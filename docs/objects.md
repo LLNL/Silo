@@ -2249,7 +2249,7 @@ Finally, Silo also supports the specification of expressions representing derive
   "<stress/sz>"|`DB_VARTYPE_SCALAR`|`"-<stress/sx>-<stress/sy>"`
   "vel"|`DB_VARTYPE_VECTOR`|`"{Vx, Vy, Vz}"`
   "speed"|`DB_VARTYPE_SCALAR`|`"magntidue(vel)"`
-  "dev_stress"|`DB_VARTYPE_TENSOR`|`"{{<stress/sx>,<stress/txy>,<stress/txz>}`,<br>`  {          0, <stress/sy>,<stress/tyz>}`,<br>`  {          0,           0, <stress/sz>}}"`
+  "dev_stress"|`DB_VARTYPE_TENSOR`|`"{ {<stress/sx>,<stress/txy>,<stress/txz>}`,<br>`   {          0, <stress/sy>,<stress/tyz>}`,<br>`   {          0,           0, <stress/sz>} }"`
 
   The first entry (0) defines a derived scalar variable named `"totaltemp"` which is the sum of variables whose names are `"nodet"` and `"zonetemp"`. The next entry (1) defines a derived scalar variable named `"sz"` in a group of variables named `"stress"` (the slash character ('/') is used to group variable names much the way file pathnames are grouped in Linux).
   Note also that the definition of `"sz"` uses the special bracketing characters (`<`) and (`>`) for the variable references due to the fact that these variable references have a slash character (`/`) in them.
