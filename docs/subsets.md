@@ -10,12 +10,12 @@ MRG trees and groupel maps work hand-in-hand in efficiently (and scalably) chara
 MRG trees are associated with (e.g. bound to) the mesh they describe using the `DBOPT_MRGTREE_NAME` optlist option in the `DBPutXxxmesh()` calls.
 MRG trees are used both to describe a multi-mesh object and then again, to describe individual pieces of the multi-mesh.
 
-In addition, once an `MRG` tree has been defined for a mesh, variables to be associated with the mesh can be defined on only specific subsets of the mesh using the `DBOPT_REGION_PNAMES` optlist option in the `DBPutXxxvar()` calls.
+In addition, once an MRG tree has been defined for a mesh, variables to be associated with the mesh can be defined on only specific subsets of the mesh using the `DBOPT_REGION_PNAMES` optlist option in the `DBPutXxxvar()` calls.
 
-Because `MRG` trees can be used to represent a wide variety of subsetting functionality and because applications have still to gain experience using `MRG` trees to describe their subsetting applications, the methods defined here are design to be as free-form as possible with few or no limitations on, for example, naming conventions of the various types of subsets.
-It is simply impossible to know a priori all the different ways in which applications may wish to apply `MRG` trees to construct subsetting information.
+Because MRG trees can be used to represent a wide variety of subsetting functionality and because applications have still to gain experience using MRG trees to describe their subsetting applications, the methods defined here are design to be as free-form as possible with few or no limitations on, for example, naming conventions of the various types of subsets.
+It is simply impossible to know a priori all the different ways in which applications may wish to apply MRG trees to construct subsetting information.
 
-For this reason, where a specific application of `MRG` trees is desired (to represent materials for example), we document the naming convention an application must use to affect the representation.
+For this reason, where a specific application of MRG trees is desired (to represent materials for example), we document the naming convention an application must use to affect the representation.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -43,7 +43,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   Arg&nbsp;name | Description
   :---|:---
-  `mesh_type` | The type of mesh object the `MRG` tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, `DB_UCDMESH`.
+  `mesh_type` | The type of mesh object the MRG tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, `DB_UCDMESH`.
   `info_bits` | UNUSED
   `max_children` | Maximum number of immediate children of the root.
   `opts` | Additional options
@@ -59,20 +59,20 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   This function creates a Mesh Region Grouping Tree (MRG) tree used to define different regions in a mesh.
 
-  An `MRG` tree is used to describe how a mesh is composed of regions such as materials, parts in an assembly, levels in an adaptive refinement hierarchy, nodesets, slide surfaces, boundary conditions, as well as many other kinds of regions.
-  An example is shown in Figure 0-8 on page `196`.
+  An MRG tree is used to describe how a mesh is composed of regions such as materials, parts in an assembly, levels in an adaptive refinement hierarchy, nodesets, slide surfaces, boundary conditions, as well as many other kinds of regions.
+  An example is shown in Figure 0-8 on page.
 
   ![](./mrgtree_subset_examples.gif)
   Figure 0-8: Example of MRGTree
 
-  In a multi-mesh setting, an `MRG` tree describing all of the subsets of the mesh is associated with the top-level multimesh object.
-  In addition, separate `MRG` trees representing the relevant portions of the top-level `MRG` tree are also associated with each block.
+  In a multi-mesh setting, an MRG tree describing all of the subsets of the mesh is associated with the top-level multimesh object.
+  In addition, separate MRG trees representing the relevant portions of the top-level MRG tree are also associated with each block.
 
   MRG trees can be used to describe a wide variety of subsets of a mesh.
-  In the paragraphs below, we outline the use of `MRG` trees to describe a variety of common subsetting scenarios.
+  In the paragraphs below, we outline the use of MRG trees to describe a variety of common subsetting scenarios.
   In some cases, a specific naming convention is required to fully specify the subsetting scenario.
 
-  The paragraphs below describe how to utilize an `MRG` tree to describe various common kinds of decompositions and subsets.
+  The paragraphs below describe how to utilize an MRG tree to describe various common kinds of decompositions and subsets.
 
   Multi-Block Grouping (obsoletes `DBOPT_GROUPING` options for DBPutMultimesh,
 
@@ -89,21 +89,21 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   Second, the grouping could not be hierarchically defined.
   MRG trees, however, support both multiple groupings and hierarchical groupings.
 
-  In the `MRG` tree, define a child node of the root named "groupings." All desired groupings shall be placed under this node in the tree.
+  In the MRG tree, define a child node of the root named "groupings." All desired groupings shall be placed under this node in the tree.
 
   For each desired grouping, define a groupel map where the number of segments of the map is equal to the number of desired groups.
   Map segment i will be of groupel type `DB_BLOCKCENT` and will enumerate the blocks to be assigned to group i.
-  Next, add regions (either an array of regions or one at a time) to the `MRG` tree, one region for each group and specify the groupel map name and other map parameters to be associated with these regions.
+  Next, add regions (either an array of regions or one at a time) to the MRG tree, one region for each group and specify the groupel map name and other map parameters to be associated with these regions.
 
   ![](./mrgtree_groupel_maps.gif)
-  Figure 0-9: Examples of `MRG` trees for single and multiple groupings.
+  Figure 0-9: Examples of MRG trees for single and multiple groupings.
 
   In the diagram above, for the multiple grouping case, two groupel map objects are defined; one for each grouping.
-  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type DB_BLOCKCENT) one for each grouping in 'side', 'top', 'bottom' and 'front.' Each segment identifies the blocks of the multi-mesh (at the root of the `MRG` tree) that are in each of the 4 groups.
+  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type DB_BLOCKCENT) one for each grouping in 'side', 'top', 'bottom' and 'front.' Each segment identifies the blocks of the multi-mesh (at the root of the MRG tree) that are in each of the 4 groups.
   For the 'B' grouping, the groupel map consists of 2 segments (both of type DB_BLOCKCENT), for each grouping in 'skinny' and 'fat'. Each segment identifies the blocks of the multi-mesh that are in each group.
 
   If, in addition to defining which blocks are in which groups, an application wishes to specify specific nodes and/or zones of the group that comprise each block, additional groupel maps of type `DB_NODECENT` or `DB_ZONECENT` are required.
-  However, because such groupel maps are specified in terms of nodes and/or zones, these groupel maps need to be defined on an `MRG` tree that is associated with an individual mesh block.
+  However, because such groupel maps are specified in terms of nodes and/or zones, these groupel maps need to be defined on an MRG tree that is associated with an individual mesh block.
   Nonetheless, the manner of representation is analogous.
 
   Multi-Block Neighbor Connectivity (obsoletes DBPutMultimeshadj):
@@ -111,42 +111,42 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   Multi-block neighbor connectivity information describes the details of how different blocks of a multi-block mesh abut with shared nodes and/or adjacent zones.
   For a given block, multi-block neighbor connectivity information lists the blocks that share nodes (or have adjacent zones) with the given block and then, for each neighboring block, also lists the specific shared nodes (or adjacent zones).
 
-  If the underlying mesh type is structured (e.g. `DBPutQuadmesh()` calls were used to create the individual mesh blocks), multi-block neighbor connectivity information can be scalably represented entirely at the multi-block level in an `MRG` tree.
-  Otherwise, it cannot and it must be represented at the individual block level in the `MRG` tree.
+  If the underlying mesh type is structured (e.g. `DBPutQuadmesh()` calls were used to create the individual mesh blocks), multi-block neighbor connectivity information can be scalably represented entirely at the multi-block level in an MRG tree.
+  Otherwise, it cannot and it must be represented at the individual block level in the MRG tree.
   This section will describe both scenarios.
   Note that these scenarios were previously handled with the now deprecated `DBPutMultimeshadj()` call.
   That call, however, did not have favorable scalaing behavior for the unstructured case.
 
-  The first step in defining multi-block connectivity information is to define a top-level `MRG` tree node named "neighbors." Underneath this point in the `MRG` tree, all the information identifying multi-block connectivity will be added.
+  The first step in defining multi-block connectivity information is to define a top-level MRG tree node named "neighbors." Underneath this point in the MRG tree, all the information identifying multi-block connectivity will be added.
 
   Next, create a groupel map with number of segments equal to the number of blocks.
   Segment i of the map will by of type `DB_BLOCKCENT` and will enumerate the neighboring blocks of block i.
-  Next, in the `MRG` tree define a child node of the root named "neighborhoods". Underneath this node, define an array of regions, one for each block of the multiblock mesh and associate the groupel map with this array of regions.
+  Next, in the MRG tree define a child node of the root named "neighborhoods". Underneath this node, define an array of regions, one for each block of the multiblock mesh and associate the groupel map with this array of regions.
 
   For the structured grid case, define a second groupel map with number of segments equal to the number of blocks.
   Segment i of the map will be of type `DB_NODECENT` and will enumerate the slabs of nodes block i shares with each of its neighbors in the same order as those neighbors are listed in the previous groupel map.
   Thus, segment i of the map will be of length equal to the number of neighbors of block i times 6 (2 ijk tuples specifying the lower and upper bounds of the slab of shared nodes).
 
-  For the unstructured case, it is necessary to store groupel maps that enumerate shared nodes between shared blocks on `MRG` trees that are associated with the individual blocks and **not** the multi-block mesh itself.
+  For the unstructured case, it is necessary to store groupel maps that enumerate shared nodes between shared blocks on MRG trees that are associated with the individual blocks and **not** the multi-block mesh itself.
   However, the process is otherwise the same.
 
-  In the `MRG` tree to be associated with a given mesh block, create a child of the root named "neighbors." For each neighboring block of the given mesh block, define a groupel map of type DB_NODECENT, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block).
-  Underneath this node in the `MRG` tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
+  In the MRG tree to be associated with a given mesh block, create a child of the root named "neighbors." For each neighboring block of the given mesh block, define a groupel map of type DB_NODECENT, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block).
+  Underneath this node in the MRG tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
 
   Multi-Block, Structured Adaptive Mesh Refinement:
 
   In a structured `AMR` setting, each `AMR` block (typically called a "patch" by the `AMR` community), is written by a `DBPutQuadmesh()` call.
   A `DBPutMultimesh()` call groups all these blocks together, defining all the individual blocks of mesh that comprise the complete `AMR` mesh.
 
-  An `MRG` tree, or portion thereof, is used to define which blocks of the multi-block mesh comprise which levels in the `AMR` hierarchy as well as which blocks are refinements of other blocks.
+  An MRG tree, or portion thereof, is used to define which blocks of the multi-block mesh comprise which levels in the `AMR` hierarchy as well as which blocks are refinements of other blocks.
 
   First, the grouping of blocks into levels is identical to multi-block grouping, described previously.
-  For the specific purpose of grouping blocks into levels, a different top-level node in the `MRG` needs to be defined named "amr-levels." Below this node in the `MRG` tree, there should be a set of regions, each region representing a separate refinement level.
+  For the specific purpose of grouping blocks into levels, a different top-level node in the MRG needs to be defined named "amr-levels." Below this node in the MRG tree, there should be a set of regions, each region representing a separate refinement level.
   A groupel map of type `DB_BLOCKCENT` with number of segments equal to number of levels needs to be defined and associated with each of the regions defined under the "amr-levels' region.
   The ith segment of the map will enumerate those blocks that belong to the region representing level i.
-  In addition, an `MRG` variable defining the refinement ratios for each level named "amr-ratios" must be defined on the regions defining the levels of the `AMR` mesh.
+  In addition, an MRG variable defining the refinement ratios for each level named "amr-ratios" must be defined on the regions defining the levels of the `AMR` mesh.
 
-  For the specific purpose of identifying which blocks of the multi-block mesh are refinements of a given block, another top-level region node is added to the `MRG` tree called "amr-refinements". Below the "amr-refinements" region node, an array of regions representing each block in the multi-block mesh should be defined.
+  For the specific purpose of identifying which blocks of the multi-block mesh are refinements of a given block, another top-level region node is added to the MRG tree called "amr-refinements". Below the "amr-refinements" region node, an array of regions representing each block in the multi-block mesh should be defined.
   In addition, define a groupel map with a number of segments equal to the number of blocks.
   Map segment i will be of groupel type `DB_BLOCKCENT` and will define all those blocks which are immediate refinements of block i.
   Since some blocks, with finest resolution do not have any refinements, the map segments defining the refinements for these blocks will be of zero length.
@@ -156,7 +156,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddRegion()`
 
-* **Summary:** Add a region to an `MRG` tree
+* **Summary:** Add a region to an MRG tree
 
 * **C Signature:**
 
@@ -180,7 +180,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   Arg&nbsp;name | Description
   :---|:---
-  `tree` | The `MRG` `tree` object to add a region to.
+  `tree` | The MRG `tree` object to add a region to.
   `reg_name` | The name of the new region.
   `info_bits` | UNUSED
   `max_children` | Maximum number of immediate children this region will have.
@@ -200,19 +200,19 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  Adds a single region node to an `MRG` `tree` below the current working region (See [`DBSetCwr`](#dbsetcwr)`204`.).
+  Adds a single region node to an MRG `tree` below the current working region (See [`DBSetCwr`](#dbsetcwr)).
 
-  If you need to add a large number of similarly purposed region nodes to an `MRG` tree, consider using the more efficient `DBAddRegionArray()` function although it does have some limitations with respect to the kinds of groupel maps it can reference.
+  If you need to add a large number of similarly purposed region nodes to an MRG tree, consider using the more efficient `DBAddRegionArray()` function although it does have some limitations with respect to the kinds of groupel maps it can reference.
 
-  A region node in an `MRG` `tree` can represent either a specific region, a group of regions or both all of which are determined by actual use by the application.
+  A region node in an MRG `tree` can represent either a specific region, a group of regions or both all of which are determined by actual use by the application.
 
-  Often, a region node is introduced to an `MRG` `tree` to provide a separate namespace for regions to be defined below it.
-  For example, to define material decompositions of a mesh, a region named "materials" is introduced as a top-level region node in the `MRG` `tree`.
+  Often, a region node is introduced to an MRG `tree` to provide a separate namespace for regions to be defined below it.
+  For example, to define material decompositions of a mesh, a region named "materials" is introduced as a top-level region node in the MRG `tree`.
   Note that in so doing, the region node named "materials" does **not** really represent a distinct region of the mesh.
   In fact, it represents the union of all material regions of the mesh and serves as a place to define one, or more, material decompositions.
 
-  Because `MRG` trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
-  At the same time, in order to convey the semantic meaning of certain kinds of information in an `MRG` tree, a set of pre-defined region names is described below.
+  Because MRG trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
+  At the same time, in order to convey the semantic meaning of certain kinds of information in an MRG tree, a set of pre-defined region names is described below.
 
   **&nbsp;**
 
@@ -227,14 +227,14 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   
 
-  When a region is being defined in an `MRG` `tree` to be associated with a multi-block mesh, often the groupel type of the maps associated with the region are of type `DB_BLOCKCENT`.
+  When a region is being defined in an MRG `tree` to be associated with a multi-block mesh, often the groupel type of the maps associated with the region are of type `DB_BLOCKCENT`.
 
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddRegionArray()`
 
-* **Summary:** Efficiently add multiple, like-kind regions to an `MRG` tree
+* **Summary:** Efficiently add multiple, like-kind regions to an MRG tree
 
 * **C Signature:**
 
@@ -259,7 +259,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   Arg&nbsp;name | Description
   :---|:---
-  `tree` | The `MRG` `tree` object to add the regions to.
+  `tree` | The MRG `tree` object to add the regions to.
   `nregn` | The number of regions to add.
   `regn_names` | This is either an array of `nregn` pointers to character string names for each region or it is an array of 1 pointer to a character string specifying a printf-style naming scheme for the regions. The existence of a percent character ('%') (used to introduce conversion specifications) anywhere in regn_names[0] will indicate the latter mode.The latter mode is almost always preferable, especially if nergn is large (say more than 100). See below for the format of the printf-style naming string.
   `info_bits` | UNUSED
@@ -279,23 +279,23 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  Use this function instead of `DBAddRegion()` when you have a large number of similarly purposed regions to add to an `MRG` `tree` `AND` you can deal with the limitations of the groupel maps associated with these regions.
+  Use this function instead of `DBAddRegion()` when you have a large number of similarly purposed regions to add to an MRG `tree` `AND` you can deal with the limitations of the groupel maps associated with these regions.
 
   The key limitation of the groupel map associated with a region created with `DBAddRegionArray()` array and a groupel map associated with a region created with `DBAddRegion()` is that every region in the region array must reference nseg map segments (some of which can of course be of zero length).
 
-  Adding a region array is a substantially more efficient way to add regions to an `MRG` `tree` than adding them one at a time especially when a printf-style naming convention is used to specify the region names.
+  Adding a region array is a substantially more efficient way to add regions to an MRG `tree` than adding them one at a time especially when a printf-style naming convention is used to specify the region names.
 
   The existence of a percent character ('%') anywhere in regn_names[0] indicates that a printf-style namescheme is to be used.
-  The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme()` (See [`DBMakeNamescheme`](#dbmakenamescheme)`209`.)
+  The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme()` (See [`DBMakeNamescheme`](#dbmakenamescheme))
 
-  Note that the names of regions within an `MRG` `tree` are not required to obey the same variable naming conventions as ordinary Silo objects (See [`DBVariableNameValid`](./globals.md#dbvariablenamevalid).) except that `MRG` region names can in no circumstance contain either a semi-colon character (';') or a new-line character ('\n').
+  Note that the names of regions within an MRG `tree` are not required to obey the same variable naming conventions as ordinary Silo objects (See [`DBVariableNameValid`](./globals.md#dbvariablenamevalid).) except that MRG region names can in no circumstance contain either a semi-colon character (';') or a new-line character ('\n').
 
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBSetCwr()`
 
-* **Summary:** Set the current working region for an `MRG` tree
+* **Summary:** Set the current working region for an MRG tree
 
 * **C Signature:**
 
@@ -314,7 +314,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   Arg&nbsp;name | Description
   :---|:---
-  `tree` | The `MRG` `tree` object.
+  `tree` | The MRG `tree` object.
   `path` | The `path` to set.
 
 
@@ -326,12 +326,12 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  Sets the current working region of the `MRG` `tree`.
+  Sets the current working region of the MRG `tree`.
   The concept of the current working region is completely analogous to the current working directory of a filesystem.
 
   Notes:
 
-  Currently, this method is limited to settings up or down the `MRG` `tree` just one level.
+  Currently, this method is limited to settings up or down the MRG `tree` just one level.
   That is, it will work only when the `path` is the name of a child of the current working region or is "..". This limitation will be relaxed in the next release.
 
 
@@ -339,7 +339,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCwr()`
 
-* **Summary:** Get the current working region of an `MRG` tree
+* **Summary:** Get the current working region of an MRG tree
 
 * **C Signature:**
 
@@ -351,7 +351,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   Arg&nbsp;name | Description
   :---|:---
-  `tree` | The `MRG` `tree`.
+  `tree` | The MRG `tree`.
 
 
 * **Returned value:**
@@ -364,7 +364,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutMrgtree()`
 
-* **Summary:** Write a completed `MRG` tree object to a Silo file
+* **Summary:** Write a completed MRG tree object to a Silo file
 
 * **C Signature:**
 
@@ -387,9 +387,9 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo `file` handle
-  `name` | The `name` of the `MRG` `tree` object in the `file`.
-  `mesh_name` | The `name` of the mesh the `MRG` `tree` object is associated with.
-  `tree` | The `MRG` `tree` object to write.
+  `name` | The `name` of the MRG `tree` object in the `file`.
+  `mesh_name` | The `name` of the mesh the MRG `tree` object is associated with.
+  `tree` | The MRG `tree` object to write.
   `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
 
 
@@ -401,14 +401,14 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  After using `DBPutMrgtree` to write the `MRG` `tree` to a Silo file, the `MRG` `tree` object itself must be freed using `DBFreeMrgtree()`.
+  After using `DBPutMrgtree` to write the MRG `tree` to a Silo file, the MRG `tree` object itself must be freed using `DBFreeMrgtree()`.
 
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetMrgtree()`
 
-* **Summary:** Read an `MRG` tree object from a Silo file
+* **Summary:** Read an MRG tree object from a Silo file
 
 * **C Signature:**
 
@@ -427,7 +427,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle
-  `name` | The `name` of the `MRG` tree object in the `file`.
+  `name` | The `name` of the MRG tree object in the `file`.
 
 
 * **Returned value:**
@@ -447,7 +447,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBFreeMrgtree()`
 
-* **Summary:** Free the memory associated by an `MRG` tree object
+* **Summary:** Free the memory associated by an MRG tree object
 
 * **C Signature:**
 
@@ -466,7 +466,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   Arg&nbsp;name | Description
   :---|:---
-  `tree` | The `MRG` `tree` object to free.
+  `tree` | The MRG `tree` object to free.
 
 
 * **Returned value:**
@@ -475,7 +475,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  Frees all the memory associated with an `MRG` `tree`.
+  Frees all the memory associated with an MRG `tree`.
 
 
 ---
@@ -606,7 +606,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutMrgvar()`
 
-* **Summary:** Write variable data to be associated with (some) regions in an `MRG` tree
+* **Summary:** Write variable data to be associated with (some) regions in an MRG tree
 
 * **C Signature:**
 
@@ -627,9 +627,9 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
      lreg_names, datatype, data_ids, optlist_id, status)
   ```
 
-  character*N compnames (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
-  character*N reg_names (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
-  int* data_ids (use dbmkptr to get id for each pointer)
+  `character*N compnames` (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
+  `character*N reg_names` (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
+  `int* data_ids` (use dbmkptr to get id for each pointer)
 
 * **Arguments:**
 
@@ -641,7 +641,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   `ncomps` | An integer specifying the number of variable components.
   `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass NULL(0) if no component names are to be specified.
   `nregns` | The number of regions this variable is being written for.
-  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==NULL, it is assumed that reg_pnames[i]=NULL for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the `MRG` tree that is the parent of all the regions for which attributes are being written.
+  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==NULL, it is assumed that reg_pnames[i]=NULL for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
   `data` | Array of `ncomps` pointers to variable `data`. The pointer, data[i] points to an array of `nregns` values of type datatype.
   `opts` | Additional options.
 
@@ -654,7 +654,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  Sometimes, it is necessary to associate variable `data` with regions in an `MRG` tree.
+  Sometimes, it is necessary to associate variable `data` with regions in an MRG tree.
   This call allows an application to associate variable `data` with a bunch of different regions in one of several ways all of which are determined by the contents of the `reg_pnames` argument.
 
   Variable `data` can be associated with all of the immediate children of a given region.
@@ -664,14 +664,14 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   Alternatively, variable `data` can be associated with a bunch of regions whose names conform to a common, printf-style naming scheme.
   This is typical of regions created with the `DBPutRegionArray()` call.
   In this case, reg_pnames[0] is the `name` of the parent region and reg_pnames[i] is set to `NULL` for all i>0 and, in addition, reg_pnames[0] is a specially formatted, printf-style string, for naming the regions.
-  See [`DBAddRegionArray`](#dbaddregionarray)`202`.
+  See [`DBAddRegionArray`](#dbaddregionarray).
   for a discussion of the regn_names argument format.
 
   Finally, variable `data` can be associated with a bunch of arbitrarily named regions.
   In this case, each region's `name` must be explicitly specified in the `reg_pnames` array.
 
-  Because `MRG` trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
-  At the same time, in order to convey the semantic meaning of certain kinds of information in an `MRG` tree, a set of pre-defined `MRG` variables is descirbed below.
+  Because MRG trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
+  At the same time, in order to convey the semantic meaning of certain kinds of information in an MRG tree, a set of pre-defined MRG variables is descirbed below.
 
   **&nbsp;**
 
@@ -684,14 +684,14 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
   
 
-  Don't forget to associate the resulting region variable object(s) with the `MRG` tree by using the `DBOPT_MRGV_ONAMES` and `DBOPT_MRGV_RNAMES` options in the `DBPutMrgtree()` call.
+  Don't forget to associate the resulting region variable object(s) with the MRG tree by using the `DBOPT_MRGV_ONAMES` and `DBOPT_MRGV_RNAMES` options in the `DBPutMrgtree()` call.
 
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetMrgvar()`
 
-* **Summary:** Retrieve an `MRG` variable object from a silo file
+* **Summary:** Retrieve an MRG variable object from a silo file
 
 * **C Signature:**
 
@@ -774,11 +774,11 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
 
 * **Description:**
 
-  By itself, an `MRG` tree is not sufficient to fully characterize the decomposition of a mesh into various regions.
-  The `MRG` tree serves only to identify the regions and their relationships in gross terms.
-  This frees `MRG` trees from growing linearly (or worse) with problem size.
+  By itself, an MRG tree is not sufficient to fully characterize the decomposition of a mesh into various regions.
+  The MRG tree serves only to identify the regions and their relationships in gross terms.
+  This frees MRG trees from growing linearly (or worse) with problem size.
 
-  All regions in an `MRG` tree are ultimately defined, in detail, by enumerating a primitive set of Grouping Elements (groupels) that comprise the regions.
+  All regions in an MRG tree are ultimately defined, in detail, by enumerating a primitive set of Grouping Elements (groupels) that comprise the regions.
   A groupel map is the object used for this purpose.
   The problem-sized information needed to fully characterize the regions of a mesh is stored in groupel maps.
 
@@ -788,7 +788,7 @@ For this reason, where a specific application of `MRG` trees is desired (to repr
   For Silo's other mesh types such as ucd or quad mesh objects, the groupels can be nodes (0d), zones (2d or 3d depending on the mesh dimension), edges (1d) and faces (2d).
 
   The groupel map concept is best illustrated by example.
-  Here, we will define a groupel map for the material case illustrated in Figure 0-6 on page `145`.
+  Here, we will define a groupel map for the material case illustrated in Figure 0-6.
 
   ![](./mrgtree_groupel_maps.gif)
   Figure 0-10: Example of using groupel map for (mixing) materials.
