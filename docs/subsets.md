@@ -1,8 +1,6 @@
-## Part Assemblies, AMR, Slide Surfaces,
+## Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets
 
-Nodesets and Other Arbitrary Mesh Subsets
-
-This section of the `API` manual describes Mesh Region Grouping (MRG) trees and Groupel Maps.
+This section of the API manual describes Mesh Region Grouping (MRG) trees and Groupel Maps.
 MRG trees describe the decomposition of a mesh into various regions such as parts in an assembly, materials (even mixing materials), element blocks, processor pieces, nodesets, slide surfaces, boundary conditions, etc.
 Groupel maps describe the, problem sized, details of the subsetted regions.
 MRG trees and groupel maps work hand-in-hand in efficiently (and scalably) characterizing the various subsets of a mesh.
@@ -17,8 +15,8 @@ It is simply impossible to know a priori all the different ways in which applica
 
 For this reason, where a specific application of MRG trees is desired (to represent materials for example), we document the naming convention an application must use to affect the representation.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBMakeMrgtree()`
 
 * **Summary:** Create and initialize an empty mesh region grouping tree
@@ -41,23 +39,20 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
-  `mesh_type` | The type of mesh object the MRG tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, `DB_UCDMESH`.
+  `mesh_type` | The type of mesh object the MRG tree will be associated with. An example would be `DB_MULTIMESH`, `DB_QUADMESH`, `DB_UCDMESH`.
   `info_bits` | UNUSED
   `max_children` | Maximum number of immediate children of the root.
   `opts` | Additional options
 
-
 * **Returned value:**
 
-  A pointer to a new `DBmrgtree` object on success and `NULL` on failure
-
-
+  A pointer to a new [`DBmrgtree`](header.md#dbmrgtree) object on success and `NULL` on failure
 
 * **Description:**
 
-  This function creates a Mesh Region Grouping Tree (MRG) tree used to define different regions in a mesh.
+  This function creates a Mesh Region Grouping (MRG) tree used to define different regions in a mesh.
 
   An MRG tree is used to describe how a mesh is composed of regions such as materials, parts in an assembly, levels in an adaptive refinement hierarchy, nodesets, slide surfaces, boundary conditions, as well as many other kinds of regions.
   An example is shown in Figure 0-8 on page.
@@ -74,13 +69,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   The paragraphs below describe how to utilize an MRG tree to describe various common kinds of decompositions and subsets.
 
-  Multi-Block Grouping (obsoletes `DBOPT_GROUPING` options for DBPutMultimesh,
-
-  **&nbsp;**
-
-  _visit_domain_groups convention)
-  :---
-
+  Multi-Block Grouping (obsoletes `DBOPT_GROUPING` options for DBPutMultimesh, and [`_visit_domain_groups`](conventions.md#visit-domain-groups) convention.
 
   A multi-block grouping is the assignment of the blocks of a multi-block mesh (e.g. the mesh objects created with `DBPutXxxmesh()` calls and enumerated by name in a `DBPutMultimesh()` call) to one of several groups.
   Each group in the grouping represents several blocks of the multi-block mesh.
@@ -99,8 +88,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Figure 0-9: Examples of MRG trees for single and multiple groupings.
 
   In the diagram above, for the multiple grouping case, two groupel map objects are defined; one for each grouping.
-  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type DB_BLOCKCENT) one for each grouping in 'side', 'top', 'bottom' and 'front.' Each segment identifies the blocks of the multi-mesh (at the root of the MRG tree) that are in each of the 4 groups.
-  For the 'B' grouping, the groupel map consists of 2 segments (both of type DB_BLOCKCENT), for each grouping in 'skinny' and 'fat'. Each segment identifies the blocks of the multi-mesh that are in each group.
+  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type `DB_BLOCKCENT`) one for each grouping in 'side', 'top', 'bottom' and 'front.' Each segment identifies the blocks of the multi-mesh (at the root of the MRG tree) that are in each of the 4 groups.
+  For the 'B' grouping, the groupel map consists of 2 segments (both of type `DB_BLOCKCENT`), for each grouping in 'skinny' and 'fat'. Each segment identifies the blocks of the multi-mesh that are in each group.
 
   If, in addition to defining which blocks are in which groups, an application wishes to specify specific nodes and/or zones of the group that comprise each block, additional groupel maps of type `DB_NODECENT` or `DB_ZONECENT` are required.
   However, because such groupel maps are specified in terms of nodes and/or zones, these groupel maps need to be defined on an MRG tree that is associated with an individual mesh block.
@@ -130,7 +119,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   For the unstructured case, it is necessary to store groupel maps that enumerate shared nodes between shared blocks on MRG trees that are associated with the individual blocks and **not** the multi-block mesh itself.
   However, the process is otherwise the same.
 
-  In the MRG tree to be associated with a given mesh block, create a child of the root named "neighbors." For each neighboring block of the given mesh block, define a groupel map of type DB_NODECENT, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block).
+  In the MRG tree to be associated with a given mesh block, create a child of the root named "neighbors." For each neighboring block of the given mesh block, define a groupel map of type `DB_NODECENT`, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block).
   Underneath this node in the MRG tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
 
   Multi-Block, Structured Adaptive Mesh Refinement:
@@ -151,9 +140,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Map segment i will be of groupel type `DB_BLOCKCENT` and will define all those blocks which are immediate refinements of block i.
   Since some blocks, with finest resolution do not have any refinements, the map segments defining the refinements for these blocks will be of zero length.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddRegion()`
 
 * **Summary:** Add a region to an MRG tree
@@ -175,12 +163,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
      seg_types, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
-  `tree` | The MRG `tree` object to add a region to.
+  `tree` | The MRG tree object to add a region to.
   `reg_name` | The name of the new region.
   `info_bits` | UNUSED
   `max_children` | Maximum number of immediate children this region will have.
@@ -188,33 +175,28 @@ For this reason, where a specific application of MRG trees is desired (to repres
   `nsegs` | [OPT] Number of segments in the groupel map object specified by the `maps_name` argument that are to be associated with this region. Pass zero if none.
   `seg_ids` | [OPT] Integer array of length `nsegs` of groupel map segment ids. Pass `NULL` (0) if none.
   `seg_lens` | [OPT] Integer array of length `nsegs` of groupel map segment lengths. Pass `NULL` (0) if none.
-  `seg_types` | [OPT] Integer array of length `nsegs` of groupel map segment element types. Pass `NULL` (0) if none. These types are the same as the centering options for variables; DB_ZONECENT, DB_NODECENT, DB_EDGECENT, `DB_FACECENT` and `DB_BLOCKCENT` (for the blocks of a multimesh)
+  `seg_types` | [OPT] Integer array of length `nsegs` of groupel map segment element types. Pass `NULL` (0) if none. These types are the same as the centering options for variables; `DB_ZONECENT`, `DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` and `DB_BLOCKCENT` (for the blocks of a multimesh)
   `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
-
 
 * **Returned value:**
 
   A positive number on success; -1 on failure
 
-
-
 * **Description:**
 
-  Adds a single region node to an MRG `tree` below the current working region (See [`DBSetCwr`](#dbsetcwr)).
+  Adds a single region node to an MRG tree below the current working region (See [`DBSetCwr`](#dbsetcwr)).
 
   If you need to add a large number of similarly purposed region nodes to an MRG tree, consider using the more efficient `DBAddRegionArray()` function although it does have some limitations with respect to the kinds of groupel maps it can reference.
 
-  A region node in an MRG `tree` can represent either a specific region, a group of regions or both all of which are determined by actual use by the application.
+  A region node in an MRG tree can represent either a specific region, a group of regions or both all of which are determined by actual use by the application.
 
-  Often, a region node is introduced to an MRG `tree` to provide a separate namespace for regions to be defined below it.
-  For example, to define material decompositions of a mesh, a region named "materials" is introduced as a top-level region node in the MRG `tree`.
+  Often, a region node is introduced to an MRG tree to provide a separate namespace for regions to be defined below it.
+  For example, to define material decompositions of a mesh, a region named "materials" is introduced as a top-level region node in the MRG tree.
   Note that in so doing, the region node named "materials" does **not** really represent a distinct region of the mesh.
   In fact, it represents the union of all material regions of the mesh and serves as a place to define one, or more, material decompositions.
 
   Because MRG trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
   At the same time, in order to convey the semantic meaning of certain kinds of information in an MRG tree, a set of pre-defined region names is described below.
-
-  **&nbsp;**
 
   Region Naming Convention|Meaning
   :---|:---
@@ -224,14 +206,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
   "amr-refinements"|Top-level region below which Adaptive Mesh Refinment refinement information is defined. This where the information indicating which blocks are refinements of other blocks is defined.
   "neighbors"|Top-level region below which multi-block adjacency information is defined.
 
+  When a region is being defined in an MRG tree to be associated with a multi-block mesh, often the groupel type of the maps associated with the region are of type `DB_BLOCKCENT`.
 
-  
+{{ EndFunc }}
 
-  When a region is being defined in an MRG `tree` to be associated with a multi-block mesh, often the groupel type of the maps associated with the region are of type `DB_BLOCKCENT`.
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddRegionArray()`
 
 * **Summary:** Efficiently add multiple, like-kind regions to an MRG tree
@@ -254,12 +232,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
      seg_types, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
-  `tree` | The MRG `tree` object to add the regions to.
+  `tree` | The MRG tree object to add the regions to.
   `nregn` | The number of regions to add.
   `regn_names` | This is either an array of `nregn` pointers to character string names for each region or it is an array of 1 pointer to a character string specifying a printf-style naming scheme for the regions. The existence of a percent character ('%') (used to introduce conversion specifications) anywhere in regn_names[0] will indicate the latter mode.The latter mode is almost always preferable, especially if nergn is large (say more than 100). See below for the format of the printf-style naming string.
   `info_bits` | UNUSED
@@ -270,29 +247,25 @@ For this reason, where a specific application of MRG trees is desired (to repres
   `seg_types` | [OPT] Integer array of length nsegs*nregn specifying the groupel types of each segment. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass 0 for the corresponding segment lengths. Pass `NULL` (0) if none.
   `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
 
-
 * **Returned value:**
 
   A positive number on success; -1 on failure
 
-
-
 * **Description:**
 
-  Use this function instead of `DBAddRegion()` when you have a large number of similarly purposed regions to add to an MRG `tree` `AND` you can deal with the limitations of the groupel maps associated with these regions.
+  Use this function instead of `DBAddRegion()` when you have a large number of similarly purposed regions to add to an MRG tree `AND` you can deal with the limitations of the groupel maps associated with these regions.
 
   The key limitation of the groupel map associated with a region created with `DBAddRegionArray()` array and a groupel map associated with a region created with `DBAddRegion()` is that every region in the region array must reference nseg map segments (some of which can of course be of zero length).
 
-  Adding a region array is a substantially more efficient way to add regions to an MRG `tree` than adding them one at a time especially when a printf-style naming convention is used to specify the region names.
+  Adding a region array is a substantially more efficient way to add regions to an MRG tree than adding them one at a time especially when a printf-style naming convention is used to specify the region names.
 
   The existence of a percent character ('%') anywhere in regn_names[0] indicates that a printf-style namescheme is to be used.
   The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme()` (See [`DBMakeNamescheme`](#dbmakenamescheme))
 
-  Note that the names of regions within an MRG `tree` are not required to obey the same variable naming conventions as ordinary Silo objects (See [`DBVariableNameValid`](./globals.md#dbvariablenamevalid).) except that MRG region names can in no circumstance contain either a semi-colon character (';') or a new-line character ('\n').
+  Note that the names of regions within an MRG tree are not required to obey the same variable naming conventions as ordinary Silo objects (See [`DBVariableNameValid`](./globals.md#dbvariablenamevalid).) except that MRG region names can in no circumstance contain either a semi-colon character (';') or a new-line character ('\n').
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBSetCwr()`
 
 * **Summary:** Set the current working region for an MRG tree
@@ -309,10 +282,9 @@ For this reason, where a specific application of MRG trees is desired (to repres
   integer function dbsetcwr(tree, path, lpath)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `tree` | The MRG `tree` object.
   `path` | The `path` to set.
@@ -322,21 +294,18 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   Positive, depth in tree, on success, -1 on failure.
 
-
-
 * **Description:**
 
-  Sets the current working region of the MRG `tree`.
-  The concept of the current working region is completely analogous to the current working directory of a filesystem.
+  Sets the current working region of the MRG tree.
+  The concept of the current working region is completely analogous to the current working directory of a file system.
 
   Notes:
 
-  Currently, this method is limited to settings up or down the MRG `tree` just one level.
-  That is, it will work only when the `path` is the name of a child of the current working region or is "..". This limitation will be relaxed in the next release.
+  Currently, this method is limited to settings up or down the MRG tree just one level.
+  That is, it will work only when the `path` is the name of a child of the current working region or is "..". This limitation will be relaxed in a future release.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCwr()`
 
 * **Summary:** Get the current working region of an MRG tree
@@ -349,19 +318,16 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
-  `tree` | The MRG `tree`.
-
+  `tree` | The MRG tree.
 
 * **Returned value:**
 
   A pointer to a string representing the name of the current working region (not the full path name, just current region name) on success; `NULL` (0) on failure.
 
+{{ EndFunc }}
 
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutMrgtree()`
 
 * **Summary:** Write a completed MRG tree object to a Silo file
@@ -381,31 +347,26 @@ For this reason, where a specific application of MRG trees is desired (to repres
      lmesh_name, tree_id, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo `file` handle
-  `name` | The `name` of the MRG `tree` object in the `file`.
-  `mesh_name` | The `name` of the mesh the MRG `tree` object is associated with.
-  `tree` | The MRG `tree` object to write.
+  `name` | The `name` of the MRG tree object in the `file`.
+  `mesh_name` | The `name` of the mesh the MRG tree object is associated with.
+  `tree` | The MRG tree object to write.
   `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
-
 
 * **Returned value:**
 
   Positive or zero on success, -1 on failure.
 
-
-
 * **Description:**
 
-  After using `DBPutMrgtree` to write the MRG `tree` to a Silo file, the MRG `tree` object itself must be freed using `DBFreeMrgtree()`.
+  After using `DBPutMrgtree` to write the MRG tree to a Silo file, the MRG tree object itself must be freed using `DBFreeMrgtree()`.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetMrgtree()`
 
 * **Summary:** Read an MRG tree object from a Silo file
@@ -424,7 +385,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle
   `name` | The `name` of the MRG tree object in the `file`.
@@ -432,19 +393,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Returned value:**
 
-  A pointer to a `DBmrgtree` object on success; `NULL` (0) on failure.
+  A pointer to a [`DBmrgtree`](header.md#dbmrgtree) object on success; `NULL` (0) on failure.
 
+{{ EndFunc }}
 
-
-* **Description:**
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBFreeMrgtree()`
 
 * **Summary:** Free the memory associated by an MRG tree object
@@ -461,13 +413,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
   integer function dbfreemrgtree(tree_id)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
-  `tree` | The MRG `tree` object to free.
-
+  `tree` | The MRG tree object to free.
 
 * **Returned value:**
 
@@ -475,11 +425,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Description:**
 
-  Frees all the memory associated with an MRG `tree`.
+  Frees all the memory associated with an MRG tree.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBMakeNamescheme()`
 
 * **Summary:** Create a `DBnamescheme` object for on-demand name generation
@@ -498,11 +447,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `ns_str` | The namescheme string as described below.
-  `...` | The remaining arguments take `...` of three forms depending on `...` the caller wants external array references, if `...` are present in `...` format substring of `ns_str` to be handled. `...` the first form, `...` format substring of `ns_str` involves no externally referenced arrays `...` so there `...` no additional arguments other than `...` `ns_str` string itself. `...` the second form, `...` caller `...` all externally referenced arrays needed in `...` format substring of `ns_str` already in memory `...` simply passes their pointers here as `...` remaining arguments in `...` same order in which they appear in `...` format substring of `ns_str`. `...` arrays `...` bound to `...` returned namescheme object `...` should `...` be freed until after `...` caller is done using `...` returned namescheme object. In this case, `DBFreeNamescheme()` does `...` free these arrays `...` the caller is required to explicitly free them. `...` the third form, `...` caller makes a request `...` the Silo library to find in a given file, read `...` bind to `...` returned namescheme object `...` externally referenced arrays in `...` format substring of `ns_str`. To achieve this, `...` caller passes a 3-tuple of `...` form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as `...` remaining arguments. `...` initial (void*)0 is required. `...` (DBfile*)file is `...` database handle of `...` Silo file in which `...` externally referenced arrays exist. `...` third (char*)mbobjpath, which `...` be 0/NULL, is `...` path within `...` file, either relative to `...` file's current working directory, or absolute, at which `...` multi-block object holding `...` `ns_str` `...` found in `...` file. `...` necessary externally referenced arrays must exist within `...` specified file using either relative paths from multi-block object's home directory or `...` file's current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
-
+  `...` | The remaining arguments take `...` of three forms depending on `...` the caller wants external array references, if `...` are present in `...` format substring of `ns_str` to be handled. `...` the first form, `...` format substring of `ns_str` involves no externally referenced arrays `...` so there `...` no additional arguments other than `...` `ns_str` string itself. `...` the second form, `...` caller `...` all externally referenced arrays needed in `...` format substring of `ns_str` already in memory `...` simply passes their pointers here as `...` remaining arguments in `...` same order in which they appear in `...` format substring of `ns_str`. `...` arrays `...` bound to `...` returned namescheme object `...` should `...` be freed until after `...` caller is done using `...` returned namescheme object. In this case, `DBFreeNamescheme()` does `...` free these arrays `...` the caller is required to explicitly free them. `...` the third form, `...` caller makes a request `...` the Silo library to find in a given file, read `...` bind to `...` returned namescheme object `...` externally referenced arrays in `...` format substring of `ns_str`. To achieve this, `...` caller passes a 3-tuple of `...` form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as `...` remaining arguments. `...` initial (void*)0 is required. `...` (DBfile*)file is `...` database handle of `...` Silo file in which `...` externally referenced arrays exist. `...` third (char*)mbobjpath, which `...` be 0/`NULL`, is `...` path within `...` file, either relative to `...` file's current working directory, or absolute, at which `...` multi-block object holding `...` `ns_str` `...` found in `...` file. `...` necessary externally referenced arrays must exist within `...` specified file using either relative paths from multi-block object's home directory or `...` file's current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
 
 * **Description:**
 
@@ -532,8 +480,6 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   Except `...` singly quoted strings which evaluate to a literal string suitable `...` output `...` a %s type conversion specifier, `...` $-type external array references which evaluate to an external string, `...` other expressions `...` treated as evaluating to integer values suitable `...` any of `...` integer conversion specifiers (%[ouxXdi]) which `...` be used in `...` format substring..
 
-  **&nbsp;**
-
   fmt|Interpretation
   :---|:---
   "|slide_%s|(n%2)?'master':'slave':"|The delimiter character is `...`. `...` format substring is "slide_%s". `...` expression substring `...` the argument to `...` first (and only in this case) conversion specifier (%s) is "(n%2)?'master':'slave':" When this expression is evaluated `...` a given region, `...` region's natural number will be inserted `...` 'n'. `...` modulo operation with 2 will be applied. If that result is non-zero, `...` ?:: expression will evaluate to 'master'. Otherwise, it will evaluate to 'slave'. Note `...` terminating colon `...` the `...` operator. This naming scheme might be useful `...` an array of regions representing, alternately, master `...` slave sides of slide surfaces.<br>Note also `...` the `...` operator, `...` caller `...` assume that only `...` sub-expression corresponding to `...` whichever half of `...` operator is satisfied is actually evaluated.
@@ -542,27 +488,21 @@ For this reason, where a specific application of MRG trees is desired (to repres
   "@domain_%03d@n+1"|This is just like `...` case above except that region names begin with "domain_001" instead of "domain_000". This might be useful to deal with different indexing origins; Fortran `...` C.
   "|foo_%03dx%03d|#P[n]|#U[n%4]"|The delimiter character is `...`. `...` format substring is "foo_%03dx%03d". `...` expression substring `...` the first argument is an external array reference '#P[n]' where `...` index into `...` array is just `...` natural number, n. `...` expression substring `...` the second argument is another external array reference, '#U[n%4]' where `...` index is an expression 'n%4' on `...` natural number n.
 
-
   If `...` caller is handling externally referenced arrays explicitly, because `...` is `...` first externally referenced array in `...` format string, a pointer to `...` must be `...` first to appear in `...` varargs list of additional args to `DBMakeNamescheme`.
   Similarly, because `...` appears as `...` second externally referenced array in `...` format string, a pointer to `...` must appear second in `...` varargs as in
 
   DBMakeNamescheme('|foo_%03dx%03d|#P[n]|#U[n%4]', p, u);
 
-  
-
   Alternatively, if `...` caller wants `...` Silo library to find `...` and `...` in a Silo file, read `...` arrays from `...` file `...` bind them into `...` namescheme automatically, then `...` and `...` must be Silo arrays in `...` current working directory of `...` file that is passed in as `...` 2-tuple "(int) 0, (DBfile *) dbfile' in `...` varargs to `DBMakeNamescheme` as in
 
   DBMakeNamescheme("|foo_%03dx%03d|#P[n]|#U[n%4]", 0, dbfile, 0);
 
-  
+  Use `DBFreeNamescheme()` to free up space associated with a namescheme.
 
-  Use `DBFreeNamescheme()` to free up `...` space associated with a namescheme.
+  Also note that there are numerous examples of nameschemes in [`tests/nameschemes.c`](https://github.com/LLNL/Silo/blob/main/tests/namescheme.c) in the Silo source release tarball.
 
-  Also note that there `...` numerous examples of nameschemes in "tests/nameschemes.c" in `...` Silo source release tarball.
+{{ EndFunc }}
 
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetName()`
 
 * **Summary:** Generate a name from a `DBnamescheme` object
@@ -581,17 +521,14 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `natnum` | Natural number of the entry in a namescheme to be generated. Must be greater than or equal to zero.
-
 
 * **Returned value:**
 
   A string representing the generated name.
   If there are problems with the namescheme, the string could be of length zero (e.g. the first character is a null terminator).
-
-
 
 * **Description:**
 
@@ -601,9 +538,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Silo maintains a tiny circular buffer of (32) names constructed and returned by this function so that multiple evaluations in the same expression do not wind up overwriting each other.
   A call to DBGetName(0,0) will free up all memory associated with this tiny circular buffer.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutMrgvar()`
 
 * **Summary:** Write variable data to be associated with (some) regions in an MRG tree
@@ -633,24 +569,21 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | Silo database `file` handle.
   `name` | Name of this mrgvar object.
   `tname` | name of the mrg tree this variable is associated with.
   `ncomps` | An integer specifying the number of variable components.
-  `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass NULL(0) if no component names are to be specified.
+  `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass `NULL`(0) if no component names are to be specified.
   `nregns` | The number of regions this variable is being written for.
-  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==NULL, it is assumed that reg_pnames[i]=NULL for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
+  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==`NULL`, it is assumed that reg_pnames[i]=`NULL` for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
   `data` | Array of `ncomps` pointers to variable `data`. The pointer, data[i] points to an array of `nregns` values of type datatype.
   `opts` | Additional options.
-
 
 * **Returned value:**
 
   Zero on success; -1 on failure.
-
-
 
 * **Description:**
 
@@ -673,22 +606,16 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Because MRG trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
   At the same time, in order to convey the semantic meaning of certain kinds of information in an MRG tree, a set of pre-defined MRG variables is descirbed below.
 
-  **&nbsp;**
-
   Variable Naming Convention|Meaning
   :---|:---
   "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinment ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
   "ijk-orientations"|An integer variable of 3 components defined on the individual blocks of a multi-block mesh defining the orientations of the individual blocks in a large, ijk indexing space (Ares convention)
   "<var>-extents"|A double precision variable defining the block-by-block extents of a multi-block variable. If <var>=="coords", then it defines the spatial extents of the mesh itself. Note, this convention obsoletes the `DBOPT_XXX_EXTENTS` options on DBPutMultivar/DBPutMultimesh calls.
 
-
-  
-
   Don't forget to associate the resulting region variable object(s) with the MRG tree by using the `DBOPT_MRGV_ONAMES` and `DBOPT_MRGV_RNAMES` options in the `DBPutMrgtree()` call.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetMrgvar()`
 
 * **Summary:** Retrieve an MRG variable object from a silo file
@@ -707,7 +634,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | Silo database `file` handle.
   `name` | The `name` of the region variable object to retrieve.
@@ -715,16 +642,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Returned value:**
 
-  A pointer to a `DBmrgvar` object on success; `NULL` (0) on failure.
+  A pointer to a [`DBmrgvar`](header.md#dbmrgvar) object on success; `NULL` (0) on failure.
 
-  Notes:
+{{ EndFunc }}
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutGroupelmap()`
 
 * **Summary:** Write a groupel map object to a Silo file
@@ -747,30 +668,27 @@ For this reason, where a specific application of MRG trees is desired (to repres
      optlist_id, status)
   ```
 
-  integer* seg_data_ids (use dbmkptr to get id for each pointer)
-  integer* seg_fracs_ids (use dbmkptr to get id for each pointer)
+  `integer* seg_data_ids` (use dbmkptr to get id for each pointer)
+  `integer* seg_fracs_ids` (use dbmkptr to get id for each pointer)
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the groupel map object in the `file`.
   `nsegs` | The number of segments in the map.
-  `seg_types` | Integer array of length `nsegs` indicating the groupel type associated with each segment of the map; one of DB_BLOCKCENT, DB_NODECENT, DB_ZONECENT, DB_EDGECENT, `DB_FACECENT`.
+  `seg_types` | Integer array of length `nsegs` indicating the groupel type associated with each segment of the map; one of `DB_BLOCKCENT`, `DB_NODECENT`, `DB_ZONECENT`, `DB_EDGECENT`, `DB_FACECENT`.
   `seg_lens` | Integer array of length `nsegs` indicating the length of each segment
   `seg_ids` | [OPT] Integer array of length `nsegs` indicating the identifier to associate with each segment. By default, segment identifiers are 0...negs-1. If default identifiers are sufficient, pass `NULL` (0) here. Otherwise, pass an explicit list of integer identifiers.
   `seg_data` | The groupel map data, itself. An array of `nsegs` pointers to arrays of integers where array seg_data[i] is of length seg_lens[i].
-  `seg_fracs` | [OPT] Array of `nsegs` pointers to floating point values indicating fractional inclusion for the associated groupels. Pass `NULL` (0) if fractional inclusions are not required. If, however, fractional inclusions are required but on only some of the segments, pass an array of pointers such that if segment i has no fractional inclusions, seg_fracs[i]=NULL(0). Fractional inclusions are useful for, among other things, defining groupel maps involving mixing materials.
+  `seg_fracs` | [OPT] Array of `nsegs` pointers to floating point values indicating fractional inclusion for the associated groupels. Pass `NULL` (0) if fractional inclusions are not required. If, however, fractional inclusions are required but on only some of the segments, pass an array of pointers such that if segment i has no fractional inclusions, seg_fracs[i]=`NULL`(0). Fractional inclusions are useful for, among other things, defining groupel maps involving mixing materials.
   `fracs_type` | [OPT] data type of the fractional parts of the segments. Ignored if `seg_fracs` is `NULL` (0).
   `opts` | Additional options
-
 
 * **Returned value:**
 
   Zero on success; -1 on failure.
-
-
 
 * **Description:**
 
@@ -795,9 +713,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   In the example in the above figure, the groupel map has the behavior of representing the clean and mixed parts of the material decomposition by enumerating in alternating segments of the map, the clean and mixed parts for each successive material.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetGroupelmap()`
 
 * **Summary:** Read a groupel map object from a Silo file
@@ -816,7 +733,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the groupel map object to read.
@@ -824,17 +741,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Returned value:**
 
-  A pointer to a `DBgroupelmap` object on success.
-  NULL (0) on failure.
+  A pointer to a [`DBgroupelmap`](header.md#dbgroupelmap) object on success.
+  `NULL` (0) on failure.
 
-  Notes:
+{{ EndFunc }}
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBFreeGroupelmap()`
 
 * **Summary:** Free memory associated with a groupel map object
@@ -853,45 +764,64 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `map` | Pointer to a `DBgroupel` `map` object.
-
 
 * **Returned value:**
 
   void
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `DBOPT_REGION_PNAMES()`
+{{ EndFunc }}
 
-* **Summary:** option for defining variables on specific regions of a mesh
+### `DBOPT_REGION_PNAMES`
+
+* **Summary:** Option list option for defining variables on specific regions of a mesh
 
 * **C Signature:**
 
-  ```
-  DBOPT_REGION_PNAMES
-      char**
-      A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names.
-      NULL
+  `DBOPT_REGION_PNAMES` char**
+  : A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined.
+    If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be `NULL` and is used to indicate the end of the list of names.
       
-      All of Silo’s DBPutXxxvar() calls support the DBOPT_REGION_PNAMES option to specify the variable on only some region(s) of the associated mesh. However, the use of the option has implications regarding the ordering of the values in the vars[] arrays passed into the DBPutXxxvar() functions. This section explains the ordering requirements.
-      Ordinarily, when the DBOPT_REGION_PNAMES option is not being used, the order of the values in the vars arrays passed here is considered to be one-to-one with the order of the nodes (for DB_NODECENT centering) or zones (for DB_ZONECENT centering) of the associated mesh. However, when the DBOPT_REGION_PNAMES option is being used, the order of values in the vars[] is determined by other conventions described below.
-      If the DBOPT_REGION_PNAMES option references regions in an MRG tree, the ordering is one-to-one with the groupel’s identified in the groupel map segment(s) (of the same groupel type as the variable’s centering) associated with the region(s); all of the segment(s), in order, of the groupel map of the first region, then all of the segment(s) of the groupel map of the second region, and so on. If the set of groupel map segments for the regions specified include the same groupel multiple times, then the vars[] arrays will wind up needing to include the same value, multiple times.
-      The preceding ordering convention works because the ordering is explicitly represented by the order in which groupels are identified in the groupel maps. However, if the DBOPT_REGION_PNAMES option references material name(s) in a material object created by a DBPutMaterial() call, then the ordering is not explicitly represented. Instead, it is based on a traversal of the mesh zones restricted to the named material(s). In this case, the ordering convention requires further explanation and is described below.
-      For DB_ZONECENT variables, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in DBOPT_REGION_PNAMES (wholly or partially), that zone is considered in the traversal and placed conceptually in an ordered list of traversed zones. In addition, if the zone contains the material only partially, that zone is also placed conceptually in an ordered list of traversed mixed zones. In this case, the values in the vars[] array must be one-to-one with this traversed zones list. Likewise, the values of the mixvars[] array must be one-to-one with the traversed mixed zones list. However, in the special case that the list of materials specified in DBOPT_REGION_PNAMES is of size one (1), an additional optimization is supported.
-      For the special case that the list of materials defined in DBOPT_REGION_PNAMES is of size one (1), the requirement to specify separate values for zones containing the material only partially in the mixvars[] array is removed. In this case, if the mixlen arg is zero (0) in the cooresponding DBPutXXXvar() call, only the vars[] array, which is one-to-one with (all) traversed zones containing the material either cleanly or partially, will be used. The reason this works is that in the single material case, there is only ever one zonal variable value per zone regardless of whether the zone contains the material cleanly or partially.
-      For DB_NODECENT variables, the situation is complicated by the fact that materials are zone-centric but the variable being defined is node-centered. So, an additional level of local traversal over a zone’s nodes is required. In this case, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in DBOPT_REGION_PNAMES (wholly or partially), then that zone’s nodes are traversed according to the ordering specified in “Node, edge and face ordering for zoo-type UCD zone shapes.” on page 2-104. On the first encounter of a node, that node is considered in the traversal and placed conceptually in an ordered list of traversed nodes. The values in the vars[] array must be one-to-one with this traversed nodes list. Because we are not aware of any cases of node-centered variables that have mixed material components, there is no analogous traversed mixed nodes list.
-      For DBOPT_EDGECENT and DBOPT_FACECENT variables, the traversal is handled similarly. That is, the list of zones for the mesh is traversed and for each zone found to contain one of the materials listed in DBOPT_REGION_PNAMES, the zone’s edge’s (or face’s) are traversed in local order specified in “Node, edge and face ordering for zoo-type UCD zone shapes.” on page 2-104.
-      For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh’s nodes (or zones) were to be traversed, which would be the first? Which would be the second?
-      Unless the DBOPT_MAJORORDER option was used, the answer is that the traversal is identical to the standard C programming language storage convention for multi-dimensional arrays often called row-major storage order. That is, was we traverse through the list of nodes (or zones) of a Quad mesh, we encounter first node with logical index [0,0,0], then [0,0,1], then [0,0,2]...[0,1,0]...etc. A traversal of zones would behave similarly. Traversal of edges or faces of a quad mesh would follow the description with “DBPutQuadvar” on page 2-94.
-      6 API Section	Object Allocation, Free and IsEmpty
-      This section describes methods to allocate and initialize many of Silo’s objects.
-  ```
+    All of Silo’s `DBPutXxxvar()` calls support the `DBOPT_REGION_PNAMES` option to specify the variable on only some region(s) of the associated mesh.
+    However, the use of the option has implications regarding the ordering of the values in the `vars[]` arrays passed into the `DBPutXxxvar()` functions.
+    This section explains the ordering requirements.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    Ordinarily, when the `DBOPT_REGION_PNAMES` option is not being used, the order of the values in the vars arrays passed here is considered to be one-to-one with the order of the nodes (for `DB_NODECENT` centering) or zones (for `DB_ZONECENT` centering) of the associated mesh.
+    However, when the `DBOPT_REGION_PNAMES` option is being used, the order of values in the `vars[]` is determined by other conventions described below.
+
+    If the `DBOPT_REGION_PNAMES` option references regions in an MRG tree, the ordering is one-to-one with the groupel’s identified in the groupel map segment(s) (of the same groupel type as the variable’s centering) associated with the region(s); all of the segment(s), in order, of the groupel map of the first region, then all of the segment(s) of the groupel map of the second region, and so on.
+    If the set of groupel map segments for the regions specified include the same groupel multiple times, then the `vars[]` arrays will wind up needing to include the same value, multiple times.
+    The preceding ordering convention works because the ordering is explicitly represented by the order in which groupels are identified in the groupel maps.
+    However, if the `DBOPT_REGION_PNAMES` option references material name(s) in a material object created by a `DBPutMaterial()` call, then the ordering is not explicitly represented.
+    Instead, it is based on a traversal of the mesh zones restricted to the named material(s).
+    In this case, the ordering convention requires further explanation and is described below.
+
+    For `DB_ZONECENT` variables, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), that zone is considered in the traversal and placed conceptually in an ordered list of traversed zones.
+    In addition, if the zone contains the material only partially, that zone is also placed conceptually in an ordered list of traversed mixed zones.
+    In this case, the values in the `vars[]` array must be one-to-one with this traversed zones list.
+    Likewise, the values of the `mixvars[]` array must be one-to-one with the traversed mixed zones list.
+    However, in the special case that the list of materials specified in `DBOPT_REGION_PNAMES` is of size one (1), an additional optimization is supported.
+    For the special case that the list of materials defined in `DBOPT_REGION_PNAMES` is of size one (1), the requirement to specify separate values for zones containing the material only partially in the `mixvars[]` array is removed.
+    In this case, if the `mixlen` arg is zero (0) in the cooresponding `DBPutXXXvar()` call, only the `vars[]` array, which is one-to-one with (all) traversed zones containing the material either cleanly or partially, will be used.
+    The reason this works is that in the single material case, there is only ever one zonal variable value per zone regardless of whether the zone contains the material cleanly or partially.
+    For `DB_NODECENT` variables, the situation is complicated by the fact that materials are zone-centric but the variable being defined is node-centered.
+    So, an additional level of local traversal over a zone’s nodes is required.
+    In this case, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), then that zone’s nodes are traversed according to the ordering specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
+    On the first encounter of a node, that node is considered in the traversal and placed conceptually in an ordered list of traversed nodes.
+    The values in the `vars[]` array must be one-to-one with this traversed nodes list.
+    Because we are not aware of any cases of node-centered variables that have mixed material components, there is no analogous traversed mixed nodes list.
+    For `DBOPT_EDGECENT` and `DBOPT_FACECENT` variables, the traversal is handled similarly.
+    That is, the list of zones for the mesh is traversed and for each zone found to contain one of the materials listed in `DBOPT_REGION_PNAMES`, the zone’s edge’s (or face’s) are traversed in local order specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
+    For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh’s nodes (or zones) were to be traversed, which would be the first? Which would be the second?
+    Unless the `DBOPT_MAJORORDER` option was used, the answer is that the traversal is identical to the standard C programming language storage convention for multi-dimensional arrays often called row-major storage order.
+    That is, was we traverse through the list of nodes (or zones) of a Quad mesh, we encounter first node with logical index [0,0,0], then [0,0,1], then [0,0,2]...[0,1,0]...etc.
+    A traversal of zones would behave similarly.
+    Traversal of edges or faces of a quad mesh would follow the description with [`DBPutQuadvar`](objects.md#dbputquadvar).
+
+{{ EndFunc }}
+
 ### `DBAlloc…()`
 
 * **Summary:** Allocate and initialize a Silo structure.
@@ -900,31 +830,30 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   ```
   DBcompoundarray  *DBAllocCompoundarray (void)
-      DBcsgmesh        *DBAllocCsgmesh (void)
-      DBcsgvar         *DBAllocCsgvar (void)
-      DBcurve          *DBAllocCurve (void)
-      DBcsgzonelist    *DBAllocCSGZonelist (void)
-      DBdefvars        *DBAllocDefvars (void)
-      DBedgelist       *DBAllocEdgelist (void)
-      DBfacelist       *DBAllocFacelist (void)
-      DBmaterial       *DBAllocMaterial (void)
-      DBmatspecies     *DBAllocMatspecies (void)
-      DBmeshvar        *DBAllocMeshvar (void)
-      DBmultimat       *DBAllocMultimat (void)
-      DBmultimatspecies *DBAllocMultimatspecies (void)
-      DBmultimesh      *DBAllocMultimesh (void)
-      DBmultimeshadj   *DBAllocMultimeshadj (void)
-      DBmultivar       *DBAllocMultivar (void)
-      DBpointmesh      *DBAllocPointmesh (void)
-      DBquadmesh       *DBAllocQuadmesh (void)
-      DBquadvar        *DBAllocQuadvar (void)
-      DBucdmesh        *DBAllocUcdmesh (void)
-      DBucdvar         *DBAllocUcdvar (void)
-      DBzonelist       *DBAllocZonelist (void)
-      DBphzonelist     *DBAllocPHZonelist (void)
-      DBnamescheme     *DBAllocNamescheme(void);
-      DBgroupelmap     *DBAllocGroupelmap(int, DBdatatype);
-      
+  DBcsgmesh        *DBAllocCsgmesh (void)
+  DBcsgvar         *DBAllocCsgvar (void)
+  DBcurve          *DBAllocCurve (void)
+  DBcsgzonelist    *DBAllocCSGZonelist (void)
+  DBdefvars        *DBAllocDefvars (void)
+  DBedgelist       *DBAllocEdgelist (void)
+  DBfacelist       *DBAllocFacelist (void)
+  DBmaterial       *DBAllocMaterial (void)
+  DBmatspecies     *DBAllocMatspecies (void)
+  DBmeshvar        *DBAllocMeshvar (void)
+  DBmultimat       *DBAllocMultimat (void)
+  DBmultimatspecies *DBAllocMultimatspecies (void)
+  DBmultimesh      *DBAllocMultimesh (void)
+  DBmultimeshadj   *DBAllocMultimeshadj (void)
+  DBmultivar       *DBAllocMultivar (void)
+  DBpointmesh      *DBAllocPointmesh (void)
+  DBquadmesh       *DBAllocQuadmesh (void)
+  DBquadvar        *DBAllocQuadvar (void)
+  DBucdmesh        *DBAllocUcdmesh (void)
+  DBucdvar         *DBAllocUcdvar (void)
+  DBzonelist       *DBAllocZonelist (void)
+  DBphzonelist     *DBAllocPHZonelist (void)
+  DBnamescheme     *DBAllocNamescheme(void);
+  DBgroupelmap     *DBAllocGroupelmap(int, DBdatatype)
   ```
 
 * **Fortran Signature:**
@@ -937,16 +866,13 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   These allocation functions return a pointer to a newly allocated and initialized structure on success and `NULL` on failure.
 
-
-
 * **Description:**
 
   The allocation functions allocate a new structure of the requested type, and initialize all values to `NULL` or zero.
   There are counterpart functions for freeing structures of a given type (see DBFree….
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBFree…()`
 
 * **Summary:** Release memory associated with a Silo structure.
@@ -955,47 +881,44 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   ```
   void DBFreeCompoundarray (DBcompoundarray *x)
-      void DBFreeCsgmesh (DBcsgmesh *x)
-      void DBFreeCsgvar (DBcsgvar *x)
-      void DBFreeCSGZonelist (DBcsgzonelist *x)
-      void DBFreeCurve(DBcurve *);
-      void DBFreeDefvars (DBdefvars *x)
-      void DBFreeEdgelist (DBedgelist *x)
-      void DBFreeFacelist (DBfacelist *x)
-      void DBFreeMaterial (DBmaterial *x)
-      void DBFreeMatspecies (DBmatspecies *x)
-      void DBFreeMeshvar (DBmeshvar *x)
-      void DBFreeMultimesh (DBmultimesh *x)
-      void DBFreeMultimeshadj (DBmultimeshadj *x)
-      void DBFreeMultivar (DBmultivar *x)
-      void DBFreeMultimat(DBmultimat *);
-      void DBFreeMultimatspecies(DBmultimatspecies *);
-      void DBFreePointmesh (DBpointmesh *x)
-      void DBFreeQuadmesh (DBquadmesh *x)
-      void DBFreeQuadvar (DBquadvar *x)
-      void DBFreeUcdmesh (DBucdmesh *x)
-      void DBFreeUcdvar (DBucdvar *x)
-      void DBFreeZonelist (DBzonelist *x)
-      void DBFreePHZonelist (DBphzonelist *x)
-      void DBFreeNamescheme(DBnamescheme *);
-      void DBFreeMrgvar(DBmrgvar *mrgv);
-      void DBFreeMrgtree(DBmrgtree *tree);
-      void DBFreeGroupelmap(DBgroupelmap *map);
+  void DBFreeCsgmesh (DBcsgmesh *x)
+  void DBFreeCsgvar (DBcsgvar *x)
+  void DBFreeCSGZonelist (DBcsgzonelist *x)
+  void DBFreeCurve(DBcurve *);
+  void DBFreeDefvars (DBdefvars *x)
+  void DBFreeEdgelist (DBedgelist *x)
+  void DBFreeFacelist (DBfacelist *x)
+  void DBFreeMaterial (DBmaterial *x)
+  void DBFreeMatspecies (DBmatspecies *x)
+  void DBFreeMeshvar (DBmeshvar *x)
+  void DBFreeMultimesh (DBmultimesh *x)
+  void DBFreeMultimeshadj (DBmultimeshadj *x)
+  void DBFreeMultivar (DBmultivar *x)
+  void DBFreeMultimat(DBmultimat *)
+  void DBFreeMultimatspecies(DBmultimatspecies *)
+  void DBFreePointmesh (DBpointmesh *x)
+  void DBFreeQuadmesh (DBquadmesh *x)
+  void DBFreeQuadvar (DBquadvar *x)
+  void DBFreeUcdmesh (DBucdmesh *x)
+  void DBFreeUcdvar (DBucdvar *x)
+  void DBFreeZonelist (DBzonelist *x)
+  void DBFreePHZonelist (DBphzonelist *x)
+  void DBFreeNamescheme(DBnamescheme *)
+  void DBFreeMrgvar(DBmrgvar *mrgv)
+  void DBFreeMrgtree(DBmrgtree *tree)
+  void DBFreeGroupelmap(DBgroupelmap *map)
   ```
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
   `Fortran Equivalent:` | None
 
-
 * **Returned value:**
 
   These free functions return zero on success and -1 on failure.
-
-
 
 * **Description:**
 
@@ -1004,9 +927,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   There are counterpart functions for allocating structures of a given type (see DBAlloc…).
   The functions will not fail if a `NULL` pointer is passed to them.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBIsEmpty()`
 
 * **Summary:** Query a object returned from Silo for "emptiness"
@@ -1014,30 +936,29 @@ For this reason, where a specific application of MRG trees is desired (to repres
 * **C Signature:**
 
   ```
-  int     DBIsEmptyCurve(DBcurve const *curve);
-      int     DBIsEmptyPointmesh(DBpointmesh const *msh);
-      int     DBIsEmptyPointvar(DBpointvar const *var);
-      int     DBIsEmptyMeshvar(DBmeshvar const *var);
-      int     DBIsEmptyQuadmesh(DBquadmesh const *msh);
-      int     DBIsEmptyQuadvar(DBquadvar const *var);
-      int     DBIsEmptyUcdmesh(DBucdmesh const *msh);
-      int     DBIsEmptyFacelist(DBfacelist const *fl);
-      int     DBIsEmptyZonelist(DBzonelist const *zl);
-      int     DBIsEmptyPHZonelist(DBphzonelist const *zl);
-      int     DBIsEmptyUcdvar(DBucdvar const *var);
-      int     DBIsEmptyCsgmesh(DBcsgmesh const *msh);
-      int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl);
-      int     DBIsEmptyCsgvar(DBcsgvar const *var);
-      int     DBIsEmptyMaterial(DBmaterial const *mat);
-      int     DBIsEmptyMatspecies(DBmatspecies const *spec);
+  int     DBIsEmptyCurve(DBcurve const *curve)
+  int     DBIsEmptyPointmesh(DBpointmesh const *msh)
+  int     DBIsEmptyPointvar(DBpointvar const *var)
+  int     DBIsEmptyMeshvar(DBmeshvar const *var)
+  int     DBIsEmptyQuadmesh(DBquadmesh const *msh)
+  int     DBIsEmptyQuadvar(DBquadvar const *var)
+  int     DBIsEmptyUcdmesh(DBucdmesh const *msh)
+  int     DBIsEmptyFacelist(DBfacelist const *fl)
+  int     DBIsEmptyZonelist(DBzonelist const *zl)
+  int     DBIsEmptyPHZonelist(DBphzonelist const *zl)
+  int     DBIsEmptyUcdvar(DBucdvar const *var)
+  int     DBIsEmptyCsgmesh(DBcsgmesh const *msh)
+  int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl)
+  int     DBIsEmptyCsgvar(DBcsgvar const *var)
+  int     DBIsEmptyMaterial(DBmaterial const *mat)
+  int     DBIsEmptyMatspecies(DBmatspecies const *spec)
   ```
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `x` | Pointer to a silo object structure to be queried
-
 
 * **Description:**
 
@@ -1045,6 +966,5 @@ For this reason, where a specific application of MRG trees is desired (to repres
   When `DBSetAllowEmptyObjects()` is enabled by a writer, it can produce objects in the file which contain useful metadata but no "problems-sized" data.
   These methods can be used by a reader to determine if an object read from a file is empty.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
