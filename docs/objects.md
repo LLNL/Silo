@@ -33,7 +33,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `curvename` | Name of the curve object
@@ -99,7 +99,7 @@ Finally, Silo also supports the specification of expressions representing derive
   ```
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `curvename` | Name of the curve to read.
@@ -138,7 +138,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
@@ -203,7 +203,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
@@ -239,7 +239,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable set.
@@ -311,7 +311,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -356,7 +356,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
@@ -400,7 +400,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
@@ -490,7 +490,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
@@ -537,7 +537,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -649,7 +649,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -700,7 +700,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
@@ -744,7 +744,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
@@ -881,7 +881,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the ucd submesh object to create.
@@ -923,7 +923,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
@@ -961,7 +961,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the zonelist structure.
@@ -1014,7 +1014,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the zonelist structure.
@@ -1060,8 +1060,6 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The following table describes the options accepted by this function:
 
-  **&nbsp;**
-
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
   `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int|`NULL`
@@ -1095,7 +1093,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the zonelist structure.
@@ -1118,14 +1116,10 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Description:**
 
-  **&nbsp;**
-
   The `DBPutPHZonelist` function writes a polyhedral-zonelist object into a Silo file.
   The name assigned to this object can in turn be used as the parameter in the `DBOPT_PHZONELIST` option for the `DBPutUcdmesh` function.
 
   The following table describes the options accepted by this function:
-
-  **&nbsp;**
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
@@ -1143,7 +1137,7 @@ Finally, Silo also supports the specification of expressions representing derive
   The other is to create an explicit list of "edges" and then define each polygon in terms of the edges it comprises.
   Either is appropriate.
 
-  ```
+  ```C
   #define NNODES 12
   #define NFACES 11
   #define NZONES 2
@@ -1176,6 +1170,7 @@ Finally, Silo also supports the specification of expressions representing derive
   ```
 
   1[](./ucd_hex_outward_normals.gif)
+
   Figure 0-4: Example of a polyhedral zonelist representation for two hexahedral elements.
 
 ---
@@ -1199,7 +1194,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `phzlname` | Name of the polyhedral-zonelist.
@@ -1241,7 +1236,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the facelist structure.
@@ -1293,7 +1288,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -1393,7 +1388,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -1439,7 +1434,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
@@ -1483,7 +1478,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name to associate with this `DBcsgmesh` object
@@ -1542,8 +1537,6 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The table below defines an analogous set of `typeflags` for creating boundaries in two dimensions..
 
-  **&nbsp;**
-
   typeflag|num-coeffs|coefficients and equation
   :---|:---|:---
   DBCSG_QUADRATIC_G|6|
@@ -1573,8 +1566,6 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of the `DBoptlist` construct.
-
-  **&nbsp;**
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
@@ -1616,7 +1607,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `meshname` | Name of the CSG mesh object to read
@@ -1652,14 +1643,12 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name to associate with the `DBcsgzonelist` object
   `nregs` | The number of regions in the regionlist.
-  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM`,`DB_SWEEP`,`DB_UNION`,`DB_INTERSECT`, and `DB_DIFF`.
-  `The symbols,`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM` and`DB_SWEEP` represent unary operators applied to the referenced region (or boundary). The symbols`DB_UNION`,`DB_INTERSECT`, and`DB_DIFF` represent binary operators applied to two referenced regions.` | For the unary operators, `DB_INNER` forms a region from a boundary (See [`DBPutCsgmesh`](#dbputcsgmesh)) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of`DB_INNER`, `DB_OUTER` and`DB_ON`, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)).
-  `For the unary operator,`DB_XFORM`, the corresponding entry in the leftids array is a reference to a region to be transformed while the corresponding entry in the rightids array is the index into the xform array of the row-by-row coefficients of the affine transform.` | The unary operator `DB_SWEEP` is not yet implemented.
+  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM`,`DB_SWEEP`,`DB_UNION`,`DB_INTERSECT`, and `DB_DIFF`.<br><br>The symbols,`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM` and `DB_SWEEP` represent unary operators applied to the referenced region (or boundary). The symbols `DB_UNION`,`DB_INTERSECT`, and `DB_DIFF` represent binary operators applied to two referenced regions.<br><br>For the unary operators, `DB_INNER` forms a region from a boundary (See [`DBPutCsgmesh`](#dbputcsgmesh)) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of`DB_INNER`, `DB_OUTER` and `DB_ON`, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)).<br><br>For the unary operator,`DB_XFORM`, the corresponding entry in the `leftids` array is a reference to a region to be transformed while the corresponding entry in the `rightids` array is the index into the xform array of the row-by-row coefficients of the affine transform. The unary operator `DB_SWEEP` is not yet implemented.
   `leftids` | Integer array of length `nregs` of references to other regions in the regionlist or boundaries in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)). Each referenced region in the `leftids` array forms the left operand of a binary expression (or single operand of a unary expression) involving the referenced region or boundary.
   `rightids` | Integer array of length `nregs` of references to other regions in the regionlist. Each referenced region in the `rightids` array forms the right operand of a binary expression involving the region or, for regions which are copies of other regions with a transformation applied, the starting index into the `xforms` array of the row-by-row, affine transform coefficients. If for a given region no right reference is appropriate, put a value of '-1' into this array for the given region.
   `xforms` | Array of length `lxforms` of row-by-row affine transform coefficients for those regions that are copies of other regions except with a transformation applied. In this case, the entry in the `leftids` array indicates the region being copied and transformed and the entry in the `rightids` array is the starting index into this `xforms` array for the transform coefficients. This argument may be `NULL`.
@@ -1705,8 +1694,6 @@ Finally, Silo also supports the specification of expressions representing derive
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of the `DBoptlist` construct.
 
-  **&nbsp;**
-
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
   `DBOPT_REGNAMES`|`char**`|Array of `nregs` character strings defining the names of the individual regions|`NULL`
@@ -1722,8 +1709,6 @@ Finally, Silo also supports the specification of expressions representing derive
   The other is a lens-shaped fin used to direct airflow (lighter area).
 
   The table below describes the contents of the boundary list (written in the `DBPutCsgmesh` call)
-
-  **&nbsp;**
 
   typeflags|id|coefficients|name (optional)
   :---|:---|:---|:---
@@ -1749,8 +1734,6 @@ Finally, Silo also supports the specification of expressions representing derive
   ```
 
   The table below describes the contents of the regionlist, written in the `DBPutCSGZonelist` call.
-
-  **&nbsp;**
 
   typeflags|regid|leftids|rightids|notes
   :---|:---|:---|:---|:---
@@ -1808,7 +1791,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `zlname` | Name of the CSG mesh zonelist object to read
@@ -1845,7 +1828,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `vname` | The name to be associated with this `DBcsgvar` object
@@ -1906,7 +1889,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `varname` | Name of CSG variable object to read
@@ -1946,7 +1929,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the material data object.
@@ -1998,24 +1981,24 @@ Finally, Silo also supports the specification of expressions representing derive
   The model used for storing material data is the most efficient for VisIt, and works as follows:
 
   One zonal array, matlist, contains the material number for a clean zone or an index into the mixed data arrays if the zone is mixed.
-  Mixed zones are marked with negative entries in matlist, so you must take ABS(matlist[i]) to get the actual 1-origin mixed data index.
+  Mixed zones are marked with negative entries in matlist, so you must take `abs(matlist[i])` to get the actual 1-origin mixed data index.
   All indices are 1-origin to allow `matlist` to use zero as a material number.
 
   The mixed data arrays are essentially a linked list of information about the mixed elements within a zone.
   Each mixed data array is of length `mixlen`.
   For a given index i, the following information is known about the i'th element:
 
-  mix_zone[i]
+  `mix_zone[i]`
   : The index of the zone which contains this element.
   The origin is determined by `DBOPT_ORIGIN`.
 
-  mix_mat[i]
+  `mix_mat[i]`
   : The material number of this element
 
-  mix_vf[i]
+  `mix_vf[i]`
   : The volume fraction of this element
 
-  mix_next[i]
+  `mix_next[i]`
   : The 1-origin index of the next material entry for this zone, else 0 if this is the last entry.
 
   ![](./mixed_mats.gif)
@@ -2041,7 +2024,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `mat_name` | Name of the material variable to read.
@@ -2084,7 +2067,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the material species data object.
@@ -2131,35 +2114,12 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The material species object would be defined such that nmat=3 and nmatspec={2,5,6}. If the composition of Brass, T-1 Steel and O-1 Steel is constant over the whole mesh, the `species_mf` array would contain just 2 + 5 + 6 = 13 entries...
 
-  **Optlist options:**
-
-  species_mf|Brass (2 values)|.35
-  :---|:---|:---
-  element|.65|Zn
-  1-origin index|Cu|2
-  |1|
-
-
-  T-1 Steel
-
-  **&nbsp;**
-
-  (5 values starting at offset 3)|.007|.18|.04|.001
-  :---|:---|:---|:---|:---
-  .763|C|W|Cr|V
-  Fe|4|5|6|7
-  3||||
-
-
-  O-1 Steel
-
-  **&nbsp;**
-
-  (6 values starting at offset 8)|.009|.014|.005|.005|.005
-  :---|:---|:---|:---|:---|:---
-  .962|C|Mn|Cr|Ni|W
-  Fe|9|10|11|12|13
-  8|||||
+|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|
+| &nbsp; <td colspan=2 style="text-align:center;">**Brass**<td colspan=5 style="text-align:center;">**T1 Steel**<td colspan=6 style="text-align:center;">**O1 Steel**|
+|`species_mf`|.65|.35|.763|.007|.18|.04|.001|.962|.009|.014|.005|.005|.005|
+|element|Cu|Zn|Fe|C|W|Cr|V|Fe|C|Mn|Cr|Ni|W|
+|index|[1]{.lime-background}|2|[3]{.lime-background}|4|5|6|7|[8]{.lime-background}|9|10|11|12|13
 
   If all of the zones in the mesh are clean (e.g. not mixing in material) and have the same composition of species, the `speclist` array would contain a '1' for every Brass zone (1-origin indexing would mean it would index species_mf[0]), a '3' for every T-1 Steel zone and a '8' for every O-1 Steel zone.
   However, if some cells had a Brass mixture with an extra 1% Cu, then you could create another two entries at positions 14 and 15 in the `species_mf` array with the values 0.66 and 0.34, respectively, and the `speclist` array for those cells would point to '14' instead of '1'.
@@ -2183,8 +2143,6 @@ Finally, Silo also supports the specification of expressions representing derive
   In this case, the resulting matspecies object isn't so much empty as it is homogeneous in that all materials consist of only a single species.
 
   The following table describes the options accepted by this function:
-
-  **&nbsp;**
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
@@ -2215,7 +2173,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `ms_name` | Name of the material species data to read.
@@ -2250,19 +2208,18 @@ Finally, Silo also supports the specification of expressions representing derive
      names, lnames, types, defns, ldefns, optlist_id,
      status)
   ```
-
-  character*N names (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
-  character*N defns (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
+  `character*N names` (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
+  `character*N defns` (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the derived variable definition(s) object.
   `ndefs` | number of derived variable definitions.
   `names` | Array of length `ndefs` of derived variable names
-  `types` | Array of length `ndefs` of derived variable `types` such as`DB_VARTYPE_SCALAR`,`DB_VARTYPE_VECTOR`,`DB_VARTYPE_TENSOR`,`DB_VARTYPE_SYMTENSOR`,`DB_VARTYPE_ARRAY`,`DB_VARTYPE_MATERIAL`,`DB_VARTYPE_SPECIES`,`DB_VARTYPE_LABEL`
+  `types` | Array of length `ndefs` of [derived variable types](header.md#derived-variable-types)
   `defns` | Array of length `ndefs` of derived variable definitions.
   `optlist` | Array of length `ndefs` pointers to option list structures containing additional information to be included with each derived variable. The options available are the same as those available for the respective variables.
 
@@ -2279,35 +2236,33 @@ Finally, Silo also supports the specification of expressions representing derive
   The variables themselves are not in any way computed by Silo.
 
   If variable references within the `defns` strings do not have a leading slash ('/') (indicating an absolute name), they are interpreted relative to the directory into which the Defvars object is written.
-  For the `defns` string, in cases where a variable's `name` includes special characters (such as / . { } [ ] + - = ), the entire variable reference should be bracketed by < and > characters.
+  For the `defns` string, in cases where a variable's `name` includes special characters (such as `/ . { } [ ] + - = )`, the entire variable reference should be bracketed by `<` and `>` characters.
 
   The interpretation of the `defns` strings written here is determined by the post-processing tool that reads and interprets these definitions.
   Since in common practice that tool tends to be VisIt, the discussion that follows describes how VisIt would interpret this string.
 
   The table below illustrates examples of the contents of the various array arguments to `DBPutDefvars` for a case that defines 6 derived variables.
 
-  **Optlist options:**
+  names|types|defns
+  :---|:---|:---
+  "totaltemp"|`DB_VARTYPE_SCALAR`|`"nodet+zonetemp"`
+  "<stress/sz>"|`DB_VARTYPE_SCALAR`|`"-<stress/sx>-<stress/sy>"`
+  "vel"|`DB_VARTYPE_VECTOR`|`"{Vx, Vy, Vz}"`
+  "speed"|`DB_VARTYPE_SCALAR`|`"magntidue(vel)"`
+  "dev_stress"|`DB_VARTYPE_TENSOR`|`"{{<stress/sx>,<stress/txy>,<stress/txz>}`,<br>`  {          0, <stress/sy>,<stress/tyz>}`,<br>`  {          0,           0, <stress/sz>}}"`
 
-  0|names|types|defns
-  :---|:---|:---|:---
-  1|"totaltemp"`DB_VARTYPE_SCALAR`|"nodet+zonetemp"
-  2|"<stress/sz>"`DB_VARTYPE_SCALAR`|"-<stress/sx>-<stress/sy>"
-  3|"vel"`DB_VARTYPE_VECTOR`|"{Vx, Vy, Vz}"
-  4|"speed"`DB_VARTYPE_SCALAR`|"magntidue(vel)"
-  |"dev_stress"`DB_VARTYPE_TENSOR`|"{ {<stress/sx>,<stress/txy>,<stress/txz>}, {                 0, <stress/sy>,<stress/tyz>}, {                 0,                 0, <stress/sz>} }"
+  The first entry (0) defines a derived scalar variable named `"totaltemp"` which is the sum of variables whose names are `"nodet"` and `"zonetemp"`. The next entry (1) defines a derived scalar variable named `"sz"` in a group of variables named `"stress"` (the slash character ('/') is used to group variable names much the way file pathnames are grouped in Linux).
+  Note also that the definition of `"sz"` uses the special bracketing characters (`<`) and (`>`) for the variable references due to the fact that these variable references have a slash character (`/`) in them.
 
-  The first entry (0) defines a derived scalar variable named "totaltemp" which is the sum of variables whose `names` are "nodet" and "zonetemp". The next entry (1) defines a derived scalar variable named "sz" in a group of variables named "stress" (the slash character ('/') is used to group variable `names` much the way file pathnames are grouped in Linux).
-  Note also that the definition of "sz" uses the special bracketing characters ('<') and ('>') for the variable references due to the fact that these variable references have a slash character ('/') in them.
-
-  The third entry (2) defines a derived vector variable named "vel" from three scalar variables named "Vx", "Vy", and "Vz" while the fourth entry (3) defines a scalar variable, "speed" to be the magnitude of the vector variable named "vel". The last entry (4) defines a deviatoric stress tensor.
+  The third entry (2) defines a derived vector variable named `"vel"` from three scalar variables named `"Vx"`, `"Vy"`, and `"Vz"` while the fourth entry (3) defines a scalar variable, `"speed"` to be the magnitude of the vector variable named `"vel"`. The last entry (4) defines a deviatoric stress tensor.
   These last two cases demonstrate that derived variable definitions may reference other derived variables.
 
-  The last few examples demonstrate the use of two operators, {}, and magnitude().
-  We call these expression operators.
-  In VisIt, there are numerous expression operators to help define derived variables including such things as sqrt(), round(), abs(), cos(), sin(), dot(), cross() as well as comparison operators, gt(), ge(), lt(), le(), eq(), and the conditional if().
+  The last few examples demonstrate the use of two operators, `{}`, and `magnitude()`.
+  We call these expression *operators*.
+  In VisIt, there are numerous expression operators to help define derived variables including such things as `sqrt()`, `round()`, `abs()`, `cos()`, `sin()`, `dot()`, `cross()` as well as comparison operators, `gt()`, `ge()`, `lt()`, `le()`, `eq()`, and the conditional `if()`.
   Furthermore, the list of expression operators in VisIt grows regularly.
   Only a few examples are illustrated here.
-  For a more complete list of the available expression operators and their syntax, the reader is referred to the Expressions portion of the VisIt user's manual.
+  For a more complete list of the available expression operators and their syntax, the reader is referred to the [Expressions](https://visit-sphinx-github-user-manual.readthedocs.io/en/stable/using_visit/Quantitative/Expressions.html#built-in-expressions) portion of the VisIt user's manual.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2329,7 +2284,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | The `name` of the `DBdefvars` object to read
@@ -2364,7 +2319,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
@@ -2399,7 +2354,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Mesh name.
@@ -2413,13 +2368,11 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBInqMeshtype` function returns the type of the given mesh.
   The value returned is described in the following table:
 
-  **&nbsp;**
-
   Mesh Type|Returned Value
   :---|:---
   Multi-Block|`DB_MULTIMESH`
   UCD|`DB_UCDMESH`
-  Pointmesh|`DB_POINTMESHH
+  Pointmesh|`DB_POINTMESH`
   Quad (Collinear)|`DB_QUAD_RECT`
   Quad (Non-Collinear)|`DB_QUAD_CURV`
   CSG|`DB_CSGMESH`
