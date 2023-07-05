@@ -450,56 +450,97 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Arg name | Description
   :---|:---
   `ns_str` | The namescheme string as described below.
-  `...` | The remaining arguments take `...` of three forms depending on `...` the caller wants external array references, if `...` are present in `...` format substring of `ns_str` to be handled. `...` the first form, `...` format substring of `ns_str` involves no externally referenced arrays `...` so there `...` no additional arguments other than `...` `ns_str` string itself. `...` the second form, `...` caller `...` all externally referenced arrays needed in `...` format substring of `ns_str` already in memory `...` simply passes their pointers here as `...` remaining arguments in `...` same order in which they appear in `...` format substring of `ns_str`. `...` arrays `...` bound to `...` returned namescheme object `...` should `...` be freed until after `...` caller is done using `...` returned namescheme object. In this case, `DBFreeNamescheme()` does `...` free these arrays `...` the caller is required to explicitly free them. `...` the third form, `...` caller makes a request `...` the Silo library to find in a given file, read `...` bind to `...` returned namescheme object `...` externally referenced arrays in `...` format substring of `ns_str`. To achieve this, `...` caller passes a 3-tuple of `...` form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as `...` remaining arguments. `...` initial (void*)0 is required. `...` (DBfile*)file is `...` database handle of `...` Silo file in which `...` externally referenced arrays exist. `...` third (char*)mbobjpath, which `...` be 0/`NULL`, is `...` path within `...` file, either relative to `...` file's current working directory, or absolute, at which `...` multi-block object holding `...` `ns_str` `...` found in `...` file. `...` necessary externally referenced arrays must exist within `...` specified file using either relative paths from multi-block object's home directory or `...` file's current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
+  `...` | The remaining arguments take various forms. See description below.
 
 * **Description:**
 
-  A namescheme defines a mapping between `...` non-negative integers (e.g. `...` natural numbers) `...` a sequence of strings such that each string to be associated with a given integer `...` can be generated from printf-style formatting involving simple expressions.
-  Nameschemes `...` most often used to define names of regions in region arrays or to define names of multi-block objects.
+  The remaining arguments after `ns_str` take one of three forms depending on how the caller wants external array references, if any are present in the format substring of `ns_str` to be handled.
 
-  The format of a printf-style namescheme is as follows.
-  The first character of `...` is treated as delimiter character definition.
-  Wherever this delimiter character appears (except as `...` first character), this will indicate `...` end of `...` substring within `...` and `...` beginning of a next substring.
-  The delimiter character cannot be `...` of `...` characters used in `...` expression language (see below) `...` defining expressions to generate names of a namescheme.
+  In the first form, the format substring of `ns_str` involves no externally referenced arrays and so there are no additional arguments other than the `ns_str` string itself.
 
-  The first substring of `...` (that is `...` characters from position 1 to `...` first delimiter character) will contain `...` complete printf-style format string.
-  The remaining substrings will contain simple expressions, `...` for each conversion specifier found in `...` format substring, which when evaluated will be used as `...` corresponding argument in an sprintf call to generate `...` actual name, when `...` if needed, on demand.
+  In the second form, the caller has all externally referenced arrays needed in the format substring of `ns_str` already in memory and simply passes their pointers here as the remaining arguments in the same order in which they appear in the format substring of `ns_str`.
+  The arrays are bound to the returned namescheme object and should not be freed until after the caller is done using the returned namescheme object.
+  In this case, `DBFreeNamescheme()` does not free these arrays and the caller is required to explicitly free them.
 
-  The expression language `...` building up `...` arguments to be used along with `...` printf-style format string is pretty simple.
+  In the third form, the caller makes a request for the Silo library to find in a given file, read and bind to the returned namescheme object all externally referenced arrays in the format substring of `ns_str`.
+  To achieve this, the caller passes a 3-tuple of the form `(void*) 0, (DBfile*) file, (char*) mbobjpath` as the remaining arguments.
+  The initial `(void*)0` is required.
+  The `(DBfile*)file` is the database handle of the Silo file in which all externally referenced arrays exist.
+  The third `(char*)mbobjpath`, which may be `NULL`, is the path within the file, either relative to the file’s current working directory, or absolute, at which the multi-block object holding the `ns_str` was found in the file.
+  All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object’s home directory or the file’s current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
 
-  It supports `...` '+', '-', '*', '/', `...` (modulo), '|', '&', `...` integer operators `...` a variant of `...` question-mark-colon operator, '? : :' which requires an extra, terminating colon.
+  A namescheme defines a mapping between the non-negative integers (e.g. the natural numbers) and a sequence of strings such that each string to be associated with a given integer (n) can be generated on the fly from printf-style formatting involving simple expressions.
+  Nameschemes are most often used to define names of regions in region arrays or to define names of multi-block objects.
+  The format of a printf-style namescheme is as follows...
 
-  It supports grouping `...` '(' `...` ')' characters.
+  The first character of `ns_str` is treated as the *delimiter character definition*.
+  Wherever this delimiter character appears (except as the first character), this will indicate the end of one substring within `ns_str` and the beginning of a next substring.
+  The delimiter character cannot be any of the characters used in the expression language (see below) for defining expressions to generate names of a namescheme.
+  The delimiter character divides `ns_str` into one or more substrings.
 
-  It supports grouping of characters into arbitrary strings `...` the string (single quote) characters `...` and `...`. `...` characters appearing between enclosing single quotes `...` treated as a literal string suitable `...` an argument to be associated with a %s-type conversion specifier in `...` format string.
+  The first substring of `ns_strs` (that is the characters from position 1 to the first delimiter character after its definition at index 0) will contain the complete printf-style format string the namescheme will generate.
+  The remaining substrings will contain simple expressions, one for each conversion specifier found in the format substring, which when evaluated will be used as the corresponding argument in an sprintf call to generate the actual name, when and if needed, on demand.
 
-  It supports references to external, integer valued arrays introduced `...` a `...` character appearing before an array's name `...` external, string valued arrays introduced `...` a `...` character appearing before an array's name.
+  The expression language for building up the arguments to be used along with the printf-style format string is pretty simple.
 
-  Finally, `...` special operator `...` appearing in an expression represents a natural number within `...` sequence of names (zero-origin index).
-  See below `...` some examples.
+  It supports the ‘+’, ‘-’, ‘*’, ‘/’, ‘%’ (modulo), ‘|’, ‘&’, ‘^’ integer operators and a variant of the question-mark-colon operator, ‘? : :’ which requires an extra, terminating colon.
 
-  Except `...` singly quoted strings which evaluate to a literal string suitable `...` output `...` a %s type conversion specifier, `...` $-type external array references which evaluate to an external string, `...` other expressions `...` treated as evaluating to integer values suitable `...` any of `...` integer conversion specifiers (%[ouxXdi]) which `...` be used in `...` format substring..
+  It supports grouping via ‘(‘ and ‘)’ characters.
 
-  fmt|Interpretation
-  :---|:---
-  "|slide_%s|(n%2)?'master':'slave':"|The delimiter character is `...`. `...` format substring is "slide_%s". `...` expression substring `...` the argument to `...` first (and only in this case) conversion specifier (%s) is "(n%2)?'master':'slave':" When this expression is evaluated `...` a given region, `...` region's natural number will be inserted `...` 'n'. `...` modulo operation with 2 will be applied. If that result is non-zero, `...` ?:: expression will evaluate to 'master'. Otherwise, it will evaluate to 'slave'. Note `...` terminating colon `...` the `...` operator. This naming scheme might be useful `...` an array of regions representing, alternately, master `...` slave sides of slide surfaces.<br>Note also `...` the `...` operator, `...` caller `...` assume that only `...` sub-expression corresponding to `...` whichever half of `...` operator is satisfied is actually evaluated.
-  "Hblock_%02dx%02dHn/16Hn%16"|The delimiter character is `...`. `...` format substring is 'block_%02dx%02d". `...` expression substring `...` the argument to `...` first conversion specifier (%02d) is "n/256". `...` expression substring `...` the argument to `...` second conversion specifier (also %02d) is "n%16". When this expression is evaluated, `...` region's natural number will be inserted `...` 'n' `...` the `...` and `...` operators will be evaluated. This naming scheme might be useful `...` a region array of `...` regions to be named as a 2D array of regions with names like "block_09x11"
-  "@domain_%03d@n"|The delimiter character is `...`. `...` format substring is "domain_%03d". `...` expression substring `...` the argument to `...` one `...` only conversion specifier is `...`. When this expression is evaluated, `...` region's natural number is inserted `...` 'n'. This results in names like "domain_000", "domain_001", `...`.
-  "@domain_%03d@n+1"|This is just like `...` case above except that region names begin with "domain_001" instead of "domain_000". This might be useful to deal with different indexing origins; Fortran `...` C.
-  "|foo_%03dx%03d|#P[n]|#U[n%4]"|The delimiter character is `...`. `...` format substring is "foo_%03dx%03d". `...` expression substring `...` the first argument is an external array reference '#P[n]' where `...` index into `...` array is just `...` natural number, n. `...` expression substring `...` the second argument is another external array reference, '#U[n%4]' where `...` index is an expression 'n%4' on `...` natural number n.
+  It supports grouping of characters into arbitrary strings via the string (single quote) characters ‘’’ and ‘’’. Any characters appearing between enclosing single quotes are treated as a literal string suitable for an argument to be associated with a %s-type conversion specifier in the format string.
 
-  If `...` caller is handling externally referenced arrays explicitly, because `...` is `...` first externally referenced array in `...` format string, a pointer to `...` must be `...` first to appear in `...` varargs list of additional args to `DBMakeNamescheme`.
-  Similarly, because `...` appears as `...` second externally referenced array in `...` format string, a pointer to `...` must appear second in `...` varargs as in
+  It supports references to external, integer valued arrays introduced via a ‘#’ character appearing before an array’s name and external, string valued arrays introduced via a ‘$’ character appearing before an array’s name.
 
-  DBMakeNamescheme('|foo_%03dx%03d|#P[n]|#U[n%4]', p, u);
+  Finally, the special operator 'n' appearing in an expression represents a *natural number* within the sequence of names (zero-origin index).
 
-  Alternatively, if `...` caller wants `...` Silo library to find `...` and `...` in a Silo file, read `...` arrays from `...` file `...` bind them into `...` namescheme automatically, then `...` and `...` must be Silo arrays in `...` current working directory of `...` file that is passed in as `...` 2-tuple "(int) 0, (DBfile *) dbfile' in `...` varargs to `DBMakeNamescheme` as in
+  Except for singly quoted strings which evaluate to a literal string suitable for output via a %s type conversion specifier, and $-type external array references which evaluate to an external string, all other expressions are treated as evaluating to integer values suitable for any of the integer conversion specifiers (%[ouxXdi]) which may be used in the format substring.
 
-  DBMakeNamescheme("|foo_%03dx%03d|#P[n]|#U[n%4]", 0, dbfile, 0);
+  Here are some examples...
 
-  Use `DBFreeNamescheme()` to free up space associated with a namescheme.
+  `"|slide_%s|(n%2)?'leader':'follower':"`
+  : The delimiter character is `|`.
+    The format substring is `slide_%s`.
+    The expression substring for the argument to the first (and only in this case) conversion specifier (`%s`) is `(n%2)?'leader':'follower':`
+    When this expression is evaluated for a given region, the region’s natural number will be inserted for `n`.
+    The modulo operation with `2` will be applied.
+    If that result is non-zero, the `?::` expression will evaluate to `'leader'`.
+    Otherwise, it will evaluate to `'follower'`.
+    Note there is also a *terminating* colon for the `?::` operator.
+    This naming scheme might be useful for an array of regions representing, alternately, the two halves of a contact surface.
+    Note also for the `?::` operator, the caller can assume that only the sub-expression corresponding to the whichever half of the operator is satisfied is actually evaluated.
 
-  Also note that there are numerous examples of nameschemes in [`tests/nameschemes.c`](https://github.com/LLNL/Silo/blob/main/tests/namescheme.c) in the Silo source release tarball.
+  `"Hblock_%02dx%02dHn/16Hn%16"`
+  : The delimiter character is `H`.
+    The format substring is `block_%02dx%02d`.
+    The expression substring for the argument to the first conversion specifier (`%02d`) is `n/256`.
+    The expression substring for the argument to the second conversion specifier (also `%02d`) is `n%16`.
+    When this expression is evaluated, the region’s natural number will be inserted for `n` and the div and mod operators will be evaluated.
+    This naming scheme might be useful for a region array of 256 regions to be named as a 2D array of regions with names like "block_09x11".
+
+  `"@domain_%03d@n"`
+  : The delimiter character is `@`.
+    The format substring is `domain_%03d`.
+    The expression substring for the argument to the one and only conversion specifier is `n`.
+    When this expression is evaluated, the region’s natural number is inserted for `n`.
+    This results in names like "domain_000", "domain_001", etc.
+
+  `"@domain_%03d@n+1"`
+  : This is just like the case above except that region names begin with "domain_001" instead of "domain_000".
+    This might be useful to deal with different indexing origins; Fortran vs. C.
+
+  `"|foo_%03dx%03d|#P[n]|#U[n%4]"`
+  : The delimiter character is `|`.
+    The format substring is `foo_%03dx%03d`.
+    The expression substring for the first argument is an external array reference `#P[n]` where the index into the array is just the natural number, n.
+    The expression substring for the second argument is another external array reference, `#U[n%4]` where the index is an expression `n%4` on the natural number n. 
+
+    If the caller is handling externally referenced arrays explicitly, because `P` is the first externally referenced array in the format string, a pointer to `P` must be the first to appear in the `...` list of additional args to `DBMakeNamescheme`.
+    Similarly, because `U` appears as the second externally referenced array in the format string, a pointer to `U` must appear second in the `...` as in `DBMakeNamescheme("|foo_%03dx%03d|#P[n]|#U[n%4]", P, U)`
+
+    Alternatively, if the caller wants the Silo library to find `P` and `U` in a Silo file, read the arrays from the file and bind them into the namescheme automatically, then `P` and `U` must be simple arrays in the current working directory of the file that is passed in as the 3-tuple `"(int) 0, (DBfile *) dbfile, 0"` in the `...` argument to `DBMakeNamescheme` as in `DBMakeNamescheme("|foo_%03dx%03d|#P[n]|#U[n%4]", 0, dbfile, 0)`.
+
+  Use `DBFreeNamescheme()` to free up the space associated with a namescheme.
+  Also note that there are numerous examples of nameschemes in “tests/nameschemes.c” in the Silo source release tarball.
 
 {{ EndFunc }}
 
@@ -563,9 +604,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
      lreg_names, datatype, data_ids, optlist_id, status)
   ```
 
-  `character*N compnames` (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
-  `character*N reg_names` (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
-  `int* data_ids` (use dbmkptr to get id for each pointer)
+  `character*N compnames` (See [`dbset2dstrlen`](fortran.md#dbset2dstrlen))
+
+  `character*N reg_names` (See [`dbset2dstrlen`](fortran.md#dbset2dstrlen))
+
+  `int* data_ids` (use [`dbmkptr]`(fortran.md#dbmkptr) to get id for each pointer)
 
 * **Arguments:**
 

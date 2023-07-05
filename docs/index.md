@@ -23,6 +23,7 @@ The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable 
 ./objects.md
 ./parallel.md
 ./subsets.md
+./alloc.md
 ./utility.md
 ./optlists.md
 ./generic.md
