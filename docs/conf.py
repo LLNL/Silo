@@ -26,7 +26,8 @@ myst_enable_extensions = [
     "fieldlist",
     "substitution",
     "attrs_block",
-    "attrs_inline"
+    "attrs_inline",
+    "colon_fence"
 ]
 myst_heading_anchors = 3
 

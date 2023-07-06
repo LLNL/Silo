@@ -216,7 +216,7 @@ This section of the API manual describes functions that can be used to compute t
   Arg Name | Description
   :--- | :---
   `strArray` | the array of strings to be freed (some members can be `NULL`)
-  `n` | If `n>0`, `n` is the number of `char*` pointers in `strArray`. If `n<0`, it loops freeing entries in `strArray` until it reaches a `NULL` entry.
+  `n` | If `n>0`, `n` is the number of `char*` pointers in `strArray`. If `n<0`, `strArray` is treated as `NULL`-terminated. That is, entries in `strArray` are freed until the first `NULL` entry is encountered.
 
 * **Returned value:**
 
@@ -226,7 +226,7 @@ This section of the API manual describes functions that can be used to compute t
 
   This function simplifies freeing of an array of strings constructed from [`DBStringListToStringArray`](#dbstringlisttostringarray).
   If `n>0`, if `strArray` contains `NULL` entries, it will handle this condition.
-  If `n<0`, it will loop freeing entries in `strArray` until it encounters a `NULL` entry.
+  If `n<0`, `strArray` is treated as `NULL`-terminated. That is, entries in `strArray` are freed until the first `NULL` entry is encountered.
 
 {{ EndFunc }}
 
@@ -260,7 +260,7 @@ This section of the API manual describes functions that can be used to compute t
 * **Description:**
 
   Walks a [`DBucdmesh`](header.md#dbucdmesh) data structure and guesses and adds shapetype info based on `ndims` and `shapesizes` and node counts of the individual shapes.
-  This is useful for taking an existing [`DBZonelist`](header.md#dbzonelist) object associated with a UCD mesh and turning it into a [`DBZonelist2`](header.md#dbzonelist2) object.
+  This is useful for taking an old-style [`DBZonelist`](header.md#dbzonelist) object which did not include the `shapetype` member populating it based on some simple heuristics.
 
 {{ EndFunc }}
 
