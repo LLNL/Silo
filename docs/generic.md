@@ -4,25 +4,10 @@ If you want to create data that other applications (not written by you or someon
 That is because the data that these functions create is not self-describing and inherently non-shareable.
 
 However, if you need to write data that only you (or someone working closely with you) will read such as for restart purposes, the functions described here may be helpful.
-The functions described here allow users to read and write arbitrary arrays of raw data as well as user-defined Silo objects.
+The functions described here allow users to read and write arbitrary arrays of raw data as well as to create and write or read user-defined Silo objects.
 
-### Methods and symbols in this section
+{{ EndFunc }}
 
-&nbsp;|&nbsp;|&nbsp;
-:---|:---|:---
-[`DBAddDblComponent`](#dbadddblcomponent)|[`DBAddFltComponent`](#dbaddfltcomponent)|[`DBAddIntComponent`](#dbaddintcomponent)
-[`DBAddStrComponent`](#dbaddstrcomponent)|[`DBAddVarComponent`](#dbaddvarcomponent)|[`DBChangeObject`](#dbchangeobject)
-[`DBClearObject`](#dbclearobject)|[`DBFreeObject`](#dbfreeobject)|[`DBGetComponent`](#dbgetcomponent)
-[`DBGetComponentType`](#dbgetcomponenttype)|[`DBGetCompoundarray`](#dbgetcompoundarray)|[`DBGetObject`](#dbgetobject)
-[`DBGetVar`](#dbgetvar)|[`DBGetVarByteLength`](#dbgetvarbytelength)|[`DBGetVarDims`](#dbgetvardims)
-[`DBGetVarLength`](#dbgetvarlength)|[`DBGetVarType`](#dbgetvartype)|[`DBInqCompoundarray`](#dbinqcompoundarray)
-[`DBInqVarExists`](#dbinqvarexists)|[`DBInqVarType`](#dbinqvartype)|[`DBMakeObject`](#dbmakeobject)
-[`DBPutCompoundarray`](#dbputcompoundarray)|[`DBReadVar`](#dbreadvar)|[`DBReadVarSlice`](#dbreadvarslice)
-[`DBWrite`](#dbwrite)|[`DBWriteComponent`](#dbwritecomponent)|[`DBWriteObject`](#dbwriteobject)
-[`DBWriteSlice`](#dbwriteslice)|
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBWrite()`
 
 * **Summary:** Write a simple variable.
@@ -40,7 +25,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -49,20 +34,17 @@ The functions described here allow users to read and write arbitrary arrays of r
   `ndims` | Number of dimensions.
   `datatype` | Datatype of the variable. One of the predefined Silo data types.
 
-
 * **Returned value:**
 
-  DBWrite returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBWrite` function writes a simple variable into a Silo file.
+  It is not associated with any other Silo object.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBWriteSlice()`
 
 * **Summary:** Write a (hyper)slab of a simple variable
@@ -83,10 +65,9 @@ The functions described here allow users to read and write arbitrary arrays of r
      datatype, offset, length, stride, dims, ndims)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -98,12 +79,9 @@ The functions described here allow users to read and write arbitrary arrays of r
   `dims` | Array of `length` `ndims` which describes the dimensionality of the entire variable. Each value in the `dims` array indicates the number of elements contained in the entire variable along that dimension.
   `ndims` | Number of dimensions.
 
-
 * **Returned value:**
 
-  DBWriteSlice returns zero on success and -1 on failure.
-
-
+  zero on success and -1 on failure.
 
 * **Description:**
 
@@ -121,9 +99,8 @@ The functions described here allow users to read and write arbitrary arrays of r
   ![](./stride.gif)
   Figure 0-11: Array slice
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBReadVar()`
 
 * **Summary:** Read a simple Silo variable.
@@ -140,33 +117,26 @@ The functions described here allow users to read and write arbitrary arrays of r
   integer function dbrdvar(dbid, varname, lvarname, ptr)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
   `result` | Pointer to memory into which the variable should be read. It is up to the application to provide sufficient space in which to read the variable.
 
-
 * **Returned value:**
 
-  DBReadVar returns zero on success and -1 on failure.
-
-
+  zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBReadVar` function reads a simple variable into the given space.
 
-  Notes:
-
   See [`DBGetVar`](#dbgetvar) for a memory-allocating version of this function.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBReadVarSlice()`
 
 * **Summary:** Read a (hyper)slab of data from a simple variable.
@@ -186,10 +156,9 @@ The functions described here allow users to read and write arbitrary arrays of r
      length, stride, ndims, ptr)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -199,12 +168,9 @@ The functions described here allow users to read and write arbitrary arrays of r
   `ndims` | Number of dimensions in the variable.
   `result` | Pointer to location where the slice is to be written. It is up to the application to provide sufficient space in which to read the variable.
 
-
 * **Returned value:**
 
-  DBReadVarSlice returns zero on success and -1 on failure.
-
-
+  zero on success and -1 on failure.
 
 * **Description:**
 
@@ -218,9 +184,8 @@ The functions described here allow users to read and write arbitrary arrays of r
   ![](./stride.gif)
   Figure 0-12: Array slice
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetVar()`
 
 * **Summary:** Allocate space for, and return, a simple variable.
@@ -239,17 +204,14 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable
 
-
 * **Returned value:**
 
-  DBGetVar returns a pointer to newly allocated space on success and `NULL` on failure.
-
-
+  A pointer to newly allocated and populated memory on success and `NULL` on failure.
 
 * **Description:**
 
@@ -257,13 +219,10 @@ The functions described here allow users to read and write arbitrary arrays of r
   If an error occurs, `NULL` is returned.
   It is up to the application to cast the returned pointer to the correct data type.
 
-  Notes:
+  See [`DBReadVar`](#dbreadvar) for non-memory allocating versions of this function.
 
-  See [`DBReadVar`](#dbreadvar) and `DBReadVar1` for non-memory allocating versions of this function.
+{{ EndFunc }}
 
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBInqVarExists()`
 
 * **Summary:** Queries variable existence
@@ -282,18 +241,15 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
-  `name` | Object `name`.
-
+  `name` | Object name.
 
 * **Returned value:**
 
   DBInqVarExists returns non-zero if the object exists in the file.
   Zero otherwise.
-
-
 
 * **Description:**
 
@@ -301,9 +257,8 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   If an object was written to a file, but the file has yet to be DBClose'd, the results of this function querying that variable are undefined.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBInqVarType()`
 
 * **Summary:** Return the type of the given object
@@ -322,66 +277,51 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Object `name`.
 
-
 * **Returned value:**
 
-  DBInqVarType returns the `DBObjectType` corresponding to the given object.
-
-
+ Returns the [`DBObjectType`](header.md#dbobjecttype) corresponding to the given object.
 
 * **Description:**
 
-  The `DBInqVarType` function returns the `DBObjectType` of the given object.
+  The `DBInqVarType` function returns the [`DBObjectType`](header.md#dbobjecttype) of the given object.
   The value returned is described in the following table:
-
-  **&nbsp;**
 
   Object Type|Returned Value
   :---|:---
-  Invalid object or the object was not found in the file.|DB_INVALID_OBJECT
-  Quadmesh|DB_QUADMESH
-  Quadvar|DB_QUADVAR
-  UCD mesh|DB_UCDMESH
-  UCD variable|DB_UCDVAR
-  CSG mesh|DB_CSGMESH
-  CSG variable|DB_CSGVAR
-  Multiblock mesh|DB_MULTIMESH
-  Multiblock variable|DB_MULTIVAR
-  Multiblock material|DB_MULTIMAT
-  Multiblock material species|DB_MULTIMATSPECIES
-  Material|DB_MATERIAL
-  Material species|DB_MATSPECIES
-  Facelist|DB_FACELIST
-  Zonelist|DB_ZONELIST
-  Polyhedral-Zonelist|DB_PHZONELIST
-  CSG-Zonelist|DB_CSGZONELIST
-  Edgelist|DB_EDGELIST
-  Curve|DB_CURVE
-  Pointmesh|DB_POINTMESH
-  Pointvar|DB_POINTVAR
-  Defvars|DB_DEFVARS
-  Compound array|DB_ARRAY
-  Directory|DB_DIR
-  Other variable (one written out using `DBWrite`.)|DB_VARIABLE
-  User-defined|DB_USERDEF
+  Invalid or object not found|`DB_INVALID_OBJECT`
+  Quadmesh|`DB_QUADMESH`
+  Quadvar|`DB_QUADVAR`
+  UCD mesh|`DB_UCDMESH`
+  UCD variable|`DB_UCDVAR`
+  CSG mesh|`DB_CSGMESH`
+  CSG variable|`DB_CSGVAR`
+  Multiblock mesh|`DB_MULTIMESH`
+  Multiblock variable|`DB_MULTIVAR`
+  Multiblock material|`DB_MULTIMAT`
+  Multiblock material species|`DB_MULTIMATSPECIES`
+  Material|`DB_MATERIAL`
+  Material species|`DB_MATSPECIES`
+  Facelist|`DB_FACELIST`
+  Zonelist|`DB_ZONELIST`
+  Polyhedral-Zonelist|`DB_PHZONELIST`
+  CSG-Zonelist|`DB_CSGZONELIST`
+  Edgelist|`DB_EDGELIST`
+  Curve|`DB_CURVE`
+  Pointmesh|`DB_POINTMESH`
+  Pointvar|`DB_POINTVAR`
+  Defvars|`DB_DEFVARS`
+  Compound array|`DB_ARRAY`
+  Directory|`DB_DIR`
+  Other variable (one written out using `DBWrite`.)|`DB_VARIABLE`
+  User-defined|`DB_USERDEF`
 
+{{ EndFunc }}
 
-  
-
-  The function will signal an error if the given `name` does not exist in the file.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetVarByteLength()`
 
 * **Summary:** Return the byte length of a simple variable.
@@ -400,7 +340,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
@@ -408,9 +348,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Returned value:**
 
-  DBGetVarByteLength returns the length of the given simple variable in bytes on success and -1 on failure.
-
-
+  The length of the given simple variable in bytes on success and -1 on failure.
 
 * **Description:**
 
@@ -418,9 +356,8 @@ The functions described here allow users to read and write arbitrary arrays of r
   This is useful for determining how much memory to allocate before reading a simple variable with `DBReadVar`.
   Note that this would not be a concern if one used the `DBGetVar` function, which allocates space itself.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetVarDims()`
 
 * **Summary:** Get dimension information of a variable in a Silo file
@@ -440,28 +377,24 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the Silo object to obtain dimension information for.
   `maxdims` | The maximum size of `dims`.
   `dims` | An array of `maxdims` integer values to be populated with the dimension information returned by this call.
 
-
 * **Returned value:**
 
   The number of dimensions on success; -1 on failure
-
-
 
 * **Description:**
 
   This function will populate the `dims` array up to a maximum of `maxdims` values with dimension information of the specified Silo variable (object) `name`.
   The number of dimensions is returned as the function's return value.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetVarLength()`
 
 * **Summary:** Return the number of elements in a simple variable.
@@ -481,26 +414,22 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
 
-
 * **Returned value:**
 
-  DBGetVarLength returns the number of elements in the given simple variable on success and -1 on failure.
-
-
+  The number of *elements* in the given simple variable on success and -1 on failure.
 
 * **Description:**
 
   The `DBGetVarLength` function returns the length of the requested simple variable, in number of elements.
   For example a 16 byte array containing 4 floats has 4 elements.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetVarType()`
 
 * **Summary:** Return the Silo datatype of a simple variable.
@@ -519,33 +448,23 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
 
-
 * **Returned value:**
 
-  DBGetVarType returns the Silo datatype of the given simple variable on success and -1 on failure.
-
-
+  The Silo [`DBdatatype`](header.md#dbdatatype) of the given simple variable on success and -1 on failure.
 
 * **Description:**
 
-  The `DBGetVarType` function returns the Silo datatype of the requested simple variable.
-  For example, `DB_FLOAT` for float variables.
+  The `DBGetVarType` function returns the Silo [`DBdatatype`](header.md#dbdatatype) of the requested simple variable.
+  This works only for simple Silo variables (those written using [`DBWrite`](#dbwrite) or [`DBWriteSlice`](#dbwriteslice)).
+  To query the type of other variables, use [`DBInqVarType`](#dbinqvartype) instead.
 
-  Notes:
+{{ EndFunc }}
 
-  This only works for simple Silo variables (those written using `DBWrite` or DBWriteSlice).
-  To query the type of other variables, use `DBInqVarType` instead.
-
-  
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutCompoundarray()`
 
 * **Summary:** Write a Compound Array object into a Silo file.
@@ -571,7 +490,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name of the compound array structure.
@@ -583,26 +502,21 @@ The functions described here allow users to read and write arbitrary arrays of r
   `datatype` | Data type of the `values` array. One of the predefined Silo types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use `NULL` is there are no options.
 
-
 * **Returned value:**
 
   DBPutCompoundarray returns zero on success and -1 on failure.
 
-
-
 * **Description:**
 
   The `DBPutCompoundarray` function writes a compound array object into a Silo file.
-  A compound array is an array whose elements are simple arrays.
-  All of the simple arrays have elements of the same data type, and each have a `name`.
+  A compound array is an array whose elements are simple arrays all of which are the same [`DBdatatype`](header.md#dbdatatype).
 
   Often, an application will partition a block of memory into named pieces, but write the block to a database as a single entity.
   Fortran common blocks are used in this way.
   The compound array object is an abstraction of this partitioned memory block.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBInqCompoundarray()`
 
 * **Summary:** Inquire Compound Array attributes.
@@ -622,10 +536,9 @@ The functions described here allow users to read and write arbitrary arrays of r
      nelems, nvalues, datatype)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the compound array.
@@ -635,21 +548,17 @@ The functions described here allow users to read and write arbitrary arrays of r
   `nvalues` | Returned number of total values in the compound array.
   `datatype` | Datatype of the data values. One of the predefined Silo data types.
 
-
 * **Returned value:**
 
-  DBInqCompoundarray returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBInqCompoundarray` function returns information about the compound array.
-  It does not return the data values themselves; use `DBGetCompoundarray` instead.
+  It does not return the data values themselves; use [`DBGetCompoundarray`](#dbgetcompoundarray) instead.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCompoundarray()`
 
 * **Summary:** Read a compound array from a Silo database.
@@ -668,33 +577,24 @@ The functions described here allow users to read and write arbitrary arrays of r
      elemnames, elemlengths, nelems, values, nvalues, datatype)
   ```
 
-
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `arrayname` | Name of the compound array.
 
-
 * **Returned value:**
 
-  DBGetCompoundarray returns a pointer to a `DBcompoundarray` structure on success and `NULL` on failure.
-
-
+  A pointer to a [`DBcompoundarray`](header.md#dbcompoundarray) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetCompoundarray` function allocates a `DBcompoundarray` structure, reads a compound array from the Silo database, and returns a pointer to that structure.
+  The `DBGetCompoundarray` function allocates a [`DBcompoundarray`](header.md#dbcompoundarray) structure, reads a compound array from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
-  Notes:
+{{ EndFunc }}
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBMakeObject()`
 
 * **Summary:** Allocate an object of the specified length and initialize it.
@@ -714,18 +614,15 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `objname` | Name of the object.
-  `objtype` | Type of object. One of the predefined types: DB_QUADMESH, DB_QUAD_RECT, DB_QUAD_CURV, DB_DEFVARS, DB_QUADVAR, DB_UCDMESH, DB_UCDVAR, DB_POINTMESH, DB_POINTVAR, DB_CSGMESH, DB_CSGVAR, DB_MULTIMESH, DB_MULTIVAR, DB_MULTIADJ, DB_MATERIAL, DB_MATSPECIES, DB_FACELIST, DB_ZONELIST, DB_PHZONELIST, DB_EDGELIST, DB_CURVE, DB_ARRAY, or `DB_USERDEF`.
+  `objtype` | Type of object. One of the predefined [`DBObjectType`](header.md#dbobjecttype) types.
   `maxcomps` | Initial maximum number of components needed for this object. If this number is exceeded, the library will silently re-allocate more space using the golden rule.
-
 
 * **Returned value:**
 
-  DBMakeObject returns a pointer to the newly allocated and initialized object on success and `NULL` on failure.
-
-
+  DBMakeObject returns a pointer to the newly allocated and initialized Silo object on success and `NULL` on failure.
 
 * **Description:**
 
@@ -735,9 +632,13 @@ The functions described here allow users to read and write arbitrary arrays of r
   However, starting in version 4.10, the `maxcomps` argument is used only for the initial object creation.
   If a caller attempts to add more than this number of components to an object, Silo will simply re-allocate the object to accomodate the additional components.
 
+  Data producers may use this method to either modify an existing Silo object type or create an empty, new user-defined object using the type `DB_USERDEF`.
+  Modified Silo objects will be recognized by Silo as long as they are not modified in ways that remove *essential* data members.
+  Data producers may *add* data members to Silo objects and those objects will still behave as those Silo objects.
+  However, obtaining any user-defined members of such an object may require *reading* the object via the [`DBGetObject`](#dbgetobject) method instead of the formal Silo method for the object (e.g. `DBGetUcdmesh` for a `DB_UCDMESH` type object).
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBFreeObject()`
 
 * **Summary:** Free memory associated with an object.
@@ -756,27 +657,23 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to the `object` to be freed. This `object` is created with the `DBMakeObject` function.
 
-
 * **Returned value:**
 
-  DBFreeObject returns zero on success and -1 on failure.
-
-
+  zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBFreeObject` function releases the memory associated with the given `object`.
   The data associated with the object's components is not released.
 
-  DBFreeObject will not fail if a `NULL` pointer is passed to it.
+  `DBFreeObject` will not fail if a `NULL` pointer is passed to it.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBChangeObject()`
 
 * **Summary:** Overwrite an existing object in a Silo file with a new object
@@ -795,25 +692,23 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `obj` | The new `DBobject` object (which knows its name) to write to the `file`.
-
 
 * **Returned value:**
 
   Zero on succes; -1 on failure
 
-
-
 * **Description:**
 
-  DBChangeObject writes a new `DBobject` object to a file, replacing the object in the `file` with the same name.
+  `DBChangeObject` writes a new `DBobject` object to a file, replacing the object in the `file` with the same name.
+  Changing (e.g. overwriting) existing objects in Silo files is frought with peril.
+  See [`DBSetAllowOverwrites`](globals.md#dbsetallowoverwrites) for more information.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBClearObject()`
 
 * **Summary:** Clear an object.
@@ -832,25 +727,21 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to the `object` to be cleared. This `object` is created with the `DBMakeObject` function.
 
-
 * **Returned value:**
 
-  DBClearObject returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBClearObject` function clears an existing `object`.
   The number of components associated with the `object` is set to zero.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddDblComponent()`
 
 * **Summary:** Add a double precision floating point component to an object.
@@ -870,7 +761,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
@@ -879,17 +770,14 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Returned value:**
 
-  DBAddDblComponent returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBAddDblComponent` function adds a component of double precision floating point data to an existing `object`.
+  The `DBAddDblComponent` function adds a component of double precision floating point data to an existing object.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddFltComponent()`
 
 * **Summary:** Add a floating point component to an object.
@@ -909,26 +797,22 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
   `f` | The value of the floating point component.
 
-
 * **Returned value:**
 
-  DBAddFltComponent returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBAddFltComponent` function adds a component of floating point data to an existing `object`.
+  The `DBAddFltComponent` function adds a component of floating point data to an existing object.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddIntComponent()`
 
 * **Summary:** Add an integer component to an object.
@@ -948,26 +832,22 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
   `i` | The value of the integer component.
 
-
 * **Returned value:**
 
-  DBAddIntComponent returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBAddIntComponent` function adds a component of integer data to an existing `object`.
+  The `DBAddIntComponent` function adds a component of integer data to an existing object.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddStrComponent()`
 
 * **Summary:** Add a string component to an object.
@@ -987,26 +867,22 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
   `s` | The value of the string component. Silo copies the contents of the string.
 
-
 * **Returned value:**
 
-  DBAddStrComponent returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBAddStrComponent` function adds a component of string data to an existing `object`.
+  The `DBAddStrComponent` function adds a component of string data to an existing object.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBAddVarComponent()`
 
 * **Summary:** Add a variable component to an object.
@@ -1026,29 +902,25 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | Component name.
   `vardata` | Name of the variable `object` associated with the component (see Description).
 
-
 * **Returned value:**
 
-  DBAddVarComponent returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBAddVarComponent` function adds a component of the variable type to an existing `object`.
+  The `DBAddVarComponent` function adds a component of the variable type to an existing object.
 
-  The variable in `vardata` is stored verbatim into the `object`.
-  No translation or typing is done on the variable as it is added to the `object`.
+  The variable name in `vardata` is stored verbatim into the object.
+  No translation or typing is done on the variable as it is added to the object.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBWriteComponent()`
 
 * **Summary:** Add a variable component to an object and write the associated data.
@@ -1070,7 +942,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `object` | Pointer to the `object`.
@@ -1081,20 +953,16 @@ The functions described here allow users to read and write arbitrary arrays of r
   `nd` | Number of dimensions of the component.
   `count` | An array of length `nd` containing the length of the component in each of its dimensions.
 
-
 * **Returned value:**
 
-  DBWriteComponent returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBWriteComponent` function adds a component to an existing `object` and also writes the component's data to a Silo file.
+  The `DBWriteComponent` function adds a component to an existing object and also writes the component's data to a Silo file.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBWriteObject()`
 
 * **Summary:** Write an object into a Silo file.
@@ -1114,28 +982,25 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `object` | Object created with `DBMakeObject` and populated with DBAddFltComponent, DBAddIntComponent, DBAddStrComponent, and `DBAddVarComponent`.
   `freemem` | If non-zero, then the `object` will be freed after writing.
 
-
 * **Returned value:**
 
-  DBWriteObject returns zero on success and -1 on failure.
-
-
+  Zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBWriteObject` function writes an `object` into a Silo file.
-  This is a user-defined `object` that consists of various components.
+  The `DBWriteObject` function writes an object into a Silo file.
+  This method may be used to write any of Silo's known, high-level [Objects](objects.md).
+  This method is more often used to write user-defined objects.
   They are used when the basic Silo structures are not sufficient.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetObject()`
 
 * **Summary:** Read an object from a Silo file as a generic object
@@ -1154,33 +1019,25 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `objname` | The name of the object to get.
 
-
 * **Returned value:**
 
-  On success, a pointer to a `DBobject` struct containing the object's data.
-  NULL on failure.
-
-
+  On success, a pointer to a [`DBobject`](header.md#dbobject) struct containing the object's data.
+  `NULL` on failure.
 
 * **Description:**
 
-  Each of the object Silo supports has corresponding methods to both write them to a Silo database `file` (DBPut...) and get them from a `file` (DBGet...).
+  Each of the objects Silo supports has corresponding methods to both write them to a Silo database file via `DBPutXxx` and get them from a file via `DBGetXxx`.
 
   However, Silo objects can also be accessed as generic objects through the generic object interface.
   This is recommended only for objects that were written with `DBWriteObject()` method.
 
-  Notes:
+{{ EndFunc }}
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetComponent()`
 
 * **Summary:** Allocate space for, and return, an object component.
@@ -1200,7 +1057,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `objname` | Object name.
@@ -1209,9 +1066,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Returned value:**
 
-  DBGetComponent returns a pointer to newly allocated space containing the component value on success, and `NULL` on failure.
-
-
+  A pointer to newly allocated space containing the component value on success, and `NULL` on failure.
 
 * **Description:**
 
@@ -1219,9 +1074,8 @@ The functions described here allow users to read and write arbitrary arrays of r
   If either the object or component does not exist, `NULL` is returned.
   It is up to the application to cast the returned pointer to the appropriate type.
 
+{{ EndFunc }}
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetComponentType()`
 
 * **Summary:** Return the type of an object component.
@@ -1241,23 +1095,25 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `objname` | Object name.
   `compname` | Component name.
-
 
 * **Returned value:**
 
   The values that are returned depend on the component's type and how the component was written into the object.
   The component types and their corresponding return values are listed in the table below.
 
-  Component Type	Integer	Float	Double	String	Variable	all others
-
-  Return value	`DB_INT`	`DB_FLOAT`	`DB_DOUBLE`	`DB_CHAR`	`DB_VARIABLE`	DB_NOTYPE
-
-
+  Component Type | Return value
+  :--- | :---
+  `int` | `DB_INT`
+  `float` | `DB_FLOAT`
+  `double` | `DB_DOUBLE`
+  `char*` | `DB_CHAR`
+  variable | `DB_VARIABLE`
+  everything else | `DB_NOTYPE` 
 
 * **Description:**
 
@@ -1265,6 +1121,4 @@ The functions described here allow users to read and write arbitrary arrays of r
   If either the object or component does not exist, `DB_NOTYPE` is returned.
   This function allows the application to process the component without having to know its type in advance.
 
-
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
