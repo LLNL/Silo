@@ -569,6 +569,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 * **Returned value:**
 
   A string representing the generated name.
+  The returned string should **not** be free'd by the caller.
   If there are problems with the namescheme, the string could be of length zero (e.g. the first character is a null terminator).
 
 * **Description:**
@@ -577,7 +578,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   The caller must **not** free the returned string.
 
   Silo maintains a tiny circular buffer of (32) names constructed and returned by this function so that multiple evaluations in the same expression do not wind up overwriting each other.
-  A call to DBGetName(0,0) will free up all memory associated with this tiny circular buffer.
+  A call to `DBGetName(0,0)` will free up all memory associated with this tiny circular buffer.
 
 {{ EndFunc }}
 
@@ -824,190 +825,49 @@ For this reason, where a specific application of MRG trees is desired (to repres
 * **C Signature:**
 
   `DBOPT_REGION_PNAMES` char**
-  : A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined.
-    If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be `NULL` and is used to indicate the end of the list of names.
+
+  A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined.
+  If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be `NULL` and is used to indicate the end of the list of names.
       
-    All of Silo’s `DBPutXxxvar()` calls support the `DBOPT_REGION_PNAMES` option to specify the variable on only some region(s) of the associated mesh.
-    However, the use of the option has implications regarding the ordering of the values in the `vars[]` arrays passed into the `DBPutXxxvar()` functions.
-    This section explains the ordering requirements.
+  All of Silo’s `DBPutXxxvar()` calls support the `DBOPT_REGION_PNAMES` option to specify the variable on only some region(s) of the associated mesh.
+  However, the use of the option has implications regarding the ordering of the values in the `vars[]` arrays passed into the `DBPutXxxvar()` functions.
+  This section explains the ordering requirements.
 
-    Ordinarily, when the `DBOPT_REGION_PNAMES` option is not being used, the order of the values in the vars arrays passed here is considered to be one-to-one with the order of the nodes (for `DB_NODECENT` centering) or zones (for `DB_ZONECENT` centering) of the associated mesh.
-    However, when the `DBOPT_REGION_PNAMES` option is being used, the order of values in the `vars[]` is determined by other conventions described below.
+  Ordinarily, when the `DBOPT_REGION_PNAMES` option is not being used, the order of the values in the vars arrays passed here is considered to be one-to-one with the order of the nodes (for `DB_NODECENT` centering) or zones (for `DB_ZONECENT` centering) of the associated mesh.
+  However, when the `DBOPT_REGION_PNAMES` option is being used, the order of values in the `vars[]` is determined by other conventions described below.
 
-    If the `DBOPT_REGION_PNAMES` option references regions in an MRG tree, the ordering is one-to-one with the groupel’s identified in the groupel map segment(s) (of the same groupel type as the variable’s centering) associated with the region(s); all of the segment(s), in order, of the groupel map of the first region, then all of the segment(s) of the groupel map of the second region, and so on.
-    If the set of groupel map segments for the regions specified include the same groupel multiple times, then the `vars[]` arrays will wind up needing to include the same value, multiple times.
-    The preceding ordering convention works because the ordering is explicitly represented by the order in which groupels are identified in the groupel maps.
-    However, if the `DBOPT_REGION_PNAMES` option references material name(s) in a material object created by a `DBPutMaterial()` call, then the ordering is not explicitly represented.
-    Instead, it is based on a traversal of the mesh zones restricted to the named material(s).
-    In this case, the ordering convention requires further explanation and is described below.
+  If the `DBOPT_REGION_PNAMES` option references regions in an MRG tree, the ordering is one-to-one with the groupel’s identified in the groupel map segment(s) (of the same groupel type as the variable’s centering) associated with the region(s); all of the segment(s), in order, of the groupel map of the first region, then all of the segment(s) of the groupel map of the second region, and so on.
+  If the set of groupel map segments for the regions specified include the same groupel multiple times, then the `vars[]` arrays will wind up needing to include the same value, multiple times.
 
-    For `DB_ZONECENT` variables, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), that zone is considered in the traversal and placed conceptually in an ordered list of traversed zones.
-    In addition, if the zone contains the material only partially, that zone is also placed conceptually in an ordered list of traversed mixed zones.
-    In this case, the values in the `vars[]` array must be one-to-one with this traversed zones list.
-    Likewise, the values of the `mixvars[]` array must be one-to-one with the traversed mixed zones list.
+  The preceding ordering convention works because the ordering is explicitly represented by the order in which groupels are identified in the groupel maps.
+  However, if the `DBOPT_REGION_PNAMES` option references material name(s) in a material object created by a `DBPutMaterial()` call, then the ordering is not explicitly represented.
+  Instead, it is based on a traversal of the mesh zones restricted to the named material(s).
+  In this case, the ordering convention requires further explanation and is described below.
+
+  For `DB_ZONECENT` variables, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), that zone is considered in the traversal and placed conceptually in an ordered list of traversed zones.
+  In addition, if the zone contains the material only partially, that zone is also placed conceptually in an ordered list of traversed mixed zones.
+  In this case, the values in the `vars[]` array must be one-to-one with this traversed zones list.
+  Likewise, the values of the `mixvars[]` array must be one-to-one with the traversed mixed zones list.
     However, in the special case that the list of materials specified in `DBOPT_REGION_PNAMES` is of size one (1), an additional optimization is supported.
-    For the special case that the list of materials defined in `DBOPT_REGION_PNAMES` is of size one (1), the requirement to specify separate values for zones containing the material only partially in the `mixvars[]` array is removed.
-    In this case, if the `mixlen` arg is zero (0) in the cooresponding `DBPutXXXvar()` call, only the `vars[]` array, which is one-to-one with (all) traversed zones containing the material either cleanly or partially, will be used.
-    The reason this works is that in the single material case, there is only ever one zonal variable value per zone regardless of whether the zone contains the material cleanly or partially.
-    For `DB_NODECENT` variables, the situation is complicated by the fact that materials are zone-centric but the variable being defined is node-centered.
-    So, an additional level of local traversal over a zone’s nodes is required.
-    In this case, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), then that zone’s nodes are traversed according to the ordering specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
-    On the first encounter of a node, that node is considered in the traversal and placed conceptually in an ordered list of traversed nodes.
-    The values in the `vars[]` array must be one-to-one with this traversed nodes list.
-    Because we are not aware of any cases of node-centered variables that have mixed material components, there is no analogous traversed mixed nodes list.
-    For `DBOPT_EDGECENT` and `DBOPT_FACECENT` variables, the traversal is handled similarly.
-    That is, the list of zones for the mesh is traversed and for each zone found to contain one of the materials listed in `DBOPT_REGION_PNAMES`, the zone’s edge’s (or face’s) are traversed in local order specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
-    For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh’s nodes (or zones) were to be traversed, which would be the first? Which would be the second?
-    Unless the `DBOPT_MAJORORDER` option was used, the answer is that the traversal is identical to the standard C programming language storage convention for multi-dimensional arrays often called row-major storage order.
-    That is, was we traverse through the list of nodes (or zones) of a Quad mesh, we encounter first node with logical index [0,0,0], then [0,0,1], then [0,0,2]...[0,1,0]...etc.
-    A traversal of zones would behave similarly.
-    Traversal of edges or faces of a quad mesh would follow the description with [`DBPutQuadvar`](objects.md#dbputquadvar).
+
+  For the special case that the list of materials defined in `DBOPT_REGION_PNAMES` is of size one (1), the requirement to specify separate values for zones containing the material only partially in the `mixvars[]` array is removed.
+  In this case, if the `mixlen` arg is zero (0) in the cooresponding `DBPutXXXvar()` call, only the `vars[]` array, which is one-to-one with (all) traversed zones containing the material either cleanly or partially, will be used.
+  The reason this works is that in the single material case, there is only ever one zonal variable value per zone regardless of whether the zone contains the material cleanly or partially.
+  For `DB_NODECENT` variables, the situation is complicated by the fact that materials are zone-centric but the variable being defined is node-centered.
+
+  So, an additional level of local traversal over a zone’s nodes is required.
+  In this case, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), then that zone’s nodes are traversed according to the ordering specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
+  On the first encounter of a node, that node is considered in the traversal and placed conceptually in an ordered list of traversed nodes.
+  The values in the `vars[]` array must be one-to-one with this traversed nodes list.
+  Because we are not aware of any cases of node-centered variables that have mixed material components, there is no analogous traversed mixed nodes list.
+
+  For `DBOPT_EDGECENT` and `DBOPT_FACECENT` variables, the traversal is handled similarly.
+  That is, the list of zones for the mesh is traversed and for each zone found to contain one of the materials listed in `DBOPT_REGION_PNAMES`, the zone’s edge’s (or face’s) are traversed in local order specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
+
+  For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh’s nodes (or zones) were to be traversed, which would be the first? Which would be the second?
+  Unless the `DBOPT_MAJORORDER` option was used, the answer is that the traversal is identical to the standard C programming language storage convention for multi-dimensional arrays often called row-major storage order.
+  That is, was we traverse through the list of nodes (or zones) of a Quad mesh, we encounter first node with logical index [0,0,0], then [0,0,1], then [0,0,2]...[0,1,0]...etc.
+  A traversal of zones would behave similarly.
+  Traversal of edges or faces of a quad mesh would follow the description with [`DBPutQuadvar`](objects.md#dbputquadvar).
 
 {{ EndFunc }}
-
-### `DBAlloc…()`
-
-* **Summary:** Allocate and initialize a Silo structure.
-
-* **C Signature:**
-
-  ```
-  DBcompoundarray  *DBAllocCompoundarray (void)
-  DBcsgmesh        *DBAllocCsgmesh (void)
-  DBcsgvar         *DBAllocCsgvar (void)
-  DBcurve          *DBAllocCurve (void)
-  DBcsgzonelist    *DBAllocCSGZonelist (void)
-  DBdefvars        *DBAllocDefvars (void)
-  DBedgelist       *DBAllocEdgelist (void)
-  DBfacelist       *DBAllocFacelist (void)
-  DBmaterial       *DBAllocMaterial (void)
-  DBmatspecies     *DBAllocMatspecies (void)
-  DBmeshvar        *DBAllocMeshvar (void)
-  DBmultimat       *DBAllocMultimat (void)
-  DBmultimatspecies *DBAllocMultimatspecies (void)
-  DBmultimesh      *DBAllocMultimesh (void)
-  DBmultimeshadj   *DBAllocMultimeshadj (void)
-  DBmultivar       *DBAllocMultivar (void)
-  DBpointmesh      *DBAllocPointmesh (void)
-  DBquadmesh       *DBAllocQuadmesh (void)
-  DBquadvar        *DBAllocQuadvar (void)
-  DBucdmesh        *DBAllocUcdmesh (void)
-  DBucdvar         *DBAllocUcdvar (void)
-  DBzonelist       *DBAllocZonelist (void)
-  DBphzonelist     *DBAllocPHZonelist (void)
-  DBnamescheme     *DBAllocNamescheme(void);
-  DBgroupelmap     *DBAllocGroupelmap(int, DBdatatype)
-  ```
-
-* **Fortran Signature:**
-
-  ```
-  None
-  ```
-
-* **Returned value:**
-
-  These allocation functions return a pointer to a newly allocated and initialized structure on success and `NULL` on failure.
-
-* **Description:**
-
-  The allocation functions allocate a new structure of the requested type, and initialize all values to `NULL` or zero.
-  There are counterpart functions for freeing structures of a given type (see DBFree….
-
-{{ EndFunc }}
-
-### `DBFree…()`
-
-* **Summary:** Release memory associated with a Silo structure.
-
-* **C Signature:**
-
-  ```
-  void DBFreeCompoundarray (DBcompoundarray *x)
-  void DBFreeCsgmesh (DBcsgmesh *x)
-  void DBFreeCsgvar (DBcsgvar *x)
-  void DBFreeCSGZonelist (DBcsgzonelist *x)
-  void DBFreeCurve(DBcurve *);
-  void DBFreeDefvars (DBdefvars *x)
-  void DBFreeEdgelist (DBedgelist *x)
-  void DBFreeFacelist (DBfacelist *x)
-  void DBFreeMaterial (DBmaterial *x)
-  void DBFreeMatspecies (DBmatspecies *x)
-  void DBFreeMeshvar (DBmeshvar *x)
-  void DBFreeMultimesh (DBmultimesh *x)
-  void DBFreeMultimeshadj (DBmultimeshadj *x)
-  void DBFreeMultivar (DBmultivar *x)
-  void DBFreeMultimat(DBmultimat *)
-  void DBFreeMultimatspecies(DBmultimatspecies *)
-  void DBFreePointmesh (DBpointmesh *x)
-  void DBFreeQuadmesh (DBquadmesh *x)
-  void DBFreeQuadvar (DBquadvar *x)
-  void DBFreeUcdmesh (DBucdmesh *x)
-  void DBFreeUcdvar (DBucdvar *x)
-  void DBFreeZonelist (DBzonelist *x)
-  void DBFreePHZonelist (DBphzonelist *x)
-  void DBFreeNamescheme(DBnamescheme *)
-  void DBFreeMrgvar(DBmrgvar *mrgv)
-  void DBFreeMrgtree(DBmrgtree *tree)
-  void DBFreeGroupelmap(DBgroupelmap *map)
-  ```
-
-* **Arguments:**
-
-  Arg name | Description
-  :---|:---
-  `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
-  `Fortran Equivalent:` | None
-
-* **Returned value:**
-
-  These free functions return zero on success and -1 on failure.
-
-* **Description:**
-
-  The free functions release the given structure as well as all memory pointed to by these structures.
-  This is the preferred method for releasing these structures.
-  There are counterpart functions for allocating structures of a given type (see DBAlloc…).
-  The functions will not fail if a `NULL` pointer is passed to them.
-
-{{ EndFunc }}
-
-### `DBIsEmpty()`
-
-* **Summary:** Query a object returned from Silo for "emptiness"
-
-* **C Signature:**
-
-  ```
-  int     DBIsEmptyCurve(DBcurve const *curve)
-  int     DBIsEmptyPointmesh(DBpointmesh const *msh)
-  int     DBIsEmptyPointvar(DBpointvar const *var)
-  int     DBIsEmptyMeshvar(DBmeshvar const *var)
-  int     DBIsEmptyQuadmesh(DBquadmesh const *msh)
-  int     DBIsEmptyQuadvar(DBquadvar const *var)
-  int     DBIsEmptyUcdmesh(DBucdmesh const *msh)
-  int     DBIsEmptyFacelist(DBfacelist const *fl)
-  int     DBIsEmptyZonelist(DBzonelist const *zl)
-  int     DBIsEmptyPHZonelist(DBphzonelist const *zl)
-  int     DBIsEmptyUcdvar(DBucdvar const *var)
-  int     DBIsEmptyCsgmesh(DBcsgmesh const *msh)
-  int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl)
-  int     DBIsEmptyCsgvar(DBcsgvar const *var)
-  int     DBIsEmptyMaterial(DBmaterial const *mat)
-  int     DBIsEmptyMatspecies(DBmatspecies const *spec)
-  ```
-
-* **Arguments:**
-
-  Arg name | Description
-  :---|:---
-  `x` | Pointer to a silo object structure to be queried
-
-* **Description:**
-
-  These functions return non-zero if the object is indeed empty and zero otherwise.
-  When `DBSetAllowEmptyObjects()` is enabled by a writer, it can produce objects in the file which contain useful metadata but no "problems-sized" data.
-  These methods can be used by a reader to determine if an object read from a file is empty.
-
-{{ EndFunc }}
-

@@ -165,6 +165,27 @@ We include the contents of the Silo header file here including a description of 
    :end-at: "} DBcsgvar;"
    ```
 
+### DBmrgtree
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "typedef struct _DBmrgtree {"
+   :end-at: "} DBmrgtree"
+   ```
+
+### DBmrgvar
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "typedef struct _DBmrgvar {"
+   :end-at: "} DBmrgvar"
+   ```
+
+### DBgroupelmap
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "typedef struct _DBgroupelmap {"
+   :end-at: "} DBgroupelmap"
+   ```
+
 ### DBcompoundarray
 
    ```{literalinclude} ../src/silo/silo.h.in
