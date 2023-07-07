@@ -28,7 +28,7 @@ Or, if you are interested in how to use some option like `DBOPT_CONSERVED`, sear
 
 ## Brief History and Background
 
-Development of the Silo library began in the early 1990’s at Lawrence Livermore National Laboratory to address a range of issues related to the storage and exchange of data among a wide variety of scientific computing applications and platforms.
+Development of the Silo library began in the early 1990's at Lawrence Livermore National Laboratory to address a range of issues related to the storage and exchange of data among a wide variety of scientific computing applications and platforms.
 
 In the early days of scientific computing, roughly 1950 - 1980, simulation software development at many labs, like Livermore, invariably took the form of a number of software *stovepipes*.
 Each big code effort included sub-efforts to develop supporting tools for data browsing and differencing, visualization, and management.
@@ -174,7 +174,7 @@ Most meshes, including quadrilateral ones, can be represented as an unstructured
 Because of their generality, however, unstructured meshes require more storage space and more complex algorithms.
 
 In UCD meshes, the basic concept of zones (cells) still applies, but there is no longer an implied connectivity between a zone and its neighbor, as with the quadrilateral mesh.
-In other words, given a 2-D quadrilateral mesh zone accessed by (i, j), one knows that this zone’s neighbors are (i-1,j), (i+1,j), (i, j-1), and so on.
+In other words, given a 2-D quadrilateral mesh zone accessed by (i, j), one knows that this zone's neighbors are (i-1,j), (i+1,j), (i, j-1), and so on.
 This is not the case with a UCD mesh.
 
 In a UCD mesh, a structure called a zonelist is used to define the nodes which make up each zone.
@@ -202,7 +202,7 @@ CSG meshes support only zone-centered variables.
 Block structured AMR meshes are composed of a large number of Quad meshes representing refinements of other quad meshes.
 The hierarchy of refinement is characterized using a Mesh Region Grouping (MRG) tree.
 
-### Summary of Silo’s Computational Modeling Objects
+### Summary of Silo's Computational Modeling Objects
 
 Objects are a grouping mechanism for maintaining related variables, dimensions, and other data.
 The Silo library understands and operates on specific types of objects including the previously described computational meshes and related data.
@@ -220,13 +220,13 @@ Quadmesh
 
 Quadvar
 : A variable associated with a quad mesh.
-  This includes the variable’s data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
+  This includes the variable's data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
   Additional information, such as time, cycle, units, label, and index ranges can also be included.
 
 Ucdmesh
 : An unstructured cell data (UCD) mesh.
   This is a mesh where the elements are only ever explicitly defined via enumeration of nodal connectivities.
-  This includes the dimension, connectivity, and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
+  This includes the dimension, connectivity, and coordinate data, but typically also includes the mesh's coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
 
   Any quad mesh can be respresented as a UCD mesh.
   However, the reverse is not true.
@@ -240,7 +240,7 @@ Ucdmesh
 
 Ucdvar
 : A variable associated with a UCD mesh.
-  This includes the variable’s data, centering information (node-centered vs.  zone-centered), and the name of the UCD mesh with which this variable is associated.
+  This includes the variable's data, centering information (node-centered vs.  zone-centered), and the name of the UCD mesh with which this variable is associated.
   Additional information, such as time, cycle, units, and label can also be included.
 
 Pointmesh
@@ -327,7 +327,7 @@ Compound Array
   group (particularly for I/O purposes).
 
 Directory
-: A silo file can be organized into directories (or folders) in much the same way as a Unix filesystem.
+: A silo file can be organized into directories (or folders) in much the same way as a Unix file system.
 
 Optlist
 : An options list object used to pass additional options to various Silo API functions.
@@ -343,10 +343,10 @@ User Defined Object
 Extended Silo Object
 : A Silo object which includes any number of user-defined additional data members.
 
-## Silo’s Fortran Interface
+## Silo's Fortran Interface
 
 The Silo library is implemented in C.
-Nonetheless, a set of Fortran callable wrappers have been written to make a majority of Silo’s functionality available to Fortran applications.
+Nonetheless, a set of Fortran callable wrappers have been written to make a majority of Silo's functionality available to Fortran applications.
 These wrappers simply take the data that is passed through a Fortran function interface, re-package it and call the equivalent C function.
 However, there are a few limitations of the Fortran interface.
 
@@ -354,7 +354,7 @@ However, there are a few limitations of the Fortran interface.
 
 First, the Fortran interface is primarily a write-only interface.
 This means Fortran applications can use the interface to write Silo files so that other tools, like VisIt, can read them.
-However, for all but a few of Silo’s objects, only the functions necessary to write the objects to a Silo file have been implemented in the Fortran interface.
+However, for all but a few of Silo's objects, only the functions necessary to write the objects to a Silo file have been implemented in the Fortran interface.
 This means Fortran applications cannot really use Silo for restart file purposes.
 
 Conceptually, the Fortran interface is identical to the C interface.
@@ -367,7 +367,7 @@ Here, we use an example to outline the key differences in the interfaces as well
 In this section, we show an example of a C function in Silo and its equivalent Fortran.
 We use this example to demonstrate many of the conventions used to construct the Fortran interface from the C.
 
-We describe these rules so that Fortran user’s can be assured of having up to date documentation (which tends to always first come for the C interface) but still be aware of key differences between the two.
+We describe these rules so that Fortran user's can be assured of having up to date documentation (which tends to always first come for the C interface) but still be aware of key differences between the two.
 
 A C function specification...
 
@@ -393,7 +393,7 @@ integer function dbaddregiona(tree_id, nregn, regn_names, lregn_names,
 
 #### About Fortran's `l<strname>` arguments
 
-Wherever the C interface accepts a `char*`, the fortran interface accepts two arguments; the `character*` argument followed by an integer argument indicating the string’s length.
+Wherever the C interface accepts a `char*`, the fortran interface accepts two arguments; the `character*` argument followed by an integer argument indicating the string's length.
 In the function specifications, it will always be identified with an ell (`l`) in front of the name of the `character*` argument that comes before it.
 In the example above, this rule is evident in the `maps_name` and `lmaps_name` arguments.
 
@@ -406,7 +406,7 @@ By default, N=32, but the value for N can be changed, as needed by the `dbset2ds
 #### About Fortran's `<object>_id` arguments
 
 Wherever the C interface accepts a pointer to an abstract Silo object, like the Silo database file handle (`DBfile *`) or, as in the example above, a `DBmrgtree*`, the Fortran interface accepts an equivalent *pointer id*.
-A *pointer id* really an integer index into an internally maintained table of pointers to Silo’s objects.
+A *pointer id* really an integer index into an internally maintained table of pointers to Silo's objects.
 In the above example, this rule is evident in the `tree_id` aand `optlist_id` arguments.
 
 #### About Fortran's `data_ids` arguments
@@ -420,7 +420,7 @@ The above example does not demonstrate this rule.
 Wherever the C interface returns integer error information in the return value of the function, the Fortran interface accepts an extra integer argument named `status` as the last argument in the list.
 The above example demonstrates this rule.
 
-Finally, there are a few function in Silo’s API that are unique to the Fortran interface.
+Finally, there are a few function in Silo's API that are unique to the Fortran interface.
 Those functions are described in the section of the API manual having to do with Fortran.
 
 ## Using Silo in Parallel
@@ -433,12 +433,12 @@ The two features that enable Silo to be used effectively in parallel are its abi
 With these features, aparallel application can easily divide its processors into N groups and write a separate Silo file for each group.
 
 Within a group, each processor in the group writes to its own directory within the Silo file.
-One and only one processor has write access to the group’s Silo file at any one time.
+One and only one processor has write access to the group's Silo file at any one time.
 So, I/O is serial within a group.
 However, because each group has a separate Silo file to write to, each group has one processor writing concurrently with other processors from other groups.
 So, I/O is parallel across groups.
 
-After all processors have created all their individual objects in various directories within the each group’s Silo file, one processor is designated to write multi-block objects.
+After all processors have created all their individual objects in various directories within the each group's Silo file, one processor is designated to write multi-block objects.
 The multi-block objects serve as an assembly of the names of all the individual objects written from various processors.
 
 When N, the number of processor groups, is equal to one, I/O is effectively serial.
