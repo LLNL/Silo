@@ -466,8 +466,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   To achieve this, the caller passes a 3-tuple of the form `(void*) 0, (DBfile*) file, (char*) mbobjpath` as the remaining arguments.
   The initial `(void*)0` is required.
   The `(DBfile*)file` is the database handle of the Silo file in which all externally referenced arrays exist.
-  The third `(char*)mbobjpath`, which may be `NULL`, is the path within the file, either relative to the file’s current working directory, or absolute, at which the multi-block object holding the `ns_str` was found in the file.
-  All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object’s home directory or the file’s current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
+  The third `(char*)mbobjpath`, which may be `NULL`, is the path within the file, either relative to the file's current working directory, or absolute, at which the multi-block object holding the `ns_str` was found in the file.
+  All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object's home directory or the file's current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
 
   A namescheme defines a mapping between the non-negative integers (e.g. the natural numbers) and a sequence of strings such that each string to be associated with a given integer (n) can be generated on the fly from printf-style formatting involving simple expressions.
   Nameschemes are most often used to define names of regions in region arrays or to define names of multi-block objects.
@@ -483,13 +483,14 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   The expression language for building up the arguments to be used along with the printf-style format string is pretty simple.
 
-  It supports the ‘+’, ‘-’, ‘*’, ‘/’, ‘%’ (modulo), ‘|’, ‘&’, ‘^’ integer operators and a variant of the question-mark-colon operator, ‘? : :’ which requires an extra, terminating colon.
+  It supports the '+', '-', '*', '/', '%' (modulo), '|', '&', '^' integer operators and a variant of the question-mark-colon operator, '? : :' which requires an extra, terminating colon.
 
-  It supports grouping via ‘(‘ and ‘)’ characters.
+  It supports grouping via '(' and ')' characters.
 
-  It supports grouping of characters into arbitrary strings via the string (single quote) characters ‘’’ and ‘’’. Any characters appearing between enclosing single quotes are treated as a literal string suitable for an argument to be associated with a %s-type conversion specifier in the format string.
+  It supports grouping of characters into arbitrary strings via the single quote character (').
+  Any characters appearing between enclosing single quotes are treated as a literal string suitable for an argument to be associated with a %s-type conversion specifier in the format string.
 
-  It supports references to external, integer valued arrays introduced via a ‘#’ character appearing before an array’s name and external, string valued arrays introduced via a ‘$’ character appearing before an array’s name.
+  It supports references to external, integer valued arrays introduced via a '#' character appearing before an array's name and external, string valued arrays introduced via a '$' character appearing before an array's name.
 
   Finally, the special operator 'n' appearing in an expression represents a *natural number* within the sequence of names (zero-origin index).
 
@@ -501,7 +502,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   : The delimiter character is `|`.
     The format substring is `slide_%s`.
     The expression substring for the argument to the first (and only in this case) conversion specifier (`%s`) is `(n%2)?'leader':'follower':`
-    When this expression is evaluated for a given region, the region’s natural number will be inserted for `n`.
+    When this expression is evaluated for a given region, the region's natural number will be inserted for `n`.
     The modulo operation with `2` will be applied.
     If that result is non-zero, the `?::` expression will evaluate to `'leader'`.
     Otherwise, it will evaluate to `'follower'`.
@@ -514,14 +515,14 @@ For this reason, where a specific application of MRG trees is desired (to repres
     The format substring is `block_%02dx%02d`.
     The expression substring for the argument to the first conversion specifier (`%02d`) is `n/256`.
     The expression substring for the argument to the second conversion specifier (also `%02d`) is `n%16`.
-    When this expression is evaluated, the region’s natural number will be inserted for `n` and the div and mod operators will be evaluated.
+    When this expression is evaluated, the region's natural number will be inserted for `n` and the div and mod operators will be evaluated.
     This naming scheme might be useful for a region array of 256 regions to be named as a 2D array of regions with names like "block_09x11".
 
   `"@domain_%03d@n"`
   : The delimiter character is `@`.
     The format substring is `domain_%03d`.
     The expression substring for the argument to the one and only conversion specifier is `n`.
-    When this expression is evaluated, the region’s natural number is inserted for `n`.
+    When this expression is evaluated, the region's natural number is inserted for `n`.
     This results in names like "domain_000", "domain_001", etc.
 
   `"@domain_%03d@n+1"`
@@ -540,7 +541,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
     Alternatively, if the caller wants the Silo library to find `P` and `U` in a Silo file, read the arrays from the file and bind them into the namescheme automatically, then `P` and `U` must be simple arrays in the current working directory of the file that is passed in as the 3-tuple `"(int) 0, (DBfile *) dbfile, 0"` in the `...` argument to `DBMakeNamescheme` as in `DBMakeNamescheme("|foo_%03dx%03d|#P[n]|#U[n%4]", 0, dbfile, 0)`.
 
   Use `DBFreeNamescheme()` to free up the space associated with a namescheme.
-  Also note that there are numerous examples of nameschemes in “tests/nameschemes.c” in the Silo source release tarball.
+  Also note that there are numerous examples of nameschemes in "tests/nameschemes.c" in the Silo source release tarball.
 
 {{ EndFunc }}
 
@@ -829,14 +830,14 @@ For this reason, where a specific application of MRG trees is desired (to repres
   A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined.
   If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be `NULL` and is used to indicate the end of the list of names.
       
-  All of Silo’s `DBPutXxxvar()` calls support the `DBOPT_REGION_PNAMES` option to specify the variable on only some region(s) of the associated mesh.
+  All of Silo's `DBPutXxxvar()` calls support the `DBOPT_REGION_PNAMES` option to specify the variable on only some region(s) of the associated mesh.
   However, the use of the option has implications regarding the ordering of the values in the `vars[]` arrays passed into the `DBPutXxxvar()` functions.
   This section explains the ordering requirements.
 
   Ordinarily, when the `DBOPT_REGION_PNAMES` option is not being used, the order of the values in the vars arrays passed here is considered to be one-to-one with the order of the nodes (for `DB_NODECENT` centering) or zones (for `DB_ZONECENT` centering) of the associated mesh.
   However, when the `DBOPT_REGION_PNAMES` option is being used, the order of values in the `vars[]` is determined by other conventions described below.
 
-  If the `DBOPT_REGION_PNAMES` option references regions in an MRG tree, the ordering is one-to-one with the groupel’s identified in the groupel map segment(s) (of the same groupel type as the variable’s centering) associated with the region(s); all of the segment(s), in order, of the groupel map of the first region, then all of the segment(s) of the groupel map of the second region, and so on.
+  If the `DBOPT_REGION_PNAMES` option references regions in an MRG tree, the ordering is one-to-one with the groupel's identified in the groupel map segment(s) (of the same groupel type as the variable's centering) associated with the region(s); all of the segment(s), in order, of the groupel map of the first region, then all of the segment(s) of the groupel map of the second region, and so on.
   If the set of groupel map segments for the regions specified include the same groupel multiple times, then the `vars[]` arrays will wind up needing to include the same value, multiple times.
 
   The preceding ordering convention works because the ordering is explicitly represented by the order in which groupels are identified in the groupel maps.
@@ -855,16 +856,16 @@ For this reason, where a specific application of MRG trees is desired (to repres
   The reason this works is that in the single material case, there is only ever one zonal variable value per zone regardless of whether the zone contains the material cleanly or partially.
   For `DB_NODECENT` variables, the situation is complicated by the fact that materials are zone-centric but the variable being defined is node-centered.
 
-  So, an additional level of local traversal over a zone’s nodes is required.
-  In this case, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), then that zone’s nodes are traversed according to the ordering specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
+  So, an additional level of local traversal over a zone's nodes is required.
+  In this case, as one traverses the zones of a mesh from the first zone to the last, if a zone contains a material listed in `DBOPT_REGION_PNAMES` (wholly or partially), then that zone's nodes are traversed according to the ordering specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
   On the first encounter of a node, that node is considered in the traversal and placed conceptually in an ordered list of traversed nodes.
   The values in the `vars[]` array must be one-to-one with this traversed nodes list.
   Because we are not aware of any cases of node-centered variables that have mixed material components, there is no analogous traversed mixed nodes list.
 
   For `DBOPT_EDGECENT` and `DBOPT_FACECENT` variables, the traversal is handled similarly.
-  That is, the list of zones for the mesh is traversed and for each zone found to contain one of the materials listed in `DBOPT_REGION_PNAMES`, the zone’s edge’s (or face’s) are traversed in local order specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
+  That is, the list of zones for the mesh is traversed and for each zone found to contain one of the materials listed in `DBOPT_REGION_PNAMES`, the zone's edge's (or face's) are traversed in local order specified in the [node, edge and face ordering for zoo-type UCD zone shape diagram](objects.md#dbputucdmesh).
 
-  For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh’s nodes (or zones) were to be traversed, which would be the first? Which would be the second?
+  For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh's nodes (or zones) were to be traversed, which would be the first? Which would be the second?
   Unless the `DBOPT_MAJORORDER` option was used, the answer is that the traversal is identical to the standard C programming language storage convention for multi-dimensional arrays often called row-major storage order.
   That is, was we traverse through the list of nodes (or zones) of a Quad mesh, we encounter first node with logical index [0,0,0], then [0,0,1], then [0,0,2]...[0,1,0]...etc.
   A traversal of zones would behave similarly.
