@@ -1,6 +1,6 @@
 # Object Allocation, Free and IsEmpty Tests
 
-This section describes methods to allocate and initialize many of Silo’s objects.
+This section describes methods to allocate and initialize many of Silo's objects.
 
 {{ EndFunc }}
 
