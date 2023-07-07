@@ -1,4 +1,4 @@
-## Fortran Interface
+# Fortran Interface
 
 The functions described in this section are either unique to the Fortran interface or facilitate the mixing of C/C++ and Fortran within a single application interacting with a Silo file.
 Note that when Silo was originally written, the vision was that only visualization/post-processing tools would ever attempt to read the contents of Silo files.
@@ -8,7 +8,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `dbmkptr()`
+## `dbmkptr()`
 
 * **Summary:** create a pointer-id from a pointer
 
@@ -40,7 +40,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `dbrmptr()`
+## `dbrmptr()`
 
 * **Summary:** remove an old and no longer needed pointer-id
 
@@ -62,7 +62,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `dbset2dstrlen()`
+## `dbset2dstrlen()`
 
 * **Summary:** Set the size of a 'row' for pointers to 'arrays' of strings
 
@@ -93,7 +93,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `dbget2dstrlen()`
+## `dbget2dstrlen()`
 
 * **Summary:** Get the size of a 'row' for pointers to 'arrays' of character strings
 
@@ -113,7 +113,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `DBFortranAllocPointer()`
+## `DBFortranAllocPointer()`
 
 * **Summary:** Facilitates accessing C objects through Fortran
 
@@ -167,7 +167,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `DBFortranAccessPointer()`
+## `DBFortranAccessPointer()`
 
 * **Summary:** Access Silo objects created through the Fortran Silo interface.
 
@@ -197,7 +197,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `DBFortranRemovePointer()`
+## `DBFortranRemovePointer()`
 
 * **Summary:** Removes a pointer from the Fortran-C index table
 
@@ -229,7 +229,7 @@ Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
 
-### `dbwrtfl()`
+## `dbwrtfl()`
 
 * **Summary:** Write a facelist object referenced by its object_id to a silo file
 

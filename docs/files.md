@@ -1,4 +1,4 @@
-## Files and File Structure
+# Files and File Structure
 
 If you are looking for information regarding how to use Silo from a parallel application, please See the section on [Multi-Block Objects Parallel I/O](./parallel.md#multi-block-objects-and-parallel-i-o).
 
@@ -21,7 +21,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBRegisterFileOptionsSet()`
+## `DBRegisterFileOptionsSet()`
 
 * **Summary:** Register a set of options for advanced control of the low-level I/O driver
 
@@ -112,7 +112,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBUnregisterFileOptionsSet()`
+## `DBUnregisterFileOptionsSet()`
 
 * **Summary:** Unregister a registered file options set
 
@@ -145,7 +145,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBUnregisterAllFileOptionsSets()`
+## `DBUnregisterAllFileOptionsSets()`
 
 * **Summary:** Unregister all file options sets
 
@@ -174,7 +174,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBSetUnknownDriverPriorities()`
+## `DBSetUnknownDriverPriorities()`
 
 * **Summary:** Set driver priorities for opening files with the `DB_UNKNOWN` driver.
 
@@ -211,7 +211,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBGetUnknownDriverPriorities()`
+## `DBGetUnknownDriverPriorities()`
 
 * **Summary:** Return the currently defined ordering of drivers the `DB_UNKNOWN` driver will attempt.
 
@@ -234,7 +234,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBCreate()`
+## `DBCreate()`
 
 * **Summary:** Create a Silo output file.
 
@@ -402,7 +402,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBOpen()`
+## `DBOpen()`
 
 * **Summary:** Open an existing Silo file.
 
@@ -459,7 +459,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBClose()`
+## `DBClose()`
 
 * **Summary:** Close a Silo database.
 
@@ -496,7 +496,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBGetToc()`
+## `DBGetToc()`
 
 * **Summary:** Get the table of contents of a Silo database.
 
@@ -531,7 +531,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBFileVersion()`
+## `DBFileVersion()`
 
 * **Summary:** Version of the Silo library used to create the specified file
 
@@ -572,7 +572,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBFileVersionDigits()`
+## `DBFileVersionDigits()`
 
 * **Summary:** Return integer digits of file version number
 
@@ -606,7 +606,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBFileVersionGE()`
+## `DBFileVersionGE()`
 
 * **Summary:** Greater than or equal comparison for version of the Silo library a given file was created with
 
@@ -639,7 +639,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBVersionGEFileVersion()`
+## `DBVersionGEFileVersion()`
 
 * **Summary:** Compare library version with file version
 
@@ -669,7 +669,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBSortObjectsByOffset()`
+## `DBSortObjectsByOffset()`
 
 * **Summary:** Sort list of object names by order of offset in the file
 
@@ -707,7 +707,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBMkDir()`
+## `DBMkDir()`
 
 * **Summary:** Create a new directory in a Silo file.
 
@@ -742,7 +742,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBSetDir()`
+## `DBSetDir()`
 
 * **Summary:** Set the current directory within the Silo database.
 
@@ -777,7 +777,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBGetDir()`
+## `DBGetDir()`
 
 * **Summary:** Get the name of the current directory.
 
@@ -810,7 +810,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBCpDir()`
+## `DBCpDir()`
 
 * **Summary:** Copy a directory hierarchy from one Silo file to another.
 
@@ -850,7 +850,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBCpListedObjects()`
+## `DBCpListedObjects()`
 
 * **Summary:** Copy lists of objects from one Silo database to another
 
@@ -934,7 +934,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBGrabDriver()`
+## `DBGrabDriver()`
 
 * **Summary:** Obtain the low-level driver file handle
 
@@ -985,7 +985,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBUngrabDriver()`
+## `DBUngrabDriver()`
 
 * **Summary:** Ungrab the low-level file driver
 
@@ -1018,7 +1018,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBGetDriverType()`
+## `DBGetDriverType()`
 
 * **Summary:** Get the type of driver for the specified file
 
@@ -1053,7 +1053,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBGetDriverTypeFromPath()`
+## `DBGetDriverTypeFromPath()`
 
 * **Summary:** Guess the driver type used by a file with the given pathname
 
@@ -1097,7 +1097,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBInqFile()`
+## `DBInqFile()`
 
 * **Summary:** Inquire if filename is a Silo file.
 
@@ -1140,7 +1140,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `DBInqFileHasObjects()`
+## `DBInqFileHasObjects()`
 
 * **Summary:** Determine if an open file has any Silo objects
 
@@ -1169,7 +1169,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `_silolibinfo`
+## `_silolibinfo`
 
 * **Summary:** A character array written by Silo to root directory indicating the Silo library version number used to generate the file
 
@@ -1190,7 +1190,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `_hdf5libinfo`
+## `_hdf5libinfo`
 
 * **Summary:** character array written by Silo to root directory indicating the HDF5 library version number used to generate the file
 
@@ -1212,7 +1212,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
-### `_was_grabbed`
+## `_was_grabbed`
 
 * **Summary:** single integer written by Silo to root directory whenever a Silo file has been grabbed.
 

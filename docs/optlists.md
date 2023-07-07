@@ -1,4 +1,4 @@
-## Option Lists or Optlists
+# Option Lists or Optlists
 
 Many Silo functions take as a last argument a pointer to an Options List or optlist.
 This is intended to permit the Silo API to grow and evolve as necessary without requiring substantial changes to the API itself.
@@ -9,7 +9,7 @@ This section of the manual describes only the functions to create and manage opt
 
 {{ EndFunc }}
 
-### A Common Coding Gotcha
+## A Common Coding Gotcha
 
 :::{tip}
 Take care regarding memory used in a [`DBoptlist`](header.md#dboptlist) object.
@@ -42,7 +42,7 @@ When the optlist is used in a Silo call such as `DBPutUcdmesh()`, it will result
 
 {{ EndFunc }}
 
-### `DBMakeOptlist()`
+## `DBMakeOptlist()`
 
 * **Summary:** Allocate an option list.
 
@@ -85,7 +85,7 @@ When the optlist is used in a Silo call such as `DBPutUcdmesh()`, it will result
 
 {{ EndFunc }}
 
-### `DBAddOption()`
+## `DBAddOption()`
 
 * **Summary:** Add an option to an option list.
 
@@ -137,7 +137,7 @@ When the optlist is used in a Silo call such as `DBPutUcdmesh()`, it will result
 
 {{ EndFunc }}
 
-### `DBClearOption()`
+## `DBClearOption()`
 
 * **Summary:** Remove an option from an option list
 
@@ -177,7 +177,7 @@ When the optlist is used in a Silo call such as `DBPutUcdmesh()`, it will result
 
 {{ EndFunc }}
 
-### `DBGetOption()`
+## `DBGetOption()`
 
 * **Summary:** Retrieve the value set for an option in an option list
 
@@ -213,7 +213,7 @@ When the optlist is used in a Silo call such as `DBPutUcdmesh()`, it will result
 
 {{ EndFunc }}
 
-### `DBFreeOptlist()`
+## `DBFreeOptlist()`
 
 * **Summary:** Free memory associated with an option list.
 
@@ -251,7 +251,7 @@ The individual option value pointers are not freed.
 
 {{ EndFunc }}
 
-### `DBClearOptlist()`
+## `DBClearOptlist()`
 
 * **Summary:** Clear an optlist.
 

@@ -1,10 +1,10 @@
-## Calculational and Utility
+# Calculational and Utility
 
 This section of the API manual describes functions that can be used to compute things such as Facelists as well as utility functions to, for example, catentate an array of strings into a single string for simple output with `DBWrite()`.
 
 {{ EndFunc }}
 
-### `DBCalcExternalFacelist()`
+## `DBCalcExternalFacelist()`
 
 * **Summary:** Calculate an external facelist for a UCD mesh.
 
@@ -57,7 +57,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBCalcExternalFacelist2()`
+## `DBCalcExternalFacelist2()`
 
 * **Summary:** Calculate an external facelist for a UCD mesh containing ghost zones.
 
@@ -124,7 +124,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBStringArrayToStringList()`
+## `DBStringArrayToStringList()`
 
 * **Summary:** Utility to catentate a group of strings into a single, semi-colon delimited string.
 
@@ -162,7 +162,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBStringListToStringArray()`
+## `DBStringListToStringArray()`
 
 * **Summary:** Given a single, semi-colon delimited string, de-catenate it into an array of strings.
 
@@ -195,7 +195,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBFreeStringArray()`
+## `DBFreeStringArray()`
 
 * **Summary:** Free an array of strings
 
@@ -230,7 +230,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBAnnotateUcdmesh()`
+## `DBAnnotateUcdmesh()`
 
 * **Summary:** Walk a UCD mesh guessing and adding shapetype info 
 
@@ -264,7 +264,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBJoinPath()`
+## `DBJoinPath()`
 
 * **Summary:** Join two strings representing paths into a single path
 
@@ -309,7 +309,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBIsDifferentDouble()`
+## `DBIsDifferentDouble()`
 
 * **Summary:** Compare doubles within absolute or relative tolerance
 
@@ -351,7 +351,7 @@ This section of the API manual describes functions that can be used to compute t
   :end-at: "return a!=b;"
   ```
 
-### `IsDifferentLongLong()`
+## `IsDifferentLongLong()`
 
 * **Summary:** Compare long longs within absolute or relative tolerance
 
@@ -389,7 +389,7 @@ This section of the API manual describes functions that can be used to compute t
 
 {{ EndFunc }}
 
-### `DBCalcDenseArraysFromMaterial()`
+## `DBCalcDenseArraysFromMaterial()`
 
 * **Summary:** Compute dense material volume fraction arrays from a DBmaterial object
 
@@ -431,7 +431,7 @@ ct.
 
 {{ EndFunc }}
 
-### `DBCalcMaterialFromDenseArrays()`
+## `DBCalcMaterialFromDenseArrays()`
 
 * **Summary:** Build a `DBmaterial` object from dense volume fraction arrays
 

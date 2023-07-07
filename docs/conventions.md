@@ -1,4 +1,4 @@
-## Previously Undocumented Use Conventions
+# Previously Undocumented Use Conventions
 
 Silo is a relatively old library.
 It was originally developed in the early 1990's.
@@ -12,7 +12,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `_visit_defvars`
+## `_visit_defvars`
 
 * **Summary:** convention for derived variable definitions
 
@@ -47,7 +47,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `_visit_searchpath`
+## `_visit_searchpath`
 
 * **Summary:** directory order to search when opening a Silo file
 
@@ -71,7 +71,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `_visit_domain_groups`
+## `_visit_domain_groups`
 
 * **Summary:** method for grouping blocks in a multi-block mesh
 
@@ -96,7 +96,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `AlphabetizeVariables`
+## `AlphabetizeVariables`
 
 * **Summary:** flag to tell post-processor to alphabetize variable lists
 
@@ -116,7 +116,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `ConnectivityIsTimeVarying`
+## `ConnectivityIsTimeVarying`
 
 * **Summary:** flag telling post-processor if connectivity of meshes in the Silo file is time varying or not
 
@@ -136,7 +136,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `MultivarToMultimeshMap_vars`
+## `MultivarToMultimeshMap_vars`
 
 * **Summary:** list of multivars to be associated with multimeshes
 
@@ -155,7 +155,7 @@ Since everything documented in this section of the Silo API is a convention on t
   Do not use this convention.
   Instead use the `DBOPT_MMESH_NAME` optlist option for a [`DBPutMultivar()`](parallel.md#dbputmultivar) call to associate a multimesh with a multivar.
 
-  The `MultivarToMultimeshMap_vars` use convention goes hand-in-hand with the [`MultivarToMultimeshMap_meshes`](#multivartomultimap-meshes) use convention.
+  The `MultivarToMultimeshMap_vars` use convention goes hand-in-hand with the [`MultivarToMultimeshMap_meshes`](#multivartomultimeshmap-meshes) use convention.
   The `_vars` portion is an array of characters defining a semi-colon separated list of multivar object names to be associated with multi-mesh names.
   The `_mesh` portion is an array of characters defining a semi-colon separated list of associated multimesh object names.
   This convention was introduced to deal with a shortcoming in Silo where multivar objects did not know the multimesh object they were associated with.
@@ -163,7 +163,7 @@ Since everything documented in this section of the Silo API is a convention on t
 
 {{ EndFunc }}
 
-### `MultivarToMultimeshMap_meshes`
+## `MultivarToMultimeshMap_meshes`
 
 * **Summary:** list of multimeshes to be associated with multivars
 

@@ -1,4 +1,4 @@
-## Python Interface
+# Python Interface
 
 :::{tip}
 Silo's python interface is designed to compile and work with either Python 2 or Python 3
@@ -59,7 +59,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `Silo.Open()`
+## `Silo.Open()`
 
 * **Summary:** Open a Silo file (See [`DBOpen`](./files.md#dbopen))
 
@@ -82,7 +82,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `Silo.Create()`
+## `Silo.Create()`
 
 * **Summary:** Create a new silo file (See [`DBCreate`](./files.md#dbcreate))
 
@@ -107,7 +107,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.GetToc()`
+## `<DBfile>.GetToc()`
 
 * **Summary:** Get the table of contents
 
@@ -125,7 +125,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.GetVarInfo()`
+## `<DBfile>.GetVarInfo()`
 
 * **Summary:** Get metadata and bulk data of any object (See [`DBGetObject`](./generic.md#dbgetobject))
 
@@ -155,7 +155,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.GetVar()`
+## `<DBfile>.GetVar()`
 
 * **Summary:** Get a primitive array (See [`DBReadVar`](./generic.md#dbreadvar))
 
@@ -177,7 +177,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.SetDir()`
+## `<DBfile>.SetDir()`
 
 * **Summary:** Set current working directory of the Silo file (See [`DBSetDir`](./files.md#dbsetdir))
 
@@ -199,7 +199,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.Close()`
+## `<DBfile>.Close()`
 
 * **Summary:** Close the Silo file
 
@@ -215,7 +215,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.WriteObject()`
+## `<DBfile>.WriteObject()`
 
 * **Summary:** Write a Python dictionary as a Silo object (See [`DBWriteObject`](./generic.md#dbwriteobject))
 
@@ -252,7 +252,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.Write()`
+## `<DBfile>.Write()`
 
 * **Summary:** Write primitive array data to a Silo file (see DBWrite)
 
@@ -277,7 +277,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 {{ EndFunc }}
 
-### `<DBfile>.MkDir()`
+## `<DBfile>.MkDir()`
 
 * **Summary:** Make a directory in a Silo file
 

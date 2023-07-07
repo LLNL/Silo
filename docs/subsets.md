@@ -1,4 +1,4 @@
-## Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets
+# Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets
 
 This section of the API manual describes Mesh Region Grouping (MRG) trees and Groupel Maps.
 MRG trees describe the decomposition of a mesh into various regions such as parts in an assembly, materials (even mixing materials), element blocks, processor pieces, nodesets, slide surfaces, boundary conditions, etc.
@@ -17,7 +17,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBMakeMrgtree()`
+## `DBMakeMrgtree()`
 
 * **Summary:** Create and initialize an empty mesh region grouping tree
 
@@ -142,7 +142,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBAddRegion()`
+## `DBAddRegion()`
 
 * **Summary:** Add a region to an MRG tree
 
@@ -210,7 +210,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBAddRegionArray()`
+## `DBAddRegionArray()`
 
 * **Summary:** Efficiently add multiple, like-kind regions to an MRG tree
 
@@ -266,7 +266,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBSetCwr()`
+## `DBSetCwr()`
 
 * **Summary:** Set the current working region for an MRG tree
 
@@ -306,7 +306,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBGetCwr()`
+## `DBGetCwr()`
 
 * **Summary:** Get the current working region of an MRG tree
 
@@ -328,7 +328,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBPutMrgtree()`
+## `DBPutMrgtree()`
 
 * **Summary:** Write a completed MRG tree object to a Silo file
 
@@ -367,7 +367,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBGetMrgtree()`
+## `DBGetMrgtree()`
 
 * **Summary:** Read an MRG tree object from a Silo file
 
@@ -397,7 +397,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBFreeMrgtree()`
+## `DBFreeMrgtree()`
 
 * **Summary:** Free the memory associated by an MRG tree object
 
@@ -429,7 +429,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBMakeNamescheme()`
+## `DBMakeNamescheme()`
 
 * **Summary:** Create a `DBnamescheme` object for on-demand name generation
 
@@ -544,7 +544,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBGetName()`
+## `DBGetName()`
 
 * **Summary:** Generate a name from a `DBnamescheme` object
 
@@ -582,7 +582,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBPutMrgvar()`
+## `DBPutMrgvar()`
 
 * **Summary:** Write variable data to be associated with (some) regions in an MRG tree
 
@@ -660,7 +660,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBGetMrgvar()`
+## `DBGetMrgvar()`
 
 * **Summary:** Retrieve an MRG variable object from a silo file
 
@@ -690,7 +690,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBPutGroupelmap()`
+## `DBPutGroupelmap()`
 
 * **Summary:** Write a groupel map object to a Silo file
 
@@ -759,7 +759,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBGetGroupelmap()`
+## `DBGetGroupelmap()`
 
 * **Summary:** Read a groupel map object from a Silo file
 
@@ -790,7 +790,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBFreeGroupelmap()`
+## `DBFreeGroupelmap()`
 
 * **Summary:** Free memory associated with a groupel map object
 
@@ -818,7 +818,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
-### `DBOPT_REGION_PNAMES`
+## `DBOPT_REGION_PNAMES`
 
 * **Summary:** Option list option for defining variables on specific regions of a mesh
 

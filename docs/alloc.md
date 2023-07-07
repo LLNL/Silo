@@ -1,10 +1,10 @@
-## Object Allocation, Free and IsEmpty Tests
+# Object Allocation, Free and IsEmpty Tests
 
 This section describes methods to allocate and initialize many of Silo’s objects.
 
 {{ EndFunc }}
 
-### `DBAllocXxx()`
+## `DBAllocXxx()`
 
 * **Summary:** Allocate and initialize a Silo structure.
 
@@ -55,7 +55,7 @@ This section describes methods to allocate and initialize many of Silo’s objec
 
 {{ EndFunc }}
 
-### `DBFreeXxx()`
+## `DBFreeXxx()`
 
 * **Summary:** Release memory associated with a Silo structure.
 
@@ -111,7 +111,7 @@ This section describes methods to allocate and initialize many of Silo’s objec
 
 {{ EndFunc }}
 
-### `DBIsEmpty()`
+## `DBIsEmpty()`
 
 * **Summary:** Query a object returned from Silo for "emptiness"
 

@@ -1,4 +1,4 @@
-## Multi-Block Objects and Parallel I/O
+# Multi-Block Objects and Parallel I/O
 
 Individual pieces of mesh created with a number of `DBPutXxxmesh()` calls can be assembled together into larger, multi-block objects.
 Likewise for variables and materials defined on these meshes.
@@ -23,7 +23,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBPutMultimesh()`
+## `DBPutMultimesh()`
 
 * **Summary:** Write a multi-block mesh object into a Silo file.
 
@@ -174,7 +174,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBGetMultimesh()`
+## `DBGetMultimesh()`
 
 * **Summary:** Read a multi-block mesh from a Silo database.
 
@@ -209,7 +209,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBPutMultimeshadj()`
+## `DBPutMultimeshadj()`
 
 * **Summary:** Write some or all of a multi-mesh adjacency object into a Silo file.
 
@@ -289,7 +289,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBGetMultimeshadj()`
+## `DBGetMultimeshadj()`
 
 * **Summary:** Get some or all of a multi-mesh nodal adjacency object
 
@@ -328,7 +328,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBPutMultivar()`
+## `DBPutMultivar()`
 
 * **Summary:** Write a multi-block variable object into a Silo file.
 
@@ -415,7 +415,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBGetMultivar()`
+## `DBGetMultivar()`
 
 * **Summary:** Read a multi-block variable definition from a Silo database.
 
@@ -449,7 +449,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBPutMultimat()`
+## `DBPutMultimat()`
 
 * **Summary:** Write a multi-block material object into a Silo file.
 
@@ -522,7 +522,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBGetMultimat()`
+## `DBGetMultimat()`
 
 * **Summary:** Read a multi-block material object from a Silo database
 
@@ -556,7 +556,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBPutMultimatspecies()`
+## `DBPutMultimatspecies()`
 
 * **Summary:** Write a multi-block species object into a Silo file.
 
@@ -622,7 +622,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBGetMultimatspecies()`
+## `DBGetMultimatspecies()`
 
 * **Summary:** Read a multi-block species from a Silo database.
 
@@ -658,7 +658,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `DBOpenByBcast()`
+## `DBOpenByBcast()`
 
 * **Summary:** Specialized, read-only open method for parallel applications needing all processors to read all (or most of) a given Silo file
 
@@ -719,7 +719,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_Init()`
+## `PMPIO_Init()`
 
 * **Summary:** Initialize a MIF Parallel I/O interaction with the Silo library
 
@@ -817,7 +817,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_CreateFileCallBack()`
+## `PMPIO_CreateFileCallBack()`
 
 * **Summary:** The `PMPIO` file creation callback
 
@@ -860,7 +860,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_OpenFileCallBack()`
+## `PMPIO_OpenFileCallBack()`
 
 * **Summary:** The `PMPIO` file open callback
 
@@ -904,7 +904,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_CloseFileCallBack()`
+## `PMPIO_CloseFileCallBack()`
 
 * **Summary:** The `PMPIO` file close callback
 
@@ -942,7 +942,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_WaitForBaton()`
+## `PMPIO_WaitForBaton()`
 
 * **Summary:** Wait for exclusive access to a Silo file
 
@@ -988,7 +988,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_HandOffBaton()`
+## `PMPIO_HandOffBaton()`
 
 * **Summary:** Give up all access to a Silo file
 
@@ -1023,7 +1023,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_Finish()`
+## `PMPIO_Finish()`
 
 * **Summary:** Finish a MIF Parallel I/O interaction with the Silo library
 
@@ -1055,7 +1055,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_GroupRank()`
+## `PMPIO_GroupRank()`
 
 * **Summary:** Obtain group rank (e.g. which `PMPIO` group) of a processor
 
@@ -1089,7 +1089,7 @@ The functions described in this section of the manual include...
 
 {{ EndFunc }}
 
-### `PMPIO_RankInGroup()`
+## `PMPIO_RankInGroup()`
 
 * **Summary:** Obtain the rank of a processor *within* its `PMPIO` group
 

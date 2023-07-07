@@ -1,11 +1,11 @@
-## Error Handling and Global Library Behavior
+# Error Handling and Global Library Behavior
 
 The functions described in this section of the Silo manual, are those that effect behavior of the library, globally, for any file(s) that are or will be created or opened.
 These include such things as error handling, requiring Silo to do extra work to warn of and avoid overwrites, to compute and warn of checksum errors and to compress data before writing it to disk.
 
 {{ EndFunc }}
 
-### `DBErrfuncname()`
+## `DBErrfuncname()`
 
 * **Summary:** Get name of error-generating function
 
@@ -34,7 +34,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBErrno()`
+## `DBErrno()`
 
 * **Summary:** Get internal error number.
 
@@ -62,7 +62,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBErrString()`
+## `DBErrString()`
 
 * **Summary:** Get error message.
 
@@ -91,7 +91,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBShowErrors()`
+## `DBShowErrors()`
 
 * **Summary:** Set the error reporting mode.
 
@@ -141,7 +141,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBErrlvl()`
+## `DBErrlvl()`
 
 * **Summary:** Return current error level setting of the library
 
@@ -164,7 +164,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBErrfunc()`
+## `DBErrfunc()`
 
 * **Summary:** Get current error function set by DBShowErrors()
 
@@ -187,7 +187,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBVariableNameValid()`
+## `DBVariableNameValid()`
 
 * **Summary:** check if character string represents a valid Silo variable name
 
@@ -223,7 +223,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBVersion()`
+## `DBVersion()`
 
 * **Summary:** Get the version of the Silo library.
 
@@ -250,7 +250,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBVersionDigits()`
+## `DBVersionDigits()`
 
 * **Summary:** Return the integer version digits of the library
 
@@ -285,7 +285,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBVersionGE()`
+## `DBVersionGE()`
 
 * **Summary:** Greater than or equal comparison for version of the Silo library
 
@@ -319,7 +319,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetAllowOverwrites()`
+## `DBSetAllowOverwrites()`
 
 * **Summary:** Allow library to over-write existing objects in Silo files
 
@@ -360,7 +360,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetAllowOverwrites()`
+## `DBGetAllowOverwrites()`
 
 * **Summary:** Get current setting for the allow overwrites flag
 
@@ -386,7 +386,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetAllowEmptyObjects()`
+## `DBSetAllowEmptyObjects()`
 
 * **Summary:** Permit the creation of empty silo objects
 
@@ -427,7 +427,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetAllowEmptyObjects()`
+## `DBGetAllowEmptyObjects()`
 
 * **Summary:** Get current setting for the allow empty objects flag
 
@@ -452,7 +452,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBForceSingle()`
+## `DBForceSingle()`
 
 * **Summary:** Convert all datatype'd data read in read methods to type float
 
@@ -505,7 +505,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetDatatypeString()`
+## `DBGetDatatypeString()`
 
 * **Summary:** Return a string name for a given Silo datatype
 
@@ -539,7 +539,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetDataReadMask2()`
+## `DBSetDataReadMask2()`
 
 * **Summary:** Set the data read mask
 
@@ -634,7 +634,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetDataReadMask2()`
+## `DBGetDataReadMask2()`
 
 * **Summary:** Get the current data read mask
 
@@ -664,7 +664,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetEnableChecksums()`
+## `DBSetEnableChecksums()`
 
 * **Summary:** Set flag controlling checksum checks
 
@@ -719,7 +719,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetEnableChecksums()`
+## `DBGetEnableChecksums()`
 
 * **Summary:** Get current state of flag controlling checksumming
 
@@ -747,7 +747,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetCompression()`
+## `DBSetCompression()`
 
 * **Summary:** Set compression options for succeeding writes of Silo data
 
@@ -872,7 +872,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetCompression()`
+## `DBGetCompression()`
 
 * **Summary:** Get current compression parameters
 
@@ -904,7 +904,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetFriendlyHDF5Names()`
+## `DBSetFriendlyHDF5Names()`
 
 * **Summary:** Set flag to indicate Silo should create friendly names for HDF5 datasets
 
@@ -950,7 +950,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetFriendlyHDF5Names()`
+## `DBGetFriendlyHDF5Names()`
 
 * **Summary:** Get setting for friendly HDF5 names flag
 
@@ -981,7 +981,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBSetDeprecateWarnings()`
+## `DBSetDeprecateWarnings()`
 
 * **Summary:** Set maximum number of deprecate warnings Silo will issue for any one function, option or convention
 
@@ -1025,7 +1025,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DBGetDeprecateWarnings()`
+## `DBGetDeprecateWarnings()`
 
 * **Summary:** Get maximum number of deprecated function warnings Silo will issue
 
@@ -1052,7 +1052,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 {{ EndFunc }}
 
-### `DB_VERSION_GE()`
+## `DB_VERSION_GE()`
 
 * **Summary:** Compile time macro to test silo version number
 

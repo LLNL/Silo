@@ -1,4 +1,4 @@
-## Deprecated Functions
+# Deprecated Functions
 
 The following functions have been deprecated from Silo, some as early as version 4.6.
 Attempts to call these methods in later versions may still succeed.
@@ -13,7 +13,7 @@ There is no guarantee that these methods will exist in later versions of Silo.
 * DBcontinue  (completely removed in version 4.10)
 * DBPause  (completely removed in version 4.10)
 * DBPutZonelist (use [`DBPutZonelist2`}(objects.md#dbputzonelist2) instead)
-* DBPutUcdsubmesh (use [Mesh Region Grouping](globals.md#dbmakemrgtree) trees instead)
-* DBErrFunc  (use [`DBErrfunc`](global.md#dberrfunc) instead)
-* DBSetDataReadMask (use [`DBSetDataReadMask2`](global.md#dbsetdatareadmask2) instead)
-* DBGetDataReadMask (use [`DBGetDataReadMask2`](global.md#dbgetdatareadmask2) instead)
+* DBPutUcdsubmesh (use [Mesh Region Grouping](subsets.md#dbmakemrgtree) trees instead)
+* DBErrFunc  (use [`DBErrfunc`](globals.md#dberrfunc) instead)
+* DBSetDataReadMask (use [`DBSetDataReadMask2`](globals.md#dbsetdatareadmask2) instead)
+* DBGetDataReadMask (use [`DBGetDataReadMask2`](globals.md#dbgetdatareadmask2) instead)

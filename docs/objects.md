@@ -1,4 +1,4 @@
-## Meshes, Variables and Materials
+# Meshes, Variables and Materials
 
 If you are interested in learning how to deal with these objects in parallel, See [Multi-Block Objects and Parallel I/O](#multi-block-objects-and-parallel-i-o).
 
@@ -12,7 +12,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutCurve()`
+## `DBPutCurve()`
 
 * **Summary:** Write a curve object into a Silo file
 
@@ -81,7 +81,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetCurve()`
+## `DBGetCurve()`
 
 * **Summary:** Read a curve from a Silo database.
 
@@ -114,7 +114,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutPointmesh()`
+## `DBPutPointmesh()`
 
 * **Summary:** Write a point mesh object into a Silo file.
 
@@ -191,7 +191,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetPointmesh()`
+## `DBGetPointmesh()`
 
 * **Summary:** Read a point mesh from a Silo database.
 
@@ -219,7 +219,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutPointvar()`
+## `DBPutPointvar()`
 
 * **Summary:** Write a scalar/vector/tensor point variable object into a Silo file.
 
@@ -290,7 +290,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutPointvar1()`
+## `DBPutPointvar1()`
 
 * **Summary:** Write a scalar point variable object into a Silo file.
 
@@ -338,7 +338,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetPointvar()`
+## `DBGetPointvar()`
 
 * **Summary:** Read a point variable from a Silo database.
 
@@ -373,7 +373,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutQuadmesh()`
+## `DBPutQuadmesh()`
 
 * **Summary:** Write a quad mesh object into a Silo file.
 
@@ -472,7 +472,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetQuadmesh()`
+## `DBGetQuadmesh()`
 
 * **Summary:** Read a Quad mesh from a Silo database.
 
@@ -507,7 +507,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutQuadvar()`
+## `DBPutQuadvar()`
 
 * **Summary:** Write a scalar/vector/tensor quad variable object into a Silo file.
 
@@ -626,7 +626,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutQuadvar1()`
+## `DBPutQuadvar1()`
 
 * **Summary:** Write a scalar quad variable object into a Silo file.
 
@@ -682,7 +682,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetQuadvar()`
+## `DBGetQuadvar()`
 
 * **Summary:** Read a Quad mesh variable from a Silo database.
 
@@ -716,7 +716,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutUcdmesh()`
+## `DBPutUcdmesh()`
 
 * **Summary:** Write a UCD mesh object into a Silo file.
 
@@ -861,7 +861,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutUcdsubmesh()`
+## `DBPutUcdsubmesh()`
 
 * **Summary:** Write a subset of a parent, ucd mesh, to a Silo file
 
@@ -905,7 +905,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetUcdmesh()`
+## `DBGetUcdmesh()`
 
 * **Summary:** Read a UCD mesh from a Silo database.
 
@@ -939,7 +939,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutZonelist()`
+## `DBPutZonelist()`
 
 * **Summary:** Write a zonelist object into a Silo file.
 
@@ -990,7 +990,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutZonelist2()`
+## `DBPutZonelist2()`
 
 * **Summary:** Write a zonelist object containing ghost zones into a Silo file.
 
@@ -1071,7 +1071,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutPHZonelist()`
+## `DBPutPHZonelist()`
 
 * **Summary:** Write an arbitrary, polyhedral zonelist object into a Silo file.
 
@@ -1175,7 +1175,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetPHZonelist()`
+## `DBGetPHZonelist()`
 
 * **Summary:** Read a polyhedral-zonelist from a Silo database.
 
@@ -1212,7 +1212,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutFacelist()`
+## `DBPutFacelist()`
 
 * **Summary:** Write a facelist object into a Silo file.
 
@@ -1266,7 +1266,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutUcdvar()`
+## `DBPutUcdvar()`
 
 * **Summary:** Write a scalar/vector/tensor UCD variable object into a Silo file.
 
@@ -1365,7 +1365,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutUcdvar1()`
+## `DBPutUcdvar1()`
 
 * **Summary:** Write a scalar UCD variable object into a Silo file.
 
@@ -1416,7 +1416,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetUcdvar()`
+## `DBGetUcdvar()`
 
 * **Summary:** Read a UCD variable from a Silo database.
 
@@ -1453,7 +1453,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutCsgmesh()`
+## `DBPutCsgmesh()`
 
 * **Summary:** Write a CSG mesh object to a Silo file
 
@@ -1589,7 +1589,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetCsgmesh()`
+## `DBGetCsgmesh()`
 
 * **Summary:** Get a CSG mesh object from a Silo file
 
@@ -1618,7 +1618,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutCSGZonelist()`
+## `DBPutCSGZonelist()`
 
 * **Summary:** Put a CSG zonelist object in a Silo file.
 
@@ -1772,7 +1772,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetCSGZonelist()`
+## `DBGetCSGZonelist()`
 
 * **Summary:** Read a CSG mesh zonelist from a Silo file
 
@@ -1802,7 +1802,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutCsgvar()`
+## `DBPutCsgvar()`
 
 * **Summary:** Write a CSG mesh variable to a Silo file
 
@@ -1871,7 +1871,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetCsgvar()`
+## `DBGetCsgvar()`
 
 * **Summary:** Read a CSG mesh variable from a Silo file
 
@@ -1901,7 +1901,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutMaterial()`
+## `DBPutMaterial()`
 
 * **Summary:** Write a material data object into a Silo file.
 
@@ -2006,7 +2006,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetMaterial()`
+## `DBGetMaterial()`
 
 * **Summary:** Read material data from a Silo database.
 
@@ -2040,7 +2040,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutMatspecies()`
+## `DBPutMatspecies()`
 
 * **Summary:** Write a material species data object into a Silo file.
 
@@ -2154,7 +2154,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetMatspecies()`
+## `DBGetMatspecies()`
 
 * **Summary:** Read material species data from a Silo database.
 
@@ -2189,7 +2189,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBPutDefvars()`
+## `DBPutDefvars()`
 
 * **Summary:** Write a derived variable definition(s) object into a Silo file.
 
@@ -2266,7 +2266,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBGetDefvars()`
+## `DBGetDefvars()`
 
 * **Summary:** Get a derived variables definition object from a Silo file.
 
@@ -2300,7 +2300,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBInqMeshname()`
+## `DBInqMeshname()`
 
 * **Summary:** Inquire the mesh name associated with a variable.
 
@@ -2336,7 +2336,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 {{ EndFunc }}
 
-### `DBInqMeshtype()`
+## `DBInqMeshtype()`
 
 * **Summary:** Inquire the mesh type of a mesh.
 

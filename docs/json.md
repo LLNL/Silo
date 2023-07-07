@@ -1,4 +1,4 @@
-## JSON Interface to Silo Objects
+# JSON Interface to Silo Objects
 
 :::{warning}
 JSON support in Silo is experimental.
@@ -51,7 +51,7 @@ The functions in this part of the library are
 
 {{ EndFunc }}
 
-### `json-c Extensions`
+## `json-c Extensions`
 
 * **Summary:** Extensions to json-c library to support Silo
 
@@ -105,7 +105,7 @@ The functions in this part of the library are
 
 {{ EndFunc }}
 
-### `DBWriteJsonObject()`
+## `DBWriteJsonObject()`
 
 * **Summary:** Write a JSON object to a Silo file
 
@@ -143,7 +143,7 @@ The functions in this part of the library are
 
 {{ EndFunc }}
 
-### `DBGetJsonObject()`
+## `DBGetJsonObject()`
 
 * **Summary:** Get an object from a Silo file as a JSON object
 

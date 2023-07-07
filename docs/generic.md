@@ -1,4 +1,4 @@
-## User Defined (Generic) Data and Objects
+# User Defined (Generic) Data and Objects
 
 If you want to create data that other applications (not written by you or someone working closely with you) can read and understand, these are **not** the right functions to use.
 That is because the data that these functions create is not self-describing and inherently non-shareable.
@@ -8,7 +8,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBWrite()`
+## `DBWrite()`
 
 * **Summary:** Write a simple variable.
 
@@ -45,7 +45,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBWriteSlice()`
+## `DBWriteSlice()`
 
 * **Summary:** Write a (hyper)slab of a simple variable
 
@@ -101,7 +101,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBReadVar()`
+## `DBReadVar()`
 
 * **Summary:** Read a simple Silo variable.
 
@@ -137,7 +137,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBReadVarSlice()`
+## `DBReadVarSlice()`
 
 * **Summary:** Read a (hyper)slab of data from a simple variable.
 
@@ -186,7 +186,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetVar()`
+## `DBGetVar()`
 
 * **Summary:** Allocate space for, and return, a simple variable.
 
@@ -223,7 +223,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBInqVarExists()`
+## `DBInqVarExists()`
 
 * **Summary:** Queries variable existence
 
@@ -259,7 +259,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBInqVarType()`
+## `DBInqVarType()`
 
 * **Summary:** Return the type of the given object
 
@@ -322,7 +322,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetVarByteLength()`
+## `DBGetVarByteLength()`
 
 * **Summary:** Return the byte length of a simple variable.
 
@@ -358,7 +358,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetVarDims()`
+## `DBGetVarDims()`
 
 * **Summary:** Get dimension information of a variable in a Silo file
 
@@ -395,7 +395,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetVarLength()`
+## `DBGetVarLength()`
 
 * **Summary:** Return the number of elements in a simple variable.
 
@@ -430,7 +430,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetVarType()`
+## `DBGetVarType()`
 
 * **Summary:** Return the Silo datatype of a simple variable.
 
@@ -465,7 +465,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBPutCompoundarray()`
+## `DBPutCompoundarray()`
 
 * **Summary:** Write a Compound Array object into a Silo file.
 
@@ -517,7 +517,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBInqCompoundarray()`
+## `DBInqCompoundarray()`
 
 * **Summary:** Inquire Compound Array attributes.
 
@@ -559,7 +559,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetCompoundarray()`
+## `DBGetCompoundarray()`
 
 * **Summary:** Read a compound array from a Silo database.
 
@@ -595,7 +595,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBMakeObject()`
+## `DBMakeObject()`
 
 * **Summary:** Allocate an object of the specified length and initialize it.
 
@@ -639,7 +639,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBFreeObject()`
+## `DBFreeObject()`
 
 * **Summary:** Free memory associated with an object.
 
@@ -674,7 +674,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBChangeObject()`
+## `DBChangeObject()`
 
 * **Summary:** Overwrite an existing object in a Silo file with a new object
 
@@ -709,7 +709,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBClearObject()`
+## `DBClearObject()`
 
 * **Summary:** Clear an object.
 
@@ -742,7 +742,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBAddDblComponent()`
+## `DBAddDblComponent()`
 
 * **Summary:** Add a double precision floating point component to an object.
 
@@ -778,7 +778,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBAddFltComponent()`
+## `DBAddFltComponent()`
 
 * **Summary:** Add a floating point component to an object.
 
@@ -813,7 +813,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBAddIntComponent()`
+## `DBAddIntComponent()`
 
 * **Summary:** Add an integer component to an object.
 
@@ -848,7 +848,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBAddStrComponent()`
+## `DBAddStrComponent()`
 
 * **Summary:** Add a string component to an object.
 
@@ -883,7 +883,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBAddVarComponent()`
+## `DBAddVarComponent()`
 
 * **Summary:** Add a variable component to an object.
 
@@ -921,7 +921,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBWriteComponent()`
+## `DBWriteComponent()`
 
 * **Summary:** Add a variable component to an object and write the associated data.
 
@@ -963,7 +963,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBWriteObject()`
+## `DBWriteObject()`
 
 * **Summary:** Write an object into a Silo file.
 
@@ -1001,7 +1001,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetObject()`
+## `DBGetObject()`
 
 * **Summary:** Read an object from a Silo file as a generic object
 
@@ -1038,7 +1038,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetComponent()`
+## `DBGetComponent()`
 
 * **Summary:** Allocate space for, and return, an object component.
 
@@ -1076,7 +1076,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 {{ EndFunc }}
 
-### `DBGetComponentType()`
+## `DBGetComponentType()`
 
 * **Summary:** Return the type of an object component.
 
