@@ -486,7 +486,7 @@ The functions described here allow users to read and write arbitrary arrays of r
      status)
   ```
 
-  character*N elemnames (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
+  character*N elemnames (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen).)
 
 * **Arguments:**
 
