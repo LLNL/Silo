@@ -1001,7 +1001,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
-  `max_count` | Maximum number of warnings Silo will issue for any single `API` function.
+  `max_count` | Maximum number of warnings Silo will issue for any single API function.
 
 * **Returned value:**
 
