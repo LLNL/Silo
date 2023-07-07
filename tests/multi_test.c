@@ -818,7 +818,7 @@ int
 main(int argc, char *argv[])
 {
     DBfile         *dbfile;
-    char           filename[256], *file_ext=".pdb";
+    char           filename[256], filename2[256], *file_ext=".pdb";
     int            i, t;
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
@@ -867,11 +867,13 @@ main(int argc, char *argv[])
         /* Tests attempts to read correctly named object using wrong DBGet method */
         } else if (!strcmp(argv[i], "testbadread")) {
             testbadread = TRUE;
+#if HAVE_UNISTD_H
         /* Tests DBFlush functionality, by execv'ing and re-reading */
         } else if (!strcmp(argv[i], "testflush")) {
             testflush = TRUE;
         } else if (!strcmp(argv[i], "testflushread")) {
             testflushread = TRUE;
+#endif
         } else if (!strcmp(argv[i], "missing-value")) {
             missing_value = strtod(argv[++i],0);
         } else if (!strcmp(argv[i], "time-series")) {
@@ -879,7 +881,7 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "emptymb")) {
             emptymb = strtol(argv[++i],0,10);
         } else {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            fprintf(stderr, "%s: unknown argument `%s'\n", argv[0], argv[i]);
             exit(1);
         }
     }
@@ -903,9 +905,15 @@ main(int argc, char *argv[])
        if (emptymb > 0 && (t % emptymb == 0))
            emb = 0;
        if (time_series == 1)
+       {
            sprintf(filename, "multi_rect2d%s", file_ext);
+           sprintf(filename2, "../../multi_rect2d%s", file_ext);
+       }
        else
+       {
            sprintf(filename, "multi_rect2d_%03d%s", t, file_ext);
+           sprintf(filename2, "../../multi_rect2d_%03d%s", t, file_ext);
+       }
        if (testflushread || 
            (dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
        {
@@ -922,7 +930,9 @@ main(int argc, char *argv[])
                        newargv[qq] = argv[qq];
                    newargv[qq++] = strdup("testflushread");
                    DBFlush(dbfile);
+#if HAVE_UNISTD_H
                    execv(argv[0], newargv);
+#endif
                }
                else
                {
@@ -933,7 +943,8 @@ main(int argc, char *argv[])
            if (testread || testbadread || testflushread)
            {
                fprintf(stdout, "reading %s\n", filename);
-               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) ||
+                   (dbfile = DBOpen(filename2, DB_UNKNOWN, DB_READ)))
                {
                    if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3*emb, 4*emb, 1*emb, DB_COLLINEAR, 1) == -1)
                        fprintf(stderr, "Error reading contents of '%s'.\n", filename);

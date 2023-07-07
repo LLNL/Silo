@@ -211,7 +211,7 @@ silo_add_test(NAME twohex SRC twohex.c)
 silo_add_test(NAME ucd SRC ucd.c)
 silo_add_test(NAME ucd1d SRC ucd1d.c)
 silo_add_test(NAME ucdsamp3 SRC ucdsamp3.c)
-silo_add_test(NAME version SRC version.c)
+silo_add_test(NAME dbversion SRC dbversion.c)
 silo_add_test(NAME wave SRC wave.c)
 
 # these currently don't compile on Windows
@@ -266,7 +266,7 @@ add_custom_target(check
           -DWD=${silo_test_output_dir}
           -DHDF5=${SILO_ENABLE_HDF5}
           -DPY=${Python_EXECUTABLE}
-          -DPYPATH=$<TARGET_FILE_DIR:Silo>
+          -DPYPATH=$<TARGET_FILE_DIR:silo>
           -DADD_FORT=${SILO_ENABLE_FORTRAN}
           -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
         WORKING_DIRECTORY ${silo_test_output_dir}
