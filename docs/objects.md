@@ -784,15 +784,25 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or "DBCalcExternalFacelist2" on page 2-230 for an automated way of computing the facelist needed for this call.
 
-  ![](./ucdmesh.gif)
-  Figure 0-1: Example usage of UCD zonelist and external facelist variables.
+  ```{figure} ./ucdmesh.gif
+  :name: ucdmesh-example
+  :align: "center"
+  :alt: "Example usage of UCD zonelist and external facelist variables."
+
+  Example usage of UCD zonelist and external facelist variables.
+  ```
 
   The order in which nodes are defined in the zonelist is important, especially for 3D cells.
   Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
   The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
 
-  ![](./ucdzoo.gif)
-  Figure 0-2: Node, edge and face ordering for zoo-type UCD zone shapes.
+  ```{figure} ucdzoo.gif
+  :name: ucdzoo
+  :align: "center"
+  :alt: "Node, edge and face ordering for zoo-type UCD zone shapes."
+
+  Node, edge and face ordering for zoo-type UCD zone shapes.
+  ```
 
   Given the node ordering in the left-most column, there is indeed an algorithm for determining the other orderings for each cell type.
 
@@ -813,7 +823,7 @@ Finally, Silo also supports the specification of expressions representing derive
   Of these, the face that enumerates the next lowest node number as we traverse the nodes using the right hand rule, is placed first in the ordering.
   Then, the face that has the next lowest node number and so on.
 
-  An example using arbitrary polyhedrons for some zones is illustrated in Figure 0-3 on page `106`.
+  An example using arbitrary polyhedrons for some zones is illustrated, below.
   The nodes of a `DB_ZONETYPE_POLYHEDRON` are specified in the following fashion: First specify the number of faces in the polyhedron.
   Then, for each face, specify the number of nodes in the face followed by the nodes that make up the face.
   The nodes should be ordered such that they are numbered in a counter-clockwise fashion when viewed from the outside (e.g. right-hand rules yields an outward facing normal).
@@ -821,8 +831,14 @@ Finally, Silo also supports the specification of expressions representing derive
   In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
   So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
 
-  ![](./ucdmesh_warbzone.gif)
-  Figure 0-3: Example usage of UCD zonelist combining a hex and 2 polyhedra.
+  ```{figure} ucdmesh_warbzone.gif
+  :name: ucdmesh-warbzone
+  align: "center"
+  alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
+
+  Example usage of UCD zonelist combining a hex and 2 polyhedra.
+  ```
+
   This example is intended to illustrate the representation of arbitrary polyhedra.
   So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a 'normal' zonelist, they are expressed using arbitrary connectivity here.
 
@@ -1325,7 +1341,7 @@ Finally, Silo also supports the specification of expressions representing derive
   We define implicit lists of edges and faces in terms of a traversal of the zonelist structure of the associated mesh.
   The position of an edge (or face) in its list is determined by the order of its first occurrence in this traversal.
   The traversal algorithm is to visit each zone in the zonelist and, for each zone, visit its edges (or faces) in local order.
-  See Figure 0-2 on page `104`.
+  See [figure showing UCD zoo and node, edge and face orderings](#ucdzoo)
   Because this traversal will wind up visiting edges multiple times, the first time an edge (or face) is encountered is what determines its position in the implicit edge (or face) list.
 
   If the zonelist contains arbitrary polyhedra or the zonelist is a polyhedral zonelist (written with DBPutPHZonelist), then the traversal algorithm involves visiting each zone, then each face for a zone and finally each edge for a face.
