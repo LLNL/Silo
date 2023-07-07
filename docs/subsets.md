@@ -753,7 +753,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   The groupel map concept is best illustrated by example.
   Here, we will define a groupel map for the material case illustrated in Figure 0-6.
 
-  ![](./mrgtree_groupel_maps.gif)
+  ![](./mrgtree_mixed_mats.gif)
   Figure 0-10: Example of using groupel map for (mixing) materials.
 
   In the example in the above figure, the groupel map has the behavior of representing the clean and mixed parts of the material decomposition by enumerating in alternating segments of the map, the clean and mixed parts for each successive material.
