@@ -101,7 +101,10 @@ be used for advertising or product endorsement purposes.
 #include <sys/types.h>
 #endif
 #if HAVE_SYS_STAT_H
-#include <sys/stat.h>
+    #if SIZEOF_OFF64_T > 4 && defined(__APPLE__)
+        #define _DARWIN_USE_64_BIT_INODE
+    #endif
+    #include <sys/stat.h>
 #endif
 #include <ctype.h>          /* For isalnum */
 #if HAVE_SYS_FCNTL_H
@@ -238,7 +241,7 @@ typedef struct db_silo_stat_t {
 #ifndef SIZEOF_OFF64_T
 #error missing definition for SIZEOF_OFF64_T in silo_private.h
 #else
-#if SIZEOF_OFF64_T > 4
+#if SIZEOF_OFF64_T > 4 && (defined(HAVE_STAT64) || !defined(HAVE_STAT))
     struct stat64 s;
 #else
     struct stat s;
@@ -2121,7 +2124,7 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
     errno = 0;
     memset(&(statbuf->s), 0, sizeof(statbuf->s));
 
-#if SIZEOF_OFF64_T > 4
+#if SIZEOF_OFF64_T > 4 && (defined(HAVE_STAT64) || !defined(HAVE_STAT))
     retval = stat64(name, &(statbuf->s));
 #else
     retval = stat(name, &(statbuf->s));
@@ -3998,7 +4001,7 @@ db_InitFileGlobals(DBfile *dbfile)
 #endif
     dbfile->pub.file_scope_globals->compressionErrmode      = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->compatabilityMode       = DB_INTBOOL_NOT_SET;
-    dbfile->pub.file_scope_globals->compressionParams       = DB_CHAR_PTR_NOT_SET;
+    dbfile->pub.file_scope_globals->compressionParams       = (char*) DB_CHAR_PTR_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_level           = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_func            = DB_VOID_PTR_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_level_drvr      = DB_INTBOOL_NOT_SET;
@@ -4136,7 +4139,7 @@ DBOpenReal(const char *name, int type, int mode)
                 /********************************/
                 /* System level error occured.  */
                 /********************************/
-#if SIZEOF_OFF64_T > 4
+#if SIZEOF_OFF64_T > 4 && (defined(HAVE_STAT64) || !defined(HAVE_STAT))
                 printf("stat64() failed with error: ");
 #else
                 printf("stat() failed with error: ");
@@ -4429,6 +4432,7 @@ DBClose(DBfile *dbfile)
 {
     int            id;
     int            retval;
+    SILO_Globals_t *tmp_file_scope_globals;
 
     API_BEGIN2("DBClose", int, -1, api_dummy) {
         if (!dbfile)
@@ -4446,8 +4450,9 @@ DBClose(DBfile *dbfile)
             free(dbfile->pub.file_lib_version);
         db_unregister_file(dbfile);
 
+	tmp_file_scope_globals = dbfile->pub.file_scope_globals; 
         retval = (dbfile->pub.close) (dbfile);
-        free(dbfile->pub.file_scope_globals);
+        free(tmp_file_scope_globals);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6500,7 +6505,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
         else if (dstType == DB_DIR)
         {
-            char const *srcDirBaseName = db_basename(srcObjAbsName);
+            char *srcDirBaseName = db_basename(srcObjAbsName);
             DBMkDir(dstFile, srcDirBaseName);
             DBSetDir(dstFile, srcDirBaseName);
             free(srcDirBaseName);
@@ -6521,6 +6526,8 @@ endLoop:
 
     DBSetDir(srcFile, srcStartCwg);
     DBSetDir(dstFile, dstStartCwg);
+
+    return 0;
 }
 
 #if 1
@@ -6699,6 +6706,8 @@ DBGetPartialObject(DBfile *dbfile, char const *name, int nvals, int ndims,
     /* If dense, do partial I/O on the datasets */
     /* Else... do object specific partial I/O */
     /* Handle mixed values on variables */
+
+    return 0;
 }
 
 PUBLIC DBmaterial *
@@ -15106,11 +15115,25 @@ _db_safe_strdup(const char *s)
  *
  * Mark C. Miller, Tue Feb  7 15:18:38 PST 2012
  * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
+ *
+ * Mark C. Miller, Mon Oct 24, 23:00:00 PDT 2022
+ * Handle nans properly
  *-------------------------------------------------------------------------
  */
 int DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps)
 {
    double       num, den;
+
+   /* handle possible NaNs first */
+   if (isnan(a))
+   {
+       if (isnan(b)) return 0;
+       return 1;
+   }
+   else if (isnan(b))
+   {
+       return 1;
+   }
 
    /*
     * First, see if we should use the alternate diff.

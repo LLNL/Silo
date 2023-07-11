@@ -107,7 +107,8 @@ file(MAKE_DIRECTORY ${silo_build_include_dir})
 # User options
 ###---------------------------------------------------------------------------
 
-option(SILO_ENABLE_SHARED  "Build silo shared library." ON)
+option(SILO_ENABLE_SHARED "Build silo shared library." ON)
+option(SILO_ENABLE_SILOCK "Enable building of silock" ON)
 option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
 option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
@@ -139,8 +140,9 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compress
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
 ##
-set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
-
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
+endif()
 
 set(BUILD_SHARED_LIBS ${SILO_ENABLE_SHARED})
 
@@ -227,6 +229,9 @@ else()
     include(${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
     set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE)
     check_type_size("off64_t" SIZEOF_OFF64_T)
+    if(NOT SIZEOF_OFF64_T)
+        set(SIZEOF_OFF64_T ${CMAKE_SIZEOF_VOID_P})
+    endif()
 endif()
 
 
@@ -283,7 +288,16 @@ check_function_exists(strerror HAVE_STRERROR)
 check_symbol_exists(isnan "math.h" HAVE_ISNAN)
 check_symbol_exists(memmove "memory.h" HAVE_MEMMOVE)
 check_symbol_exists(add_history "readline.h" HAVE_READLINE_HISTORY)
+check_symbol_exists(stat64 "sys/stat.h" HAVE_STAT64)
+check_symbol_exists(stat "sys/stat.h" HAVE_STAT)
 
+if (HAVE_STAT64)
+	add_definitions(-DHAVE_STAT64)
+endif()
+
+if (HAVE_STAT)
+	add_definitions(-DHAVE_STAT)
+endif()
 
 ###-----------------------------------------------------------------------------
 # Set flags & options from config-site files after everything is set up since
@@ -567,13 +581,16 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 add_library(silo ${silo_library_sources})
-target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
-add_dependencies(silo pdb_detect)
-target_include_directories(silo PRIVATE ${silo_library_include_dirs})
 
 if(UNIX)
     target_link_libraries(silo m)
 endif()
+
+target_link_libraries(silo ${CMAKE_DL_LIBS})
+target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
+add_dependencies(silo pdb_detect)
+target_include_directories(silo PRIVATE ${silo_library_include_dirs})
+
 
 # add list of public headers to be installed
 set(silo_headers
@@ -583,7 +600,8 @@ set(silo_headers
     ${silo_build_include_dir}/silo.h
     ${Silo_SOURCE_DIR}/src/silo/silo.inc
     ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc
-    ${Silo_SOURCE_DIR}/src/silo/silo_exports.h)
+    ${Silo_SOURCE_DIR}/src/silo/silo_exports.h
+    ${Silo_SOURCE_DIR}/src/silo/pmpio.h)
 
 if(WIN32)
     list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
@@ -619,6 +637,7 @@ endif()
 # setting up for installing Silo CMake config files
 set(silo_targets_name "SiloTargets")
 install(TARGETS silo EXPORT ${silo_targets_name}
+        LIBRARY DESTINATION lib
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
@@ -643,11 +662,14 @@ endif()
 ##
 # silock
 ##
-if(NOT WIN32)
+if(SILO_ENABLE_SILOCK AND NOT WIN32)
     add_executable(silock
         ${Silo_SOURCE_DIR}/tools/silock/silock.c)
     add_dependencies(silock silo)
     target_link_libraries(silock $<TARGET_LINKER_FILE:silo>)
+    if(UNIX)
+        target_link_libraries(silock m ${CMAKE_DL_LIBS})
+    endif()
     target_include_directories(silock PRIVATE
         ${silo_build_include_dir}
         ${Silo_SOURCE_DIR}/src/silo)
