@@ -405,7 +405,7 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test using namescheme as a simple integer mapping */
-    ns = DBMakeNamescheme("|chemA_%04X|n%3");
+    ns = DBMakeNamescheme("|chemA_0x%04X|n");
     TEST_GET_INDEX(DBGetName(ns,  1), 0, 0, 1);
     TEST_GET_INDEX(DBGetName(ns, 50), 0, 0, 50);
     TEST_GET_INDEX(DBGetName(ns, 37), 0, 0, 37);

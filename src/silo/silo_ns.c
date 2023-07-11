@@ -49,6 +49,7 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -608,11 +609,6 @@ DBGetName(DBnamescheme const *ns, int natnum)
     return SaveReturnedString(retval);
 }
 
-#if 0
-#include <stdlib.h>
-#include <ctype.h>
-#endif
-
 PUBLIC int
 DBGetIndex(char const *dbns_name_str, int fieldSelector, int base)
 {
@@ -622,7 +618,7 @@ DBGetIndex(char const *dbns_name_str, int fieldSelector, int base)
 
     while (*currentPosition != '\0')
     {
-        if (isdigit(*currentPosition) || strchr("xXbB", *currentPosition))
+        if (isdigit(*currentPosition) || strchr("-+xXbB", *currentPosition))
         {
             int value;
             errno = 0;
