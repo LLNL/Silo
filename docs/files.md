@@ -459,6 +459,38 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 {{ EndFunc }}
 
+## `DBFlush()`
+
+* **Summary:** 
+
+* **C Signature:**
+
+  ```
+  int DBFlush(DBfile *dbile)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `dbfile` | the file to be flushed
+  
+* **Returned value:**
+
+  Zero on success; -1 on failure.
+
+* **Description:**
+
+Flush any changes to a file to disk without having to actually close the file.
+
+{{ EndFunc }}
+
 ## `DBClose()`
 
 * **Summary:** Close a Silo database.
@@ -528,6 +560,54 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBGetToc` function returns a pointer to a [`DBtoc`](header.md#dbtoc) structure, which contains the names of the various Silo object contained in the Silo database.
   The returned pointer points into Silo private space and must not be modified or freed.
   Also, calls to `DBSetDir` will free the [`DBtoc`](header.md#dbtoc) structure, invalidating the pointer returned previously by `DBGetToc`.
+
+{{ EndFunc }}
+
+## File-level properties
+
+There are a number of methods that control overall *behavior* either globally to the whole library or for a specific file.
+These are all documented in the [Global Library Behavior](globals.md) section.
+
+* [`DBSetAllowOverwritesFile()`](globals.md#dbsetallowoverwritesfile)
+* [`DBGetAllowOverwritesFile()`](globals.md#dbgetallowoverwritesfile)
+* [`DBSetAllowEmptyObjectsFile()`](globals.md#dBsetallowemptyobjectsfile)
+* [`DBGetAllowEmptyObjectsFile()`](globals.md#dbgetallowemptyobjectsfile)
+* [`DBSetDataReadMask2File()`](globals.md#dbsetdatareadmask2file)
+* [`DBGetDataReadMask2File()`](globals.md#dbgetdatareadmask2file)
+* [`DBSetEnableChecksumsFile()`](globals.md#dbsetenablechecksumsfile)
+* [`DBGetEnableChecksumsFile()`](globals.md#dbgetenablechecksumsfile)
+* [`DBSetCompressionFile()`](globals.md#dbsetcompressionfile)
+* [`DBGetCompressionFile()`](globals.md#dbgetcompressionfile)
+* [`DBSetFriendlyHDF5NamesFile()`](globals.md#dbsetfriendlyhdf5namesfile)
+* [`DBGetFriendlyHDF5NamesFile()`](globals.md#dbgetfriendlyhdf5namesfile)
+* [`DBSetDeprecateWarningsFile()`](globals.md#dbsetdeprecatewarningsfile)
+* [`DBGetDeprecateWarningsFile()`](globals.md#dbgetdeprecatewarningsfile)
+
+## `DBFileName()`
+
+* **Summary:** 
+
+* **C Signature:**
+
+  ```
+  char const *DBFileName(DBfile *dbfile)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `dbfile` | the Silo database file for which the name is to be queried.
+  
+* **Returned value:**
+
+  Always succeeds. May return string containing "unknown".
 
 {{ EndFunc }}
 
@@ -730,14 +810,48 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   `dbfile` | Database file pointer.
   `dirname` | Name of the directory to create.
 
-
 * **Returned value:**
 
   DBMkDir returns zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see DBSetDir).
+  The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see [`DBSetDir`](#dbsetdir)).
+  The directory name may be an absolute path name similar to `"/dir/subdir"`, or may be a relative path name similar to `"../../dir/subdir"`.
+
+{{ EndFunc }}
+
+## `DBMkDirP()`
+
+* **Summary:** Create a new directory, as well as any necessary intervening directories, in a Silo file.
+
+* **C Signature:**
+
+  ```
+  int DBMkDirP(DBfile *dbfile, char const *dirname)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `dirname` | Name of the directory to create.
+
+* **Returned value:**
+
+  Returns zero on success and -1 on failure.
+
+* **Description:**
+
+  The `DBMkDirP` function creates a new directory in the Silo file including making any necessary intervening directories.
+  This is the Silo equivalent of Unix' `mkdir -p`.
   The directory name may be an absolute path name similar to `"/dir/subdir"`, or may be a relative path name similar to `"../../dir/subdir"`.
 
 {{ EndFunc }}
@@ -931,6 +1045,103 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   2. Copies `../ucd_dir/ucdmesh` of `dbfile` to `/foogar` in `dbfile2`
   3. Copies `/quad_dir/quadmesh` to `cwg` (e.g. `/tmp`) `/tmp/quadmesh` in `dbfile2`
   4. Copies `trimesh` in `cwg` of `dbfile` to `cwg/foo` (`/tmp/foo/trimesh` in dbfile2`
+
+{{ EndFunc }}
+
+## `DBCp()`
+
+* **Summary:** Generalized copy function emulating unix `cp`
+
+* **C Signature:**
+
+  ```
+  int DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `opts` | A space-separated options string.
+  `srcFile` | The file holding the source objects to be copied.
+  `dstFile` | The file holding the destination object paths into which source objects will be copied.
+  `...` | A `varargs` list of remaining arguments terminated in `DB_EOA` (end of arguments).
+
+* **Return value:**
+
+  0 on success. -1 on failure.
+
+* **Description:**
+
+  This is the Silo equivalent of a unix `cp` command obeying all unix semantics and applicable flags and works on either *above* any driver.
+  This means the method can be used for PDB files, HDF5 files or even a mixture of drivers.
+  In particular, it can be used to copy a whole file from one low-level driver to another.
+
+  * Copy a single source object to a single destination object
+    * ```
+      DBCp("", srcFile, dstFile, srcPATH, dstPATH, DB_EOA);`
+      ```
+  * Copy multiple source objects to single destination (dir) object
+    * ```
+      DBCp("", srcFile, dstFile, srcPATH1, srcPATH2, ..., dstDIR, DB_EOA);`
+      ```
+  * Copy multiple source objects to multiple destination objects
+    * ```
+      DBCp("-2", DBfile *srcFile, DBfile *dstFile,
+              char const *srcPATH1, char const *dstPATH1,
+              char const *srcPATH2, char const *dstPATH2,
+              char const *srcPATH3, char const *dstPATH3, ..., DB_EOA);
+      ```
+  
+  `srcFile` and `dstFile` may be the same Silo file.
+  `srcFile` cannot be null.
+  `dstFile` may be null in which case it is assumed same as `srcFile`.
+  The argument list *must* be terminated by the `DB_EOA` sentinel.
+  Just as for unix `cp`, the options and their meanings are...
+ 
+    * `-R/-r`: recurse on any directory objects.
+    * `-L/-P`: dereference links / never dereference links.
+    * `-d`: preserve links.
+    * `-s/-l`: don't actually copy, just sym/hard link (only possible when srcFile==dstFile).
+
+  There are some additional options specific to Silo's `DBCp`...
+
+    * `-2`: treat varargs list of args as `src/dst` path pairs and where any `NULL` `dst` is inferred to have same path as associated `src` except that relative paths are interpreted relative to `dst` file's cwg.
+    * `-1`: like `-2` except caller passes only `src` paths.
+      All `dst` paths are inferred to be same as associated `src` path.
+      The `dst` file's cwg will then determine how any relative `src` paths are interpreted.
+    * `-3` only 3 args follow the `dstFile` arg...
+      * `int N`: number of objects in the following lists.
+      * `DBCAS_t srcPathNames`: list of `N` source path names.
+      * `DBCAS_t dstPathNames`: list of `N` destination path names.
+      * In this case, a terminating `DB_EOA` is not necessary.
+    * `-4`: Like `-3`, except 3rd arg is treated as a single `dst` dir name.
+      * `int N`: number of paths in `srcPathNames`.
+      * `DBCAS_t srcPathNames`: list of `N` source path names.
+      * `char const *dstDIR`: pre-existing destination dir path.
+      * In this case, a terminating `DB_EOA` is not necessary.
+    * `-5`: Internal use only...like `-4` except used only internally when `DBCp` recursively calls itself.
+ 
+  **Other rules:**
+
+    * If any `src` is a dir, then the operation is an error without `-R/-r` option.
+    * If cooresponding `dst` exists and is a dir, `src` is copied *into* (e.g. becomes a child of) `dst`.
+    * If cooresponding `dst` exists and is **not** a dir (e.g. is just a normal Silo object), then it is an error if src is not also the same kind of Silo object.
+     The copy overwrites (destructively) `dst`.
+     However, if the file space `dst` object occupies is smaller than that needed to copy `src`, behavior is indeterminate but may will result in the `dst` file (not just the `dst` object) being corrupted.
+
+  If none of the preceding numeric arguments are specified, then the varags list of args is treated as (default) where the last is a pre-existing destination directory and all the others are the paths of source objects to be copied into that directory.
+
+ Relative path names are interpreted relative to the current working directory of the associated (`src` or `dst`) file when DBCp is invoked.
+
+ In all the different ways this function can be invoked, there are really just two fundamentally different interpretations of the list(s) of names.
+ Either each source path is paired also with a destination path or all source paths go into a single destination path which, just as for linux `cp`, must then also be a directory already present in the destination.
 
 {{ EndFunc }}
 

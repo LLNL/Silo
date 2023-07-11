@@ -583,6 +583,43 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 {{ EndFunc }}
 
+## `DBGetIndex()`
+
+* **Summary:** Reverse engineer a name from a namescheme to obtain field indices 
+
+* **C Signature:**
+
+  ```
+  int DBGetIndex(char const *dbns_name_str, int field, int base)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `dbns_name_str` | An arbitrary string but most commonly with substrings of digits representing different *fields*
+  `field` | Of the various substrings of digits, numbered starting at zero from left to right, this argument selects which of the digit substrings is to be retrieved
+  `base` | The numeric base of the digit string.
+  
+* **Returned value:**
+
+  A field's converted value on success; -1 on failure.
+
+* **Description:**
+
+Nameschemes often generate names of the form `foo_0050.0210.silo`.
+Sometimes, it is useful to obtain the decimal values of the numbered fields in such a string.
+Calling `DBGetIndex("foo_0050.0210.silo", 0, 10)` will retrieve the first digit field, "0050", and convert it to a decimal number using a number base of 10.
+Calling `DBGetIndex("foo_0050.0210.silo", 1, 10)` will retrieve the second digit field, "0210", and convert it to a decimal number using a number base of 10.
+
+{{ EndFunc }}
+
 ## `DBPutMrgvar()`
 
 * **Summary:** Write variable data to be associated with (some) regions in an MRG tree

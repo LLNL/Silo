@@ -1,6 +1,8 @@
 # Calculational and Utility
 
-This section of the API manual describes functions that can be used to compute things such as Facelists as well as utility functions to, for example, catentate an array of strings into a single string for simple output with `DBWrite()`.
+This section of the API manual describes some calculational and utility functions that can be used to compute things such as facelists or catentate an array of strings into a single string for simple output with `DBWrite()`.
+
+There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) object from *dense* volume fraction arrays and vice versa.
 
 {{ EndFunc }}
 

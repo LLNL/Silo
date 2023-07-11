@@ -14,10 +14,8 @@ def setup(app):
     elif hasattr(app, 'add_stylesheet'):
         app.add_stylesheet('custom.css')
 
-#source_suffix = {
-#    '.md': 'markdown',
-#    '.in': 'markdown',
-#}
+# Files to exclude
+exclude_patterns = [ "func-template.md" ]
 
 # MYST specific extensions
 myst_enable_extensions = [

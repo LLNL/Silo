@@ -324,12 +324,12 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 ## `DBGetVarByteLength()`
 
-* **Summary:** Return the byte length of a simple variable.
+* **Summary:** Return the memory byte length of a simple variable.
 
 * **C Signature:**
 
   ```
-  int DBGetVarByteLength (DBfile *dbfile, char const *varname)
+  int DBGetVarByteLength(DBfile *dbfile, char const *varname)
   ```
 
 * **Fortran Signature:**
@@ -352,9 +352,44 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Description:**
 
-  The `DBGetVarByteLength` function returns the length of the requested simple variable, in bytes.
+  The `DBGetVarByteLength` function returns the *memory* length of the requested simple variable, in bytes.
   This is useful for determining how much memory to allocate before reading a simple variable with `DBReadVar`.
   Note that this would not be a concern if one used the `DBGetVar` function, which allocates space itself.
+
+{{ EndFunc }}
+
+## `DBGetVarByteLengthInFile()`
+
+* **Summary:** Get the *file* length of a simple variable
+
+* **C Signature:**
+
+  ```
+  DBGetVarByteLengthInFile(DBfile *file, char const *name)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `dbfile` | The silo database file handle
+  `name` | Name of a simple variable in the file
+  
+* **Returned value:**
+
+  Length of variable in file on success; -1 on failure.
+
+* **Description:**
+
+  Sometimes, the lengh of a variable in a file may be different from its length in memory.
+  This is especially true if type conversion is performed on the variable when it is being read or when compression is applied.
+  This function returns the number of bytes the variable takes up in the file.
 
 {{ EndFunc }}
 

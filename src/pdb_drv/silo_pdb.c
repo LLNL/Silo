@@ -7489,7 +7489,7 @@ db_pdb_WriteObject(DBfile   *_file,    /*File to write into */
    group = PJ_make_group(obj->name, obj->type, obj->comp_names,
                          obj->pdb_names, obj->ncomponents);
    if (!PJ_put_group(file, group, (OVER_WRITE==flags?1:0) ||
-                                  SILO_Globals.allowOverwrites)) {
+                                  DBGetAllowOverwritesFile(_file)) {
       PJ_rel_group (group);
       return db_perror ("PJ_put_group", E_CALLFAIL, me);
    }

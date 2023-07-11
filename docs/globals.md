@@ -3,6 +3,14 @@
 The functions described in this section of the Silo manual, are those that effect behavior of the library, globally, for any file(s) that are or will be created or opened.
 These include such things as error handling, requiring Silo to do extra work to warn of and avoid overwrites, to compute and warn of checksum errors and to compress data before writing it to disk.
 
+## Global and File-level variants
+
+Some behaviors have both *file* level and *global* variants.
+For example, see [`DBSetAllowOverwrites()`](#dbsetallowoverwrites) and [`DBSetAllowOverwritesFile()`](#dbsetallowoverwritesfile).
+
+When a file is *opened or *created*, it *inherents* whatever the library's *global* settings are.
+However, a file's settings can be adjusted independently from the library's global settings by calling the equivalent `DBSetXxxFile()` methods.
+
 {{ EndFunc }}
 
 ## `DBErrfuncname()`
@@ -320,6 +328,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetAllowOverwrites()`
+## `DBSetAllowOverwritesFile()`
 
 * **Summary:** Allow library to over-write existing objects in Silo files
 
@@ -327,6 +336,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBSetAllowOverwrites(int allow)
+  int DBSetAllowOverwritesFile(DBfile *dbfile, int allow)
   ```
 
 * **Fortran Signature:**
@@ -339,6 +349,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | The file for which the over-write property is desired.
   `allow` | Integer value controlling the Silo library's overwrite behavior. A non-zero value sets the Silo library to permit overwrites of existing objects. A zero value disables overwrites. By default, Silo does **not** permit overwrites.
 
 * **Returned value:**
@@ -361,6 +372,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetAllowOverwrites()`
+## `DBGetAllowOverwritesFile()`
 
 * **Summary:** Get current setting for the allow overwrites flag
 
@@ -368,6 +380,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBGetAllowOverwrites(void)
+  int DBGetAllowOverwritesFile(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -378,7 +391,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  Returns the current setting for the allow overwrites flag
+  Returns the current setting for the allow overwrites flag of the library or the specified file
 
 * **Description:**
 
@@ -387,6 +400,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetAllowEmptyObjects()`
+## `DBSetAllowEmptyObjectsFile()`
 
 * **Summary:** Permit the creation of empty silo objects
 
@@ -394,6 +408,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBSetAllowEmptyObjects(int allow)
+  int DBSetAllowEmptyObjectsFile(DBfile *file, int allow)
   ```
 
 * **Fortran Signature:**
@@ -406,6 +421,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | The file for which the empty object setting is desired.
   `allow` | Integer value indicating whether or not empty objects should be allowed to be created in Silo files. A zero value prevents callers from creating empty objects in Silo files. A non-zero value permits it. By default, the Silo library does **not** permit callers to create empty objects.
 
 * **Returned value:**
@@ -428,13 +444,15 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetAllowEmptyObjects()`
+## `DBGetAllowEmptyObjectsFile()`
 
 * **Summary:** Get current setting for the allow empty objects flag
 
 * **C Signature:**
 
   ```
-  int DBGetAllowEmptyobjets(void)
+  int DBGetAllowEmptyObjects(void)
+  int DBGetAllowEmptyObjectsFile(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -446,6 +464,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 * **Arguments:**
 
   `None`
+
 * **Description:**
 
   Get the current library setting for the allow empty objects flag.
@@ -540,13 +559,15 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetDataReadMask2()`
+## `DBSetDataReadMask2File()`
 
 * **Summary:** Set the data read mask
 
 * **C Signature:**
 
   ```
-  unsigned long long DBSetDataReadMask2 (unsigned long long mask)
+  unsigned long long DBSetDataReadMask2(unsigned long long mask)
+  unsigned long long DBSetDataReadMask2File(DBfile *dbfile, unsigned long long mask)
   ```
 
 * **Fortran Signature:**
@@ -559,6 +580,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | the file whose read mask is to be set.
   `mask` | The `mask` to use to read data. This is a bit vector of values that define whether each data portion of the various Silo objects should be read.
 
 * **Returned value:**
@@ -635,13 +657,15 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetDataReadMask2()`
+## `DBGetDataReadMask2File()`
 
 * **Summary:** Get the current data read mask
 
 * **C Signature:**
 
   ```
-  unsigned long long DBGetDataReadMask2 (void)
+  unsigned long long DBGetDataReadMask2(void)
+  unsigned long long DBGetDataReadMask2File(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -665,6 +689,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetEnableChecksums()`
+## `DBSetEnableChecksumsFile()`
 
 * **Summary:** Set flag controlling checksum checks
 
@@ -672,6 +697,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBSetEnableChecksums(int enable)
+  int DBSetEnableChecksumsFile(DBfile *dbfile, int enable)
   ```
 
 * **Fortran Signature:**
@@ -685,6 +711,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | The file for which the checksum property should be set
   `enable` | Integer value controlling checksum behavior of the Silo library. See description for a complete explanation.
 
 
@@ -720,6 +747,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetEnableChecksums()`
+## `DBGetEnableChecksumsFile()`
 
 * **Summary:** Get current state of flag controlling checksumming
 
@@ -727,6 +755,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBGetEnableChecksums(void)
+  int DBGetEnableChecksumsFile(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -748,6 +777,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetCompression()`
+## `DBSetCompressionFile()`
 
 * **Summary:** Set compression options for succeeding writes of Silo data
 
@@ -755,6 +785,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBSetCompression(char const *options)
+  int DBSetCompressionFile(DBfile *dbfile, char const *options)
   ```
 
 * **Fortran Signature:**
@@ -767,6 +798,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | The file for which compression settings should be set.
   `options` | Character string containing the name of the compression method and various parameters. The method set using the keyword, "METHOD=". Any remaining parameters are dependent on the compression method and are described below.
 
 * **Returned value:**
@@ -873,6 +905,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetCompression()`
+## `DBGetCompressionFile()`
 
 * **Summary:** Get current compression parameters
 
@@ -880,6 +913,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   char const *DBGetCompression()
+  char const *DBGetCompressionFile(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -905,6 +939,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetFriendlyHDF5Names()`
+## `DBSetFriendlyHDF5NamesFile()`
 
 * **Summary:** Set flag to indicate Silo should create friendly names for HDF5 datasets
 
@@ -912,6 +947,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBSetFriendlyHDF5Names(int enable)
+  int DBSetFriendlyHDF5NamesFile(DBfile *dbfile, int enable)
   ```
 
 * **Fortran Signature:**
@@ -924,6 +960,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | The file for which HDF5 friendly names property should be set
   `enable` | Flag to indicate if friendly names should be turned on (non-zero value) or off (zero).
 
 * **Returned value:**
@@ -951,6 +988,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetFriendlyHDF5Names()`
+## `DBGetFriendlyHDF5NamesFile()`
 
 * **Summary:** Get setting for friendly HDF5 names flag
 
@@ -958,6 +996,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBGetFriendlyHDF5Names()
+  int DBGetFriendlyHDF5NamesFile(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -982,6 +1021,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBSetDeprecateWarnings()`
+## `DBSetDeprecateWarningsFile()`
 
 * **Summary:** Set maximum number of deprecate warnings Silo will issue for any one function, option or convention
 
@@ -989,6 +1029,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBSetDeprecateWarnings(int max_count)
+  int DBSetDeprecateWarningsFile(DBfile *dbfile, int max_count)
   ```
 
 * **Fortran Signature:**
@@ -1001,6 +1042,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Arg name | Description
   :---|:---
+  `dbfile` | The file for which deprecation warning property should be set
   `max_count` | Maximum number of warnings Silo will issue for any single API function.
 
 * **Returned value:**
@@ -1026,6 +1068,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 {{ EndFunc }}
 
 ## `DBGetDeprecateWarnings()`
+## `DBGetDeprecateWarningsFile()`
 
 * **Summary:** Get maximum number of deprecated function warnings Silo will issue
 
@@ -1033,6 +1076,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   ```
   int DBGetDeprecateWarnings()
+  int DBGetDeprecateWarningsFile(DBfile *dbfile)
   ```
 
 * **Fortran Signature:**
@@ -1049,6 +1093,46 @@ These include such things as error handling, requiring Silo to do extra work to 
   The current maximum number of deprecate warnings
 
 * **Description:**
+
+{{ EndFunc }}
+
+## `DBSetAllowLongStrComponents()`
+## `DBSetAllowLongStrComponentsFile()`
+
+* **Summary:** Allow for *long* string components of objects
+
+* **C Signature:**
+
+  ```
+  int DBSetAllowLongStrComponents(int allow)
+  int DBSetAllowLongStrComponentsFile(DBfile *dbfile, int allow)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg name | Description
+  :---|:---
+  `dbfile` | the file for which long string components should be allowed
+  `allow` | the setting for the flag
+  
+* **Returned value:**
+
+  The previous value of the setting
+
+* **Description:**
+
+  In earlier versions of Silo, string valued components of user-defined objects (e.g. written with [`DBWriteObject()`](generic.md#dbwriteobject) were limited in length to `1024` characters.
+  This setting allows longer (arbitrary length) string components of user defined objects.
+
+:::{warning}
+Longer than normal component strings can result in creating objects in Silo files that are not readable by older versions (<4.10.3) of the Silo library.
+:::
 
 {{ EndFunc }}
 
