@@ -737,7 +737,6 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
            int *mix_next, int *mix_mat, int *mix_zone, void const *mix_vf,
            int *mixlen, int *datatype, int *optlist_id, int *status)
 {
-    int           *mixz = NULL;
     char          *nm = NULL, *mnm = NULL;
     DBfile        *dbfile = NULL;
     DBoptlist     *optlist = NULL;
@@ -760,7 +759,7 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
         else
             mnm = SW_strndup(_fcdtocp(meshname), *lmeshname);
 #else
-        if (strcmp(meshname, DB_F77NULLSTRING) == 0)
+        if (strcmp(name, DB_F77NULLSTRING) == 0)
             nm = NULL;
         else
             nm = SW_strndup(name, *lname);
@@ -771,19 +770,13 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
             mnm = SW_strndup(meshname, *lmeshname);
 #endif
 
-      /*---------------------------------------------
-       *  Check for "null" arrays. The convention is
-       *  that a DB_F77NULL indicates a null array.
-       *--------------------------------------------*/
-
-        mixz = FPTR(mix_zone);
-
-        *status = DBPutMaterial(dbfile, nm, mnm, *nmat, matnos, matlist,
-                           dims, *ndims, mix_next, mix_mat, mixz, mix_vf,
-                                *mixlen, *datatype, optlist);
+        *status = DBPutMaterial(dbfile, nm, mnm, *nmat, matnos, matlist, dims, *ndims,
+                      FPTR(mix_zone), FPTR(mix_mat), FPTR(mix_zone), FPTR(mix_vf),
+                      *mixlen, *datatype, optlist);
 
         FREE(nm);
         FREE(mnm);
+
         API_RETURN((*status >= 0) ? 0 : (-1));
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -1616,8 +1609,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimesh(dbfile, nm, *nmesh,
-                                     (char const * const *) meshnms, meshtypes, optlist);
+            *status = DBPutMultimesh(dbfile, nm, *nmesh, (char const * const *) meshnms,
+                         (int const *) FPTR(meshtypes), optlist);
             
             for (i = 0; i < *nmesh; i++)
                 FREE(meshnms[i]);
@@ -1873,7 +1866,7 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
 
             /* Invoke the C function to do the work. */
             *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) varnms,
-                                    vartypes, optlist);
+                      (int const *) FPTR(vartypes), optlist);
 
             for(i=0;i<*nvar;i++)
                 FREE(varnms[i]);
