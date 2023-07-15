@@ -49,10 +49,12 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
+#include <regex.h>
 #include <string.h>
 #include <silo_private.h>
 
@@ -608,20 +610,36 @@ DBGetName(DBnamescheme const *ns, int natnum)
 }
 
 PUBLIC int
-DBGetIndex(DBnamescheme const *ns, int natnum)
+DBGetIndex(char const *dbns_name_str, int fieldSelector, int base)
 {
-    char const *name_str = DBGetName(ns, natnum);
-    int i = 0;
+    int currentField = 0;
+    char const *currentPosition = dbns_name_str;
+    char *endPtr;
 
-    if (!name_str) return -1;
+    while (*currentPosition != '\0')
+    {
+        if (isdigit(*currentPosition) || strchr("-+xXbB", *currentPosition))
+        {
+            int value;
+            errno = 0;
+            /* Found a digit, attempt to convert it to an integer value */
+            value = strtol(currentPosition, &endPtr, base);
+            if (errno == 0)
+            {
+                if (currentField == fieldSelector)
+                    return value;
+                currentPosition = endPtr; /* moved to end of whatever was parsed by strtol */
+                currentField++;
+            }
+            else
+                currentPosition++;
+        } else {
+            /* Skip non-digit characters */
+            currentPosition++;
+        }
+    }
 
-    while (name_str[i] && !(strchr("0123456789+-",      name_str[i  ]) &&
-                            strchr("0123456789.aAbBcCdDeEfFxX+-", name_str[i+1])))
-        i++;
-
-    if (!name_str[i]) return -1;
-
-    return (int) strtol(&name_str[i], 0, 10);
+    return -1; /* specified field not found */
 }
 
 PUBLIC char const *

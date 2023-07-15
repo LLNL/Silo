@@ -50,7 +50,6 @@ National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
 #include <config.h>
-
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
