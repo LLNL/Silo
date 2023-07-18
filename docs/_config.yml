@@ -1,0 +1,8 @@
+remote_theme: pages-themes/leap-day@v0.2.0
+plugins:
+- jekyll-remote-theme
+
+title: Silo Project Home
+description: Home pages for the Silo project.
+
+show_downloads: false
