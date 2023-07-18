@@ -22,6 +22,9 @@ def setup(app):
 # Files to exclude
 exclude_patterns = [ "func-template.md" ]
 
+# Top of MyST/Sphinx doc tree
+root_doc = u'index-sphinx.md'
+
 # MYST specific extensions
 myst_enable_extensions = [
     "deflist",
