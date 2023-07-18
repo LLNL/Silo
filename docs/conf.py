@@ -22,12 +22,14 @@ def setup(app):
 # Files to exclude
 exclude_patterns = [ "func-template.md" ]
 
+# Using default suffix would have been fine, but root_doc
+# variable winds up assuming `.rst` without this.
 source_suffix = {
     '.md': 'markdown'
 }
 
-# Top of MyST/Sphinx doc tree
-root_doc = u'index-sphinx.md'
+# Top of MyST/Sphinx doc tree WITHOUT the extension
+root_doc = u'index-sphinx'
 
 # MYST specific extensions
 myst_enable_extensions = [
