@@ -22,6 +22,10 @@ def setup(app):
 # Files to exclude
 exclude_patterns = [ "func-template.md" ]
 
+source_suffix = {
+    '.md': 'markdown'
+}
+
 # Top of MyST/Sphinx doc tree
 root_doc = u'index-sphinx.md'
 
