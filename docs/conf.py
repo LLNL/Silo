@@ -20,7 +20,7 @@ def setup(app):
         app.add_stylesheet('custom.css')
 
 # Files to exclude
-exclude_patterns = [ "func-template.md" ]
+exclude_patterns = [ "func-template.md", "index.md" ]
 
 # Using default suffix would have been fine, but root_doc
 # variable winds up assuming `.rst` without this.
