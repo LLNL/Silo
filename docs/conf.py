@@ -1,5 +1,10 @@
 import os, sys
 
+project = u'Silo User Manual'
+copyright = u'1996-2023, LLNL, LLNL-SM-654357'
+author = u'LLNL'
+release = u'4.11.1'
+
 extensions = ['sphinx.ext.mathjax']
 
 if os.environ.get('READTHEDOCS'):
