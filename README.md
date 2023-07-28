@@ -1,1 +1,1 @@
-./docs/index.md
+[Silo Documentation](https://silo.readthedocs.io)
