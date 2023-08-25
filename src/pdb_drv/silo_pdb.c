@@ -829,6 +829,9 @@ PJ_GetComponent (PDBfile *file, char const *objname, char const *compname) {
  *
  *  Modified
  *
+ *    Mark C. Miller, Thu Aug 24 22:41:23 PDT 2023
+ *    Add use_PJcache_group==0 to conditions controlling whether a new
+ *    call to PJ_GetObject is made.
  *--------------------------------------------------------------------
  */
 INTERNAL int
@@ -840,7 +843,7 @@ PJ_GetComponentType (PDBfile *file, char const *objname, char const *compname)
 
    /* If there is no cached group, or we are interested in a
     * different object, get the one we want.  */
-   if(cached_group == NULL || cached_obj_name == NULL ||
+   if(use_PJgroup_cache == 0 || cached_group == NULL || cached_obj_name == NULL ||
       (!STR_EQUAL(cached_obj_name, objname)))
    {
        char       *result = NULL;
