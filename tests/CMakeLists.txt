@@ -241,6 +241,13 @@ endif()
 if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     foreach(f arrayf77 csgmesh curvef77 matf77 pointf77 qmeshmat2df77 quadf77 testallf77 ucdf77)
         silo_add_test(NAME ${f} SRC ${f}.f)
+        if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+          if (CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
+            target_compile_options(${f} PRIVATE
+              "$<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>"
+              )
+          endif()
+        endif()
     endforeach()
     silo_add_test(NAME arrayf90 SRC arrayf90.f90)
 endif()
