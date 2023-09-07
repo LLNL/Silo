@@ -1253,3 +1253,33 @@ Longer than normal component strings can result in creating objects in Silo file
   In other cases, a consumer may need to be re-compiled and re-linked or worse, re-coded, re-compiled and re-linked.
   These latter cases are non-ideal because they often involve repercussions up and down the dependency chain.
   In these cases, no part of the workflow can be fixed until all parts of the workflow are fixed.
+
+{{ EndFunc }}
+
+## `DBGetCompatabilityMode()`
+## `DBGetCompatabilityModeFile()`
+
+* **Summary:** Get compatability mode 
+
+* **C Signature:**
+
+  ```
+  int DBGetCompatabilityMode()
+  int DBGetCompatabilityModeFile(DBfile *dbfile)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  integer function dbgetcompat()
+  ```
+
+* **Arguments:**
+
+  `None`
+
+* **Returned value:**
+
+  The current compatability mode of the library or file.
+
+* **Description:**
