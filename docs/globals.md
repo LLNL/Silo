@@ -1226,9 +1226,9 @@ Longer than normal component strings can result in creating objects in Silo file
   This is more likely to be true if the data producer is using a newer version of the HDF5 library than a consumer and is less likely to be true in the reverse situation.
   :::
 
-  As Silo has evolved, various new features have been introduced either to Silo itself or the the underlying driver I/O library Silo uses which can impact the backward compatibility.
+  As Silo has evolved, various new features have been introduced either to Silo itself or the underlying driver I/O library Silo uses which can impact the backward compatibility.
   Backward compatibility issues can sometimes be restricted to specific objects in a Silo file or specific features of the interface or may sometimes involve the entire file.
-  For example, its concievable newer versions of the Silo library can be used in such a way that only *some* objects in the file are not readable by older versions of the Silo library while other objects in a file are fine.
+  For example, it is concievable newer versions of the Silo library can be used in such a way that only *some* objects in the file are not readable by older versions of the Silo library while other objects in a file are fine.
 
   An example of a Silo-level feature that impacted backward compatibility was the introduction of nameschemes for multi-block objects.
   Nameschemes were introduced in such a way that data producers using nameschemes produced files downstream consumers could no longer read correctly without modification.
@@ -1239,7 +1239,7 @@ Longer than normal component strings can result in creating objects in Silo file
   Nameschemes represent a backward compatibility issue that is restricted to *some* objects (e.g. multi-block objects) in a Silo file.
   Other parts of the Silo file will still remain readable by older workflows.
   An example of a Silo feature that can impact compatibility of the *whole file* is the choice of virtual file driver (VFD).
-  In some cases, a data producer can select a virtual file driver (often driven by I/O performance considerations) which can be handled in a consumer only if the consumer had been previously set up to handle it.
+  In some cases, a data producer can select a virtual file driver (often driven by I/O performance considerations) which can be handled by a data consumer only if the consumer had been previously set up to handle it.
   Any workflow involving a Silo data consumer that was not set up to handle that virtual file driver would not be able to even open the file.
 
   The above examples underscore a commonly encountered compatibility tradeoff in persistent storage libraries like Silo.
@@ -1286,4 +1286,4 @@ Longer than normal component strings can result in creating objects in Silo file
 * **Description:**
 
   Because compatibility mode can be set differently for a file than for the library globally, two methods are provided to
-  retrieve its value.
+  retrieve it's value.
