@@ -1206,20 +1206,27 @@ Longer than normal component strings can result in creating objects in Silo file
 
 * **Description:**
 
-  Compatibility mode can be OR'd into the `mode` arg in the [`DBCreate`](files.md#dbcreate) or [`DBOpen`](files.md#dbopen) calls or can be set globally for the entire library with `DBSetCompatibilityMode()`.
-  When `DB_COMPAT_OVER_PERF` or `DB_PERF_OVER_COMPAT` are OR'd into the `mode` arg in the [`DBCreate`](files.md#dbcreate) or [`DBOpen`](files.md#dbopen), that setting takes precedent over whatever setting is active globally for the library.
+  Silo's compatibility mode influences how data is *exchanged* between producers and consumers when they are using different versions of the Silo library (or an underlying driver library such as HDF5).
+  Producers using newer versions of Silo (or newer versions of an underlying driver library such as HDF5) may need to expicitly control Silo's compatibility mode in order to ensure consumers using older versions of Silo (or older versions of an underlying driver library such as HDF5) will be able to read their data.
 
-  When `DB_COMPAT_OVER_PERF` is set (which is also the default), it means that when there is a choice in the way the Silo library behaves, compatibility will trump performance.
+  The compatibility mode can be set globally for the entire library with `DBSetCompatibilityMode()`.
+  Alternatively, it can also be set on an individual Sil file when it is OR'd into the `mode` arg in the [`DBCreate`](files.md#dbcreate) or [`DBOpen`](files.md#dbopen) calls.
+  When `DB_COMPAT_OVER_PERF` or `DB_PERF_OVER_COMPAT` are OR'd into the `mode` arg, that setting takes precedent over the global setting.
+
+  When `DB_COMPAT_OVER_PERF` is set (which is also the default), it means that when there is a choice in the way the Silo library behaves, compatibility will be prioritized over performance.
   In this mode, the Silo library endeavours to create data readable by the oldest version of Silo still likely in use (4.10) and/or the oldest version of the HDF5 library Silo is likely to be using (1.8).
-  In some rare cases (e.g. certain VFD's described below), *compatibility* applies to an *entire* file.
-  Usually, however, *compatibility* applies to individual *objects* written while `DB_COMPAT_OVER_PERF` is set.
-  A single Silo file can contain objects written with different compatibility modes and only those objects are then effected.
+  In rare cases (e.g. some special purpose virtual file drivers (VFD)), *compatibility* applies to an *entire* file.
+  Usually, however, *compatibility* applies to individual *objects* in a file.
+  A single Silo file can contain objects written with different compatibility modes.
 
   By default, the library operates to prioritize compatibility over performance.
-  There are likely circumstances where running in this way means accepting less than available performance.
 
-  When performance considerations need to take precedent, callers are free to set the compatibility mode to `DB_PERF_OVER_COMPAT`.
-  However, all stakeholders need to be aware that doing so may cause objects the Silo library produces while this mode is in effect to be unreadable by downstream consumers.
+  :::{tip}
+  There are likely circumstances where running in this way means accepting less than available performance.
+  :::
+
+  When performance considerations need to take precedent, callers are free to set the compatibility mode to `DB_PERF_OVER_COMPAT` which favors performance over compatibility.
+  However, all stakeholders needing to share this data need to be aware that doing so may cause objects the Silo library produces while this mode is in effect to be unreadable by downstream consumers.
 
   :::{danger}
   When `DB_PERF_OVER_COMPAT` is in effect (either for an individual file or for the whole library), objects written may not be readable by all downstream consumers.
@@ -1234,17 +1241,18 @@ Longer than normal component strings can result in creating objects in Silo file
   Nameschemes were introduced in such a way that data producers using nameschemes produced files downstream consumers could no longer read correctly without modification.
   This is a bad outcome.
   This is especially true when an alternative would have been to have `DBGetMultiXxx()` methods (the methods that read multi-block objects) expand any nameschemes into the equivalent explicit lists of names thereby obeying the terms of the original, older `DBGetMultiXxx()` interface.
-  Callers who didn't want to suffer that memory hit could have been given the option of setting a flag that would enable `DBGetMultiXxx()` methods to return the nameschemed objects natively instead of expanding the names.
+  Concievably, this is something that is possible to handle if `DB_COMPAT_OVER_PERF` is OR'd with `DB_READ` in a [`DBOpen`](files.md#dbopen) call.
+  Currently, compatibility mode flags are not supported for `DB_READ` opens.
 
   Nameschemes represent a backward compatibility issue that is restricted to *some* objects (e.g. multi-block objects) in a Silo file.
-  Other parts of the Silo file will still remain readable by older workflows.
+  Other objects of the Silo file will remain readable by older versions of Silo (or older versions of the underlying driver library such as HDF5).
   An example of a Silo feature that can impact compatibility of the *whole file* is the choice of virtual file driver (VFD).
   In some cases, a data producer can select a virtual file driver (often driven by I/O performance considerations) which can be handled by a data consumer only if the consumer had been previously set up to handle it.
   Any workflow involving a Silo data consumer that was not set up to handle that virtual file driver would not be able to even open the file.
 
   The above examples underscore a commonly encountered compatibility tradeoff in persistent storage libraries like Silo.
   Compatibility (whether downstream consumers can read the data) is often pitted against performance.
-  Best performance often requires data producers to utilize features of libraries that may break backward compatibility meaning downstream consumers may not be able to read the data without modification.
+  Best performance often requires data producers to utilize features of libraries that may break backward compatibility meaning downstream consumers using older versions of Silo (or older versions of the underlying driver library such as HDF5) may not be able to read the data without modification.
 
   These issues extend also to the underlying I/O driver libraries Silo uses such as HDF5.
   Data producers using newer versions of HDF5 underneath Silo and using newer features that offer better performance can produce HDF5 files that downstream consumers may not be able to read without modification.

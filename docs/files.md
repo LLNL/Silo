@@ -427,7 +427,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   :---|:---
   `name` | Name of the file to open. Can be either an absolute or relative path.
   `type` | The `type` of file to open. One of the predefined types, typically `DB_UNKNOWN`, `DB_PDB`, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
-  `mode` | The `mode` of the file to open. Pass `DB_READ` or `DB_APPEND`, optionally OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode)
+  `mode` | The `mode` of the file to open. Pass `DB_READ` or `DB_APPEND`. Optionally, `DB_APPEND` can be OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode). OR'ing of `DB_READ` with compatibility mode flags is not allowed.
 
 * **Returned value:**
 
