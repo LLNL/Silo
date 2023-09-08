@@ -1178,7 +1178,6 @@ Longer than normal component strings can result in creating objects in Silo file
 {{ EndFunc }}
 
 ## `DBSetCompatibilityMode()`
-## `DBSetCompatibilityModeFile()`
 
 * **Summary:** Set compatibility mode for subsequent object creations 
 
@@ -1186,7 +1185,6 @@ Longer than normal component strings can result in creating objects in Silo file
 
   ```
   int DBSetCompatibilityMode(int mode)
-  int DBSetCompatibilityModeFile(DBfile *dbfile, int mode)
   ```
 
 * **Fortran Signature:**
@@ -1207,6 +1205,9 @@ Longer than normal component strings can result in creating objects in Silo file
   Previous setting for `mode`.
 
 * **Description:**
+
+  Compatibility mode can be OR'd into the `mode` arg in the [`DBCreate`](files.md#dbcreate) or [`DBOpen`](files.md#dbopen) calls or can be set globally for the entire library with `DBSetCompatibilityMode()`.
+  When `DB_COMPAT_OVER_PERF` or `DB_PERF_OVER_COMPAT` are OR'd into the `mode` arg in the [`DBCreate`](files.md#dbcreate) or [`DBOpen`](files.md#dbopen), that setting takes precedent over whatever setting is active globally for the library.
 
   When `DB_COMPAT_OVER_PERF` is set (which is also the default), it means that when there is a choice in the way the Silo library behaves, compatibility will trump performance.
   In this mode, the Silo library endeavours to create data readable by the oldest version of Silo still likely in use (4.10) and/or the oldest version of the HDF5 library Silo is likely to be using (1.8).
@@ -1283,3 +1284,6 @@ Longer than normal component strings can result in creating objects in Silo file
   The current compatibility mode of the library or file.
 
 * **Description:**
+
+  Because compatibility mode can be set differently for a file than for the library globally, two methods are provided to
+  retrieve its value.
