@@ -1195,7 +1195,7 @@ Longer than normal component strings can result in creating objects in Silo file
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | The file for which HDF5 friendly names property should be set
   `mode` | Mode to indicate how Silo library should behave for subsequent object creation operations. Pass either `DB_COMPAT_OVER_PERF` or `DB_PERF_OVER_COMPAT`. The default is `DB_COMPAT_OVER_PERF`. See description below for further details.
