@@ -1207,6 +1207,7 @@ Longer than normal component strings can result in creating objects in Silo file
 * **Description:**
 
   Silo's compatibility mode influences how data is *exchanged* between producers and consumers when they are using versions of the Silo library (or an underlying driver library such as HDF5) different enough to introduce potential compatibility issues.
+
   By default, the Silo library operates to *maximize* compatibility of files created between newer and older versions of the library (or an underlying driver library such as HDF5).
   However, doing this often comes at the cost of lost performance.
   Better performance may be possible by using newer features of Silo (or an underlying driver library such as HDF5) but the resulting data may not be readable by older versions of Silo (or older versions of an underlying driver library such as HDF5).
@@ -1220,14 +1221,12 @@ Longer than normal component strings can result in creating objects in Silo file
   In this mode, the Silo library endeavours to create data readable by the oldest version of Silo still likely in use (4.10) and/or the oldest version of the HDF5 library Silo is likely to be using (1.8).
   In rare cases (e.g. some special purpose virtual file drivers (VFD)), *compatibility* applies to an *entire* file.
   Usually, however, *compatibility* applies to individual *objects* in a file.
-  A single Silo file can wind up containing objects associated with different compatibility modes.
-
-  By default, the library operates to prioritize compatibility over performance.
+  A single Silo file can wind up containing objects produced while in different compatibility modes.
 
   :::{tip}
   There are likely circumstances where setting compatibility mode to prioritize performance over compatibility will result in better performance.
   It is difficult to quantify *better* and it will vary based on the particular use-cases.
-  However, *better* can be anyware between 2x and 10x for specific operations.
+  However, *better* might be anywhere between 2x and 10x for specific operations.
   :::
 
   When performance considerations need to take precedence, callers are free to set the compatibility mode to `DB_PERF_OVER_COMPAT` which favors performance over compatibility.
@@ -1236,6 +1235,8 @@ Longer than normal component strings can result in creating objects in Silo file
   :::{danger}
   When `DB_PERF_OVER_COMPAT` is in effect (either for an individual file or for the whole library), objects written may not be readable by all downstream consumers.
   This is more likely to be true if the data producer is using a newer version of Silo or HDF5 than a consumer and is less likely to be true if the data producer is using and older version of Silo or HDF5 than a consumer.
+  In some cases, correcting downstream consumers may involve simply re-linking them with newer versions of Silo and/or HDF5.
+  In other cases, correcting downstream consumers may require re-compiling them with newer versions of Silo and/or HDF5.
   :::
 
   As Silo has evolved, various new features have been introduced either to Silo itself or the underlying driver I/O library Silo uses which can impact the backward compatibility.
