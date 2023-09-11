@@ -975,7 +975,7 @@ main(int argc, char *argv[])
     /* 
      * Create the multi-block curvilinear 2d mesh.
      */
-    DBSetCompatibilityMode(DB_PERF_OVER_COMPAT);
+    DBSetCompatibilityMode(compat);
     for (t = 0; t < time_series; t++)
     {
        int emb = 1;
