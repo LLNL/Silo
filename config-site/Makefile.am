@@ -74,7 +74,7 @@ EXTRA_DIST = $(srcdir)/*.conf
 # from a Linux system.
 #
 dist-hook:
-	@if test -z "$(uname | grep -i linux)"; then \
+	@if test -z "$$(uname | grep -i linux)"; then \
             echo -e "\n\n\n***Produce distributions only from linux***\n\n\n"; \
             exit 1; \
         fi; \
