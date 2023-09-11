@@ -57,7 +57,9 @@ be used for advertising or product endorsement purposes.
    versions of HDF5 before 1.8 and ensures correct compilation with
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
+#if 0
 #define H5_USE_16_API
+#endif
 
 #include <hdf5.h>
 
@@ -942,11 +944,11 @@ static hid_t    P_ckrdprops = -1;
     if (_tmp_m>=0) {                                                          \
         hid_t _m_ary;                                                         \
         _size = 3;                                                            \
-        _m_ary = H5Tarray_create(_tmp_m, 1, &_size, NULL);                    \
+        _m_ary = H5Tarray_create(_tmp_m, 1, &_size);                          \
         db_hdf5_put_cmemb(_mt, #NAME, OFFSET(_m, NAME), 0, NULL, _m_ary);     \
         H5Tclose(_m_ary);                                                     \
         if (_f && (_tmp_f=_f->T_##TYPE)>=0) {                                 \
-            hid_t _f_ary = H5Tarray_create(_tmp_f, 1, &_size, NULL);          \
+            hid_t _f_ary = H5Tarray_create(_tmp_f, 1, &_size);                \
             db_hdf5_put_cmemb(_ft, #NAME, _f_off, 0, NULL, _f_ary);           \
             _f_off += H5Tget_size(_f_ary);                                    \
             H5Tclose(_f_ary);                                                 \
@@ -1825,7 +1827,7 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
         hid_t o, attr;
 
         /* If the named object is a group, there isn't anything to do */
-        o = H5Gopen(dbfile->cwg, name);
+        o = H5Gopen(dbfile->cwg, name, H5P_DEFAULT);
         if (o > 0)
         {
             H5Gclose(o);
@@ -1833,7 +1835,7 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
         }
 
         /* If the named object *is* a dataset, just return that name */
-        o = H5Dopen(dbfile->cwg, name);
+        o = H5Dopen(dbfile->cwg, name, H5P_DEFAULT);
         if (o > 0)
         {
             H5Dclose(o);
@@ -1844,7 +1846,7 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
         }
 
         /* Its probably an aggregate Silo object */
-        o = H5Topen(dbfile->cwg, name);
+        o = H5Topen(dbfile->cwg, name, H5P_DEFAULT);
         if (o < 0) return -1;
 
         if ((attr=H5Aopen_name(o, "silo_type"))<0 ||
@@ -1907,7 +1909,7 @@ db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
         int i;
         *ndims = H5Tget_array_ndims(type);
         assert(*ndims<=3);
-        H5Tget_array_dims(type, bigdims, NULL);
+        H5Tget_array_dims(type, bigdims);
         for (i=0; i<*ndims; i++) size[i] = bigdims[i];
         type = H5Tget_super(type);
     } else {
@@ -1946,7 +1948,7 @@ db_hdf5_put_cmemb(hid_t compound_type, char const *name, size_t offset,
         hsize_t bigdims[16];
         int i;
         for (i=0; i<ndims; i++) bigdims[i] = dim[i];
-        type = H5Tarray_create(type, ndims, bigdims, NULL);
+        type = H5Tarray_create(type, ndims, bigdims);
     }
     retval = H5Tinsert(compound_type, name, offset, type);
     if (ndims) H5Tclose(type);
@@ -2007,7 +2009,7 @@ T_str(char *s)
  *-------------------------------------------------------------------------
  */
 PRIVATE herr_t
-silo_walk_cb(int n, H5E_error_t *err_desc, void *client_data) 
+silo_walk_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data) 
 {
     int *silo_error_code_p = (int *) client_data;
 
@@ -2042,7 +2044,7 @@ hdf5_to_silo_error(char const *vname, char const *fname)
 {
     int silo_error_code = E_NOERROR;
 
-    H5Ewalk(H5E_WALK_UPWARD, silo_walk_cb, &silo_error_code);
+    H5Ewalk(H5E_DEFAULT, H5E_WALK_UPWARD, silo_walk_cb, &silo_error_code);
 
     if (silo_error_code == E_NOERROR)
         silo_error_code = E_CALLFAIL;
@@ -2089,9 +2091,9 @@ db_hdf5_init(void)
 
     /* Turn off error messages from the hdf5 library */
     if (SILO_Globals._db_err_level_drvr == DB_ALL)
-        H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
+        H5Eset_auto(H5E_DEFAULT, (H5E_auto2_t) H5Eprint2, stderr);
     else
-        H5Eset_auto(NULL, NULL);
+        H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     /* Define a scalar data space */
     SCALAR = H5Screate(H5S_SCALAR);
@@ -3779,7 +3781,7 @@ db_hdf5_get_comp_var(DBfile *_dbfile, char const *name, hsize_t *nelmts,
         memname = p+1;
 
         stypeid = attr = type_id = -1;
-        if ((type_id=H5Topen(fileid, type_name))>=0 &&
+        if ((type_id=H5Topen(fileid, type_name, H5P_DEFAULT))>=0 &&
             (attr=H5Aopen_name(type_id, "silo"))>=0 &&
             (stypeid=H5Aget_type(attr))>=0 &&
             (membno=H5Tget_member_index(stypeid, memname))>=0)
@@ -3861,7 +3863,7 @@ db_hdf5_get_comp_var(DBfile *_dbfile, char const *name, hsize_t *nelmts,
             {
                 hid_t d, fspace, ftype, mtype;
 
-                d = H5Dopen(fileid, tmp);
+                d = H5Dopen(fileid, tmp, H5P_DEFAULT);
                 fspace = H5Dget_space(d);
                 filesize = H5Dget_storage_size(d);               
                 numvals = H5Sget_simple_extent_npoints(fspace);
@@ -3994,7 +3996,7 @@ load_toc(hid_t grp, char const *name, H5L_info_t const *dummy, void *_toc)
          * Any group which has a `..' entry is a silo directory. The `..'
          * names do not appear in the silo table of contents.
          */
-        if (!strcmp(name, "..") || (obj=H5Gopen(grp, name))<0) break;
+        if (!strcmp(name, "..") || (obj=H5Gopen(grp, name, H5P_DEFAULT))<0) break;
         H5E_BEGIN_TRY {
             if (H5Gget_objinfo(obj, "..", FALSE, NULL)>=0) objtype = DB_DIR;
         } H5E_END_TRY;
@@ -4002,7 +4004,7 @@ load_toc(hid_t grp, char const *name, H5L_info_t const *dummy, void *_toc)
         break;
 
     case H5G_TYPE:
-        if ((obj=H5Topen(grp, name))<0) break;
+        if ((obj=H5Topen(grp, name, H5P_DEFAULT))<0) break;
         if ((attr=H5Aopen_name(obj, "silo_type"))<0) break;
         if (H5Aread(attr, H5T_NATIVE_INT, &_objtype)<0) break;
         objtype = (DBObjectType)_objtype;
@@ -4242,7 +4244,7 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
 #endif
             if (h5lexists != FALSE)
             {
-                dset = H5Dopen(dbfile->cwg, names[i]);
+                dset = H5Dopen(dbfile->cwg, names[i], H5P_DEFAULT);
                 if (!(dset<0))
                 {
                     H5Dclose(dset);
@@ -4254,7 +4256,7 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
             ftype = silof2hdff_type(dbfile, types[i]);
             if (space == -1)
                 space = H5Screate_simple(1, &one, &one);
-            dset = H5Dcreate(dbfile->cwg, names[i], ftype, space, H5P_DEFAULT);
+            dset = H5Dcreate(dbfile->cwg, names[i], ftype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             H5Dwrite(dset, mtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[i]);
             H5Dclose(dset);
         }
@@ -4300,7 +4302,7 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
             attr = H5Aopen_name(dbfile->link, "nlinks");
         } H5E_END_TRY;
         if (attr<0 && (attr=H5Acreate(dbfile->link, "nlinks", H5T_NATIVE_INT,
-                                      SCALAR, H5P_DEFAULT))<0) {
+                                      SCALAR, H5P_DEFAULT, H5P_DEFAULT))<0) {
             db_perror("nlinks attribute", E_CALLFAIL, me);
             UNWIND();
         }
@@ -4444,7 +4446,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int const _size[],
         {
             if (fname)
             {
-                if ((dset=H5Dcreate(dbfile->cwg, fname, ftype, space, P_crprops))<0) {
+                if ((dset=H5Dcreate(dbfile->cwg, fname, ftype, space, H5P_DEFAULT, P_crprops, H5P_DEFAULT))<0) {
                     db_perror(name, E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -4452,7 +4454,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int const _size[],
             }
             else
             {
-                if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
+                if ((dset=H5Dcreate(dbfile->link, name, ftype, space, H5P_DEFAULT, P_crprops, H5P_DEFAULT))<0) {
                     db_perror(name, E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -4460,7 +4462,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int const _size[],
         }
         else
         {
-            if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
+            if ((dset=H5Dcreate(dbfile->link, name, ftype, space, H5P_DEFAULT, P_crprops, H5P_DEFAULT))<0) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
@@ -4545,7 +4547,7 @@ db_hdf5_compckz(DBfile_hdf5 *dbfile, char *name)
 
     PROTECT {
         if (name && *name) {
-            if ((d=H5Dopen(dbfile->cwg, name))<0) {
+            if ((d=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))<0) {
                 db_perror(name, E_NOTFOUND, me);
                 UNWIND();
             }
@@ -4608,7 +4610,7 @@ db_hdf5_comprd(DBfile_hdf5 *dbfile, char *name, int ignore_force_single)
     
     PROTECT {
         if (name && *name) {
-            if ((d=H5Dopen(dbfile->cwg, name))<0) {
+            if ((d=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))<0) {
                 db_perror(name, E_NOTFOUND, me);
                 UNWIND();
             }
@@ -4852,11 +4854,11 @@ db_hdf5_hdrwr(DBfile_hdf5 *dbfile, char *name, hid_t mtype, hid_t ftype,
     PROTECT {
         /* Open an existing object or create a named type */
         H5E_BEGIN_TRY {
-            obj = H5Topen(dbfile->cwg, name);
+            obj = H5Topen(dbfile->cwg, name, H5P_DEFAULT);
         } H5E_END_TRY;
         if (obj<0) {
             obj = H5Tcopy(H5T_NATIVE_INT);
-            if (H5Tcommit(dbfile->cwg, name, obj)<0) {
+            if (H5Tcommit(dbfile->cwg, name, obj, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)<0) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
@@ -4872,7 +4874,7 @@ db_hdf5_hdrwr(DBfile_hdf5 *dbfile, char *name, hid_t mtype, hid_t ftype,
             } H5E_END_TRY;
         }
         if (attr<0 && (attr=H5Acreate(obj, "silo", ftype, SCALAR,
-                                      H5P_DEFAULT))<0) {
+                                      H5P_DEFAULT, H5P_DEFAULT))<0) {
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
@@ -4893,7 +4895,7 @@ db_hdf5_hdrwr(DBfile_hdf5 *dbfile, char *name, hid_t mtype, hid_t ftype,
             } H5E_END_TRY;
         }
         if (attr<0 && (attr=H5Acreate(obj, "silo_type", H5T_NATIVE_INT, SCALAR,
-                                      H5P_DEFAULT))<0) {
+                                      H5P_DEFAULT, H5P_DEFAULT))<0) {
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
@@ -4972,20 +4974,16 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 #endif
 
     /* Performance optimizations for memory footprint */
-#if HDF5_VERSION_GE(1,8,0)
-#ifndef _WIN32
-#warning FIX ME...THIS NEEDS TO BE CONDITION ON COMPAT MODE WORKS FOR 1.8.0
+    if (mode & DB_PERF_OVER_COMPAT)
+        H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+#if HDF5_VERSION_GE(1,10,0)
+    if (mode & DB_COMPAT_OVER_PERF)
+        H5Pset_libver_bounds(retval, H5F_LIBVER_V18, H5F_LIBVER_V18);
 #endif
-    /*H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);*/
 
 #if HDF5_VERSION_GE(1,10,1)
     H5Pset_evict_on_close(retval, (hbool_t)1);
 #endif
-
-#ifndef _WIN32
-#warning SET FRIENDLY NAMES TO 2 but only at file level
-#endif
-    /*DBSetFriendlyHDF5NamesFile((DBfile*)dbfile, 2);*/
 
     /* First, initialize our copy of h5mdc_config */
     h5mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -5000,7 +4998,6 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 
     /* Set mdc config params */
     H5Pset_mdc_config(retval, &h5mdc_config);
-#endif
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
@@ -5611,7 +5608,7 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
     int         tmp, target=DB_LOCAL;
     
     /* Open "/" as current working group */
-    if ((cwg=H5Gopen(dbfile->fid, "/"))<0) {
+    if ((cwg=H5Gopen(dbfile->fid, "/", H5P_DEFAULT))<0) {
         H5Fclose(dbfile->fid);
         silo_db_close((DBfile*) dbfile);
         db_perror("root group", E_CALLFAIL, me);
@@ -5623,9 +5620,9 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
      * might not exist in old SAMI files).
      */
     H5E_BEGIN_TRY {
-        link = H5Gopen(dbfile->fid, LINKGRP);
+        link = H5Gopen(dbfile->fid, LINKGRP, H5P_DEFAULT);
     } H5E_END_TRY;
-    if (link<0 && (link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
+    if (link<0 && (link=H5Gcreate(dbfile->fid, LINKGRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0) {
         H5Fclose(dbfile->fid);
         silo_db_close((DBfile*) dbfile);
         db_perror("link group", E_CALLFAIL, me);
@@ -5702,13 +5699,13 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char const *finfo)
     const       int nofilters = 1;
     
     /* Open root group as CWG */
-    if ((dbfile->cwg=H5Gopen(dbfile->fid, "/"))<0) {
+    if ((dbfile->cwg=H5Gopen(dbfile->fid, "/", H5P_DEFAULT))<0) {
         db_perror("root group", E_CALLFAIL, me);
         return silo_db_close((DBfile*) dbfile);
     }
 
     /* Create the link group */
-    if ((dbfile->link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
+    if ((dbfile->link=H5Gcreate(dbfile->fid, LINKGRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0) {
         db_perror("link group", E_CALLFAIL, me);
         return silo_db_close((DBfile*) dbfile);
     }
@@ -5721,7 +5718,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char const *finfo)
      * link group so we can retrieve it later when the file is reopened.
      */
     if ((attr=H5Acreate(dbfile->link, "target", dbfile->T_int, SCALAR,
-                        H5P_DEFAULT))<0 ||
+                        H5P_DEFAULT, H5P_DEFAULT))<0 ||
         H5Awrite(attr, H5T_NATIVE_INT, &target)<0 ||
         H5Aclose(attr)<0) {
         db_perror("targetinfo", E_CALLFAIL, me);
@@ -5890,9 +5887,9 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
     static char *me = "db_hdf5_Open";
 
     if (SILO_Globals._db_err_level_drvr == DB_ALL)
-        H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
+        H5Eset_auto(H5E_DEFAULT, (H5E_auto2_t) H5Eprint2, stderr);
     else
-        H5Eset_auto(NULL, NULL);
+        H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     /* File access mode */
     if (DB_READ==mode) {
@@ -5902,6 +5899,16 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
     } else {
         db_perror("mode", E_INTERNAL, me);
         return NULL;
+    }
+
+    /* use mode to pass compatibility option into
+       db_hdf5_file_accprops */
+    if (((mode & 0x0000000F) == DB_APPEND))
+    {
+        if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
+            mode |= DB_PERF_OVER_COMPAT;
+        if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
+            mode |= DB_COMPAT_OVER_PERF;
     }
 
     faprops = db_hdf5_file_accprops(opts_set_id, mode, 0);
@@ -5973,14 +5980,21 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
 
     /* Turn off error messages from the hdf5 library */
     if (SILO_Globals._db_err_level_drvr == DB_ALL)
-        H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
+        H5Eset_auto(H5E_DEFAULT, (H5E_auto2_t) H5Eprint2, stderr);
     else
-        H5Eset_auto(NULL, NULL);
+        H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+
+    /* use mode to pass compatibility option into
+       db_hdf5_file_accprops */
+    if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
+        mode |= DB_PERF_OVER_COMPAT;
+    if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
+        mode |= DB_COMPAT_OVER_PERF;
 
     faprops = db_hdf5_file_accprops(opts_set_id, mode, &fcprops);
 
         /* Create or open hdf5 file */
-    if (DB_CLOBBER==mode) {
+    if (DB_CLOBBER==(mode & 0x0000000F)) {
         /* If we ever use checksumming (which requires chunked datasets),
          * HDF5's BTree's will effect storage overhead. Since Silo really
          * doesn't support growing/shrinking datasets, we just use a value
@@ -5999,7 +6013,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
         if (created_fcprops)
             H5Pclose(fcprops);
         H5Glink(fid, H5G_LINK_HARD, "/", ".."); /*don't care if fails*/
-    } else if (DB_NOCLOBBER==mode) {
+    } else if (DB_NOCLOBBER==(mode & 0x0000000F)) {
         fid = H5Fopen(name, H5F_ACC_RDWR, faprops);
     } else {
         H5Pclose(faprops);
@@ -6185,7 +6199,7 @@ db_hdf5_MkDir(DBfile *_dbfile, char const *name)
     PROTECT {
 
         /* Create the new group */
-        if ((grp=H5Gcreate(dbfile->cwg, name, 0))<0) {
+        if ((grp=H5Gcreate(dbfile->cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0) {
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
@@ -6252,7 +6266,7 @@ db_hdf5_SetDir(DBfile *_dbfile, char const *name)
     hid_t       newdir = -1;
     
     PROTECT {
-        if ((newdir=H5Gopen(dbfile->cwg, name))<0 ||
+        if ((newdir=H5Gopen(dbfile->cwg, name, H5P_DEFAULT))<0 ||
             (strcmp(name,"/.silo")!=0 &&
             H5Gget_objinfo(newdir, "..", FALSE, NULL)<0)) {
             db_perror(name, E_NOTFOUND, me);
@@ -6324,7 +6338,7 @@ db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/)
     
     memset(comp, 0, sizeof comp);
     PROTECT {
-        cwg = H5Gopen(dbfile->cwg, ".");
+        cwg = H5Gopen(dbfile->cwg, ".", H5P_DEFAULT);
         if (H5Gget_objinfo(cwg, ".", TRUE, &cur_sb)<0) {
             db_perror("stat(\".\")", E_CALLFAIL, me);
             UNWIND();
@@ -6347,7 +6361,7 @@ db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/)
              * same object ID as the current group and use that as the
              * component of the name
              */
-            if ((parent=H5Gopen(cwg, ".."))<0) {
+            if ((parent=H5Gopen(cwg, "..", H5P_DEFAULT))<0) {
                 db_perror("no `..' entry", E_NOTFOUND, me);
                 UNWIND();
             }
@@ -6438,7 +6452,7 @@ copy_obj(hid_t hobj, char const *name, void *op_data)
          * Any group which has a `..' entry is a silo directory. The `..'
          * names do not appear in the silo table of contents.
          */
-        if (!strcmp(name, "..") || (obj=H5Gopen(hobj, name))<0) break;
+        if (!strcmp(name, "..") || (obj=H5Gopen(hobj, name, H5P_DEFAULT))<0) break;
         H5E_BEGIN_TRY {
             if (H5Gget_objinfo(obj, "..", FALSE, NULL)>=0) objtype = DB_DIR;
         } H5E_END_TRY;
@@ -6467,7 +6481,7 @@ copy_obj(hid_t hobj, char const *name, void *op_data)
         size_t      asize, nelmts, msize;
 
         /* Open the object as a named data type */
-        if ((o=H5Topen(hobj, name))<0) {
+        if ((o=H5Topen(hobj, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -6550,7 +6564,7 @@ copy_obj(hid_t hobj, char const *name, void *op_data)
                     char *srcSubObjAbsName = db_join_path(srcSubObjDirName, mem_value);
                     char *dstSubObjDirName = db_dirname(dstName);
                     char *dstSubObjAbsName = db_join_path(dstSubObjDirName, mem_value);
-                    if (strcmp(srcSubObjDirName, ".") && ((tid = H5Topen(hobj, srcSubObjAbsName)) >= 0))
+                    if (strcmp(srcSubObjDirName, ".") && ((tid = H5Topen(hobj, srcSubObjAbsName, H5P_DEFAULT)) >= 0))
                     {
                         copy_obj_data_t cp_data2 = {cp_data->dstFile, dstSubObjAbsName};
                         H5Tclose(tid);
@@ -6976,7 +6990,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
     
     PROTECT {
         /* Open the object as a named data type */
-        if ((o=H5Topen(dbfile->cwg, objname))<0) {
+        if ((o=H5Topen(dbfile->cwg, objname, H5P_DEFAULT))<0) {
             db_perror(objname, E_NOTFOUND, me);
             UNWIND();
         }
@@ -7058,7 +7072,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
                     (mtype=H5Tcreate(H5T_COMPOUND, H5Tget_size(ftype)))>=0 &&
                     db_hdf5_put_cmemb(mtype, compname, 0, 0, NULL, ftype)>=0 && 
                     H5Aread(attr, mtype, dataset_name)>=0) {
-                    if ((dset=H5Dopen(dbfile->cwg, dataset_name))>=0) {
+                    if ((dset=H5Dopen(dbfile->cwg, dataset_name, H5P_DEFAULT))>=0) {
                         retval = db_hdf5_comprd(dbfile, dataset_name, 1);
                         H5Dclose(dset);
                     }
@@ -7296,7 +7310,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             hid_t _f_ary;
                             msize = ALIGN(msize, sizeof(dummy)) + sizeof(dummy);
 #if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
-                            _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size, NULL);
+                            _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size);
                             fsize += H5Tget_size(_f_ary);
                             H5Tclose(_f_ary);
 #else
@@ -7311,7 +7325,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             hid_t _f_ary;
                             msize = ALIGN(msize, sizeof(dummy)) + sizeof(dummy);
 #if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
-                            _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size, NULL);
+                            _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size);
                             fsize += H5Tget_size(_f_ary);
                             H5Tclose(_f_ary);
 #else
@@ -7326,7 +7340,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             hid_t _f_ary;
                             msize = ALIGN(msize, sizeof(dummy)) + sizeof(dummy);
 #if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
-                            _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size, NULL);
+                            _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size);
                             fsize += H5Tget_size(_f_ary);
                             H5Tclose(_f_ary);
 #else
@@ -7449,8 +7463,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             hsize_t _size = 3;
                             moffset = ALIGN(moffset, sizeof(dummy));
 #if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
-                            _m_ary = H5Tarray_create(H5T_NATIVE_INT, 1, &_size, NULL);
-                            _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size, NULL);
+                            _m_ary = H5Tarray_create(H5T_NATIVE_INT, 1, &_size);
+                            _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
@@ -7474,8 +7488,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             hsize_t _size = 3;
                             moffset = ALIGN(moffset, sizeof(dummy));
 #if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
-                            _m_ary = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &_size, NULL);
-                            _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size, NULL);
+                            _m_ary = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &_size);
+                            _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
@@ -7499,8 +7513,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             hsize_t _size = 3;
                             moffset = ALIGN(moffset, sizeof(dummy));
 #if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
-                            _m_ary = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, &_size, NULL);
-                            _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size, NULL);
+                            _m_ary = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, &_size);
+                            _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
@@ -7741,7 +7755,7 @@ db_hdf5_GetVarLength(DBfile *_dbfile, char const *name)
     hsize_t     nelmts=-1;
 
     PROTECT {
-        if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
+        if ((dset=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))>=0) {
             if ((space=H5Dget_space(dset))<0) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
@@ -7782,7 +7796,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
 #endif
     PROTECT {
         /* Open the dataset */
-        if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
+        if ((dset=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))>=0) {
         
             /* Get data type and space */
             if ((ftype=H5Dget_type(dset))<0 ||
@@ -7901,7 +7915,7 @@ db_hdf5_GetVarType(DBfile *_dbfile, char const *name)
         return -1;
 
     PROTECT {
-        if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
+        if ((dset=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))>=0) {
             if ((ftype=H5Dget_type(dset))<0) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
@@ -7956,7 +7970,7 @@ db_hdf5_GetVarDims(DBfile *_dbfile, char const *name, int maxdims, int *dims/*ou
     int         i, ndims=-1;
     
     PROTECT {
-        if ((dset=H5Dopen(dbfile->cwg, name))<0) {
+        if ((dset=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -8014,7 +8028,7 @@ db_hdf5_GetVar(DBfile *_dbfile, char const *name)
     PROTECT {
 
         /* Get dataset, type, and space */
-        if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
+        if ((dset=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))>=0) {
             if ((ftype=H5Dget_type(dset))<0 ||
                 (space=H5Dget_space(dset))<0) {
                 db_perror(name, E_CALLFAIL, me);
@@ -8102,7 +8116,7 @@ db_hdf5_ReadVar(DBfile *_dbfile, char const *vname, void *result)
    PROTECT {
 
        /* Get dataset and data type */
-       if ((dset=H5Dopen(dbfile->cwg, vname))>=0) {
+       if ((dset=H5Dopen(dbfile->cwg, vname, H5P_DEFAULT))>=0) {
            if ((ftype=H5Dget_type(dset))<0) {
                db_perror(vname, E_CALLFAIL, me);
                UNWIND();
@@ -8176,7 +8190,7 @@ db_hdf5_ReadVarSlice(DBfile *_dbfile, char const *vname, int const *offset, int 
 
    PROTECT {
        /* Get dataset and data type */
-       if ((dset=H5Dopen(dbfile->cwg, vname))<0) {
+       if ((dset=H5Dopen(dbfile->cwg, vname, H5P_DEFAULT))<0) {
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
@@ -8271,7 +8285,7 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
        if (dscount <= 0) return -1;
 
        /* We'll get info about the first dataset and assume all datasets are same */
-       if ((dset=H5Dopen(dbfile->cwg, dsnames[0]))<0) {
+       if ((dset=H5Dopen(dbfile->cwg, dsnames[0], H5P_DEFAULT))<0) {
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
@@ -8324,7 +8338,7 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
        for (i = 0; i < dscount; i++)
        {
            /* Open the dataset */
-           if ((dset=H5Dopen(dbfile->cwg, dsnames[i]))<0) {
+           if ((dset=H5Dopen(dbfile->cwg, dsnames[i], H5P_DEFAULT))<0) {
                db_perror(vname, E_CALLFAIL, me);
                UNWIND();
            }
@@ -8410,7 +8424,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
         * dataset.
         */
        H5E_BEGIN_TRY {
-           dset = H5Dopen(dbfile->cwg, vname);
+           dset = H5Dopen(dbfile->cwg, vname, H5P_DEFAULT);
        } H5E_END_TRY;
        if (dset>=0) {
            space = H5Dget_space(dset);
@@ -8444,7 +8458,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
                }
 
                /* Create dataset if it doesn't already exist */
-               if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space, P_crprops))<0) {
+               if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space, H5P_DEFAULT, P_crprops, H5P_DEFAULT))<0) {
                    db_perror(vname, E_CALLFAIL, me);
                    UNWIND();
                }
@@ -8452,7 +8466,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
            else
            {
                /* Create dataset if it doesn't already exist */
-               if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space, H5P_DEFAULT))<0) {
+               if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0) {
                    db_perror(vname, E_CALLFAIL, me);
                    UNWIND();
                }
@@ -8553,7 +8567,7 @@ db_hdf5_WriteSlice(
         * dataset.
         */
        H5E_BEGIN_TRY {
-           dset = H5Dopen(dbfile->cwg, vname);
+           dset = H5Dopen(dbfile->cwg, vname, H5P_DEFAULT);
        } H5E_END_TRY;
        if (dset>=0) {
            fspace = H5Dget_space(dset);
@@ -8581,8 +8595,8 @@ db_hdf5_WriteSlice(
                UNWIND();
            }
 
-           if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, fspace,
-                               P_crprops))<0) {
+           if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, fspace, H5P_DEFAULT,
+                               P_crprops, H5P_DEFAULT))<0) {
                db_perror(vname, E_CALLFAIL, me);
                UNWIND();
            }
@@ -8675,7 +8689,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open the object as a named data type */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -8988,7 +9002,7 @@ db_hdf5_GetCurve(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a curve */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -9226,7 +9240,7 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a csgmesh */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror((char*)name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -9460,7 +9474,7 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a ucdvar */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror((char*)name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -9678,7 +9692,7 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a zonelist */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror((char*)name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -9892,7 +9906,7 @@ db_hdf5_GetDefvars(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a curve */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror((char*)name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -10267,7 +10281,7 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char const *name)
     
     PROTECT {
         /* Open object and make sure it's a quadmesh */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -10703,7 +10717,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
     
     PROTECT {
         /* Open object and make sure it's a quadvar */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -11063,7 +11077,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char const *name, char const *parentmesh,
 
     PROTECT {
         /* Get metadata from the parent UCD mesh */
-        if ((o=H5Topen(dbfile->cwg, parentmesh))<0) {
+        if ((o=H5Topen(dbfile->cwg, parentmesh, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -11233,7 +11247,7 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a ucdmesh */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -11686,7 +11700,7 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a ucdvar */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -11899,7 +11913,7 @@ db_hdf5_GetFacelist(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a facelist */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -12387,7 +12401,7 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a zonelist */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -12493,7 +12507,7 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a phzonelist */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -12747,7 +12761,7 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
     
     PROTECT {
         /* Open object and make sure it's a material */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -13003,7 +13017,7 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a matspecies */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -13333,7 +13347,7 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a multimesh */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -13496,7 +13510,7 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
     PROTECT {
 
        H5E_BEGIN_TRY {
-           o = H5Topen(dbfile->cwg, name);
+           o = H5Topen(dbfile->cwg, name, H5P_DEFAULT);
        } H5E_END_TRY;
 
        if (o >= 0)
@@ -13628,13 +13642,13 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
        }
 
        if (m.nodelists[0] && 
-           (nldset = H5Dopen(dbfile->cwg, m.nodelists)) < 0) {
+           (nldset = H5Dopen(dbfile->cwg, m.nodelists, H5P_DEFAULT)) < 0) {
            db_perror((char*)name, E_CALLFAIL, me);
            UNWIND();
        }
 
        if (m.zonelists[0] &&
-           (zldset = H5Dopen(dbfile->cwg, m.zonelists)) < 0) {
+           (zldset = H5Dopen(dbfile->cwg, m.zonelists, H5P_DEFAULT)) < 0) {
            db_perror((char*)name, E_CALLFAIL, me);
            UNWIND();
        }
@@ -13760,7 +13774,7 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
 
     PROTECT {
         /* Open object and make sure it's a multimesh */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror((char*)name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -13841,13 +13855,13 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
             tmpnmesh = mmadj->nblocks;
  
         if (m.nodelists[0] && 
-            (nldset = H5Dopen(dbfile->cwg, m.nodelists)) < 0) {
+            (nldset = H5Dopen(dbfile->cwg, m.nodelists, H5P_DEFAULT)) < 0) {
             db_perror((char*)name, E_CALLFAIL, me);
             UNWIND();
         }
 
         if (m.zonelists[0] &&
-            (zldset = H5Dopen(dbfile->cwg, m.zonelists)) < 0) {
+            (zldset = H5Dopen(dbfile->cwg, m.zonelists, H5P_DEFAULT)) < 0) {
             db_perror((char*)name, E_CALLFAIL, me);
             UNWIND();
         }
@@ -14216,7 +14230,7 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a multivar */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -14519,7 +14533,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a multimat */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -14803,7 +14817,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a multimatspecies */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -15085,7 +15099,7 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a pointmesh */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -15341,7 +15355,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a pointvar */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -15535,7 +15549,7 @@ db_hdf5_GetCompoundarray(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a compund array */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -15633,9 +15647,9 @@ db_hdf5_InqVarType(DBfile *_dbfile, char const *name)
     PROTECT {
 
         /* Open object */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
-            if ((o=H5Gopen(dbfile->cwg, name))<0) {
-                if ((o=H5Dopen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
+            if ((o=H5Gopen(dbfile->cwg, name, H5P_DEFAULT))<0) {
+                if ((o=H5Dopen(dbfile->cwg, name, H5P_DEFAULT))<0) {
                     _objtype = DB_INVALID_OBJECT;
                 }
                 else
@@ -15719,7 +15733,7 @@ db_hdf5_InqMeshName(DBfile *_dbfile, char const *name, char *meshname/*out*/)
             }
 
             /* Open variable */
-            if ((o=H5Topen(dbfile->cwg, name))<0 ||
+            if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0 ||
                 (attr=H5Aopen_name(o, "silo"))<0) {
                 db_perror(name, E_NOTFOUND, me);
                 UNWIND();
@@ -16016,7 +16030,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
     
     PROTECT {
         /* Open object and make sure it's a material */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -16348,7 +16362,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
     
     PROTECT {
         /* Open object and make sure it's a material */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -16570,7 +16584,7 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, char const *name)
 
     PROTECT {
         /* Open object and make sure it's a ucdvar */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
+        if ((o=H5Topen(dbfile->cwg, name, H5P_DEFAULT))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -16694,7 +16708,7 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
         else
         {
             hid_t dsid;
-            if ((dsid=H5Dopen(dbfile->cwg, names[i]))<0 ||
+            if ((dsid=H5Dopen(dbfile->cwg, names[i], H5P_DEFAULT))<0 ||
                 (iop[i].offset=H5Dget_offset(dsid))==HADDR_UNDEF ||
                 H5Dclose(dsid)<0)
                 iop[i].offset = HADDR_MAX;
