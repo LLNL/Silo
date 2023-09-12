@@ -159,7 +159,7 @@ FCPROGS= arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec misc sami newsami specmix spec \
-      cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
+      cpz1plt group_test listtypes alltypes wave polyzl csg \
       rocket mmadjacency largefile dbversion namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
       test_mat_compression bcastopen memfile_simple \
@@ -234,7 +234,6 @@ check_PROGRAMS = \
  mat3d_3across \
  ucd1d \
  wave \
- multi_file \
  polyzl \
  csg \
  rocket \
@@ -300,7 +299,6 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_mat3d_3across_SOURCES = dummy.cxx
  nodist_EXTRA_ucd1d_SOURCES = dummy.cxx
  nodist_EXTRA_wave_SOURCES = dummy.cxx
- nodist_EXTRA_multi_file_SOURCES = dummy.cxx
  nodist_EXTRA_polyzl_SOURCES = dummy.cxx
  nodist_EXTRA_csg_SOURCES = dummy.cxx
 # nodist_EXTRA_rocket_SOURCES = dummy.cxx
