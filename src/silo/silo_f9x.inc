@@ -2,6 +2,8 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
+!  Programmer:   miller86 Tue Sep 12 10:09:10 PDT 2023
+! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
 !     SILO distribution.  Do not make changes to this file manually,
@@ -33,6 +35,7 @@
       integer, external :: dberrlvl
       integer, external :: dberrno
       integer, external :: dbfgetca
+      integer, external :: dbfreecaopt
       integer, external :: dbfreemrgtree
       integer, external :: dbfreeobject
       integer, external :: dbfreeoptlist
@@ -106,8 +109,8 @@
 
 !...Parameters.
       integer, parameter :: SILO_VERS_MAJ = 4
-      integer, parameter :: SILO_VERS_MIN = 10
-      integer, parameter :: SILO_VERS_PAT = 4
+      integer, parameter :: SILO_VERS_MIN = 11
+      integer, parameter :: SILO_VERS_PAT = 1
       integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: DB_NETCDF = 0
       integer, parameter :: DB_PDB = 2
@@ -192,6 +195,7 @@
       integer, parameter :: DB_POINTVAR = 571
       integer, parameter :: DB_ARRAY = 580
       integer, parameter :: DB_DIR = 600
+      integer, parameter :: DB_SYMLINK = 601
       integer, parameter :: DB_VARIABLE = 610
       integer, parameter :: DB_MRGTREE = 611
       integer, parameter :: DB_GROUPELMAP = 612
@@ -209,6 +213,8 @@
       integer, parameter :: DB_NOCLOBBER = 1
       integer, parameter :: DB_READ = 1
       integer, parameter :: DB_APPEND = 2
+      integer, parameter :: DB_COMPAT_OVER_PERF = 16
+      integer, parameter :: DB_PERF_OVER_COMPAT = 32
       integer, parameter :: DB_LOCAL = 0
       integer, parameter :: DB_SUN3 = 10
       integer, parameter :: DB_SUN4 = 11
@@ -333,11 +339,8 @@
       integer, parameter :: DBOPT_H5_SILO_USE_DIRECT = 530
       integer, parameter :: DBOPT_H5_FIC_SIZE = 531
       integer, parameter :: DBOPT_H5_FIC_BUF = 532
-      integer, parameter :: DBOPT_H5_CORE_CREAT_BUFINFO = 533
-      integer, parameter :: DBOPT_H5_CORE_OPEN_BUFINFO = 534
-      integer, parameter :: DBOPT_H5_CORE_CLOSE_BUFINFO = 535
-      integer, parameter :: DBOPT_H5_FCPL_HID_T = 536
-      integer, parameter :: DBOPT_H5_FAPL_HID_T = 537
+      integer, parameter :: DBOPT_H5_FCPL_HID_T = 533
+      integer, parameter :: DBOPT_H5_FAPL_HID_T = 534
       integer, parameter :: DBOPT_H5_LAST = 599
       integer, parameter :: DB_TOP = 0
       integer, parameter :: DB_NONE = 1
@@ -378,8 +381,6 @@
       integer, parameter :: DB_VARTYPE_LABEL = 207
       integer, parameter :: DB_GHOSTTYPE_NOGHOST = 0
       integer, parameter :: DB_GHOSTTYPE_INTDUP = 1
-      integer, parameter :: DB_MAX_COMPATABILITY = 0
-      integer, parameter :: DB_MAX_PERFORMANCE = 1
       integer, parameter :: DBCSG_QUADRIC_G = 16777216
       integer, parameter :: DBCSG_SPHERE_PR = 33619968
       integer, parameter :: DBCSG_ELLIPSOID_PRRR = 33685504
@@ -429,6 +430,8 @@
       integer, parameter :: DB_PARTIO_POINTS = 1
       integer, parameter :: DB_PARTIO_HSLABS = 2
       real (kind=8), parameter :: DB_MISSING_VALUE_NOT_SET = 1.0D+308
+      integer, parameter :: DB_EOA = 0
+      integer, parameter :: DB_NOBJ_TYPES = 25
       integer, parameter :: DB_ZONETYPE_BEAM = 10
       integer, parameter :: DB_ZONETYPE_POLYGON = 20
       integer, parameter :: DB_ZONETYPE_TRIANGLE = 23
