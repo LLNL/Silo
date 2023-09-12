@@ -59,5 +59,5 @@ templates_path = ['.']
 
 # Additional templates that should be rendered to pages.
 html_additional_pages = {
-    'index': 'sphinx-index.md',
+    'index': 'index-sphinx.md',
 }
