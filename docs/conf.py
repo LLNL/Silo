@@ -53,3 +53,11 @@ html_theme_options = {
     # Toc options
     'navigation_depth': 4
 }
+
+# Path to find HTML templates.
+templates_path = ['.']
+
+# Additional templates that should be rendered to pages.
+html_additional_pages = {
+    'index': 'sphinx-index.md',
+}
