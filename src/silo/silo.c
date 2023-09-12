@@ -300,7 +300,7 @@ SILO_Globals_t SILO_Globals = {
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
-    DB_MAX_COMPATABILITY, /* compatability mode */
+    0,     /* compatability mode */
     {      /* file options sets [32 of them] */
         0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -2545,6 +2545,7 @@ DB_SETGET(int, DeprecateWarnings, maxDeprecateWarnings, DB_INTBOOL_NOT_SET)
 /*DB_SETGET(int, EnableDarshan, darshanEnabled, DB_INTBOOL_NOT_SET) */
 DB_SETGET(int, AllowLongStrComponents, allowLongStrComponents, DB_INTBOOL_NOT_SET) 
 DB_SETGET(unsigned long long, DataReadMask2, dataReadMask, DB_MASK_NOT_SET) 
+DB_SETGET(int, CompatibilityMode, compatibilityMode, DB_INTBOOL_NOT_SET)
 #ifndef _WIN32
 #warning WHAT ABOUT FORCESINGLE SHOWERRORS
 #endif
@@ -3968,21 +3969,24 @@ DBFileName(const DBfile *dbfile)
 }
 
 static void
-db_InitFileGlobals(DBfile *dbfile)
+db_InitFileGlobals(DBfile *dbfile, int mode)
 {
     int i;
 
     dbfile->pub.file_scope_globals = (SILO_Globals_t*) malloc(sizeof(SILO_Globals_t));
     /* since most entries are ints and we want to init them to the NOT-SET value
        this call averts *some* mistakes where SILO_Globals_t might get updated with
-       new int members but failed to be explicitly initialize here. Setting to all
-       0xFF has effect of setting all ints to -1, the DB_INTBOOL_NOT_SET value. */
-    memset(dbfile->pub.file_scope_globals, 0xFF, sizeof(SILO_Globals_t));
+       new int members but failed to be explicitly initialize here. The value of
+       DB_INTBOOL_NOT_SET is accepted as int but is ultimately cast to unsigned char
+       internally in memset(). Given that its integer value is -1 (0xFFFFFFFF), its
+       conversion to unsigned char will be 0xFF and will have the effect of setting
+       all int members of SILO_Globals_t to -1 or DB_INTBOOL_NOT_SET. */
+    memset(dbfile->pub.file_scope_globals, DB_INTBOOL_NOT_SET, sizeof(SILO_Globals_t));
 
     /* Initialize to NOT-SET values so that, initially, a file is set to
        inheret *and* track all behaviors from Silo's globals. The first time
        any of these values are changed to a NOT_SET value, then forevermore, 
-       that particular behavior for the file */
+       that particular behavior is governed by the file */
     dbfile->pub.file_scope_globals->dataReadMask            = DB_MASK_NOT_SET;
     dbfile->pub.file_scope_globals->allowOverwrites         = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->allowEmptyObjects       = DB_INTBOOL_NOT_SET;
@@ -4000,7 +4004,7 @@ db_InitFileGlobals(DBfile *dbfile)
 #warning CORRECT INITIALIZATION OF compressionErrmode
 #endif
     dbfile->pub.file_scope_globals->compressionErrmode      = DB_INTBOOL_NOT_SET;
-    dbfile->pub.file_scope_globals->compatabilityMode       = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->compatibilityMode       = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->compressionParams       = (char*) DB_CHAR_PTR_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_level           = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_func            = DB_VOID_PTR_NOT_SET;
@@ -4011,6 +4015,10 @@ db_InitFileGlobals(DBfile *dbfile)
 
     for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
         dbfile->pub.file_scope_globals->fileOptionsSets[i] = 0;
+
+    /* If compatibility is set in mode, then set it in file_scope_globals too */
+    if (mode & 0x000000F0)
+        dbfile->pub.file_scope_globals->compatibilityMode = mode & 0x000000F0;
 }
 
 /*-------------------------------------------------------------------------
@@ -4111,7 +4119,7 @@ DBOpenReal(const char *name, int type, int mode)
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
         }
-        if ((mode != DB_READ) && (mode != DB_APPEND))
+        if (((mode & 0x0000000F) != DB_READ) && ((mode & 0x0000000F) != DB_APPEND))
         {
             sprintf(ascii, "%d", mode);
             API_ERROR(ascii, E_BADARGS);
@@ -4180,7 +4188,7 @@ DBOpenReal(const char *name, int type, int mode)
         i = db_isregistered_file(0, &filestate);
         if (i != -1)
         {
-            if (_db_regstatus[i].w != 0 || mode != DB_READ)
+            if (_db_regstatus[i].w != 0 || (mode & 0x0000000F) != DB_READ)
                 API_ERROR(name, E_CONCURRENT);
         }
 
@@ -4198,7 +4206,7 @@ DBOpenReal(const char *name, int type, int mode)
             /****************************************/
             API_ERROR((char *)name, E_FILENOREAD);
         }
-        if (DB_READ!=mode && (filestate.s.st_mode & S_IWUSR) == 0)
+        if (DB_READ!=(mode&0x0000000F) && (filestate.s.st_mode & S_IWUSR) == 0)
         {
             /****************************************/
             /* File is open for write and missing write permission. */
@@ -4214,8 +4222,8 @@ DBOpenReal(const char *name, int type, int mode)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-        db_InitFileGlobals(dbfile);
-        db_register_file(dbfile, &filestate, mode!=DB_READ);
+        db_InitFileGlobals(dbfile, mode);
+        db_register_file(dbfile, &filestate, (mode&0x0000000F)!=DB_READ);
 
         /*
          * Install filters.  First, all `init' filters, then the
@@ -4316,7 +4324,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 
         if (db_silo_stat(name, &filestate, opts_set_id) == 0)  /* Success - File exists */
         {
-            if (mode == DB_NOCLOBBER)
+            if ((mode & 0x0000000F) == DB_NOCLOBBER)
             {
                 API_ERROR((char *)name, E_FEXIST);
             }
@@ -4356,7 +4364,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-        db_InitFileGlobals(dbfile);
+        db_InitFileGlobals(dbfile, mode);
         db_silo_stat(name, &filestate, opts_set_id);
         db_register_file(dbfile, &filestate, 1);
 
