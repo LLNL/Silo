@@ -96,6 +96,8 @@ int main(int argc, char *argv[])
     int            show_all_errors = FALSE;
     char          *objname = 0;
     int            ndirs = 0;
+    int            ntocs = 0;
+    int            compat = 0;
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
@@ -115,6 +117,12 @@ int main(int argc, char *argv[])
             show_all_errors = 1;
         } else if (!strncmp(argv[i], "ndirs=", 6)) {
             ndirs = (int) strtol(argv[i]+6,0,10);
+        } else if (!strncmp(argv[i], "ntocs=", 6)) {
+            ntocs = (int) strtol(argv[i]+6,0,10);
+        } else if (!strcmp(argv[i], "compat-over-perf")) {
+            compat = DB_COMPAT_OVER_PERF;
+        } else if (!strcmp(argv[i], "perf-over-compat")) {
+            compat = DB_PERF_OVER_COMPAT;
 	} else if (argv[i][0] != '\0') {
             objname = strdup(argv[i]);
 #ifndef _WIN32
@@ -125,10 +133,18 @@ int main(int argc, char *argv[])
     }
     
     DBSetFriendlyHDF5Names(1);
+    DBSetCompatibilityMode(compat);
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
     printf("Creating file: '%s'...\n", filename);
+
+    for (i = 0; i < ndirs; i++)
+    {
+        char dirname[64];
+        sprintf(dirname, "domain_%08d", i);
+        DBMkDir(dbfile, dirname);
+    }
 
     DBMkdir(dbfile, "quad_dir");
     DBMkdir(dbfile, "ucd_dir");
@@ -210,22 +226,47 @@ int main(int argc, char *argv[])
     /* try to copy the smaller trimesh on top of the larger one */
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh", DB_EOA);
 
-{
-    char *list[100];
-    int i, nlist  = (int) sizeof(list)/sizeof(list[0]);
+    int nlist  = ndirs + 5;
+    char **list = malloc((nlist) * sizeof(char*));
     DBSetDir(dbfile, "/");
     for (i = 0; i < nlist; i++) list[i] = 0;
     DBLs(dbfile, 0, 0, &nlist);
-    printf("Got nlist=%d\n", nlist);
     DBLs(dbfile, 0, list, &nlist);
-    for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+    for (i = 0; i < nlist; i++)
+        printf("\"%s\"\n", list[i]);
 
-    nlist  = (int) sizeof(list)/sizeof(list[0]);
+    nlist = ndirs + 5;
     DBSetDir(dbfile, "/tri_dir");
     for (i = 0; i < nlist; i++) list[i] = 0;
     DBLs(dbfile, 0, list, &nlist);
     for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
-}
+    free(list);
+
+    /* make some hellaciously long directory names which are almost the same */
+    if (ntocs)
+    {
+        char tmp[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        char tmp2[sizeof(tmp)+10];
+        DBClose(dbfile);
+        dbfile = DBOpen(filename, driver, DB_APPEND);
+        DBSetDir(dbfile, "/");
+        DBMkDir(dbfile, "testtoc");
+        DBSetDir(dbfile, "/testtoc");
+        for (i = 0; i < ndirs; i++)
+        {
+            snprintf(tmp2, sizeof(tmp2), "%s%08d", tmp, i);
+            DBMkDir(dbfile, tmp2);
+        }
+        for (i = 0; i < ntocs/2; i++)
+        {
+            DBtoc *dbtoc;
+
+            DBSetDir(dbfile, "/");
+            dbtoc = DBGetToc(dbfile);
+            DBSetDir(dbfile, "/testtoc");
+            dbtoc = DBGetToc(dbfile);
+        }
+    }
 
     DBClose(dbfile);
     DBClose(dbfile2);
@@ -252,6 +293,7 @@ int main(int argc, char *argv[])
 
     DBClose(dbfile);
     DBClose(dbfile2);
+
 
     /* test attempt to DBCreate a file without clobbering it and
        for which the path is really a dir in the host filesystem */

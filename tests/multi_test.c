@@ -823,6 +823,7 @@ main(int argc, char *argv[])
     int            i, t;
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
+    int            compat = 0x00000000;
 
     /* set up variable name to varextents index map */
     vidx['d'-'a'] = 3;
@@ -881,6 +882,10 @@ main(int argc, char *argv[])
             time_series = strtol(argv[++i],0,10);
         } else if (!strcmp(argv[i], "emptymb")) {
             emptymb = strtol(argv[++i],0,10);
+        } else if (!strcmp(argv[i], "compat-over-perf")) {
+            compat = DB_COMPAT_OVER_PERF;
+        } else if (!strcmp(argv[i], "perf-over-compat")) {
+            compat = DB_PERF_OVER_COMPAT;
         } else {
             fprintf(stderr, "%s: unknown argument `%s'\n", argv[0], argv[i]);
             exit(1);
@@ -916,7 +921,7 @@ main(int argc, char *argv[])
            sprintf(filename2, "../../multi_rect2d_%03d%s", t, file_ext);
        }
        if (testflushread || 
-           (dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
+           (dbfile = DBCreate(filename, DB_CLOBBER | compat, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
        {
            if (!testflushread)
            {
@@ -970,6 +975,7 @@ main(int argc, char *argv[])
     /* 
      * Create the multi-block curvilinear 2d mesh.
      */
+    DBSetCompatibilityMode(compat);
     for (t = 0; t < time_series; t++)
     {
        int emb = 1;
@@ -1006,6 +1012,7 @@ main(int argc, char *argv[])
            fprintf(stderr, "Error in creating '%s'.\n", filename);
        }
     }
+    DBSetCompatibilityMode(0);
 
     /* 
      * Create the multi-block point 2d mesh.
@@ -1020,7 +1027,7 @@ main(int argc, char *argv[])
        else
            sprintf(filename, "multi_point2d_%03d%s", t, file_ext);
        fprintf(stdout, "creating %s\n", filename);
-       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block point 2d test file", driver)))
+       if ((dbfile = DBCreate(filename, DB_CLOBBER | compat, DB_LOCAL, "multi-block point 2d test file", driver)))
        {
            if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5*emb, 1*emb, 1*emb, 0, 0) == -1)
                fprintf(stderr, "Could not create '%s'.\n", filename);
@@ -1060,7 +1067,7 @@ main(int argc, char *argv[])
        else
            sprintf(filename, "multi_rect3d_%03d%s", t, file_ext);
        fprintf(stdout, "creating %s\n", filename);
-       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 3d test file", driver)))
+       if ((dbfile = DBCreate(filename, DB_CLOBBER | compat, DB_LOCAL, "multi-block rectilinear 3d test file", driver)))
        {
            if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3*emb, 4*emb, 3*emb, DB_COLLINEAR, 0) == -1)
                fprintf(stderr, "Could not create '%s'.\n", filename);
@@ -1100,7 +1107,7 @@ main(int argc, char *argv[])
        else
            sprintf(filename, "multi_curv3d_%03d%s", t, file_ext);
        fprintf(stdout, "creating %s\n", filename);
-       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 3d test file", driver)))
+       if ((dbfile = DBCreate(filename, DB_CLOBBER | compat, DB_LOCAL, "multi-block curvilinear 3d test file", driver)))
        {
            if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3*emb, 4*emb, 3*emb, DB_NONCOLLINEAR, 0) == -1)
                fprintf(stderr, "Could not create '%s'.\n", filename);
@@ -1141,7 +1148,7 @@ main(int argc, char *argv[])
        else
            sprintf(filename, "multi_ucd3d_%03d%s", t, file_ext);
        fprintf(stdout, "creating %s\n", filename);
-       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block ucd 3d test file", driver)))
+       if ((dbfile = DBCreate(filename, DB_CLOBBER | compat, DB_LOCAL, "multi-block ucd 3d test file", driver)))
        {
            if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3*emb, 4*emb, 3*emb, 0, 0) == -1)
                fprintf(stderr, "Could not create '%s'.\n", filename);

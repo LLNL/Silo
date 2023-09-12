@@ -368,6 +368,12 @@ typedef enum {
 #define         DB_READ         1
 #define         DB_APPEND       2
 
+/* Compatibility flags for DBOpen|DBCreate
+   These can get OR'd into above flags and
+   occupy the 2nd most significant nibble. */
+#define DB_COMPAT_OVER_PERF     0x00000010
+#define DB_PERF_OVER_COMPAT     0x00000020 
+
 /* Target machine for DBCreate */
 #define         DB_LOCAL        0
 #define         DB_SUN3         10
@@ -599,10 +605,6 @@ typedef enum {
 /* Definitions for ghost labels */
 #define DB_GHOSTTYPE_NOGHOST ((char)0x00)
 #define DB_GHOSTTYPE_INTDUP ((char)0x01)
-
-/* Definitions for compatability mode */
-#define DB_MAX_COMPATABILITY            0
-#define DB_MAX_PERFORMANCE              1
 
 /* Definitions for CSG boundary types 
    Designed so low-order 16 bits are unused.
@@ -1885,6 +1887,10 @@ SILO_API extern int                    DBSetAllowLongStrComponents(int allow);
 SILO_API extern int                    DBGetAllowLongStrComponents(void);
 SILO_API extern int                    DBSetAllowLongStrComponentsFile(DBfile *f, int allow);
 SILO_API extern int                    DBGetAllowLongStrComponentsFile(DBfile *f);
+SILO_API extern int                    DBSetCompatibilityMode(int mode);
+SILO_API extern int                    DBGetCompatibilityMode(void);
+/*SILO_API extern int                  DBSetCompatibilityModeFile(DBfile *f, int mode); NOT ALLOWED */
+SILO_API extern int                    DBGetCompatibilityModeFile(DBfile *f);
 
 SILO_API extern int const *            DBSetUnknownDriverPriorities(int const *);
 SILO_API extern int const *            DBGetUnknownDriverPriorities();
