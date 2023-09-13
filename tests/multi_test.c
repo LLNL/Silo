@@ -2930,6 +2930,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     float           xstrip[NX + NY + NZ], ystrip[NX + NY + NZ], zstrip[NX + NY + NZ];
 
     int             one = 1;
+    int             reset_mixlen = 0;
     DBoptlist      *optlist;
 
     DBfacelist     *fl;
@@ -3159,6 +3160,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                 }
 
         iz = 0;
+        reset_mixlen = 1;
         for (k = 0, n_z = kmin; n_z < kmax - 1; k++, n_z++)
             for (j = 0, n_y = jmin; n_y < jmax - 1; j++, n_y++)
                 for (i = 0, n_x = imin; n_x < imax - 1; i++, n_x++)
@@ -3178,6 +3180,9 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                     mix_zone_map[n_z * NX * NY + n_y * NX + n_x] =
                         k * (nx - 1) * (ny - 1) + j * (nx - 1) + i;
 
+                    if (matlist2[k * (nx - 1) * (ny - 1) + j * (nx - 1) + i] < 0)
+                        reset_mixlen = 0;
+
                     if (((k == 0 || n_z == kmax - 2) &&
                          (n_z != 0 && n_z != NZ - 1)) ||
                         ((j == 0 || n_y == jmax - 2) &&
@@ -3188,6 +3193,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                     else
                         ghost[k * (nx - 1) * (ny - 1) + j * (nx - 1) + i] = 0;
                 }
+
 
         /*
          * Compute mix_zone2 array from mix_zone array and mix_zone_map
@@ -3358,7 +3364,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             int dims[1];
             dims[0] = nzones;
             TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims,
-                    1, mix_next, mix_mat, mix_zone2, mix_vf, mixlen, DB_FLOAT, optlist);
+                    1, mix_next, mix_mat, mix_zone2, mix_vf,
+                    (reset_mixlen ? 0 : mixlen), DB_FLOAT, optlist);
         }
 
         DBFreeOptlist(optlist);
