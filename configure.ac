@@ -155,7 +155,7 @@ dnl The esyscmd macro invokation allows us to keep version number in
 dnl VERSION file and just re-generate configure instead of having to
 dnl also checkout and edit configure.ac
 dnl
-m4_define(SILO_VERSION, m4_esyscmd([cat VERSION | tr -d '\n']))
+m4_define(SILO_VERSION, m4_esyscmd([cat SILO_VERSION | tr -d '\n']))
 m4_define(SILO_NAME, silo)
 m4_define(SILO_BUGS,visit-users@elist.ornl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)

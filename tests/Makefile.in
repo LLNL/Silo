@@ -150,11 +150,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @JSON_NEEDED_TRUE@am__append_1 = ../tools/json/json-c-0.10/libjson.la
-@INSTALL_LITE_HEADERS_TRUE@am__append_2 = -DPDB_LITE
-@INSTALL_LITE_HEADERS_TRUE@am__append_3 = -DPDB_LITE
-@INSTALL_LITE_HEADERS_TRUE@am__append_4 = -DPDB_LITE
-@INSTALL_LITE_HEADERS_TRUE@am__append_5 = testpdb pdbtst
-@JSON_NEEDED_TRUE@am__append_6 = json
+@JSON_NEEDED_TRUE@am__append_2 = json
 check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	extface$(EXEEXT) multi_test$(EXEEXT) partial_io$(EXEEXT) \
 	point$(EXEEXT) group_test$(EXEEXT) listtypes$(EXEEXT) \
@@ -173,13 +169,13 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	readstuff$(EXEEXT) testfs$(EXEEXT) empty$(EXEEXT) \
 	majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
 	test_mat_compression$(EXEEXT) bcastopen$(EXEEXT) \
-	memfile_simple$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4) \
-	$(am__EXEEXT_6) $(am__EXEEXT_8)
-@HDF5_DRV_NEEDED_TRUE@am__append_7 = $(HDF5PROGS)
-@HDF5_DRV_NEEDED_TRUE@am__append_8 = $(HDF5PROGS)
-@HDF5_DRV_NEEDED_TRUE@am__append_9 = $(HDF5CKLTLIBS)
-@FORTRAN_NEEDED_TRUE@am__append_10 = $(FCPROGS)
-@FORTRAN_NEEDED_TRUE@am__append_11 = $(FCPROGS)
+	memfile_simple$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) \
+	$(am__EXEEXT_5) $(am__EXEEXT_7)
+@HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5PROGS)
+@HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5PROGS)
+@HDF5_DRV_NEEDED_TRUE@am__append_5 = $(HDF5CKLTLIBS)
+@FORTRAN_NEEDED_TRUE@am__append_6 = $(FCPROGS)
+@FORTRAN_NEEDED_TRUE@am__append_7 = $(FCPROGS)
 subdir = tests
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ax_check_compiler_flags.m4 \
@@ -245,19 +241,17 @@ rocket_silo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(AM_CXXFLAGS) $(CXXFLAGS) $(rocket_silo_la_LDFLAGS) \
 	$(LDFLAGS) -o $@
-@INSTALL_LITE_HEADERS_TRUE@am__EXEEXT_1 = testpdb$(EXEEXT) \
-@INSTALL_LITE_HEADERS_TRUE@	pdbtst$(EXEEXT)
-am__EXEEXT_2 = $(am__EXEEXT_1)
-@JSON_NEEDED_TRUE@am__EXEEXT_3 = json$(EXEEXT)
-am__EXEEXT_4 = $(am__EXEEXT_3)
-am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT) \
+am__EXEEXT_1 = testpdb$(EXEEXT) pdbtst$(EXEEXT)
+@JSON_NEEDED_TRUE@am__EXEEXT_2 = json$(EXEEXT)
+am__EXEEXT_3 = $(am__EXEEXT_2)
+am__EXEEXT_4 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT) \
 	testhdf5$(EXEEXT)
-@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
-am__EXEEXT_7 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
+@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
+am__EXEEXT_6 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
 	matf77$(EXEEXT) pointf77$(EXEEXT) quadf77$(EXEEXT) \
 	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT) \
 	qmeshmat2df77$(EXEEXT)
-@FORTRAN_NEEDED_TRUE@am__EXEEXT_8 = $(am__EXEEXT_7)
+@FORTRAN_NEEDED_TRUE@am__EXEEXT_7 = $(am__EXEEXT_6)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
@@ -1213,13 +1207,13 @@ AM_CPPFLAGS = \
 
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
 testpdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score \
-	$(am__append_2)
+	-DPDB_LITE
 pdbtst_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score \
-	$(am__append_3)
+	-DPDB_LITE
 mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score \
-	$(am__append_4)
-PDBTESTS = $(am__append_5)
-JSONTESTS = $(am__append_6)
+	-DPDB_LITE
+PDBTESTS = testpdb pdbtst
+JSONTESTS = $(am__append_2)
 @JSON_NEEDED_TRUE@json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
@@ -1236,7 +1230,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
 	mat3d_3across merge_block test_mat_compression bcastopen \
 	memfile_simple empty majorder realloc_obj_and_opts $(PDBTESTS) \
-	$(JSONTESTS) $(am__append_7) $(am__append_10)
+	$(JSONTESTS) $(am__append_3) $(am__append_6)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_main.c
@@ -1250,7 +1244,7 @@ newsami_SOURCES = newsami.cxx
 # plugins for rocket and for ioperf
 HDF5CKLTLIBS = ioperf_hdf5.la
 check_LTLIBRARIES = rocket_silo.la ioperf_silo.la ioperf_pdb.la \
-	ioperf_sec2.la ioperf_stdio.la $(am__append_9)
+	ioperf_sec2.la ioperf_stdio.la $(am__append_5)
 rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
 rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
@@ -2295,11 +2289,11 @@ clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
 
-testsuite: $(srcdir)/testsuite.at $(top_srcdir)/VERSION
+testsuite: $(srcdir)/testsuite.at $(top_srcdir)/SILO_VERSION
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 
-$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(top_srcdir)/VERSION
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(top_srcdir)/SILO_VERSION
 	{					\
 	  echo '# Signature of the current package.'; \
 	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \

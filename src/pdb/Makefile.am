@@ -59,11 +59,13 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/score -I$(top_srcdir)/src/silo
 
 EXTRA_DIST = detect.c
 
-noinst_HEADERS = pdb.h
 nodist_noinst_HEADERS = pdform.h
 
 if INSTALL_LITE_HEADERS
+noinst_HEADERS = pdb.h
 nodist_include_HEADERS = lite_pdb.h
+else
+noinst_HEADERS = pdb.h lite_pdb.h
 endif
 
 FILES = \
