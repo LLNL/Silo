@@ -137,13 +137,10 @@ AM_CPPFLAGS = \
 testpdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 pdbtst_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
-PDBTESTS =
-if INSTALL_LITE_HEADERS
- testpdb_CPPFLAGS += -DPDB_LITE
- pdbtst_CPPFLAGS += -DPDB_LITE
- mk_nasf_pdb_CPPFLAGS += -DPDB_LITE
- PDBTESTS += testpdb pdbtst
-endif
+testpdb_CPPFLAGS += -DPDB_LITE
+pdbtst_CPPFLAGS += -DPDB_LITE
+mk_nasf_pdb_CPPFLAGS += -DPDB_LITE
+PDBTESTS = testpdb pdbtst
 JSONTESTS =
 if JSON_NEEDED
  json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
@@ -434,11 +431,11 @@ clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
 
-testsuite: $(srcdir)/testsuite.at $(top_srcdir)/VERSION
+testsuite: $(srcdir)/testsuite.at $(top_srcdir)/SILO_VERSION
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 
-$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(top_srcdir)/VERSION
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(top_srcdir)/SILO_VERSION
 	{					\
 	  echo '# Signature of the current package.'; \
 	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \

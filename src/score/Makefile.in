@@ -155,7 +155,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ax_check_compiler_flags.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-DIST_COMMON = $(srcdir)/Makefile.am $(noinst_HEADERS) \
+DIST_COMMON = $(srcdir)/Makefile.am $(am__noinst_HEADERS_DIST) \
 	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -239,6 +239,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(includedir)"
+am__noinst_HEADERS_DIST = score.h lite_score.h
 HEADERS = $(nodist_include_HEADERS) $(noinst_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -442,8 +443,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_score.la
 libsilo_score_la_SOURCES = $(FILES)
+@INSTALL_LITE_HEADERS_FALSE@noinst_HEADERS = score.h lite_score.h
+@INSTALL_LITE_HEADERS_TRUE@noinst_HEADERS = score.h
 @INSTALL_LITE_HEADERS_TRUE@nodist_include_HEADERS = lite_score.h
-noinst_HEADERS = score.h
 CLEANFILES = lite_score.h
 FILES = \
  memmove.c \

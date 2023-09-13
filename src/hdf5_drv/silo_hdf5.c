@@ -4973,10 +4973,13 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     H5AC_cache_config_t h5mdc_config;
 #endif
 
-    /* Performance optimizations for memory footprint */
+#if HDF5_VERSION_GE(1,10,2)
+    H5Pset_libver_bounds(retval, H5F_LIBVER_V18, H5F_LIBVER_V18);
+#endif
+
     if (mode & DB_PERF_OVER_COMPAT)
         H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-#if HDF5_VERSION_GE(1,10,0)
+#if HDF5_VERSION_GE(1,10,2)
     if (mode & DB_COMPAT_OVER_PERF)
         H5Pset_libver_bounds(retval, H5F_LIBVER_V18, H5F_LIBVER_V18);
 #endif

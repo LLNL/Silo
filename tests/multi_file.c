@@ -68,7 +68,9 @@ product endorsement purposes.
 #  include <unistd.h>
 #endif
 
+#ifdef HAVE_HDF5_H
 #include <hdf5.h>
+#endif
 #include <silo.h>
 #include <std.c>
 
@@ -1282,6 +1284,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
          */
         if (!i_am_a_writer) /* this rank sends its block to its writer */
         {
+#ifdef HAVE_HDF5_H
             hid_t hdf5_file_id;
             void *file_buf_ptr = 0;
             hsize_t hdf5_file_size = 0;
@@ -1290,16 +1293,12 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
             hdf5_file_id = *((hid_t*) DBGrabDriver(dbfile));
 
-#if 0
-            H5Fget_vfd_handle(hdf5_file_id, H5P_DEFAULT, &file_buf_ptr);
-            H5Fget_filesize(hdf5_file_id, &hdf5_file_size);
-#else
             hdf5_file_size = H5Fget_file_image(hdf5_file_id, NULL, 0);
             file_buf_ptr = malloc(hdf5_file_size);
             H5Fget_file_image(hdf5_file_id, file_buf_ptr, hdf5_file_size);
-#endif
-            DBUngrabDriver(dbfile,0);
 
+            DBUngrabDriver(dbfile,0);
+#endif
 
 #ifdef HAVE_MPI
             MPI_Isend(file_buf_ptr, (int) hdf5_file_size, MPI_CHAR, my_writer_rank,
@@ -1307,6 +1306,8 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
             sendinfo[block].dbfile = dbfile;
             sendinfo[block].buf = file_buf_ptr;
 #endif
+
+            DBClose(dbfile);
         }
         else
         {
