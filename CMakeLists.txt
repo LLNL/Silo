@@ -57,7 +57,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 ###
 # grab the version string
 ###
-file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/VERSION SILO_VERSION)
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/SILO_VERSION SILO_VERSION)
 
 ###-----------------------------------------------------------------------------
 # project command will automatically create cmake vars for major, minor,
