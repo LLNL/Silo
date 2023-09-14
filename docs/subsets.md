@@ -57,7 +57,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   An MRG tree is used to describe how a mesh is composed of regions such as materials, parts in an assembly, levels in an adaptive refinement hierarchy, nodesets, slide surfaces, boundary conditions, as well as many other kinds of regions.
   An example is shown in Figure 0-8 on page.
 
-  ![](./mrgtree_subset_examples.gif)
+  ![](./images/mrgtree_subset_examples.gif)
   Figure 0-8: Example of MRGTree
 
   In a multi-mesh setting, an MRG tree describing all of the subsets of the mesh is associated with the top-level multimesh object.
@@ -84,7 +84,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Map segment i will be of groupel type `DB_BLOCKCENT` and will enumerate the blocks to be assigned to group i.
   Next, add regions (either an array of regions or one at a time) to the MRG tree, one region for each group and specify the groupel map name and other map parameters to be associated with these regions.
 
-  ![](./mrgtree_groupel_maps.gif)
+  ![](./images/mrgtree_groupel_maps.gif)
   Figure 0-9: Examples of MRG trees for single and multiple groupings.
 
   In the diagram above, for the multiple grouping case, two groupel map objects are defined; one for each grouping.
@@ -798,7 +798,7 @@ The solution is to ensure the string has characters separating fields that are n
   The groupel map concept is best illustrated by example.
   Here, we will define a groupel map for the material case illustrated in Figure 0-6.
 
-  ![](./mrgtree_mixed_mats.gif)
+  ![](./images/mrgtree_mixed_mats.gif)
   Figure 0-10: Example of using groupel map for (mixing) materials.
 
   In the example in the above figure, the groupel map has the behavior of representing the clean and mixed parts of the material decomposition by enumerating in alternating segments of the map, the clean and mixed parts for each successive material.

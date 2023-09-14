@@ -96,7 +96,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   A one-dimensional array slice:
 
-  ![](./stride.gif)
+  ![](./images/stride.gif)
   Figure 0-11: Array slice
 
 {{ EndFunc }}
@@ -181,7 +181,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   A one-dimensional array slice:
 
-  ![](./stride.gif)
+  ![](./images/stride.gif)
   Figure 0-12: Array slice
 
 {{ EndFunc }}

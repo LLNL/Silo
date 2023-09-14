@@ -86,7 +86,7 @@ The functions described in this section of the manual include...
 
   For example, in the case where the are 6 blocks to be assembled into a larger mesh named 'multi-mesh' in the file 'foo.silo' and the blocks are stored in three files as in the figure below,
 
-  ![](./multi_block_files.gif)
+  ![](./images/multi_block_files.gif)
   Figure 0-7: Strings for multi-block objects.
 
   the array of strings to be passed as the `meshnames` argument of `DBPutMultimesh` are illustrated.

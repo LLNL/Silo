@@ -784,7 +784,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or "DBCalcExternalFacelist2" on page 2-230 for an automated way of computing the facelist needed for this call.
 
-  ```{figure} ./ucdmesh.gif
+  ```{figure} ./images/ucdmesh.gif
   :name: ucdmesh-example
   :align: "center"
   :alt: "Example usage of UCD zonelist and external facelist variables."
@@ -796,7 +796,7 @@ Finally, Silo also supports the specification of expressions representing derive
   Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
   The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
 
-  ```{figure} ucdzoo.gif
+  ```{figure} ./images/ucdzoo.gif
   :name: ucdzoo
   :align: "center"
   :alt: "Node, edge and face ordering for zoo-type UCD zone shapes."
@@ -831,7 +831,7 @@ Finally, Silo also supports the specification of expressions representing derive
   In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
   So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
 
-  ```{figure} ucdmesh_warbzone.gif
+  ```{figure} ./images/ucdmesh_warbzone.gif
   :name: ucdmesh-warbzone
   align: "center"
   alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
@@ -1185,7 +1185,7 @@ Finally, Silo also supports the specification of expressions representing derive
   int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
   ```
 
-  1[](./ucd_hex_outward_normals.gif)
+  1[](./images/ucd_hex_outward_normals.gif)
 
   Figure 0-4: Example of a polyhedral zonelist representation for two hexahedral elements.
 
@@ -1716,7 +1716,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_ZONENAMES`|`char**`|Array of `nzones` character strings defining the names of individual zones|`NULL`
   `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
-  ![](./csgmesh.gif)
+  ![](./images/csgmesh.gif)
 
   Figure 0-5: A relatively simple object to represent as a CSG mesh.
   It models an A/C vent outlet for a 1994 Toyota Tercel.
@@ -2017,7 +2017,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `mix_next[i]`
   : The 1-origin index of the next material entry for this zone, else 0 if this is the last entry.
 
-  ![](./mixed_mats.gif)
+  ![](./images/mixed_mats.gif)
   Figure 0-6: Example using mixed data arrays for representing material information
 
 {{ EndFunc }}

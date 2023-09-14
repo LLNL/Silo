@@ -570,7 +570,7 @@ These are all documented in the [Global Library Behavior](globals.md) section.
 
 * [`DBSetAllowOverwritesFile()`](globals.md#dbsetallowoverwritesfile)
 * [`DBGetAllowOverwritesFile()`](globals.md#dbgetallowoverwritesfile)
-* [`DBSetAllowEmptyObjectsFile()`](globals.md#dBsetallowemptyobjectsfile)
+* [`DBSetAllowEmptyObjectsFile()`](globals.md#dbsetallowemptyobjectsfile)
 * [`DBGetAllowEmptyObjectsFile()`](globals.md#dbgetallowemptyobjectsfile)
 * [`DBSetDataReadMask2File()`](globals.md#dbsetdatareadmask2file)
 * [`DBGetDataReadMask2File()`](globals.md#dbgetdatareadmask2file)

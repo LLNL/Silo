@@ -20,7 +20,7 @@ def setup(app):
         app.add_stylesheet('custom.css')
 
 # Files to exclude
-exclude_patterns = [ "func-template.md", "index.md" ]
+exclude_patterns = [ "func-template.md", "index.md", "index-sphinx.html" ]
 
 # Using default suffix would have been fine, but root_doc
 # variable winds up assuming `.rst` without this.
@@ -59,5 +59,5 @@ templates_path = ['.']
 
 # Additional templates that should be rendered to pages.
 html_additional_pages = {
-    'index': 'index-sphinx.md',
+    'index': 'index-sphinx.html',
 }
