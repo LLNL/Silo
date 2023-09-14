@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Silo… &mdash; Silo User Manual 4.11.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction to Silo" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Silo User Manual
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to Silo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="globals.html">Error Handling and Global Library Behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">Files and File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">Meshes, Variables and Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parallel.html">Multi-Block Objects and Parallel I/O</a></li>
+<li class="toctree-l1"><a class="reference internal" href="subsets.html">Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alloc.html">Object Allocation, Free and IsEmpty Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Calculational and Utility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optlists.html">Option Lists or Optlists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">User Defined (Generic) Data and Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="json.html">JSON Interface to Silo Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">Previously Undocumented Use Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fortran.html">Fortran Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python.html">Python Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated.html">Deprecated Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="header.html">Silo Library Header File</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Silo User Manual</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">About Silo…</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index-sphinx.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="about-silo">
+<h1>About Silo…<a class="headerlink" href="#about-silo" title="Permalink to this heading"></a></h1>
+<p>Silo is a library for reading and writing a wide variety of scientific data to binary, files.
+The files Silo produces and the data within them can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
+Consequently, Silo facilitates the development of general purpose tools for processing scientific data.
+One of the more popular tools that process Silo data files is the <a class="reference external" href="https://github.com/visit-dav/visit">VisIt</a> visualization tool.</p>
+<p><img alt="" src="_images/silo_objects.png" /></p>
+<p>Silo supports gridless (point) meshes, structured meshes, unstructured-zoo and unstructured-arbitrary-polyhedral meshes, block structured AMR meshes, constructive solid geometry (CSG) meshes, piecewise-constant (e.g., zone-centered) and piecewise-linear (e.g. node-centered) variables defined on the node, edge, face or volume elements of meshes as well as the decomposition of meshes into arbitrary subset hierarchies including materials and mixing materials.
+In addition, Silo supports a wide variety of other useful objects and metadata to address various scientific computing application needs.
+Although the Silo library is a serial library, key features enable it to be applied effectively in scalable, parallel applications using the <a class="reference external" href="https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/">Multiple Independent File (MIF)</a> parallel I/O paradigm.</p>
+<p>Architecturally, the library is divided into two main pieces; an upper-level application programming interface (API) and a lower-level I/O implementation called a <em>driver</em>.
+Silo supports multiple I/O drivers.
+The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable DataBase) drivers.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to Silo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#where-to-find-example-code">Where to Find Example Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#brief-history-and-background">Brief History and Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#silo-architecture">Silo Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#computational-meshes-supported-by-silo">Computational Meshes Supported by Silo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#silo-s-fortran-interface">Silo’s Fortran Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#using-silo-in-parallel">Using Silo in Parallel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="globals.html">Error Handling and Global Library Behavior</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#global-and-file-level-variants">Global and File-level variants</a></li>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dberrfuncname"><code class="docutils literal notranslate"><span class="pre">DBErrfuncname()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dberrno"><code class="docutils literal notranslate"><span class="pre">DBErrno()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dberrstring"><code class="docutils literal notranslate"><span class="pre">DBErrString()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbshowerrors"><code class="docutils literal notranslate"><span class="pre">DBShowErrors()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dberrlvl"><code class="docutils literal notranslate"><span class="pre">DBErrlvl()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dberrfunc"><code class="docutils literal notranslate"><span class="pre">DBErrfunc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbvariablenamevalid"><code class="docutils literal notranslate"><span class="pre">DBVariableNameValid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbversion"><code class="docutils literal notranslate"><span class="pre">DBVersion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbversiondigits"><code class="docutils literal notranslate"><span class="pre">DBVersionDigits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbversionge"><code class="docutils literal notranslate"><span class="pre">DBVersionGE()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetallowoverwrites"><code class="docutils literal notranslate"><span class="pre">DBSetAllowOverwrites()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetallowoverwritesfile"><code class="docutils literal notranslate"><span class="pre">DBSetAllowOverwritesFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetallowoverwrites"><code class="docutils literal notranslate"><span class="pre">DBGetAllowOverwrites()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetallowoverwritesfile"><code class="docutils literal notranslate"><span class="pre">DBGetAllowOverwritesFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetallowemptyobjects"><code class="docutils literal notranslate"><span class="pre">DBSetAllowEmptyObjects()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetallowemptyobjectsfile"><code class="docutils literal notranslate"><span class="pre">DBSetAllowEmptyObjectsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetallowemptyobjects"><code class="docutils literal notranslate"><span class="pre">DBGetAllowEmptyObjects()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetallowemptyobjectsfile"><code class="docutils literal notranslate"><span class="pre">DBGetAllowEmptyObjectsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbforcesingle"><code class="docutils literal notranslate"><span class="pre">DBForceSingle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetdatatypestring"><code class="docutils literal notranslate"><span class="pre">DBGetDatatypeString()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetdatareadmask2"><code class="docutils literal notranslate"><span class="pre">DBSetDataReadMask2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetdatareadmask2file"><code class="docutils literal notranslate"><span class="pre">DBSetDataReadMask2File()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetdatareadmask2"><code class="docutils literal notranslate"><span class="pre">DBGetDataReadMask2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetdatareadmask2file"><code class="docutils literal notranslate"><span class="pre">DBGetDataReadMask2File()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetenablechecksums"><code class="docutils literal notranslate"><span class="pre">DBSetEnableChecksums()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetenablechecksumsfile"><code class="docutils literal notranslate"><span class="pre">DBSetEnableChecksumsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetenablechecksums"><code class="docutils literal notranslate"><span class="pre">DBGetEnableChecksums()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetenablechecksumsfile"><code class="docutils literal notranslate"><span class="pre">DBGetEnableChecksumsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetcompression"><code class="docutils literal notranslate"><span class="pre">DBSetCompression()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetcompressionfile"><code class="docutils literal notranslate"><span class="pre">DBSetCompressionFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetcompression"><code class="docutils literal notranslate"><span class="pre">DBGetCompression()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetcompressionfile"><code class="docutils literal notranslate"><span class="pre">DBGetCompressionFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetfriendlyhdf5names"><code class="docutils literal notranslate"><span class="pre">DBSetFriendlyHDF5Names()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetfriendlyhdf5namesfile"><code class="docutils literal notranslate"><span class="pre">DBSetFriendlyHDF5NamesFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetfriendlyhdf5names"><code class="docutils literal notranslate"><span class="pre">DBGetFriendlyHDF5Names()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetfriendlyhdf5namesfile"><code class="docutils literal notranslate"><span class="pre">DBGetFriendlyHDF5NamesFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetdeprecatewarnings"><code class="docutils literal notranslate"><span class="pre">DBSetDeprecateWarnings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetdeprecatewarningsfile"><code class="docutils literal notranslate"><span class="pre">DBSetDeprecateWarningsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetdeprecatewarnings"><code class="docutils literal notranslate"><span class="pre">DBGetDeprecateWarnings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbgetdeprecatewarningsfile"><code class="docutils literal notranslate"><span class="pre">DBGetDeprecateWarningsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetallowlongstrcomponents"><code class="docutils literal notranslate"><span class="pre">DBSetAllowLongStrComponents()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#dbsetallowlongstrcomponentsfile"><code class="docutils literal notranslate"><span class="pre">DBSetAllowLongStrComponentsFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="globals.html#db-version-ge"><code class="docutils literal notranslate"><span class="pre">DB_VERSION_GE()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="files.html">Files and File Structure</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbregisterfileoptionsset"><code class="docutils literal notranslate"><span class="pre">DBRegisterFileOptionsSet()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbunregisterfileoptionsset"><code class="docutils literal notranslate"><span class="pre">DBUnregisterFileOptionsSet()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbunregisterallfileoptionssets"><code class="docutils literal notranslate"><span class="pre">DBUnregisterAllFileOptionsSets()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbsetunknowndriverpriorities"><code class="docutils literal notranslate"><span class="pre">DBSetUnknownDriverPriorities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbgetunknowndriverpriorities"><code class="docutils literal notranslate"><span class="pre">DBGetUnknownDriverPriorities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbcreate"><code class="docutils literal notranslate"><span class="pre">DBCreate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbopen"><code class="docutils literal notranslate"><span class="pre">DBOpen()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbflush"><code class="docutils literal notranslate"><span class="pre">DBFlush()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbclose"><code class="docutils literal notranslate"><span class="pre">DBClose()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbgettoc"><code class="docutils literal notranslate"><span class="pre">DBGetToc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#file-level-properties">File-level properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbfilename"><code class="docutils literal notranslate"><span class="pre">DBFileName()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbfileversion"><code class="docutils literal notranslate"><span class="pre">DBFileVersion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbfileversiondigits"><code class="docutils literal notranslate"><span class="pre">DBFileVersionDigits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbfileversionge"><code class="docutils literal notranslate"><span class="pre">DBFileVersionGE()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbversiongefileversion"><code class="docutils literal notranslate"><span class="pre">DBVersionGEFileVersion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbsortobjectsbyoffset"><code class="docutils literal notranslate"><span class="pre">DBSortObjectsByOffset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbmkdir"><code class="docutils literal notranslate"><span class="pre">DBMkDir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbmkdirp"><code class="docutils literal notranslate"><span class="pre">DBMkDirP()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbsetdir"><code class="docutils literal notranslate"><span class="pre">DBSetDir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbgetdir"><code class="docutils literal notranslate"><span class="pre">DBGetDir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbcpdir"><code class="docutils literal notranslate"><span class="pre">DBCpDir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbcplistedobjects"><code class="docutils literal notranslate"><span class="pre">DBCpListedObjects()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbcp"><code class="docutils literal notranslate"><span class="pre">DBCp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbgrabdriver"><code class="docutils literal notranslate"><span class="pre">DBGrabDriver()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbungrabdriver"><code class="docutils literal notranslate"><span class="pre">DBUngrabDriver()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbgetdrivertype"><code class="docutils literal notranslate"><span class="pre">DBGetDriverType()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbgetdrivertypefrompath"><code class="docutils literal notranslate"><span class="pre">DBGetDriverTypeFromPath()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbinqfile"><code class="docutils literal notranslate"><span class="pre">DBInqFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#dbinqfilehasobjects"><code class="docutils literal notranslate"><span class="pre">DBInqFileHasObjects()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#silolibinfo"><code class="docutils literal notranslate"><span class="pre">_silolibinfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#hdf5libinfo"><code class="docutils literal notranslate"><span class="pre">_hdf5libinfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#was-grabbed"><code class="docutils literal notranslate"><span class="pre">_was_grabbed</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">Meshes, Variables and Materials</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputcurve"><code class="docutils literal notranslate"><span class="pre">DBPutCurve()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetcurve"><code class="docutils literal notranslate"><span class="pre">DBGetCurve()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputpointmesh"><code class="docutils literal notranslate"><span class="pre">DBPutPointmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetpointmesh"><code class="docutils literal notranslate"><span class="pre">DBGetPointmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputpointvar"><code class="docutils literal notranslate"><span class="pre">DBPutPointvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputpointvar1"><code class="docutils literal notranslate"><span class="pre">DBPutPointvar1()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetpointvar"><code class="docutils literal notranslate"><span class="pre">DBGetPointvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputquadmesh"><code class="docutils literal notranslate"><span class="pre">DBPutQuadmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetquadmesh"><code class="docutils literal notranslate"><span class="pre">DBGetQuadmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputquadvar"><code class="docutils literal notranslate"><span class="pre">DBPutQuadvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputquadvar1"><code class="docutils literal notranslate"><span class="pre">DBPutQuadvar1()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetquadvar"><code class="docutils literal notranslate"><span class="pre">DBGetQuadvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputucdmesh"><code class="docutils literal notranslate"><span class="pre">DBPutUcdmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputucdsubmesh"><code class="docutils literal notranslate"><span class="pre">DBPutUcdsubmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetucdmesh"><code class="docutils literal notranslate"><span class="pre">DBGetUcdmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputzonelist"><code class="docutils literal notranslate"><span class="pre">DBPutZonelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputzonelist2"><code class="docutils literal notranslate"><span class="pre">DBPutZonelist2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputphzonelist"><code class="docutils literal notranslate"><span class="pre">DBPutPHZonelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetphzonelist"><code class="docutils literal notranslate"><span class="pre">DBGetPHZonelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputfacelist"><code class="docutils literal notranslate"><span class="pre">DBPutFacelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputucdvar"><code class="docutils literal notranslate"><span class="pre">DBPutUcdvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputucdvar1"><code class="docutils literal notranslate"><span class="pre">DBPutUcdvar1()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetucdvar"><code class="docutils literal notranslate"><span class="pre">DBGetUcdvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputcsgmesh"><code class="docutils literal notranslate"><span class="pre">DBPutCsgmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetcsgmesh"><code class="docutils literal notranslate"><span class="pre">DBGetCsgmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputcsgzonelist"><code class="docutils literal notranslate"><span class="pre">DBPutCSGZonelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetcsgzonelist"><code class="docutils literal notranslate"><span class="pre">DBGetCSGZonelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputcsgvar"><code class="docutils literal notranslate"><span class="pre">DBPutCsgvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetcsgvar"><code class="docutils literal notranslate"><span class="pre">DBGetCsgvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputmaterial"><code class="docutils literal notranslate"><span class="pre">DBPutMaterial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetmaterial"><code class="docutils literal notranslate"><span class="pre">DBGetMaterial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputmatspecies"><code class="docutils literal notranslate"><span class="pre">DBPutMatspecies()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetmatspecies"><code class="docutils literal notranslate"><span class="pre">DBGetMatspecies()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbputdefvars"><code class="docutils literal notranslate"><span class="pre">DBPutDefvars()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbgetdefvars"><code class="docutils literal notranslate"><span class="pre">DBGetDefvars()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbinqmeshname"><code class="docutils literal notranslate"><span class="pre">DBInqMeshname()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#dbinqmeshtype"><code class="docutils literal notranslate"><span class="pre">DBInqMeshtype()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="parallel.html">Multi-Block Objects and Parallel I/O</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbputmultimesh"><code class="docutils literal notranslate"><span class="pre">DBPutMultimesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbgetmultimesh"><code class="docutils literal notranslate"><span class="pre">DBGetMultimesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbputmultimeshadj"><code class="docutils literal notranslate"><span class="pre">DBPutMultimeshadj()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbgetmultimeshadj"><code class="docutils literal notranslate"><span class="pre">DBGetMultimeshadj()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbputmultivar"><code class="docutils literal notranslate"><span class="pre">DBPutMultivar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbgetmultivar"><code class="docutils literal notranslate"><span class="pre">DBGetMultivar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbputmultimat"><code class="docutils literal notranslate"><span class="pre">DBPutMultimat()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbgetmultimat"><code class="docutils literal notranslate"><span class="pre">DBGetMultimat()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbputmultimatspecies"><code class="docutils literal notranslate"><span class="pre">DBPutMultimatspecies()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbgetmultimatspecies"><code class="docutils literal notranslate"><span class="pre">DBGetMultimatspecies()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#dbopenbybcast"><code class="docutils literal notranslate"><span class="pre">DBOpenByBcast()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-init"><code class="docutils literal notranslate"><span class="pre">PMPIO_Init()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-createfilecallback"><code class="docutils literal notranslate"><span class="pre">PMPIO_CreateFileCallBack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-openfilecallback"><code class="docutils literal notranslate"><span class="pre">PMPIO_OpenFileCallBack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-closefilecallback"><code class="docutils literal notranslate"><span class="pre">PMPIO_CloseFileCallBack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-waitforbaton"><code class="docutils literal notranslate"><span class="pre">PMPIO_WaitForBaton()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-handoffbaton"><code class="docutils literal notranslate"><span class="pre">PMPIO_HandOffBaton()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-finish"><code class="docutils literal notranslate"><span class="pre">PMPIO_Finish()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-grouprank"><code class="docutils literal notranslate"><span class="pre">PMPIO_GroupRank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel.html#pmpio-rankingroup"><code class="docutils literal notranslate"><span class="pre">PMPIO_RankInGroup()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="subsets.html">Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbmakemrgtree"><code class="docutils literal notranslate"><span class="pre">DBMakeMrgtree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbaddregion"><code class="docutils literal notranslate"><span class="pre">DBAddRegion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbaddregionarray"><code class="docutils literal notranslate"><span class="pre">DBAddRegionArray()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbsetcwr"><code class="docutils literal notranslate"><span class="pre">DBSetCwr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbgetcwr"><code class="docutils literal notranslate"><span class="pre">DBGetCwr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbputmrgtree"><code class="docutils literal notranslate"><span class="pre">DBPutMrgtree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbgetmrgtree"><code class="docutils literal notranslate"><span class="pre">DBGetMrgtree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbfreemrgtree"><code class="docutils literal notranslate"><span class="pre">DBFreeMrgtree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbmakenamescheme"><code class="docutils literal notranslate"><span class="pre">DBMakeNamescheme()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbgetname"><code class="docutils literal notranslate"><span class="pre">DBGetName()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbgetindex"><code class="docutils literal notranslate"><span class="pre">DBGetIndex()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbputmrgvar"><code class="docutils literal notranslate"><span class="pre">DBPutMrgvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbgetmrgvar"><code class="docutils literal notranslate"><span class="pre">DBGetMrgvar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbputgroupelmap"><code class="docutils literal notranslate"><span class="pre">DBPutGroupelmap()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbgetgroupelmap"><code class="docutils literal notranslate"><span class="pre">DBGetGroupelmap()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbfreegroupelmap"><code class="docutils literal notranslate"><span class="pre">DBFreeGroupelmap()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="subsets.html#dbopt-region-pnames"><code class="docutils literal notranslate"><span class="pre">DBOPT_REGION_PNAMES</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="alloc.html">Object Allocation, Free and IsEmpty Tests</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="alloc.html#dballocxxx"><code class="docutils literal notranslate"><span class="pre">DBAllocXxx()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="alloc.html#dbfreexxx"><code class="docutils literal notranslate"><span class="pre">DBFreeXxx()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="alloc.html#dbisempty"><code class="docutils literal notranslate"><span class="pre">DBIsEmpty()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Calculational and Utility</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbcalcexternalfacelist"><code class="docutils literal notranslate"><span class="pre">DBCalcExternalFacelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbcalcexternalfacelist2"><code class="docutils literal notranslate"><span class="pre">DBCalcExternalFacelist2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbstringarraytostringlist"><code class="docutils literal notranslate"><span class="pre">DBStringArrayToStringList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbstringlisttostringarray"><code class="docutils literal notranslate"><span class="pre">DBStringListToStringArray()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbfreestringarray"><code class="docutils literal notranslate"><span class="pre">DBFreeStringArray()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbannotateucdmesh"><code class="docutils literal notranslate"><span class="pre">DBAnnotateUcdmesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbjoinpath"><code class="docutils literal notranslate"><span class="pre">DBJoinPath()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbisdifferentdouble"><code class="docutils literal notranslate"><span class="pre">DBIsDifferentDouble()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbisdifferentlonglong"><code class="docutils literal notranslate"><span class="pre">DBIsDifferentLongLong()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbcalcdensearraysfrommaterial"><code class="docutils literal notranslate"><span class="pre">DBCalcDenseArraysFromMaterial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#dbcalcmaterialfromdensearrays"><code class="docutils literal notranslate"><span class="pre">DBCalcMaterialFromDenseArrays()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="optlists.html">Option Lists or Optlists</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#a-common-coding-gotcha">A Common Coding Gotcha</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#dbmakeoptlist"><code class="docutils literal notranslate"><span class="pre">DBMakeOptlist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#dbaddoption"><code class="docutils literal notranslate"><span class="pre">DBAddOption()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#dbclearoption"><code class="docutils literal notranslate"><span class="pre">DBClearOption()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#dbgetoption"><code class="docutils literal notranslate"><span class="pre">DBGetOption()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#dbfreeoptlist"><code class="docutils literal notranslate"><span class="pre">DBFreeOptlist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optlists.html#dbclearoptlist"><code class="docutils literal notranslate"><span class="pre">DBClearOptlist()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">User Defined (Generic) Data and Objects</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbwrite"><code class="docutils literal notranslate"><span class="pre">DBWrite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbwriteslice"><code class="docutils literal notranslate"><span class="pre">DBWriteSlice()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbreadvar"><code class="docutils literal notranslate"><span class="pre">DBReadVar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbreadvarslice"><code class="docutils literal notranslate"><span class="pre">DBReadVarSlice()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetvar"><code class="docutils literal notranslate"><span class="pre">DBGetVar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbinqvarexists"><code class="docutils literal notranslate"><span class="pre">DBInqVarExists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbinqvartype"><code class="docutils literal notranslate"><span class="pre">DBInqVarType()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetvarbytelength"><code class="docutils literal notranslate"><span class="pre">DBGetVarByteLength()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetvarbytelengthinfile"><code class="docutils literal notranslate"><span class="pre">DBGetVarByteLengthInFile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetvardims"><code class="docutils literal notranslate"><span class="pre">DBGetVarDims()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetvarlength"><code class="docutils literal notranslate"><span class="pre">DBGetVarLength()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetvartype"><code class="docutils literal notranslate"><span class="pre">DBGetVarType()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbputcompoundarray"><code class="docutils literal notranslate"><span class="pre">DBPutCompoundarray()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbinqcompoundarray"><code class="docutils literal notranslate"><span class="pre">DBInqCompoundarray()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetcompoundarray"><code class="docutils literal notranslate"><span class="pre">DBGetCompoundarray()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbmakeobject"><code class="docutils literal notranslate"><span class="pre">DBMakeObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbfreeobject"><code class="docutils literal notranslate"><span class="pre">DBFreeObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbchangeobject"><code class="docutils literal notranslate"><span class="pre">DBChangeObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbclearobject"><code class="docutils literal notranslate"><span class="pre">DBClearObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbadddblcomponent"><code class="docutils literal notranslate"><span class="pre">DBAddDblComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbaddfltcomponent"><code class="docutils literal notranslate"><span class="pre">DBAddFltComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbaddintcomponent"><code class="docutils literal notranslate"><span class="pre">DBAddIntComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbaddstrcomponent"><code class="docutils literal notranslate"><span class="pre">DBAddStrComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbaddvarcomponent"><code class="docutils literal notranslate"><span class="pre">DBAddVarComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbwritecomponent"><code class="docutils literal notranslate"><span class="pre">DBWriteComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbwriteobject"><code class="docutils literal notranslate"><span class="pre">DBWriteObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetobject"><code class="docutils literal notranslate"><span class="pre">DBGetObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetcomponent"><code class="docutils literal notranslate"><span class="pre">DBGetComponent()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generic.html#dbgetcomponenttype"><code class="docutils literal notranslate"><span class="pre">DBGetComponentType()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="json.html">JSON Interface to Silo Objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="json.html#json-c-extensions"><code class="docutils literal notranslate"><span class="pre">json-c</span></code> Extensions</a></li>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="json.html#dbwritejsonobject"><code class="docutils literal notranslate"><span class="pre">DBWriteJsonObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="json.html#dbgetjsonobject"><code class="docutils literal notranslate"><span class="pre">DBGetJsonObject()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">Previously Undocumented Use Conventions</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#visit-defvars"><code class="docutils literal notranslate"><span class="pre">_visit_defvars</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#visit-searchpath"><code class="docutils literal notranslate"><span class="pre">_visit_searchpath</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#visit-domain-groups"><code class="docutils literal notranslate"><span class="pre">_visit_domain_groups</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#alphabetizevariables"><code class="docutils literal notranslate"><span class="pre">AlphabetizeVariables</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#connectivityistimevarying"><code class="docutils literal notranslate"><span class="pre">ConnectivityIsTimeVarying</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#multivartomultimeshmap-vars"><code class="docutils literal notranslate"><span class="pre">MultivarToMultimeshMap_vars</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html#multivartomultimeshmap-meshes"><code class="docutils literal notranslate"><span class="pre">MultivarToMultimeshMap_meshes</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="fortran.html">Fortran Interface</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbmkptr"><code class="docutils literal notranslate"><span class="pre">dbmkptr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbrmptr"><code class="docutils literal notranslate"><span class="pre">dbrmptr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbset2dstrlen"><code class="docutils literal notranslate"><span class="pre">dbset2dstrlen()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbget2dstrlen"><code class="docutils literal notranslate"><span class="pre">dbget2dstrlen()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbfortranallocpointer"><code class="docutils literal notranslate"><span class="pre">DBFortranAllocPointer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbfortranaccesspointer"><code class="docutils literal notranslate"><span class="pre">DBFortranAccessPointer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbfortranremovepointer"><code class="docutils literal notranslate"><span class="pre">DBFortranRemovePointer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran.html#dbwrtfl"><code class="docutils literal notranslate"><span class="pre">dbwrtfl()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="python.html">Python Interface</a><ul>
+<details><summary>Functions</summary>
+<li class="toctree-l2"><a class="reference internal" href="python.html#silo-open"><code class="docutils literal notranslate"><span class="pre">Silo.Open()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#silo-create"><code class="docutils literal notranslate"><span class="pre">Silo.Create()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-gettoc"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.GetToc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-getvarinfo"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.GetVarInfo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-getvar"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.GetVar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-setdir"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.SetDir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-close"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.Close()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-writeobject"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.WriteObject()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-write"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.Write()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html#dbfile-mkdir"><code class="docutils literal notranslate"><span class="pre">&lt;DBfile&gt;.MkDir()</span></code></a></li>
+</ul>
+</li>
+</details>
+<li class="toctree-l1"><a class="reference internal" href="deprecated.html">Deprecated Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="header.html">Silo Library header file</a><ul>
+<details><summary>Constants and Types</summary>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbtoc">DBtoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbcurve">DBcurve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbdefvars">DBdefvars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbpointmesh">DBpointmesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmultimesh">DBmultimesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmultimeshadj">DBmultimeshadj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmultivar">DBmultivar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmultimat">DBmultimat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmultimatspecies">DBmultimatspecies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbzonelist">DBzonelist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbphzonelist">DBphzonelist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbfacelist">DBfacelist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbedgelist">DBedgelist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbquadmesh">DBquadmesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbucdmesh">DBucdmesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbquadvar">DBquadvar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbucdvar">DBucdvar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmeshvar">DBmeshvar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmaterial">DBmaterial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmatspecies">DBmatspecies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbcsgzonelist">DBcsgzonelist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbcsgmesh">DBcsgmesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbcsgvar">DBcsgvar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmrgtree">DBmrgtree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbmrgvar">DBmrgvar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbgroupelmap">DBgroupelmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbcompoundarray">DBcompoundarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dboptlist">DBoptlist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbobject">DBobject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbdatatype">DBdatatype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#dbobjecttype">DBObjectType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#open-create-flags">Open/Create flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#optlist-options">Optlist options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#vfd-options">VFD options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#error-handling-options">Error handling options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#error-return-codes">Error return codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#major-order-options">Major order options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#variable-centering-options">Variable centering options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#coordinate-system-options">Coordinate system options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#derived-variable-types">Derived variable types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="header.html#csg-options">CSG options</a></li>
+</ul>
+</li>
+</details>
+</ul>
+</div>
+<div class="section" id="manuals-for-previous-versions">
+<h2>Manuals for previous versions<a class="headerlink" href="#manuals-for-previous-versions" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wci.llnl.gov/sites/wci/files/2020-08/LLNL-SM-654357.pdf">Most recent previously released manual (4.10)</a></p></li>
+</ul>
+</div>
+<div class="section" id="contacts">
+<h2>Contacts<a class="headerlink" href="#contacts" title="Permalink to this heading"></a></h2>
+<p>For inquiries, users are encouraged to use Silo’s <a class="reference external" href="https://github.com/LLNL/Silo/discussions">GitHub Discussions space</a>.
+GitHub accounts are free.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-right" title="Introduction to Silo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1996-2023, LLNL, LLNL-SM-654357.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
