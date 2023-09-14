@@ -16,7 +16,7 @@ Silo supports multiple I/O drivers.
 The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable DataBase) drivers.
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 ./intro.md
 ./globals.md
 ./files.md
@@ -33,6 +33,7 @@ The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable 
 ./python.md
 ./deprecated.md
 ./header.md
+./devnotes.md
 ```
 
 ## Manuals for previous versions
