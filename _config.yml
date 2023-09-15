@@ -1,10 +1,7 @@
 title: Silo
-author:
-  name: markcmiller86
-  email: miller86@llnl.gov
 
 description: >
-  An API for reading and writing a wide diversity of binary, scientific data to be easily shared and exchanged applications.
+  An API for reading and writing a wide diversity of binary, scientific data to be easily shared and exchanged.
   Silo is used by the [VisIt](https://visit.llnl.gov) visualization tool.
 
 theme: minima
@@ -12,6 +9,8 @@ theme: minima
 minima:
   skin: solarized-light
 
-exclude: [docs]
+exclude: [docs, src]
 
 show_downloads: false
+
+headers:
