@@ -9,7 +9,7 @@ theme: minima
 minima:
   skin: solarized-light
 
-headers:
+header_pages:
 
 exclude: [CMake, config, config-site, docs, resources, src, svn_bin, tests, tools]
 
