@@ -1,8 +1,20 @@
-remote_theme: pages-themes/leap-day@v0.2.0
-plugins:
-- jekyll-remote-theme
+title: Silo
+author:
+  name: markcmiller86
+  email: miller86@llnl.gov
 
-title: Silo Project Home
-description: Home pages for the Silo project.
+description: >
+  The Silo library defines an application programing interface (API) for reading and writing a wide variety of scientific data to binary, files.
+  The files and the data within them can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
+  One of the more popular applications that reads Silo data files is the [VisIt](https://visit.llnl.gov) visualization tool.
+
+  Silo supports a variety of mesh types including gridless (point), structured, unstructured-zoo and unstructured-arbitrary, block structured AMR, and constructive solid geometry (CSG).
+  Silo also supports piecewise-constant (e.g. zone-centered) and piecewise-linear (e.g. node-centered) variables defined on the node, edge, face or volume elements of meshes and the decomposition of meshes into arbitrary subset hierarchies including materials and mixing materials.
+  Although Silo is a serial library, key features enable it to be applied effectively in scalable, parallel applications using the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
+
+theme: minima
+
+minima:
+  skin: solarized-light
 
 show_downloads: false
