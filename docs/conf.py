@@ -20,7 +20,7 @@ def setup(app):
         app.add_stylesheet('custom.css')
 
 # Files to exclude
-exclude_patterns = [ "func-template.md", "index.md", "index-sphinx.html" ]
+exclude_patterns = [ "func-template.md" ]
 
 # Using default suffix would have been fine, but root_doc
 # variable winds up assuming `.rst` without this.
@@ -29,7 +29,7 @@ source_suffix = {
 }
 
 # Top of MyST/Sphinx doc tree WITHOUT the extension
-root_doc = u'index-sphinx'
+#root_doc = u'index-sphinx'
 
 # MYST specific extensions
 myst_enable_extensions = [
@@ -52,12 +52,4 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     # Toc options
     'navigation_depth': 4
-}
-
-# Path to find HTML templates.
-templates_path = ['.']
-
-# Additional templates that should be rendered to pages.
-html_additional_pages = {
-    'index': 'index-sphinx.html',
 }
