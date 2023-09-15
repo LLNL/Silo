@@ -97,6 +97,9 @@ endif()
 # turn on folders (VS IDE, ignored otherwise)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Query if the generator is multi-config or not.
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 #
 # create an include dir for generated include files
 #
@@ -615,7 +618,7 @@ if(WIN32)
         # copy silo dll to build/bin dir
         add_custom_command(TARGET copy_deps POST_BUILD
              COMMAND ${CMAKE_COMMAND} -E copy_if_different
-             $<TARGET_FILE:silo> ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+             $<TARGET_FILE:silo> ${Silo_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)
     endif()
 endif()
 
