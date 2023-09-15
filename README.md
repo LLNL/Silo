@@ -1,4 +1,6 @@
-# Major heading
+---
+title: Welcome to Silo
+---
 
 Some text
 
