@@ -11,13 +11,13 @@ Version | Release assets | Notes
 4.11.1  | [Legacy][4111] / [BSD][4111b] | [Release notes][4111rn]
 4.11  | [Legacy][411] / [BSD][411b] | [Release notes][411rn]
 4.10.2  | [Legacy][4102] / [BSD][4102b] | [See 4.10.1 Release notes][4102rn]
-4.10.1 | Intentionally unavailable
+4.10.1 | Intentionally unavailable | Release was DOA
 4.10  | [Legacy][410] / [BSD][410b] | [Release notes][410rn]
 4.9.1  | [Legacy][491] / [BSD][491b] | [Release notes][491rn]
 4.9  | [Legacy][49] / [BSD][49b] | [Release notes][49rn]
 4.8  | [Legacy][48] / [BSD][48b] | [Release notes][48rn]
 4.7.2  | [Legacy][472] | [Release notes][472rn]
-4.7.1  | Intentionally unavailable
+4.7.1  | Intentionally unavailable | Release was DOA
 4.7  | [Legacy][47] | Not available
 4.6.2  | [Legacy][462] | Not available
 4.6.1  | [Legacy][461] | Not available
@@ -50,4 +50,3 @@ Version | Release assets | Notes
 [47]: silo-4.7.tar.xz "Legacy License but includes all features"
 [462]: silo-4.6.2.tar.xz "Legacy License but includes all features"
 [461]: silo-4.6.1.tar.xz "Legacy License but includes all features"
-

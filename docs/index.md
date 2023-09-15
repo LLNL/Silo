@@ -15,6 +15,8 @@ Architecturally, the library is divided into two main pieces; an upper-level app
 Silo supports multiple I/O drivers.
 The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable DataBase) drivers.
 
+## Major sections of the user's manual
+
 ```{toctree}
 :maxdepth: 1
 ./intro.md
