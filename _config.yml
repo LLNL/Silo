@@ -2,15 +2,18 @@ title: Silo
 
 description: >
   An API for reading and writing a wide diversity of binary, scientific data to be easily shared and exchanged.
-  Silo is used by the [VisIt](https://visit.llnl.gov) visualization tool.
+  Silo is prominently used by the VisIt visualization tool.
 
 theme: minima
 
 minima:
   skin: solarized-light
 
+headers:
+
 exclude: [docs, src]
 
 show_downloads: false
 
-headers:
+plugins:
+  - jekyll-readme-index
