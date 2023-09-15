@@ -7,8 +7,8 @@ Each example shows a picture of the data (visualized with [VisIt](https://visit.
 All of the examples here use some common Silo functions such as `DBCreate()` and `DBClose()`.
 So, those calls are not explicitly mentioned.
 
-Image (from [VisIt](https://visit.llnl.gov) | Description | Links
-:---: | :---: | :---
+Image (from [VisIt](https://visit.llnl.gov) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Description | Links
+:---: | :--- | :---
 ![](csg.jpg) | Key concepts: Representation of Constructive Solid Geometry (CSG) meshes, variables and materials defined on CSG meshes and multiple meshes in a single file, error controls.  Silo calls: [DBAddOption], `DBClose`, `DBFreeOptlist`, `DBPutCSGZonelist`, `DBPutCsgmesh`, `DBPutCsgvar`, `DBPutMaterial`, `DBShowErrors`, `DBMakeOptlist`. | [`csg.silo` data file](csg.silo)<br>[csg.C source code](csg_mesh.C)
 
 [DBAddOption]: https://silo.readthedocs.io/en/latest/optlists.html#dbaddoption
