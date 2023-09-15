@@ -117,8 +117,8 @@ if(WIN32 AND TARGET Qt5::windeployqt)
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/windeployqt"
         COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-        COMMAND Qt5::windeployqt --dir "${CMAKE_CURRENT_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:silex>/$<TARGET_FILE_NAME:silex>"
-        COMMAND Qt5::windeployqt --verbose 0 --dir "${Silo_BINARY_DIR}/bin/$<CONFIG>" "$<TARGET_FILE_DIR:silex>/$<TARGET_FILE_NAME:silex>"
+        COMMAND Qt5::windeployqt --dir "${CMAKE_CURRENT_BINARY_DIR}/windeployqt" "$<TARGET_FILE:silex>"
+        COMMAND Qt5::windeployqt --verbose 0 --dir "${Silo_BINARY_DIR}/bin/$<CONFIG>" "$<TARGET_FILE:silex>"
     )
 
     # copy deployment directory during installation
