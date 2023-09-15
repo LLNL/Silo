@@ -227,7 +227,7 @@ if(WIN32)
     endif()
 else()
     include(${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
-    set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE)
+    set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64)
     check_type_size("off64_t" SIZEOF_OFF64_T)
     if(NOT SIZEOF_OFF64_T)
         set(SIZEOF_OFF64_T ${CMAKE_SIZEOF_VOID_P})
@@ -369,7 +369,7 @@ configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
 if(WIN32)
    add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _USE_MATH_DEFINES NOMINMAX)
 else()
-   add_compile_definitions(_LARGEFILE64_SOURCE)
+   add_compile_definitions(_LARGEFILE64_SOURCE _FILE_OFFSET_BITS=64)
 endif()
 
 ##
