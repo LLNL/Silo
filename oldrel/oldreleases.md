@@ -4,19 +4,28 @@ title: Releases
 
 Version | Assets | Notes
 ---:    | :---   | ---
-4.10.2  | [legacy][4102]<br>[bsd][4102b]
+4.11.1  | [Legacy Licensed][4111]<br>[BSD Licensed][4111b] | [Release notes][4111rn]
+4.11  | [Legacy Licensed][411]<br>[BSD Licensed][411b] | [Release notes][411rn]
+4.10.2  | [Legacy Licensed][4102]<br>[BSD Licensed][4102b]
 4.10.1 | Intentionally unavailable
-4.10  | [legacy][410]<br>[bsd][410b]
-4.9.1  | [legacy][491]<br>[bsd][491b]
-4.9  | [legacy][49]<br>[bsd][49b]
-4.8  | [legacy][48]<br>[bsd][48b]
-4.7.2  | [legacy][472]<br>[bsd][472b]
-4.7.1  | Intentionall unavailable
-4.7  | [legacy][47]<br>[bsd][47b]
-4.6.2  | [legacy][462]<br>[bsd][462b]
-4.6.1  | [legacy][461]<br>[bsd][461b]
+4.10  | [Legacy Licensed][410]<br>[BSD Licensed][410b]
+4.9.1  | [Legacy Licensed][491]<br>[BSD Licensed][491b]
+4.9  | [Legacy Licensed][49]<br>[BSD Licensed][49b]
+4.8  | [Legacy Licensed][48]<br>[BSD Licensed][48b]
+4.7.2  | [Legacy Licensed][472]
+4.7.1  | Intentionally unavailable
+4.7  | [Legacy Licensed][47]
+4.6.2  | [Legacy Licensed][462]
+4.6.1  | [Legacy Licensed][461]
 
 <!-- release asset links -->
+
+[4111]: https://github.com/LLNL/Silo/releases/download/4.11.1/silo-4.11.1.tar.xz "Legacy License but includes all features"
+[4111b]: https://github.com/LLNL/Silo/releases/download/4.11.1/silo-4.11.1-bsd.tar.xz "BSD License, fpzip/hzip compressors removed"
+[4111rn]: https://github.com/LLNL/Silo/releases/tag/4.11.1
+[411]: https://github.com/LLNL/Silo/releases/download/v4.11/silo-4.11.tar.gz "Legacy License but includes all features"
+[411b]: https://github.com/LLNL/Silo/releases/download/v4.11/silo-4.11-bsd.tar.gz "BSD License, fpzip/hzip compressors removed"
+[411rn]:https://github.com/LLNL/Silo/wiki/4.11-Release-Notes-September,-2021
 [4102]: ./silo-4.10.2.tar.xz "Legacy License but includes all features"
 [4102b]: ./silo-4.10.2-bsd.tar.xz "BSD License, fpzip/hzip compressors removed"
 [410]: silo-4.10.tar.xz "Legacy License but includes all features"
