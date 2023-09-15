@@ -2,7 +2,7 @@ title: Silo
 
 description: >
   An API for reading and writing a wide diversity of binary, scientific data to be easily shared and exchanged.
-  Silo is used by the <a href="https://visit.llnl.gov">VisIt</a> visualization tool.
+  Silo is used by the [VisIt](https://visit.llnl.gov) visualization tool.
 
 theme: minima
 
