@@ -1,6 +1,5 @@
 ---
 title: Some stuff
-permalink: /index/
 ---
 # Major heading
 
