@@ -14,6 +14,3 @@ headers:
 exclude: [docs, src]
 
 show_downloads: false
-
-plugins:
-  - jekyll-readme-index
