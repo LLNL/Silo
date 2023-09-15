@@ -12,4 +12,6 @@ theme: minima
 minima:
   skin: solarized-light
 
+exclude: [docs]
+
 show_downloads: false
