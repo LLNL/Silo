@@ -1,147 +1,1272 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Wayback Machine</title>
-<script src="//archive.org/includes/analytics.js?v=cf34f82" type="text/javascript"></script>
-<script type="text/javascript">window.addEventListener('DOMContentLoaded',function(){var v=archive_analytics.values;v.service='wb';v.server_name='wwwb-app227.us.archive.org';v.server_ms=427;archive_analytics.send_pageview({});});</script>
-<script type="text/javascript" src="/_static/js/bundle-playback.js?v=1WaXNDFE" charset="utf-8"></script>
-<link rel="stylesheet" type="text/css" href="/_static/css/banner-styles.css?v=S1zqJCYt" />
-<link rel="stylesheet" type="text/css" href="/_static/css/iconochive.css?v=qtvMKcIJ" />
-<script src="/_static/js/jquery-1.11.1.min.js"></script>
-</head>
-<body style="height:100vh;overflow:hidden;margin:0;display:flex;flex-flow:column nowrap;align-items:stretch;">
-<div style="flex:0 0;">
-<!-- BEGIN WAYBACK TOOLBAR INSERT -->
-<script>__wm.rw(0);</script>
-<div id="wm-ipp-base" lang="en" style="display:none;direction:ltr;">
-<div id="wm-ipp" style="position:fixed;left:0;top:0;right:0;">
-<div id="donato" style="position:relative;width:100%;">
-  <div id="donato-base">
-    <iframe id="donato-if" src="https://archive.org/includes/donate.php?as_page=1&amp;platform=wb&amp;referer=https%3A//web.archive.org/web/20161230021048/https%3A//wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C"
-	    scrolling="no" frameborder="0" style="width:100%; height:100%">
-    </iframe>
-  </div>
-</div><div id="wm-ipp-inside">
-  <div id="wm-toolbar" style="position:relative;display:flex;flex-flow:row nowrap;justify-content:space-between;">
-    <div id="wm-logo" style="/*width:110px;*/padding-top:12px;">
-      <a href="/web/" title="Wayback Machine home page"><img src="/_static/images/toolbar/wayback-toolbar-logo-200.png" srcset="/_static/images/toolbar/wayback-toolbar-logo-100.png, /_static/images/toolbar/wayback-toolbar-logo-150.png 1.5x, /_static/images/toolbar/wayback-toolbar-logo-200.png 2x" alt="Wayback Machine" style="width:100px" border="0" /></a>
-    </div>
-    <div class="c" style="display:flex;flex-flow:column nowrap;justify-content:space-between;flex:1;">
-      <form class="u" style="display:flex;flex-direction:row;flex-wrap:nowrap;" target="_top" method="get" action="/web/submit" name="wmtb" id="wmtb"><input type="text" name="url" id="wmtbURL" value="https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" onfocus="this.focus();this.select();" style="flex:1;"/><input type="hidden" name="type" value="replay" /><input type="hidden" name="date" value="20161230021048" /><input type="submit" value="Go" />
-      </form>
-      <div style="display:flex;flex-flow:row nowrap;align-items:flex-end;">
-                <div class="s" id="wm-nav-captures" style="flex:1;">
-                    <a class="t" href="/web/20161230021048*/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" title="See a list of every capture for this URL">2 captures</a>
-          <div class="r" title="Timespan for captures of this URL">30 Dec 2016 - 18 Mar 2021</div>
-          </div>
-        <div class="k">
-          <a href="" id="wm-graph-anchor">
-            <div id="wm-ipp-sparkline" title="Explore captures for this URL" style="position: relative">
-              <canvas id="wm-sparkline-canvas" width="700" height="27" border="0"></canvas>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="n">
-      <table>
-        <tbody>
-          <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
-          <tr class="m">
-            <td class="b" nowrap="nowrap">Nov</td>
-            <td class="c" id="displayMonthEl" title="You are here: 02:10:48 Dec 30, 2016">DEC</td>
-            <td class="f" nowrap="nowrap"><a href="https://web.archive.org/web/20210318075301/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" title="18 Mar 2021"><strong>Mar</strong></a></td>
-          </tr>
-          <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
-          <tr class="d">
-            <td class="b" nowrap="nowrap"><img src="/_static/images/toolbar/wm_tb_prv_off.png" alt="Previous capture" width="14" height="16" border="0" /></td>
-            <td class="c" id="displayDayEl" style="width:34px;font-size:22px;white-space:nowrap;" title="You are here: 02:10:48 Dec 30, 2016">30</td>
-            <td class="f" nowrap="nowrap"><a href="https://web.archive.org/web/20210318075301/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" title="07:53:01 Mar 18, 2021"><img src="/_static/images/toolbar/wm_tb_nxt_on.png" alt="Next capture" width="14" height="16" border="0" /></a></td>
-          </tr>
-          <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
-          <tr class="y">
-            <td class="b" nowrap="nowrap">2015</td>
-            <td class="c" id="displayYearEl" title="You are here: 02:10:48 Dec 30, 2016">2016</td>
-            <td class="f" nowrap="nowrap"><a href="https://web.archive.org/web/20210318075301/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" title="18 Mar 2021"><strong>2021</strong></a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="r" style="display:flex;flex-flow:column nowrap;align-items:flex-end;justify-content:space-between;">
-      <div id="wm-btns" style="text-align:right;height:23px;">
-                <span class="xxs">
-          <div id="wm-save-snapshot-success">success</div>
-          <div id="wm-save-snapshot-fail">fail</div>
-          <a id="wm-save-snapshot-open" href="#" title="Share via My Web Archive" >
-            <span class="iconochive-web"></span>
-          </a>
-          <a href="https://archive.org/account/login.php" title="Sign In" id="wm-sign-in">
-            <span class="iconochive-person"></span>
-          </a>
-          <span id="wm-save-snapshot-in-progress" class="iconochive-web"></span>
-        </span>
-                <a class="xxs" href="http://faq.web.archive.org/" title="Get some help using the Wayback Machine" style="top:-6px;"><span class="iconochive-question" style="color:rgb(87,186,244);font-size:160%;"></span></a>
-        <a id="wm-tb-close" href="#close" style="top:-2px;" title="Close the toolbar"><span class="iconochive-remove-circle" style="color:#888888;font-size:240%;"></span></a>
-      </div>
-      <div id="wm-share" class="xxs">
-        <a href="/web/20161230021048/http://web.archive.org/screenshot/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C"
-           id="wm-screenshot"
-           title="screenshot">
-          <span class="wm-icon-screen-shot"></span>
-        </a>
-        <a href="#" id="wm-video" title="video">
-          <span class="iconochive-movies"></span>
-        </a>
-        <a id="wm-share-facebook" href="#" data-url="https://web.archive.org/web/20161230021048/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" title="Share on Facebook" style="margin-right:5px;" target="_blank"><span class="iconochive-facebook" style="color:#3b5998;font-size:160%;"></span></a>
-        <a id="wm-share-twitter" href="#" data-url="https://web.archive.org/web/20161230021048/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" title="Share on Twitter" style="margin-right:5px;" target="_blank"><span class="iconochive-twitter" style="color:#1dcaff;font-size:160%;"></span></a>
-      </div>
-      <div style="padding-right:2px;text-align:right;white-space:nowrap;">
-        <a id="wm-expand" class="wm-btn wm-closed" href="#expand" onclick="__wm.ex(event);return false;"><span id="wm-expand-icon" class="iconochive-down-solid"></span> <span class="xxs" style="font-size:80%;">About this capture</span></a>
-      </div>
-    </div>
-  </div>
-    <div id="wm-capinfo" style="border-top:1px solid #777;display:none; overflow: hidden">
-        <div id="wm-capinfo-notice" source="api"></div>
-                <div id="wm-capinfo-collected-by">
-    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center">COLLECTED BY</div>
-    <div style="padding:3px;position:relative" id="wm-collected-by-content">
-            <div style="display:inline-block;vertical-align:top;width:50%;">
-			<span class="c-logo" style="background-image:url(https://archive.org/services/img/webwidecrawl);"></span>
-		Organization: <a style="color:#33f;" href="https://archive.org/details/webwidecrawl" target="_new"><span class="wm-title">Internet Archive</span></a>
-		<div style="max-height:75px;overflow:hidden;position:relative;">
-	  <div style="position:absolute;top:0;left:0;width:100%;height:75px;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 90%,rgba(255,255,255,255) 100%);"></div>
-	  The Internet Archive discovers and captures web pages through many different web crawls.
+/*****************************************************************************
+*
+* Copyright (c) 2000 - 2008, Lawrence Livermore National Security, LLC
+* Produced at the Lawrence Livermore National Laboratory
+* LLNL-CODE-400142
+* All rights reserved.
+*
+* This file is  part of VisIt. For  details, see https://visit.llnl.gov/.  The
+* full copyright notice is contained in the file COPYRIGHT located at the root
+* of the VisIt distribution or at http://www.llnl.gov/visit/copyright.html.
+*
+* Redistribution  and  use  in  source  and  binary  forms,  with  or  without
+* modification, are permitted provided that the following conditions are met:
+*
+*  - Redistributions of  source code must  retain the above  copyright notice,
+*    this list of conditions and the disclaimer below.
+*  - Redistributions in binary form must reproduce the above copyright notice,
+*    this  list of  conditions  and  the  disclaimer (as noted below)  in  the
+*    documentation and/or other materials provided with the distribution.
+*  - Neither the name of  the LLNS/LLNL nor the names of  its contributors may
+*    be used to endorse or promote products derived from this software without
+*    specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT  HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR  IMPLIED WARRANTIES, INCLUDING,  BUT NOT  LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND  FITNESS FOR A PARTICULAR  PURPOSE
+* ARE  DISCLAIMED. IN  NO EVENT  SHALL LAWRENCE  LIVERMORE NATIONAL  SECURITY,
+* LLC, THE  U.S.  DEPARTMENT OF  ENERGY  OR  CONTRIBUTORS BE  LIABLE  FOR  ANY
+* DIRECT,  INDIRECT,   INCIDENTAL,   SPECIAL,   EXEMPLARY,  OR   CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT  LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF  USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER
+* CAUSED  AND  ON  ANY  THEORY  OF  LIABILITY,  WHETHER  IN  CONTRACT,  STRICT
+* LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE)  ARISING IN ANY  WAY
+* OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+* DAMAGE.
+*
+*****************************************************************************/
 
-At any given time several distinct crawls are running, some for months, and some every day or longer.
+#include <stdlib.h>
+#include <string.h>
+#include <silo.h>
+#include <math.h>
 
-View the web archive through the <a href="http://archive.org/web/web.php">Wayback Machine</a>.
-	</div>
-	      </div>
-      <div style="display:inline-block;vertical-align:top;width:49%;">
-			<span class="c-logo" style="background-image:url(https://archive.org/services/img/EndOfTerm2016PreinaugurationCrawls)"></span>
-		<div>Collection: <a style="color:#33f;" href="https://archive.org/details/EndOfTerm2016PreinaugurationCrawls" target="_new"><span class="wm-title">End Of Term 2016 Pre-Inauguration Crawls</span></a></div>
-		<div style="max-height:75px;overflow:hidden;position:relative;">
-	  <div style="position:absolute;top:0;left:0;width:100%;height:75px;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 90%,rgba(255,255,255,255) 100%);"></div>
-	  This collection contains web crawls performed as the pre-inauguration crawl for part of the End of Term Web Archive, a collaborative project that aims to preserve the U.S. federal government web presence at each change of administration. Content includes publicly-accessible government websites hosted on .gov, .mil, and relevant non-.gov domains, as well as government social media materials. The web archiving was performed in the Fall and Winter of 2016 to capture websites prior to the January 20, 2017 inauguration. For more information, see http://eotarchive.cdlib.org/.
-	</div>
-	      </div>
-    </div>
-    </div>
-    <div id="wm-capinfo-timestamps">
-    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center" title="Timestamps for the elements of this page">TIMESTAMPS</div>
-    <div>
-      <div id="wm-capresources" style="margin:0 5px 5px 5px;max-height:250px;overflow-y:scroll !important"></div>
-      <div id="wm-capresources-loading" style="text-align:left;margin:0 20px 5px 5px;display:none"><img src="/_static/images/loading.gif" alt="loading" /></div>
-    </div>
-    </div>
-  </div></div></div></div><div id="wm-ipp-print">The Wayback Machine - https://web.archive.org/web/20161230021048/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C</div>
-<script type="text/javascript">//<![CDATA[
-__wm.bt(700,27,25,2,"web","https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C","20161230021048",1996,"/_static/",["/_static/css/banner-styles.css?v=S1zqJCYt","/_static/css/iconochive.css?v=qtvMKcIJ"], false);
-  __wm.rw(1);
-//]]></script>
-<!-- END WAYBACK TOOLBAR INSERT -->
- </div>
-<iframe id="playback" src="https://web.archive.org/web/20161230021048if_/https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/code/csg_mesh.C" frameborder="0" style="flex:1 0">
-</iframe>
-</body>
-</html>
+static void build_csg(DBfile *dbfile, char *name);
+static void build_greenman_csg(DBfile *dbfile, char *name);
+static void build_primitives_csg(DBfile *dbfile);
+
+int
+main(int argc, char *argv[])
+{
+    DBfile        *dbfile;
+    int            i=1, driver = DB_PDB;
+
+    DBShowErrors(DB_ALL, NULL);
+
+    while (i < argc)
+    {
+        if (strcmp(argv[i], "-driver") == 0)
+        {
+            i++;
+
+            if (strcmp(argv[i], "DB_HDF5") == 0)
+            {
+                driver = DB_HDF5;
+            }
+            else if (strcmp(argv[i], "DB_PDB") == 0)
+            {
+                driver = DB_PDB;
+            }
+            else
+            {
+               fprintf(stderr,"Uncrecognized driver name \"%s\"\n",
+                   argv[i]);
+               exit(-1);
+            }
+        }
+        i++;
+    }
+
+    dbfile = DBCreate("csg.silo", 0, DB_LOCAL, "csg test file", driver);
+    build_csg(dbfile, "csgmesh");
+    build_greenman_csg(dbfile, "greenman_mesh");
+    build_primitives_csg(dbfile);
+    DBClose(dbfile);
+
+    return 0;
+}
+
+static void
+build_csg(DBfile *dbfile, char *name)
+{
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_SPHERE_PR,
+            DBCSG_PLANE_X,
+            DBCSG_PLANE_X,
+            DBCSG_CYLINDER_PNLR,
+            //DBCSG_QUADRIC_G,
+            DBCSG_SPHERE_PR,
+            DBCSG_SPHERE_PR
+        };
+
+        float coeffs[] =
+        {
+            0.0, 0.0, 0.0, 5.0,                // point-radius form of sphere
+           -2.0,                               // x-intercept form of plane
+            2.0,                               // x-intercept form of plane
+           -10.0, 0.0, 0.0, 1.0, 0.0, 0.0, 20.0, 4.5, // point-normal-length-radius form of cylinder
+          //  0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -20.25,
+            0.0, 0.0, 49.5, 50.0,              // point-radius form of sphere
+            0.0, 0.0, -49.5, 50.0              // point radius form of sphere
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        DBPutCsgmesh(dbfile, name, 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "csgzl", NULL);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,       // 0: inside of sphere
+            DBCSG_OUTER,       // 1: in-front of -X plane
+            DBCSG_INNER,       // 2: in-back of +X plane 
+            DBCSG_INNER,       // 3: inside of quadric cylinder
+            DBCSG_INTERSECT,   // 4: sphere cut to -X plane
+            DBCSG_INTERSECT,   // 5: -X-cut-sphere cut to +X plane
+            DBCSG_DIFF,        // 6: cut-sphere minus quadric cylinder
+            DBCSG_INNER,       // 7: inside of large upper sphere
+            DBCSG_INNER,       // 8: inside of large lower sphere
+            DBCSG_INTERSECT,   // 9: intersection of large spheres
+            DBCSG_INTERSECT,   //10: 9 cut to inside of quadric cylinder 
+            DBCSG_INTERSECT    //11: 10 cut to inside of smaller sphere 
+        };
+        //                 0   1   2   3   4   5   6   7   8   9  10  11
+        int leftids[] =  { 0,  1,  2,  3,  0,  4,  5,  4,  5,  7,  9, 10};
+        int rightids[] = {-1, -1, -1, -1,  1,  2,  3, -1, -1,  8,  3, 0}; 
+        int zonelist[] = {6, 11};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"ring housing", "lens-shaped fin"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // output a csg variable
+    {
+        void *pv[1];
+        double var1_data[] = {10.0, 100.0};
+        char *pname[1];
+        char name1[] = "var1";
+
+        pv[0] = var1_data;
+        pname[0] = name1;
+
+#ifdef DB_SDX // Use existence of sdx driver to detect earlier versions.
+              // Sdx driver exists in 4.5.1 and earlier.
+        DBPutCsgvar(dbfile, "var1", "csgmesh", 1, (const char**)pname,
+                    (const void**)pv, 2, DB_DOUBLE, DB_ZONECENT, 0);
+#else
+        DBPutCsgvar(dbfile, "var1", "csgmesh", 1, pname,
+                    pv, 2, DB_DOUBLE, DB_ZONECENT, 0);
+#endif
+    }
+
+    // output a material for this csg mesh
+    {
+        int matnos[] = {2, 3};
+        int matlist[] = {2, 3};
+        int dims = 2;
+        DBPutMaterial(dbfile, "mat", "csgmesh", 2,  matnos,  matlist, &dims, 1,
+            0, 0, 0, 0, 0, DB_FLOAT, 0);
+    }
+}
+
+// This mesh is based on some test data from Greg Greenman
+static void
+build_greenman_csg(DBfile *dbfile, char *name)
+{
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G,
+            DBCSG_QUADRIC_G,
+            DBCSG_QUADRIC_G,
+            DBCSG_QUADRIC_G,
+            DBCSG_QUADRIC_G,
+            DBCSG_QUADRIC_G
+        };
+
+        const float c0 = .464102;
+        const float c1 = .707107;
+        const float c2 = -1.0718;
+        float coeffs[] =
+        {
+         // x^2  y^2  z^2  xy   yz   xz    x    y    z    c
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,    // 0: "bottom" 
+            1.0,  c0,  c0, 0.0,  c2, 0.0, 0.0, 0.0, 0.0, 0.0,    // 1: "cone"
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  c1,  c1, 0.0,    // 2: "cone_apex"
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  c1,  c1,-4.0,    // 3: "cone_end"
+            1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -100.0, // 4: "cylinder"
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -10.0   // 5: "top" 
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        //double extents[] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0};
+        double extents[] = {-10.0, -10.0, -10.0, 20.0, 20.0, 20.0};
+
+        char *bndnames[] = {"bottom", "cone", "cone_apex", "cone_end",
+                            "cylinder", "top"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, name, 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "greenman_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_OUTER,          // 0: above bottom plane
+            DBCSG_INNER,          // 1: below top plane
+            DBCSG_INNER,          // 2: inside of cylinder
+            DBCSG_INTERSECT,      // 3: between top/bottom
+            DBCSG_INTERSECT,      // 4: cylinder clipped to between top/bottom
+            DBCSG_OUTER,          // 5: outside of cylinder
+            DBCSG_INTERSECT,      // 6: oustide of cylinder cliped to between top/bottom
+            DBCSG_INNER,          // 7: inside of cone
+            DBCSG_INNER,          // 8: below cone_end plane
+            DBCSG_OUTER,          // 9: above cone_apex plane
+            DBCSG_INTERSECT,      //10: between cone planes 
+            DBCSG_INTERSECT,      //11: inside of cone between cone planes
+            DBCSG_DIFF            //12: cylinder minus cone
+        };
+        //                 0   1   2   3   4   5   6   7   8   9  10  11  12
+        int leftids[] =  { 0,  5,  4,  0,  3,  4,  5,  1,  3,  2,  8, 10,  4};
+        int rightids[] = {-1, -1, -1,  1,  2, -1,  3, -1, -1, -1,  9,  7, 11};
+        int zonelist[] = {6, 11, 12};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"void", "uranium", "air"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "greenman_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+}
+
+static void
+build_primitives_csg(DBfile *dbfile)
+{
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_SPHERE_PR,
+            DBCSG_PLANE_X
+        };
+
+        float coeffs[] =
+        {
+            0.0, 0.0, 0.0, 1.0,               // point-radius form of sphere
+            0.0                               // x-intercept form of plane
+        };
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        char *bndnames[] = {"sphere", "plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "sphere", 3, 1, typeflags,
+            NULL, coeffs, 4, DB_FLOAT, extents, "sphere_csgzl", optlist);
+
+        DBPutCsgmesh(dbfile, "half_sphere", 3, 2, typeflags,
+            NULL, coeffs, 5, DB_FLOAT, extents, "half_sphere_csgzl", optlist);
+
+        DBPutCsgmesh(dbfile, "half_sphere_compliment", 3, 2, typeflags,
+            NULL, coeffs, 5, DB_FLOAT, extents, "half_sphere_comp_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside of sphere 
+            DBCSG_OUTER,          // 1: +x side of plane
+            DBCSG_INTERSECT,      // 2: the +half sphere
+            DBCSG_COMPLIMENT      // 3: the not of 2
+        };
+        //                 0   1   2   3
+        int leftids[] =  { 0,  1,  1,  2};
+        int rightids[] = {-1, -1,  0, -1};
+        int zonelist1[] = {0};
+        int zonelist2[] = {2};
+        int zonelist3[] = {3};
+
+        char *zonenames[] = {"region_1"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "sphere_csgzl", 1, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, 1, zonelist1, optlist);
+
+        DBPutCSGZonelist(dbfile, "half_sphere_csgzl", 3, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, 1, zonelist2, optlist);
+
+        DBPutCSGZonelist(dbfile, "half_sphere_comp_csgzl", 4, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, 1, zonelist3, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_CYLINDER_PNLR,      // 0: cylinderY
+            DBCSG_CYLINDER_PNLR,      // 1: cylinderX
+            DBCSG_CYLINDER_PNLR       // 2: cylinderZ
+        };
+
+        float coeffs[] =
+        {
+           //0.0, -10.0, 0.0, 0.707, 0.0, 0.707, 20.0, 4.5 point-normal-length-radius form of cylinder
+         -10.0, 0.0, 0.0, 1.0, 0.0, 0.0, 20.0, 4.5, // point-normal-length-radius form of cylinder
+           0.0, -10.0, 0.0, 0.0, 1.0, 0.0, 20.0, 4.5, // point-normal-length-radius form of cylinder
+           0.0, 0.0, -10.0, 0.0, 0.0, 1.0, 20.0, 4.5  // point-normal-length-radius form of cylinder
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-10.0, -10.0, -10.0, 10.0, 10.0, 10.0};
+
+        char *bndnames[] = {"cylinderY", "cylinderX", "cylinderZ"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "cylinders", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "cylinders_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside of cylinderY
+            DBCSG_INNER,          // 1: inside of cylinderX 
+            DBCSG_INNER,          // 2: inside of cylinderZ
+            DBCSG_UNION,          // 3: 0 and 1 
+            DBCSG_UNION           // 4: 2 and 3 
+        };
+        //                 0   1   2   3   4
+        int leftids[] =  { 0,  1,  2,  0,  2};
+        int rightids[] = {-1, -1, -1,  1,  3};
+        int zonelist[] = {0, 1, 2, 4};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"cylinderY","cylinderX","cylinderZ","cylinderAll"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "cylinders_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_PLANE_PN
+        };
+
+        float coeffs[] =
+        {
+            1.0, 0.0, 0.0, 1.0, 0.0, 0.0  // point-normal form of plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 3.0, 3.0, 3.0};
+
+        char *bndnames[] = {"plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "plane_pn_X", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "plane_pn_X_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,           // 0: inside (everything to left) of plane
+            DBCSG_OUTER            // 1: outside (everything to right) of plane
+        };
+        //                 0
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = {0, 1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"left-of-plane",
+                             "right-of-plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "plane_pn_X_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_PLANE_X
+        };
+
+        float coeffs[] =
+        {
+            1.0  // x-intercept form of plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        char *bndnames[] = {"plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "plane_X", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "plane_X_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to left) of plane
+            DBCSG_OUTER           // 1: outside (everything to right) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"left-of-plane", "right-of-plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "plane_X_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_PLANE_Y
+        };
+
+        float coeffs[] =
+        {
+            1.0  // y-intercept form of plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        char *bndnames[] = {"plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "plane_Y", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "plane_Y_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to bottom) of plane
+            DBCSG_OUTER           // 1: outside (everything to top) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"bottom-of-plane", "top-of-plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "plane_Y_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_PLANE_Z
+        };
+
+        float coeffs[] =
+        {
+            1.0  // z-intercept form of plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        char *bndnames[] = {"plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "plane_Z", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "plane_Z_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to back) of plane
+            DBCSG_OUTER           // 1: outside (everything to front) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"back-of-plane", "front-of-plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "plane_Z_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_PLANE_X,
+            DBCSG_PLANE_X,
+            DBCSG_PLANE_Y,
+            DBCSG_PLANE_Y,
+            DBCSG_PLANE_Z,
+            DBCSG_PLANE_Z
+        };
+
+        float coeffs[] =
+        {
+            1.0, -1.0,  // x-intercept form of plane
+            1.0, -1.0,  // y-intercept form of plane
+            1.0, -1.0   // z-intercept form of plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        char *bndnames[] = {"XAplane","XBplane","YAplane","YBplane","ZAplane","ZBplane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "Box", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "box_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to left) of plane
+            DBCSG_OUTER,          // 1: outside (everything to right) of plane
+            DBCSG_INNER,          // 2: inside (everything to left) of plane
+            DBCSG_OUTER,          // 3: outside (everything to right) of plane
+            DBCSG_INNER,          // 4: inside (everything to left) of plane
+            DBCSG_OUTER,          // 5: outside (everything to right) of plane
+            DBCSG_INTERSECT,      // 6: between X planes
+            DBCSG_INTERSECT,      // 7: between Y planes
+            DBCSG_INTERSECT,      // 8: between Z planes
+            DBCSG_INTERSECT,      // 9: between XY planes
+            DBCSG_INTERSECT,      //10: between XY & Z planes
+        };
+        //                 0   1   2   3   4   5   6   7   8   9   10
+        int leftids[] =  { 0,  1,  2,  3,  4,  5,  0,  2,  4,  6,  8};
+        int rightids[] = {-1, -1, -1, -1, -1, -1,  1,  3,  5,  7,  9};
+        int zonelist[] = {10};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"box"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "box_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_PLANE_PN
+        };
+
+        float coeffs[] =
+        {
+            1.0, 1.0, 1.0, 0.707, 0.707, 0.0  // point-normal form of plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        char *bndnames[] = {"plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "plane_PN", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "plane_PN_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to back) of plane
+            DBCSG_OUTER           // 1: outside (everything to front) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"sideA", "sideB"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "plane_PN_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G
+        };
+
+        float coeffs[] =
+        {
+            0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -20.25 // cylinder
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        char *bndnames[] = {"cylinder"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_cylinder", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_cylinder_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to back) of plane
+            DBCSG_OUTER           // 1: outside (everything to front) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"inside", "outside"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_cylinder_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G
+        };
+
+        float coeffs[] =
+        {
+            1.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -16.0 // spheriod
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        char *bndnames[] = {"spheriod"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_spheriod", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_spheroid_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to back) of plane
+            DBCSG_OUTER           // 1: outside (everything to front) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"inside", "outside"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_spheroid_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G
+        };
+
+        float coeffs[] =
+        {
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -1.0 // plane
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        char *bndnames[] = {"plane"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_plane", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_plane_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to back) of plane
+            DBCSG_OUTER           // 1: outside (everything to front) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"inside", "outside"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_plane_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G
+        };
+
+        const float c0 = .464102;
+        const float c2 = -1.0718;
+        float coeffs[] =
+        {
+            1.0,  c0,  c0, 0.0,  c2, 0.0, 0.0, 0.0, 0.0, 0.0    // cone
+            //1/9.0,  1/9.0,  -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0    // good-cone
+            //1/9.0,  1/9.0,  -0.01, 0.0, -.10, 0.0, 0.0, 0.0, 0.0, 0.0    // cone
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        //double extents[] = {-1.0, -1.0, -1.0, 1.0, 1.0, 1.0};
+        double extents[] = {-10.0, -10.0, -10.0, 10.0, 10.0, 10.0};
+
+        char *bndnames[] = {"cone"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_cone", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_cone_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside (everything to back) of plane
+            DBCSG_OUTER           // 1: outside (everything to front) of plane
+        };
+        //                 0   1
+        int leftids[] =  { 0,  0};
+        int rightids[] = {-1, -1};
+        int zonelist[] = { 0,  1};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"inside", "outside"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_cone_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_SPHERE_PR,
+            DBCSG_SPHERE_PR
+        };
+
+        float coeffs[] =
+        {
+            0.0, 0.0, 0.0, 1.0,
+            0.0, 0.0, 0.0, 0.9
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-3.0, -3.0, -3.0, 3.0, 3.0, 3.0};
+
+        char *bndnames[] = {"outer-sphere", "inner-sphere"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_shell", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_shell_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside of outer sphere 
+            DBCSG_INNER,          // 1: inside of inner sphere 
+            DBCSG_DIFF            // 2: difference 
+        };
+        //                 0   1   2
+        int leftids[] =  { 0,  1,  0};
+        int rightids[] = {-1, -1,  1};
+        int zonelist[] = {2};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"difference"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_shell_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G
+        };
+
+        double theta = 45.0 * 3.1415926/180.0;
+        double a = cos(theta);
+        double b = sin(theta); 
+        float coeffs[] =
+        {
+         // x^2  y^2  z^2  xy   yz      xz    x    y    z    c
+            a*a, 1.0, b*b, 0.0, 0.0, 2*a*b, 0.0, 0.0, 0.0, -1
+            //1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -4
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        char *bndnames[] = {"quadric_cylinder"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_cylinder2", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_cylinder2_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER           // 0: inside of cylinder 
+        };
+        //                 0
+        int leftids[] =  { 0};
+        int rightids[] = {-1};
+        int zonelist[] = {0};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"cylinder"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_cylinder2_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_QUADRIC_G
+        };
+
+        double theta = 45.0 * 3.1415926/180.0;
+        double phi  = 45.0 * 3.1415926/180.0;
+        double a = cos(theta);
+        double b = sin(theta); 
+        double q = cos(-phi);
+        double r = sin(-phi);
+        double a2 = a*a;
+        double b2 = b*b;
+        double q2 = q*q;
+        double r2 = r*r;
+        double R = 2.0;
+        float coeffs[] =
+        {
+         // x^2     y^2      z^2        xy         yz           xz         x  y  z    c
+         a2+r2*b2,  q2,    b2+r2*a2,  2*q*r*b,   2*q*r*a, -2*a*b+2*a*b*r2, 0, 0, 0, -R*R
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        char *bndnames[] = {"quadric_cylinder"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "quadric_cylinder3", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "quadric_cylinder3_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER           // 0: inside of cylinder 
+        };
+        //                 0
+        int leftids[] =  { 0};
+        int rightids[] = {-1};
+        int zonelist[] = {0};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"cylinder"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "quadric_cylinder3_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_CONE_PNLA
+        };
+
+        float coeffs[] =
+        {
+            0.0, 0.0, 0.0, 0.577, 0.577, 0.577, 5.0, 30.0
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-5.0, -5.0, -5.0, 5.0, 5.0, 5.0};
+
+        char *bndnames[] = {"cone_pnla"};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+        DBAddOption(optlist, DBOPT_BNDNAMES, bndnames);
+
+        DBPutCsgmesh(dbfile, "cone_pnla", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "cone_pnla_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER           // 0: inside of cylinder 
+        };
+        //                 0
+        int leftids[] =  { 0};
+        int rightids[] = {-1};
+        int zonelist[] = {0};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"cone"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "cone_pnla_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg mesh (boundaries)
+    {
+        int typeflags[] =
+        {
+            DBCSG_SPHERE_PR,
+            DBCSG_SPHERE_PR,
+            DBCSG_CYLINDER_PNLR
+        };
+
+        float coeffs[] =
+        {
+            0.0, 0.0, 0.0, 0.975,
+            0.0, 0.0, 0.0,  1.0,
+            0.4, 0.4, 0.4, 0.57, 0.578, 0.578, 2.0, 0.1
+        };
+
+        int nbounds = sizeof(typeflags) / sizeof(typeflags[0]);
+        int lcoeffs = sizeof(coeffs) / sizeof(coeffs[0]);
+
+        double extents[] = {-2.0, -2.0, -2.0, 2.0, 2.0, 2.0};
+
+        DBoptlist *optlist = DBMakeOptlist(2);
+        DBAddOption(optlist, DBOPT_EXTENTS, extents);
+
+        DBPutCsgmesh(dbfile, "sphere_shell_by_intersection", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "ssbi_csgzl", optlist);
+
+        DBPutCsgmesh(dbfile, "sphere_shell_by_diff", 3, nbounds, typeflags,
+            NULL, coeffs, lcoeffs, DB_FLOAT, extents, "ssbd_csgzl", optlist);
+
+        DBFreeOptlist(optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_OUTER,          // 0: outside of inner sphere
+            DBCSG_INNER,          // 1: inside of outer sphere 
+            DBCSG_INTERSECT,      // 2: intersection between them 
+            DBCSG_INNER,          // 3: inside of cylinder
+            DBCSG_DIFF            // 4: sphere shell minus cylinder
+        };
+        //                 0   1   2   3   4
+        int leftids[] =  { 0,  1,  0,  2,  2};
+        int rightids[] = {-1, -1,  1, -1,  3};
+        int zonelist[] = {4};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"shelli"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "ssbi_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+
+    // build and output the csg zonelist
+    {
+        int typeflags[] =
+        {
+            DBCSG_INNER,          // 0: inside of inner sphere
+            DBCSG_INNER,          // 1: inside of outer sphere 
+            DBCSG_DIFF,           // 2: outer minus inner 
+            DBCSG_INNER,          // 3: inside of cylinder
+            DBCSG_DIFF            // 4: sphere shell minus cylinder
+        };
+        //                 0   1   2   3   4
+        int leftids[] =  { 0,  1,  1,  2,  2};
+        int rightids[] = {-1, -1,  0, -1,  3};
+        int zonelist[] = {2};
+
+        int nregs = sizeof(typeflags) / sizeof(typeflags[0]);
+        int nzones = sizeof(zonelist) / sizeof(zonelist[0]);
+
+        char *zonenames[] = {"shelli"};
+
+        DBoptlist *optlist = DBMakeOptlist(1);
+        DBAddOption(optlist, DBOPT_ZONENAMES, zonenames);
+
+        DBPutCSGZonelist(dbfile, "ssbd_csgzl", nregs, typeflags, leftids, rightids,
+                         NULL, 0, DB_INT, nzones, zonelist, optlist);
+    }
+}
