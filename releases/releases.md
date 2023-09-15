@@ -2,21 +2,25 @@
 title: Releases
 ---
 
-Version | Assets | Notes
+Silo source code is released under two different licenses; a *legacy* license and a BSD license.
+The BSD licensed releases do not contain the [fpzip](https://computing.llnl.gov/projects/fpzip) or hzip compression libraries.
+For details, see the [BSD_LICENSE_README](../BSD_LICENSE_README) file.
+
+Version | Release assets | Notes
 ---:    | :---   | ---
-4.11.1  | [Legacy Licensed][4111]<br>[BSD Licensed][4111b] | [Release notes][4111rn]
-4.11  | [Legacy Licensed][411]<br>[BSD Licensed][411b] | [Release notes][411rn]
-4.10.2  | [Legacy Licensed][4102]<br>[BSD Licensed][4102b] | [Release notes][4102rn]
+4.11.1  | [Legacy][4111]&nbsp;[BSD][4111b] | [Release notes][4111rn]
+4.11  | [Legacy][411]&nbsp;[BSD][411b] | [Release notes][411rn]
+4.10.2  | [Legacy][4102]&nbsp;[BSD][4102b] | [Release notes][4102rn]
 4.10.1 | Intentionally unavailable
-4.10  | [Legacy Licensed][410]<br>[BSD Licensed][410b]
-4.9.1  | [Legacy Licensed][491]<br>[BSD Licensed][491b]
-4.9  | [Legacy Licensed][49]<br>[BSD Licensed][49b]
-4.8  | [Legacy Licensed][48]<br>[BSD Licensed][48b]
-4.7.2  | [Legacy Licensed][472]
+4.10  | [Legacy][410]&nbsp;[BSD][410b]
+4.9.1  | [Legacy][491]&nbsp;[BSD][491b]
+4.9  | [Legacy][49]&nbsp;[BSD][49b]
+4.8  | [Legacy][48]&nbsp;[BSD][48b]
+4.7.2  | [Legacy][472]
 4.7.1  | Intentionally unavailable
-4.7  | [Legacy Licensed][47]
-4.6.2  | [Legacy Licensed][462]
-4.6.1  | [Legacy Licensed][461]
+4.7  | [Legacy][47]
+4.6.2  | [Legacy][462]
+4.6.1  | [Legacy][461]
 
 <!-- release asset links -->
 
