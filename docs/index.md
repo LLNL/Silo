@@ -33,7 +33,6 @@ The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable 
 ./python.md
 ./deprecated.md
 ./header.md
-./oldrelnotes.md
 ```
 
 ## Manuals for previous versions
