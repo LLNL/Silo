@@ -629,9 +629,6 @@ install(FILES ${silo_headers} DESTINATION include
 
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    # since we change the ouputname from silo to siloh5 when building
-    # with HDF5, will use $<TARGET_LINKER_FILE:silo> in place of plain 'silo'
-    # when telling broswer and silex to link with silo
     set_target_properties(silo PROPERTIES OUTPUT_NAME siloh5)
     target_link_libraries(silo ${HDF5_C_LIBRARIES})
     target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})
@@ -668,8 +665,7 @@ endif()
 if(SILO_ENABLE_SILOCK AND NOT WIN32)
     add_executable(silock
         ${Silo_SOURCE_DIR}/tools/silock/silock.c)
-    add_dependencies(silock silo)
-    target_link_libraries(silock $<TARGET_LINKER_FILE:silo>)
+    target_link_libraries(silock silo)
     if(UNIX)
         target_link_libraries(silock m ${CMAKE_DL_LIBS})
     endif()
