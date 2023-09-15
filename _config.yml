@@ -11,7 +11,7 @@ minima:
 
 headers:
 
-exclude: [docs, src]
+exclude: [CMake, config, config-site, docs, resources, src, svn_bin, tests, tools]
 
 show_downloads: false
 
