@@ -1,6 +1,3 @@
----
-title: Some stuff
----
 # Major heading
 
 Some text
