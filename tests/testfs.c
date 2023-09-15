@@ -51,7 +51,7 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #else
 #include <direct.h>

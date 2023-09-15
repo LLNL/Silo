@@ -51,7 +51,7 @@ product endorsement purposes.
 */
 #include <stdio.h>
 #include <silo.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/time.h>
 #else
 #include <string.h>

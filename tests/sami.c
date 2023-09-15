@@ -67,7 +67,7 @@ be used for advertising or product endorsement purposes.
 #include <hdf5.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <string.h>
 #endif
 
