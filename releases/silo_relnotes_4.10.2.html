@@ -7,15 +7,6 @@
 
 <h1 style="text-align: center;">Announcing the release of version 4.10.2 of the Silo Library</h1>
 
-<h2>Obtaining...</h2>
-<ul>
-  <li>Obtain BSD Licensed source code at <a href="https://wci.llnl.gov/codes/silo/silo-4.10.2/silo-4.10.2-bsd.tar.gz">
-https://wci.llnl.gov/codes/silo/silo-4.10.2/silo-4.10.2-bsd.tar.gz</a></li>
-  <li>Obtain Legacy Licensed source code at <a href="https://wci.llnl.gov/codes/silo/silo-4.10.2/silo-4.10.2.tar.gz">
-https://wci.llnl.gov/codes/silo/silo-4.10.2/silo-4.10.2.tar.gz</a></li>
-  <li>Obtain documentation at <a href="https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-654357.pdf">https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-654357.pdf</a></li>
-
-</ul>
 <h2>Organization of information in this announcement</h2>
 <ol>
   <li>Important information regarding this release.</li>
@@ -24,18 +15,9 @@ https://wci.llnl.gov/codes/silo/silo-4.10.2/silo-4.10.2.tar.gz</a></li>
 
 <h3>1. Important information regarding this release.</h3>
 <ul>
-  <li>Until the release tarballs are permanently available at the URL's 
-mentioned above (probably next week sometime), they will be temporarily 
-available at...
-    <ul>
-      <li><a href="ftp://ftp.llnl.gov/outgoing/silo-4.10.2.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.10.2.tar.gz</a></li>
-      <li><a href="ftp://ftp.llnl.gov/outgoing/silo-4.10.2-bsd.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.10.2-bsd.tar.gz</a></li>
-      <li><a href="ftp://ftp.llnl.gov/outgoing/silo-4.10.2-bsd-smalltest.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.10.2-bsd-smalltest.tar.gz</a></li>
-    </ul>
-  </li>
-  <li>Version 4.10.2 <b>is</b> link-time compatible 4.10.</li>
-  <li>In some cases, passing a 'make check' requires adding 'LIBS=-lstdc++' to the make command line (e.g. 'make check LIBS=-lstdc++'.</li>
-  <li>The rocket test will fail during 'make check' on OSX. We've yet to 
+<li>Version 4.10.2 <b>is</b> link-time compatible 4.10.</li>
+<li>In some cases, passing a 'make check' requires adding 'LIBS=-lstdc++' to the make command line (e.g. 'make check LIBS=-lstdc++'.</li>
+<li>The rocket test will fail during 'make check' on OSX. We've yet to 
 learn how to handle dlopen and shared libs there. For similar reasons, 
 Silo's python module has yet to be tested on a OSX.</li>
 </ul>
