@@ -29,10 +29,13 @@ So, those functions are not explicitly mentioned.
 
 [VisIt](https://visit.llnl.gov) Image | Related assets
 :---: | :---
-![](bigsil.jpg) | [`bigsil.silo` data file](bigsil.silo)<br>[`bigsil.C` source code](bigsil.C)
+![](bigsil.jpg) | [`bigsil.silo` data file](bigsil.silo)<br>[`bigsil.C` source code](bigsil.C)<br>[`pmpio_silo_test_mesh.c` source code](https://github.com/LLNL/Silo/blob/main/tests/pmpio_silo_test_mesh.c)
 
 * **Key concepts**: Representation of parallel decomposition of data using multi-block objects, grouping of blocks into 'groups' using '_visit_domain_groups' convention and other conventions, use of directories.
 * **Silo functions**: [DBMkDir], [DBPutMaterial], [DBPutMultimat], [DBPutMultimesh], [DBPutMultivar], [DBPutQuadmesh], [DBSetDir], [DBWrite].
+
+Also, be sure to read about the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
+A [`pmpio.h`](https://github.com/LLNL/Silo/blob/main/src/silo/pmpio.h) header file is available to make MIF I/O easy.
 
 ### Point (Gridless) Meshes
 
