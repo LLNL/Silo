@@ -91,8 +91,8 @@ else                                                                            
 {                                                                                                          \
     if (DBGetIndex(NS, I) != IND)                                                                          \
     {                                                                                                      \
-        fprintf(stderr, "Namescheme at line %d failed for index %d. Expected %d, got %d\n",                \
-            __LINE__, I, IND, DBGetIndex(NS, I));                                                          \
+        fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",\
+            __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,BASE));                                \
         return 1;                                                                                          \
     }                                                                                                      \
 }
@@ -419,12 +419,27 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(ns, 4, 1);
     DBFreeNamescheme(ns);
 
+    /* simple offset by -2 mapping */
     ns = DBMakeNamescheme("|%04d_domain|n-2");
-    TEST_GET_INDEX(ns, 0, -2);
-    TEST_GET_INDEX(ns, 1, -1);
-    TEST_GET_INDEX(ns, 2, 0);
-    TEST_GET_INDEX(ns, 3, 1);
-    TEST_GET_INDEX(ns, 4, 2);
+    TEST_GET_INDEX(DBGetName(ns,0), 0, 0, -2);
+    TEST_GET_INDEX(DBGetName(ns,1), 0, 0, -1);
+    TEST_GET_INDEX(DBGetName(ns,2), 0, 0,  0);
+    TEST_GET_INDEX(DBGetName(ns,3), 0, 0,  1);
+    TEST_GET_INDEX(DBGetName(ns,4), 0, 0,  2);
+    DBFreeNamescheme(ns);
+
+    /* Get different fields as indices from nameschemed strings */
+    ns = DBMakeNamescheme("|foo_%03d_%03d|n/5|n%5");
+    TEST_GET_INDEX(DBGetName(ns,0), 0, 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,0), 1, 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,18), 0, 2, 0);
+    TEST_GET_INDEX(DBGetName(ns,18), 1, 3, 0);
+    DBFreeNamescheme(ns);
+
+    /* Case where index is bigger than an int */
+    ns = DBMakeNamescheme("|block_0x%llX|n");
+    TEST_GET_INDEX(DBGetName(ns, 0x7FFFFFFF), 0, 0,  0x7FFFFFFF); /* max for an int */
+    TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
 
     /* Test the convenience method, DBSPrintf */
