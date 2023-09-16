@@ -2,10 +2,10 @@
 title: Examples
 ---
 
-Each row in the table below is an example of the use of Silo to represent a different kind of scientific data.
+Each item below is an example of the use of Silo to represent a different kind of scientific data.
 Each example shows a picture of the data (visualized with [VisIt](https://visit.llnl.gov), describes some of the key concepts the example demonstrates, lists a set of key Silo functions the example uses and provides links to both C or C++ source code used to generate the data as well as the resulting Silo data file.
 All of the examples here use some common Silo functions such as [DBCreate] and [DBClose] or functions to manage [option lists](https://silo.readthedocs.io/en/latest/optlists.html) such as [DBMakeOptlist] or [DBAddOption].
-So, those calls are not explicitly mentioned.
+So, those functions are not explicitly mentioned.
 
 ### Constructive Solid Geometry
 
@@ -23,7 +23,7 @@ So, those calls are not explicitly mentioned.
 ![](specmix_quad.jpg) | [`specmix_quad.silo` quadmesh file](specmix_quad.silo)<br>[`specmix_ucd.silo` ucdmesh file](specmix_ucd.silo)<br>[`specmix_quad.C` source code](specmix_quad.C)
 
 * **Key concepts**: Representation of the same mesh data on both quadrilateral (Quad) and unstructured (UCD) meshes, quadrilateral mesh with deformed (nonlinear) coordinates, representation of materials and mixing materials and material species.
-* **Silo calls**: [DBPutMaterial], [DBPutMatspecies], [DBPutQuadmesh], [DBPutZonelist].
+* **Silo functions**: [DBPutMaterial], [DBPutMatspecies], [DBPutQuadmesh], [DBPutZonelist].
 
 ### Parallel Decomposed Meshes
 
@@ -32,7 +32,7 @@ So, those calls are not explicitly mentioned.
 ![](bigsil.jpg) | [`bigsil.silo` data file](bigsil.silo)<br>[`bigsil.C` source code](bigsil.C)
 
 * **Key concepts**: Representation of parallel decomposition of data using multi-block objects, grouping of blocks into 'groups' using '_visit_domain_groups' convention and other conventions, use of directories.
-* **Silo calls**: [DBMkDir], [DBPutMaterial], [DBPutMultimat], [DBPutMultimesh], [DBPutMultivar], [DBPutQuadmesh], [DBSetDir], [DBWrite].
+* **Silo functions**: [DBMkDir], [DBPutMaterial], [DBPutMultimat], [DBPutMultimesh], [DBPutMultivar], [DBPutQuadmesh], [DBSetDir], [DBWrite].
 
 ### Point (Gridless) Meshes
 
@@ -41,7 +41,7 @@ So, those calls are not explicitly mentioned.
 ![](pointmesh.jpg) | [`noise.silo` data file](noise.silo)<br>[`noise.C` source code](noise.C)
 
 * **Key concepts**: Point (gridless) meshes and variables, use of directories, quadrilateral meshes and variables.
-* **Silo calls**: [DBMkDir], [DBPutMaterial], [DBPutPointmesh], [DBPutPointvar], [DBPutQuadmesh], [DBPutQuadvar], [DBWrite].
+* **Silo functions**: [DBMkDir], [DBPutMaterial], [DBPutPointmesh], [DBPutPointvar], [DBPutQuadmesh], [DBPutQuadvar], [DBWrite].
 
 ### Unstructured Zoo and Arbitrary Polyhedral Meshes
 
@@ -50,7 +50,7 @@ So, those calls are not explicitly mentioned.
 ![](poly3d.jpg) | [`poly3d.silo` data file](poly3d.silo)<br>[`testall.C` source code](testall.C)
 
 * **Key concepts**: Unstructured cell data (UCD) meshes with ordinary 'zoo type' elements and arbitrary polyhedral elements.
-* **Silo calls*: [DBFreeFacelist], [DBPutFacelist], [DBPutMaterial], [DBPutMatspecies], [DBPutQuadmesh], [DBPutUcdmesh], [DBPutUcdvar], [DBPutZonelist], [DBShowErrors], [DBWrite], [DBCalcExternalFacelist].
+* **Silo functions**: [DBFreeFacelist], [DBPutFacelist], [DBPutMaterial], [DBPutMatspecies], [DBPutQuadmesh], [DBPutUcdmesh], [DBPutUcdvar], [DBPutZonelist], [DBShowErrors], [DBWrite], [DBCalcExternalFacelist].
 
 ### Block-Structured Adaptive Mesh Refinement Meshes
 
@@ -61,7 +61,7 @@ So, those calls are not explicitly mentioned.
 * **Key concepts**: Adaptive Mesh Refinement (AMR) meshes, Quadmeshes, Mesh Region Grouping trees (Mrgtrees) and variables (Mrgvars), Grouping Element Maps (Groupelmaps).
   Without Mrgtrees, a multiblock mesh of Quadmeshes representing the different patches of an AMR hierarchy is not properly organized into an AMR hierarchy.
   The Silo file examples provided here contain two multi-block representations of the meshes, one without an Mrgtree and one with, so you can understand the difference and what the Mrgtree information is doing.
-* **Silo calls**: DBMkMrgtree, DBAddRegion, DBAddRegionArray, DBPutMrgtree DBPutGroupelmap, DBPutMrgvar.
+* **Silo functions**: [DBMkMrgtree], [DBAddRegion], [DBAddRegionArray], [DBPutMrgtree], [DBPutGroupelmap], [DBPutMrgvar].
 
 [DBMkMrgtree]: https://silo.readthedocs.io/en/latest/subsets.html#dbmakemrgtree
 [DBAddRegion]: https://silo.readthedocs.io/en/latest/subsets.html#dbaddregion
