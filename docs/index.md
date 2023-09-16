@@ -5,7 +5,7 @@ The files Silo produces and the data within them can be easily shared and exchan
 Consequently, Silo facilitates the development of general purpose tools for processing scientific data.
 One of the more popular tools that process Silo data files is the [VisIt](https://github.com/visit-dav/visit) visualization tool.
 
-![](silo_objects.png)
+![](images/silo_objects.png)
 
 Silo supports gridless (point) meshes, structured meshes, unstructured-zoo and unstructured-arbitrary-polyhedral meshes, block structured AMR meshes, constructive solid geometry (CSG) meshes, piecewise-constant (e.g., zone-centered) and piecewise-linear (e.g. node-centered) variables defined on the node, edge, face or volume elements of meshes as well as the decomposition of meshes into arbitrary subset hierarchies including materials and mixing materials.
 In addition, Silo supports a wide variety of other useful objects and metadata to address various scientific computing application needs.
@@ -15,8 +15,10 @@ Architecturally, the library is divided into two main pieces; an upper-level app
 Silo supports multiple I/O drivers.
 The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable DataBase) drivers.
 
+## Major sections of the user's manual
+
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 ./intro.md
 ./globals.md
 ./files.md

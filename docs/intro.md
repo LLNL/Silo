@@ -59,7 +59,7 @@ Silo has several drivers.
 Some are read-only and some are read-write.
 These are illustrated in the figure below...
 
-![](./architecture.gif)
+![](./images/architecture.gif)
 
 Silo supports both read and write on the PDB (Portable DataBase) and HDF5 drivers.
 In addition, Silo supports two different *flavors* of PDB drivers.
@@ -165,7 +165,7 @@ Silo supports several classes, or types, of meshes. These are quadrilateral, uns
 A quadrilateral mesh is one which contains four nodes per zone in 2-D and eight nodes per zone (four nodes per zone face) in 3-D.
 Quad meshes can be either regular, rectilinear, or curvilinear, but they must be logically rectangular 
 
-![](rectmesh.gif)
+![](./images/rectmesh.gif)
 
 ### UCD-Based Meshes and Related Data
 
@@ -182,9 +182,9 @@ A UCD mesh need not be composed of zones of just one shape (Fig. 1-5).
 Part of the zonelist structure describes the shapes of the zones in the mesh and a count of how many of each zone shape occurs in the mesh.
 The facelist structure is analogous to the zonelist structure, but defines the nodes which make up each zone face.
 
-![](./ucd2dmesh.gif)
+![](./images/ucd2dmesh.gif)
 
-![](./celltypes.gif)
+![](./images/celltypes.gif)
 
 ### Point Meshes and Related Data
 

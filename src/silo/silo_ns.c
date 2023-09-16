@@ -60,7 +60,7 @@ product endorsement purposes.
 
 typedef struct _DBexprnode {
     char type;
-    int val;
+    long long val;
     char sval[128];
     struct _DBexprnode *left;
     struct _DBexprnode *right;
@@ -77,7 +77,7 @@ FreeTree(DBexprnode *tree)
 }
 
 static DBexprnode *
-UpdateTree(DBexprnode *tree, const char t, int v, char *s)
+UpdateTree(DBexprnode *tree, const char t, long long v, char *s)
 {
     DBexprnode *retval = 0;
     DBexprnode *newnode = (DBexprnode *) calloc(1,sizeof(DBexprnode));
@@ -146,7 +146,7 @@ BuildExprTree(const char **porig)
             {
                 char tokbuf[256];
                 char *tp = tokbuf;
-                long int val;
+                long long val;
                 while ('0' <= *p && *p <= '9')
                     *tp++ = *p++;
                 p--;
@@ -154,7 +154,7 @@ BuildExprTree(const char **porig)
                 errno = 0;
                 val = strtol(tokbuf, 0, 0);
                 if (errno == 0 && val != LONG_MIN && val != LONG_MAX)
-                    tree = UpdateTree(tree, 'c', (int) val, 0);
+                    tree = UpdateTree(tree, 'c', val, 0);
                 break;
             }
 
@@ -286,14 +286,14 @@ static char * SaveReturnedString(char const * retstr)
     return retstrbuf[modn];
 }
 
-static int
-EvalExprTree(DBnamescheme const *ns, DBexprnode *tree, int n)
+static long long
+EvalExprTree(DBnamescheme const *ns, DBexprnode *tree, long long n)
 {
     if (tree == 0)
         return 0;
     else if ((tree->type == '$' || tree->type == '#') && tree->left != 0)
     {
-        int i, q = EvalExprTree(ns, tree->left, n);
+        long long i, q = EvalExprTree(ns, tree->left, n);
         for (i = 0; i < ns->narrefs; i++)
         {
             if (strcmp(tree->sval, ns->arrnames[i]) == 0)
@@ -316,7 +316,7 @@ EvalExprTree(DBnamescheme const *ns, DBexprnode *tree, int n)
     }
     else if (tree->left != 0 && tree->right != 0)
     {
-        int vc = 0, vl = 0, vr = 0;
+        long long vc = 0, vl = 0, vr = 0;
         if (tree->type == '?')
         {
             vc = EvalExprTree(ns, tree->left, n);
@@ -565,7 +565,7 @@ DBMakeNamescheme(char const *fmt, ...)
 }
 
 PUBLIC const char *
-DBGetName(DBnamescheme const *ns, int natnum)
+DBGetName(DBnamescheme const *ns, long long natnum)
 {
     char *currentExpr, *tmpExpr;
     char retval[1024];
@@ -591,7 +591,7 @@ DBGetName(DBnamescheme const *ns, int natnum)
                             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         DBexprnode *exprtree;
-        int theVal;
+        long long theVal;
 
         currentExpr = STRDUP(ns->exprstrs[i]);
         tmpExpr = currentExpr;
@@ -609,21 +609,26 @@ DBGetName(DBnamescheme const *ns, int natnum)
     return SaveReturnedString(retval);
 }
 
-PUBLIC int
+PUBLIC long long
 DBGetIndex(char const *dbns_name_str, int fieldSelector, int base)
 {
     int currentField = 0;
     char const *currentPosition = dbns_name_str;
     char *endPtr;
+    long long value = LLONG_MAX;
 
     while (*currentPosition != '\0')
     {
+        /* x and X and b and B allow use of hexidecimal and binary numbers as in
+           0xDeadBeef and 0b101101 though the latter is non-converntional.
+           Note that leading zeros, which are probably quite common in fields in
+           nameschemes will get treated automatically as octal (base 8) if base
+           is not explicitly specified. */
         if (isdigit(*currentPosition) || strchr("-+xXbB", *currentPosition))
         {
-            int value;
             errno = 0;
             /* Found a digit, attempt to convert it to an integer value */
-            value = strtol(currentPosition, &endPtr, base);
+            value = strtoll(currentPosition, &endPtr, base);
             if (errno == 0)
             {
                 if (currentField == fieldSelector)
@@ -639,7 +644,7 @@ DBGetIndex(char const *dbns_name_str, int fieldSelector, int base)
         }
     }
 
-    return -1; /* specified field not found */
+    return value;
 }
 
 PUBLIC char const *

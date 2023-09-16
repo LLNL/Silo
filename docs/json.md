@@ -51,7 +51,7 @@ The functions in this part of the library are
 
 {{ EndFunc }}
 
-## `json-c Extensions`
+## `json-c` Extensions
 
 * **Summary:** Extensions to json-c library to support Silo
 

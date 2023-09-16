@@ -353,7 +353,7 @@ There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) objec
   :end-at: "return a!=b;"
   ```
 
-## `IsDifferentLongLong()`
+## `DBIsDifferentLongLong()`
 
 * **Summary:** Compare long longs within absolute or relative tolerance
 
@@ -387,7 +387,7 @@ There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) objec
 
 * **Description:**
 
-  Same as [`IsDifferentDouble()`](#isdifferentdouble) except for `long long` type.
+  Same as [`DBIsDifferentDouble()`](#dbisdifferentdouble) except for `long long` type.
 
 {{ EndFunc }}
 
