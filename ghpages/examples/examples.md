@@ -4,6 +4,7 @@ title: Examples
 
 Each item below is an example of the use of Silo to represent a different kind of scientific data.
 Each example shows a picture of the data (visualized with [VisIt](https://visit.llnl.gov), describes some of the key concepts the example demonstrates, lists a set of key Silo functions the example uses and provides links to both C or C++ source code used to generate the data as well as the resulting Silo data file.
+
 All of the examples here use some common Silo functions such as [DBCreate] and [DBClose] or functions to manage [option lists](https://silo.readthedocs.io/en/latest/optlists.html) such as [DBMakeOptlist] or [DBAddOption].
 So, those functions are not explicitly mentioned.
 
@@ -31,7 +32,7 @@ So, those functions are not explicitly mentioned.
 :---: | :---
 ![](bigsil.jpg) | [`bigsil.silo` data file](bigsil.silo)<br>[`bigsil.C` source code](bigsil.C)<br>[`pmpio_silo_test_mesh.c` source code](https://github.com/LLNL/Silo/blob/main/tests/pmpio_silo_test_mesh.c)
 
-* **Key concepts**: Representation of parallel decomposition of data using multi-block objects, grouping of blocks into 'groups' using '_visit_domain_groups' convention and other conventions, use of directories.
+* **Key concepts**: Representation of parallel decomposition of data using multi-block objects, grouping of blocks into *groups* using `_visit_domain_groups` convention and other conventions, use of directories within a silo file.
 * **Silo functions**: [DBMkDir], [DBPutMaterial], [DBPutMultimat], [DBPutMultimesh], [DBPutMultivar], [DBPutQuadmesh], [DBSetDir], [DBWrite].
 
 Also, be sure to read about the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
@@ -52,7 +53,7 @@ A [`pmpio.h`](https://github.com/LLNL/Silo/blob/main/src/silo/pmpio.h) header fi
 :---: | :---
 ![](poly3d.jpg) | [`poly3d.silo` data file](poly3d.silo)<br>[`testall.C` source code](testall.C)
 
-* **Key concepts**: Unstructured cell data (UCD) meshes with ordinary 'zoo type' elements and arbitrary polyhedral elements.
+* **Key concepts**: Unstructured cell data (UCD) meshes with ordinary *zoo type* elements and arbitrary polyhedral elements.
 * **Silo functions**: [DBFreeFacelist], [DBPutFacelist], [DBPutMaterial], [DBPutMatspecies], [DBPutQuadmesh], [DBPutUcdmesh], [DBPutUcdvar], [DBPutZonelist], [DBShowErrors], [DBWrite], [DBCalcExternalFacelist].
 
 ### Block-Structured Adaptive Mesh Refinement Meshes
@@ -84,7 +85,7 @@ A [`pmpio.h`](https://github.com/LLNL/Silo/blob/main/src/silo/pmpio.h) header fi
 [DBPutMultivar]: https://silo.readthedocs.io/en/latest/parallel.html#dbputmultivar
 
 [DBMkDir]: https://silo.readthedocs.io/en/latest/files.html#dbmkdir
-[DBMkDir]: https://silo.readthedocs.io/en/latest/files.html#dbsetdir
+[DBSetDir]: https://silo.readthedocs.io/en/latest/files.html#dbsetdir
 [DBPutCSGZonelist]: https://silo.readthedocs.io/en/latest/objects.html#dbputcsgzonelist
 [DBPutZonelist]: https://silo.readthedocs.io/en/latest/objects.html#dbputzonelist
 [DBPutFacelist]: https://silo.readthedocs.io/en/latest/objects.html#dbputfacelist
