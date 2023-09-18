@@ -3,26 +3,27 @@ title: Releases
 ---
 
 Silo source code is released under two different licenses; a *legacy* license and a BSD license.
+
 The BSD licensed releases do not contain the [fpzip](https://computing.llnl.gov/projects/fpzip) or hzip compression libraries.
 For details, see the [BSD_LICENSE_README](https://raw.githubusercontent.com/LLNL/Silo/main/BSD_LICENSE_README) file.
 
 <br>
 
-Version | Release assets | Notes
----:    | :---   | ---
-4.11.1  | [Legacy][4111] / [BSD][4111b] | [Release notes][4111rn] / [User Manual][4111um]
-4.11  | [Legacy][411] / [BSD][411b] | [Release notes][411rn]
-4.10.2  | [Legacy][4102] / [BSD][4102b] | [See 4.10.1 Release notes][4102rn]
-4.10.1 | Intentionally unavailable | Release was DOA
-4.10  | [Legacy][410] / [BSD][410b] | [Release notes][410rn] / [User Manual][410um]
-4.9.1  | [Legacy][491] / [BSD][491b] | [Release notes][491rn]
-4.9  | [Legacy][49] / [BSD][49b] | [Release notes][49rn]
-4.8  | [Legacy][48] / [BSD][48b] | [Release notes][48rn] / [User Manual][48um]
-4.7.2  | [Legacy][472] | [Release notes][472rn] / [User Manual][471um]
-4.7.1  | Intentionally unavailable | Release was DOA
-4.7  | [Legacy][47] | [User Manual][47um]
-4.6.2  | [Legacy][462] | [User Manual][462um]
-4.6.1  | [Legacy][461] | [User Manual][46um]
+Date | Version | Sources | Documentation
+:--- | ---:    | :---        | ---
+Sep 2023 | 4.11.1 | [Legacy][4111] / [BSD][4111b] | [Release notes][4111rn] / [User Manual][4111um]
+Sep 2022 | 4.11 | [Legacy][411] / [BSD][411b] | [Release notes][411rn]
+Feb 2016 | 4.10.2 | [Legacy][4102] / [BSD][4102b] | [See 4.10.1 Release notes][4102rn]
+Feb 2016 | 4.10.1 | Not available | Release was DOA
+Jul 2014 | 4.10 | [Legacy][410] / [BSD][410b] | [Release notes][410rn] / [User Manual][410um]
+Jun 2013 | 4.9.1  | [Legacy][491] / [BSD][491b] | [Release notes][491rn]
+Mar 2012 | 4.9 | [Legacy][49] / [BSD][49b] | [Release notes][49rn]
+Aug 2010 | 4.8 | [Legacy][48] / [BSD][48b] | [Release notes][48rn] / [User Manual][48um]
+Nov 2009 | 4.7.2 | [Legacy][472] | [Release notes][472rn] / [User Manual][471um]
+Nov 2009 | 4.7.1 | Not available | Release was DOA
+Jan 2009 | 4.7 | [Legacy][47] | [User Manual][47um]
+Jul 2008 | 4.6.2 | [Legacy][462] | [User Manual][462um]
+Oct 2007 | 4.6.1 | [Legacy][461] | [User Manual][46um]
 
 <!-- release asset links -->
 
