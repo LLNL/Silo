@@ -1,9 +1,3 @@
-<style>
-body {
-  background-image: url('https://software.llnl.gov/Silo/silo_objects.png');
-}   
-</style> 
-
 ### A library for file-based, scientific data exchange and software interoperability
 
 &#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
