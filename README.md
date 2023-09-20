@@ -1,15 +1,35 @@
-Silo is a [C/Fortran API](https://silo.readthedocs.io/en/latest/) for reading and writing a wide variety of scientific data to binary files.
-Silo files can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
+<style>
+body {
+  background-image: url('https://software.llnl.gov/Silo/silo_objects.png');
+}   
+</style> 
 
-Consequently, Silo facilitates the development of general purpose tools for processing scientific data.
-One of the more popular tools to process Silo data is the [VisIt](https://github.com/visit-dav/visit) visualization tool.
+### A library for file-based, scientific data exchange and software interoperability
 
-Silo supports a vareity of mesh types (pictured below) including simple curves, gridless (point), structured, unstructured-zoo and unstructured-arbitrary, block structured AMR, and constructive solid geometry (CSG).
+&#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
+&#9883;&nbsp;[X/Y curves], [points], [structured], [unstructured], [arbitrary], [AMR], and [CSG] meshes<br>
+&#9883;&nbsp;Piecewise constant/linear fields over node, edge, face and volume elements<br>
+&#9883;&nbsp;[Mixing materials], [species], slide surfaces, part assembilies and other [subset hierarchies]<br>
+&#9883;&nbsp;Easy parallelism with [MIF Parallel I/O]<br>
+&#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
+&#9883;&nbsp;[Memory-file-based] in-situ, [compression], HDF5<br>
 
-<center><img src="silo_objects.png" style="height:500px;" /></center>
-
-In addition, Silo supports piecewise-constant (e.g., zone-centered) and piecewise-linear (e.g. node-centered) variables (e.g. *fields*) defined on the node, edge, face or volume elements of meshes.
-
-Silo also supports the decomposition of meshes into arbitrary subsets and subset hierarchies including materials with optinal mixing.
-
-Although Silo is a serial library, key features enable it to be applied easily and effectively in scalable, parallel applications using the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
+[C]: https://silo.readthedocs.io/en/latest/intro.html
+[Fortran]: https://silo.readthedocs.io/en/latest/fortran.html
+[Python]: https://silo.readthedocs.io/en/latest/python.html
+[X/Y Curves]: https://silo.readthedocs.io/en/latest/objects.html#dbputcurve
+[points]: https://silo.readthedocs.io/en/latest/objects.html#dbputpointmesh
+[structured]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadmesh
+[unstructured]: https://silo.readthedocs.io/en/latest/objects.html#dbgetucdmesh
+[arbitrary]: https://silo.readthedocs.io/en/latest/objects.html#dbputphzonelist
+[AMR]: https://silo.readthedocs.io/en/latest/subsets.html#dbmakemrgtree
+[CSG]: https://silo.readthedocs.io/en/latest/objects.html#dbputcsgmesh
+[Mixing materials]: https://silo.readthedocs.io/en/latest/objects.html#dbputmaterial
+[species]: https://silo.readthedocs.io/en/latest/objects.html#dbputmatspecies
+[subset hierarchies]: https://silo.readthedocs.io/en/latest/subsets.html
+[Memory-file-based]: https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849
+[MIF Parallel I/O]: https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/
+[VisIt]: https://visit.llnl.gov
+[compression]: https://silo.readthedocs.io/en/latest/globals.html#dbsetcompression
+[HDF5]: https://www.hdfgroup.org/solutions/hdf5/
+[visualization]: https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/data_into_visit/SiloFormat.html?highlight=silex#
