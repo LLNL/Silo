@@ -1,3 +1,9 @@
+<style>
+body {
+  background-image: url('ghpages/silo_objects_lightened.png');
+}
+</style>
+
 ### A library for file-based, scientific data exchange and software interoperability
 
 &#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
