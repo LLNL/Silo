@@ -12,7 +12,7 @@ body {
 &#9883;&nbsp;[Mixing materials], [species], slide surfaces, part assembilies and other [subset hierarchies]<br>
 &#9883;&nbsp;Easy parallelism with [MIF Parallel I/O]<br>
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
-&#9883;&nbsp;[Memory-file-based] in-situ, [compression], HDF5<br>
+&#9883;&nbsp;[Memory-file-based] in-situ, [compression], [HDF5] and more...<br>
 
 [C]: https://silo.readthedocs.io/en/latest/intro.html
 [Fortran]: https://silo.readthedocs.io/en/latest/fortran.html
