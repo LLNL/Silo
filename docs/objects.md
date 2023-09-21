@@ -2017,8 +2017,15 @@ Finally, Silo also supports the specification of expressions representing derive
   `mix_next[i]`
   : The 1-origin index of the next material entry for this zone, else 0 if this is the last entry.
 
+  ![](./images/material-mesh-example.png)
+  Figure 0-6a: Example of 2x3 mesh with two middle zones containing a mix of materials.
+  In this example, zones are numbered starting from 1 (instead of the default C-origin of 0).
+  Zones 2 and 5 are mixing, each in two materials (numbered 1 and 2).
+  Material numbers must be positive but can otherwise be arbitrary.
+  For example, the two materials here could have been numbered 37 and 2345.
+
   ![](./images/mixed_mats.gif)
-  Figure 0-6: Example using mixed data arrays for representing material information
+  Figure 0-6b: Example using mixed data arrays for representing material information
 
 {{ EndFunc }}
 
