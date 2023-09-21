@@ -2,6 +2,8 @@
 </style>
 ### A library for file-based, scientific data exchange and software interoperability
 
+![](ghpages/images/output1.gif)![](ghpages/images/output2.gif)![](ghpages/images/output3.gif)
+
 &#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
 &#9883;&nbsp;[X/Y curves], [points], [structured], [unstructured], [arbitrary], [AMR], and [CSG] mesh types<br>
 &#9883;&nbsp;Piecewise constant and linear fields over node, edge, face and volume elements<br>
@@ -10,7 +12,6 @@
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
 &#9883;&nbsp;In-situ via [memory-files], [compression], [HDF5] and more...
 
-![](examples.gif)
 
 [C]: https://silo.readthedocs.io/en/latest/intro.html
 [Fortran]: https://silo.readthedocs.io/en/latest/fortran.html
