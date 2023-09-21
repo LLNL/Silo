@@ -1,5 +1,6 @@
 ---
-title: Help
+title: Getting Help
+permalink: /help/
 ---
 The [Silo](https://github.com/LLNL/Silo) project is maintained on GitHub.
 Users needing support will need [a (free) GitHub account](https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home) to create and comment on issues and discussions and to watch for new releases.
