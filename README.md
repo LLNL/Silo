@@ -1,18 +1,12 @@
-<style>
-body {
-  background-image: url('ghpages/silo_objects_lightened.png');
-}
-</style>
-
 ### A library for file-based, scientific data exchange and software interoperability
 
 &#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
 &#9883;&nbsp;[X/Y curves], [points], [structured], [unstructured], [arbitrary], [AMR], and [CSG] mesh types<br>
 &#9883;&nbsp;Piecewise constant and linear fields over node, edge, face and volume elements<br>
-&#9883;&nbsp;[Mixing materials], [species], slide surfaces, part assembilies and other [subset hierarchies]<br>
+&#9883;&nbsp;[Mixing materials], [species], part assembilies and other [subset hierarchies]<br>
 &#9883;&nbsp;Easy parallelism with [MIF Parallel I/O]<br>
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
-&#9883;&nbsp;[Memory-file-based] in-situ, [compression], [HDF5] and more...<br>
+&#9883;&nbsp;In-situ via [memory-files], [compression], [HDF5] and more...<br>
 
 [C]: https://silo.readthedocs.io/en/latest/intro.html
 [Fortran]: https://silo.readthedocs.io/en/latest/fortran.html
@@ -27,7 +21,7 @@ body {
 [Mixing materials]: https://silo.readthedocs.io/en/latest/objects.html#dbputmaterial
 [species]: https://silo.readthedocs.io/en/latest/objects.html#dbputmatspecies
 [subset hierarchies]: https://silo.readthedocs.io/en/latest/subsets.html
-[Memory-file-based]: https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849
+[memory-files]: https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849
 [MIF Parallel I/O]: https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/
 [VisIt]: https://visit.llnl.gov
 [compression]: https://silo.readthedocs.io/en/latest/globals.html#dbsetcompression
