@@ -10,7 +10,7 @@
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
 &#9883;&nbsp;In-situ via [memory-files], [compression], [JSON], [HDF5] and more...
 
-![](ghpages/images/output1.gif)![](ghpages/images/output2.gif)![](ghpages/images/output3.gif)
+<img src="ghpages/images/silo_objects_roll.gif" alt="Silo Objects Roll" style="display: block; margin: auto;">
 
 [C]: https://silo.readthedocs.io/en/latest/intro.html
 [Fortran]: https://silo.readthedocs.io/en/latest/fortran.html
