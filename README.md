@@ -8,7 +8,7 @@
 &#9883;&nbsp;[Mixing materials], [species], part assembilies and other [subset hierarchies]<br>
 &#9883;&nbsp;Easy parallelism with [MIF Parallel I/O]<br>
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
-&#9883;&nbsp;In-situ via [memory-files], [compression], [HDF5] and more...
+&#9883;&nbsp;In-situ via [memory-files], [compression], [JSON], [HDF5] and more...
 
 ![](ghpages/images/output1.gif)![](ghpages/images/output2.gif)![](ghpages/images/output3.gif)
 
@@ -31,3 +31,4 @@
 [compression]: https://silo.readthedocs.io/en/latest/globals.html#dbsetcompression
 [HDF5]: https://www.hdfgroup.org/solutions/hdf5/
 [visualization]: https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/data_into_visit/SiloFormat.html?highlight=silex#
+[JSON]: https://silo.readthedocs.io/en/latest/json.html
