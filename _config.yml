@@ -23,3 +23,10 @@ readme_index:
   enabled:          true
   remove_originals: false
   with_frontmatter: true
+
+header_pages:
+  - releases.md
+  - examples.md
+  - help.md
+  - documentation.md
+  - more.md
