@@ -25,8 +25,8 @@ readme_index:
   with_frontmatter: true
 
 header_pages:
-  - ghpages/releases.md
-  - ghpages/examples.md
+  - ghpages/releases/releases.md
+  - ghpages/examples/examples.md
   - ghpages/help.md
   - ghpages/documentation.md
   - ghpages/more.md
