@@ -4,7 +4,7 @@
 
 &#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
 &#9883;&nbsp;[X/Y curves], [points], [structured], [unstructured], [arbitrary], [AMR], and [CSG] mesh types<br>
-&#9883;&nbsp;Piecewise constant and linear fields over node, edge, face and volume elements<br>
+&#9883;&nbsp;Piecewise constant and linear fields ([v][][a][][r]iables) over node, edge, face and volume elements<br>
 &#9883;&nbsp;[Mixing materials], [species], part assembilies and other [subset hierarchies]<br>
 &#9883;&nbsp;Easy parallelism with [MIF Parallel I/O]<br>
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
@@ -32,3 +32,6 @@
 [HDF5]: https://www.hdfgroup.org/solutions/hdf5/
 [visualization]: https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/data_into_visit/SiloFormat.html?highlight=silex#
 [JSON]: https://silo.readthedocs.io/en/latest/json.html
+[v]: https://silo.readthedocs.io/en/latest/objects.html#dbputpointvar "a"
+[a]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadvar "b"
+[r]: https://silo.readthedocs.io/en/latest/objects.html#dbputucdvar "c"
