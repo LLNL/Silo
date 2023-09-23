@@ -32,6 +32,6 @@
 [HDF5]: https://www.hdfgroup.org/solutions/hdf5/
 [visualization]: https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/data_into_visit/SiloFormat.html?highlight=silex#
 [JSON]: https://silo.readthedocs.io/en/latest/json.html
-[v]: https://silo.readthedocs.io/en/latest/objects.html#dbputpointvar "a"
-[a]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadvar "b"
-[r]: https://silo.readthedocs.io/en/latest/objects.html#dbputucdvar "c"
+[v]: https://silo.readthedocs.io/en/latest/objects.html#dbputpointvar
+[a]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadvar
+[r]: https://silo.readthedocs.io/en/latest/objects.html#dbputucdvar
