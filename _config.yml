@@ -1,8 +1,6 @@
 title: Silo
 
-description: >
-  An API for reading and writing a wide diversity of binary, scientific data to be easily shared and exchanged.
-  Silo is prominently used by the VisIt visualization tool.
+description: File-based scientific data exchange and software interoperability
 
 theme: minima
 
