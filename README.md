@@ -36,4 +36,4 @@
 [a]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadvar
 [r]: https://silo.readthedocs.io/en/latest/objects.html#dbputucdvar
 [i]: https://silo.readthedocs.io/en/latest/objects.html#dbputcsgvar
-[ab]: https://silo.readthedocs.io/en/latest/objects.html#dbputmrgvar
+[ab]: https://silo.readthedocs.io/en/latest/subsets.html#dbmakemrgtree
