@@ -1,10 +1,10 @@
 <style>
 </style>
-### A library for file-based, scientific data exchange and software interoperability
+### File-based, scientific data exchange and software interoperability
 
 &#9883;&nbsp;[C] / [Fortran] / [Python] APIs<br>
 &#9883;&nbsp;[X/Y curves], [points], [structured], [unstructured], [arbitrary], [AMR], and [CSG] mesh types<br>
-&#9883;&nbsp;Piecewise constant and linear fields ([v][][a][][r]iables) over node, edge, face and volume elements<br>
+&#9883;&nbsp;Piecewise constant and linear fields ([v][][a][][r][][i][][ab][]les) over node, edge, face and volume elements<br>
 &#9883;&nbsp;[Mixing materials], [species], part assembilies and other [subset hierarchies]<br>
 &#9883;&nbsp;Easy parallelism with [MIF Parallel I/O]<br>
 &#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
@@ -35,3 +35,5 @@
 [v]: https://silo.readthedocs.io/en/latest/objects.html#dbputpointvar
 [a]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadvar
 [r]: https://silo.readthedocs.io/en/latest/objects.html#dbputucdvar
+[i]: https://silo.readthedocs.io/en/latest/objects.html#dbputcsgvar
+[ab]: https://silo.readthedocs.io/en/latest/objects.html#dbputmrgvar
