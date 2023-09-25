@@ -7,7 +7,7 @@
 &#9883;&nbsp;Piecewise constant and linear fields ([v][][a][][r][][i][][ab][]les) over node, edge, face and volume elements<br>
 &#9883;&nbsp;[Mixing materials], [species], part assembilies and other [subset hierarchies]<br>
 &#9883;&nbsp;[Easy parallelism] with [MIF Parallel I/O] (see [examples])<br>
-&#9883;&nbsp;Data browsing, differencing and [visualization] including seamless integration with [VisIt]<br>
+&#9883;&nbsp;Data [browsing], [differencing] and [visualization] including seamless integration with [VisIt]<br>
 &#9883;&nbsp;In-situ via [memory-files], [compression], [JSON], [HDF5] and more...
 
 <img src="ghpages/images/silo_objects_roll.gif" alt="Silo Objects Roll" style="display: block; margin: auto;">
@@ -39,3 +39,5 @@
 [ab]: https://silo.readthedocs.io/en/latest/subsets.html#dbmakemrgtree
 [Easy parallelism]: https://github.com/LLNL/Silo/blob/ab0e316442e4dd340f04af81f8cd5868b337bb97/src/silo/pmpio.h#L55
 [examples]: https://github.com/LLNL/Silo/blob/ab0e316442e4dd340f04af81f8cd5868b337bb97/tests/pmpio_silo_test_mesh.c#L70
+[browsing]: https://github.com/LLNL/Silo/blob/ab0e316442e4dd340f04af81f8cd5868b337bb97/tools/browser/browser.texi#L217
+[differencing]: https://github.com/LLNL/Silo/blob/ab0e316442e4dd340f04af81f8cd5868b337bb97/tools/browser/browser.texi#L496
