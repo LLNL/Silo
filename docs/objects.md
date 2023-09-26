@@ -420,19 +420,20 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The `DBPutQuadmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a quad-mesh object in the Silo file.
 
-  A Silo quad-mesh object contains all necessary information for describing a mesh.
-  This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear).
+  A Silo quad-mesh object contains all necessary information for describing a *structured* mesh.
+  This includes the coordinate arrays, the topological dimension of the mesh (1,2,3,...) and the type of coordinates (collinear or non-collinear).
   In addition, other information is useful and is therefore optionally included (row-major indicator, time and cycle of mesh, offsets to *real* zones, plus coordinate system type.)
 
   Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
   For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
   However, this function can also be used to define a surface of quadrilaterals embedded in 3-space or a path of line segments embedded in 2- or 3-space.
   In these less common cases, the topological dimension is lower than the geometric dimension.
-  The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent extra dimensions to one.
+  The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent *extra* dimensions to one.
   For example, to specify a mesh of quadrilaterals in 3-space, set `ndims` to 3 but set dims[2] to 1.
   To specify a mesh of lines defining a path embedded in 3-space, `ndims` would again be 3 but dims[1] and dims[2] would both be 1.
   In fact, this works in general.
   For N geometric dimensions and N-k topological dimensions, set ndims=N and dims[N-1-k]...dims[N-1] to 1.
+  An example of doing this can be found in some [VisIt test data](https://github.com/visit-dav/visit/blob/31e345e285a75a18a483d07643c30cc3ee58bcac/src/tools/data/datagen/quad_disk.C#L189)
 
   The following table describes the options accepted by this function.
   See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
