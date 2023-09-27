@@ -29,11 +29,10 @@ The [Silo](https://github.com/LLNL/Silo) project is maintained on GitHub.
 Users needing support will need [a (free) GitHub account](https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home) to create and comment on issues and discussions and to watch for new releases.
 
 The [**Watch**](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository) button on the [main Silo repository](https://github.com/LLNL/Silo) provides controls to opt in or out of various kinds of [notifications](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications) including to just watch for releases
-
 <div class="image-container">
   (<bold>Watch->Custom</bold>->Check *only releases*).
     <div class="image-popup">
-        <img src="https://avatars.githubusercontent.com/u/5720676?v=4" alt="Popup Image Description">
+        <img src="../ghpages/images/watch-releases.png" alt="Popup Image Description">
     </div>
 </div>
 
