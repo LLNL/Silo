@@ -30,9 +30,9 @@ Users needing support will need [a (free) GitHub account](https://github.com/sig
 
 The <strong><a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">Watch</a></strong> button on the <a href="https://github.com/LLNL/Silo">main Silo repository</a> provides controls to opt in or out of various kinds of <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications">notifications</a> including to just watch for releases
 <div class="image-container">
-  (<strong>Watch->Custom</strong>->Check *only releases*).
+  (<b>Watch->Custom</b>->Check <i>only releases</i>).
   <div class="image-popup">
-    <img src="../ghpages/images/watch-releases.png" alt="Watch releases checkbox"
+    <img src="../ghpages/images/watch-releases.png" alt="Watch releases checkbox">
   </div>
 </div>
 
