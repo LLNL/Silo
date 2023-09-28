@@ -28,7 +28,13 @@ permalink: /help/
 The [Silo](https://github.com/LLNL/Silo) project is maintained on GitHub.
 Users needing support will need [a (free) GitHub account](https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home) to create and comment on issues and discussions and to watch for new releases.
 
-The <strong><a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">Watch</a></strong> button on the <a href="https://github.com/LLNL/Silo">main Silo repository</a> provides controls to opt in or out of various kinds of <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications">notifications</a> including to just watch for releases <div class="image-container"> (<strong>Watch->Custom</strong>->Check *only releases*). <div class="image-popup"> <img src="../ghpages/images/watch-releases.png" alt="Watch releases checkbox"></div></div>
+The <strong><a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">Watch</a></strong> button on the <a href="https://github.com/LLNL/Silo">main Silo repository</a> provides controls to opt in or out of various kinds of <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications">notifications</a> including to just watch for releases
+<div class="image-container">
+  (<strong>Watch->Custom</strong>->Check *only releases*).
+  <div class="image-popup">
+    <img src="../ghpages/images/watch-releases.png" alt="Watch releases checkbox"
+  </div>
+</div>
 
 A [GitHub Q&A Discussion](https://github.com/LLNL/Silo/discussions/new?category=q-a) is the preferred way to get help because it is likely to be seen by more people who can provide a timely response and because any response produced is likely to be a benefit to the widest possible audience.
 
