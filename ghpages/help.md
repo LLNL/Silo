@@ -8,7 +8,7 @@ Users needing support will need [a (free) GitHub account](https://github.com/sig
 The **[Watch](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)** button on the [main Silo repository](https://github.com/LLNL/Silo) provides controls to opt in or out of various kinds of [notifications](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications) including to just watch for releases **Watch**->**Custom**->**Only releases**.
 
 Alternatively, if all you will ever care about is Silo release announcements and you do not want to get a GitHub account for that, you can [subscribe](mailto:listserv@listserv.llnl.gov?subject=subscribe%20silo-announce&body=subscribe%20silo-announce) to the silo-announce email list.
-**Be sure to add your name on the same line immediately after `subscribe silo-announce` in the body of the email before sending it.
+**Be sure to add your name on the same line immediately after `subscribe silo-announce` in the body of the email before sending it.**
 
 A [GitHub Q&A Discussion](https://github.com/LLNL/Silo/discussions/new?category=q-a) is the preferred way to get help because it is likely to be seen by more people who can provide a timely response and because any response produced is likely to be a benefit to the widest possible audience.
 
