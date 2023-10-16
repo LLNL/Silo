@@ -97,15 +97,7 @@ install(FILES s2ex.py DESTINATION bin
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
-if(WIN32)
-    add_custom_command(TARGET Silo POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
-            ${Silo_BINARY_DIR}/bin/$<CONFIG>)
-else()
-    add_custom_command(TARGET Silo POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
-            ${Silo_BINARY_DIR}/bin/)
-endif()
-
+add_custom_command(TARGET Silo POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
+        ${Silo_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)

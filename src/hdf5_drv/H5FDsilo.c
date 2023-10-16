@@ -496,7 +496,7 @@ static herr_t H5FD_silo_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_
                 size_t size, const void *buf);
 static herr_t H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REMOVE ME
 #endif
 #if 0
@@ -2001,7 +2001,7 @@ H5FD_silo_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 H5FD_silo_get_eof(const H5FD_t *_file)
 #endif
 {
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning TAKE ADVANTAGE OF TYPE INFO HERE
 #endif
     const H5FD_silo_t	*file = (const H5FD_silo_t *)_file;

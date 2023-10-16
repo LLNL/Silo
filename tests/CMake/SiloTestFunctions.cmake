@@ -81,12 +81,8 @@ function(silo_add_test)
 
 
     add_executable(${sat_NAME} ${sat_SRC})
-    if(WIN32)
-        # change output directory using generator expression to avoid
-        # VS adding per-configuration subdir
-        set_target_properties(${sat_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-            ${silo_test_output_dir}/$<$<CONFIG:Debug>:>)
-    endif()
+    set_target_properties(${sat_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+        ${silo_test_output_dir})
     if("LANG" IN_LIST sat_KEYWORDS_MISSING_VALUES)
         message(WARNING "silo_add_test: LANG argument is missing a value.")
         return()

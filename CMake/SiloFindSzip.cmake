@@ -82,7 +82,7 @@ if(SZIP_FOUND)
 
         add_custom_command(TARGET copy_deps POST_BUILD
              COMMAND ${CMAKE_COMMAND} -E copy_if_different
-             ${SZIP_DLL} ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+             ${SZIP_DLL} ${Silo_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)
 
     endif()
 else()

@@ -2154,7 +2154,7 @@ db_hdf5_init(void)
 
 #if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_hzip_class.version = H5Z_CLASS_T_VERS;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning SHOULD WE DISABLE HZIP AND FPZIP ENCODING
 #endif
     db_hdf5_hzip_class.encoder_present = 1;
@@ -2800,7 +2800,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     dbfile->pub.newtoc = db_hdf5_NewToc;
     dbfile->pub.mkdir = db_hdf5_MkDir;
     dbfile->pub.cpdir = db_hdf5_CpDir;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning GET RID OF CPLISTEDOBJECTS
 #endif
     dbfile->pub.cpnobjs = db_hdf5_CpListedObjects;
@@ -3352,7 +3352,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
             have_zfp = TRUE;
 #endif
     }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning WHAT ABOUT NULL RETURN FROM DBGETCOMPRESSION
 #endif
 /* Handle some global compression parameters */
@@ -3385,7 +3385,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
             return (-1);
         }
     }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning FIX MISSING .compressionMinsize member
 #endif
 #if 0
@@ -3405,7 +3405,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
     }
 #endif
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning QUERY FILE LEVEL COMPRESSION PARAMS HERE
 #endif
     opt_flag = SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
@@ -4132,7 +4132,7 @@ load_toc(hid_t grp, char const *name, H5L_info_t const *dummy, void *_toc)
     }
 
     /* Append to table of contents */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REVISIT THIS CODE BLOCK
 #endif
 #if 0
@@ -4749,7 +4749,7 @@ db_hdf5_resolvename(DBfile *_dbfile,
     static int const nmax = 32;
     static char *cbuf[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                              0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning HARD CODED SIZE HERE
 #endif
     static char cwgname[4096];
@@ -5020,7 +5020,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     /* Handle cases where we are running on Windows. If a client
        request anything other than the default driver, we issue
        a warning message and continue only on windows (default) vfd. */
-#if !defined(_WIN32)
+#if !defined(_MSC_VER)
 #warning REMOVED WINDOWS SPECIFIC CHECK
 #endif
 #if 0
@@ -5111,7 +5111,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         /* default HDF5 mpi drivers */
         case DB_FILE_OPTS_H5_DEFAULT_MPIP:
         {
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning DO WE STILL NEED THIS
 #endif
             H5Pclose(retval);
@@ -5171,7 +5171,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                 h5status |= H5Pset_driver(retval, new_driver_id, p);
             }
 
-#if !defined(_WIN32)
+#if !defined(_MSC_VER)
 #warning REMOVED WINDOWS SPECIFIC CHECK
 #endif
 #if 0
@@ -5291,7 +5291,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                         }
 
                         /* Allocate buffer to communicate user data to callbacks */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning PUT UDATA POINTER IN DBFILE pointer so it can be freed with file is closed.
 #endif
                         if (NULL == (udata = (db_hdf5_H5LT_file_image_ud_t *)malloc(sizeof(db_hdf5_H5LT_file_image_ud_t))))
@@ -5440,7 +5440,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                     }
                     else
                     {
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning DO WE STILL NEED THIS
 #endif
                         H5Pclose(retval);
@@ -5526,7 +5526,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         }
     }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning FIX THIS
 #endif
 #if 0
@@ -5915,7 +5915,7 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
     }
 
     faprops = db_hdf5_file_accprops(opts_set_id, mode, 0);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning QUERY FILE IMAGE STUFF HERE TO GET UDATA PTR
 #endif
 
@@ -6006,7 +6006,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
         if (fcprops == -1)
         {
             fcprops = H5Pcreate(H5P_FILE_CREATE);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning BACKWARD COMPAT ISSUE FOR HDF5
 #endif
             /*H5Pset_istore_k(fcprops, 1);*/
@@ -6043,7 +6043,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     *fidp = fid;
     dbfile->pub.GrabId = (void*) fidp;
     dbfile->fid = fid;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning FIX FILE SCOPE GLOBAL INITIALIZATION
 #endif
 #if 0
@@ -6509,7 +6509,7 @@ copy_obj(hid_t hobj, char const *name, void *op_data)
             UNWIND();
         }
         asize = H5Tget_size(atype);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning WHY THIS SIZE
 #endif
         msize = MAX(asize, 3*1024);
@@ -6680,7 +6680,7 @@ db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
     return 0;
 }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REMOVE THIS MAYBE
 #endif
 SILO_CALLBACK int
@@ -7419,7 +7419,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
                 size_t len = strlen(obj->pdb_names[i]+4)-1;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning COMPATABILITY ISSUE
 #endif
                 hid_t str_type;
@@ -7794,7 +7794,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
     hsize_t     nbytes_big;
     int         nbytes_small=-1;
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REMOVED db_perror CALLS
 #endif
     PROTECT {
@@ -8442,7 +8442,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
                    UNWIND();
                }
            }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning WHAT IF EXISTING DATASET WAS COMPRESSED
 #endif
        } else {
@@ -8486,7 +8486,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning COMPARE TO -1 OR TO NEGATIVE
 #endif
        if (dset_type != -1)
@@ -8510,7 +8510,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
        H5E_BEGIN_TRY {
            H5Dclose(dset);
            H5Sclose(space);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning COMPARE TO -1 OR NEGATIVE
 #endif
            if (dset_type != -1)
@@ -8737,7 +8737,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
         }
 
         /* Add members to the DBobject */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning THIS IFDEFD CODE IS IN TRANSITION TO BETTER GENERIC OBJECTS
 #endif
         for (i=0; i<nmembs; i++) {
@@ -8836,14 +8836,14 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
             H5Tclose(member_type);
         }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REVISIT THIS CLEANUP CODE. IS THERE A BETTER SYMBOLIC VALUE THAN -1
 #endif
         /* Cleanup */
         H5Tclose(atype);
         H5Aclose(attr);
         H5Tclose(o);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning USE FREE() MACRO HERE
 #endif
         free(file_value);
@@ -8857,7 +8857,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
             H5Aclose(attr);
             H5Tclose(o);
         } H5E_END_TRY;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning USE FREE() MACRO HERE
 #endif
         if (file_value) free(file_value);
@@ -11520,7 +11520,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         for (i=0; i<nvars && nels; i++) {
             db_hdf5_compwrz(dbfile, datatype, 1, &nels, vars[i],
                 m.value[i]/*out*/, friendly_name(_dbfile,varnames[i], "_data", 0), compressionFlags);
-//#ifndef _WIN32
+//#ifndef _MSC_VER
 //#warning WHY NOT COMPRESS MIX DATA TOO
 //#endif
             if (mixvars && mixvars[i] && mixlen>0) {
@@ -14367,7 +14367,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
          * material names.
          */
         /* Write raw data arrays */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REPLACE WITH STRING UTILITIES
 #endif
         if (nmats > 0 && matnames)
@@ -14407,7 +14407,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(_dbfile,name,"_matcolors", 0));
             FREE(tmp);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning IS THIS TAKEN CARE OF ELSEWHERE
 #endif
             _mm._matcolors = 0;
@@ -14419,7 +14419,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(_dbfile,name,"_material_names", 0));
             FREE(tmp);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning IS THIS TAKEN CARE OF ELSEWHERE
 #endif
             _mm._matnames = 0;

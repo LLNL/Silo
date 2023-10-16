@@ -107,7 +107,7 @@ SILO_CALLBACK int db_hdf5_SetDir(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/);
 SILO_CALLBACK int db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
                            DBfile *dstFile, char const *dstDir);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REMOVE db_hdf5_CpListedObjects
 #endif
 SILO_CALLBACK int db_hdf5_CpListedObjects(int nobjs,
