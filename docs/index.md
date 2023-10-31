@@ -37,10 +37,6 @@ The two most common are the HDF5 (Hierarchical Data Format 5) and PDB (Portable 
 ./header.md
 ```
 
-## Manuals for previous versions
-
-* [Most recently released manual (4.10)](https://wci.llnl.gov/sites/wci/files/2020-08/LLNL-SM-654357.pdf)
-
 ## Contacts
 
 For inquiries, users are encouraged to use Silo's [GitHub Discussions space](https://github.com/LLNL/Silo/discussions).
