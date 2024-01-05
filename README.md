@@ -18,7 +18,7 @@
 [X/Y Curves]: https://silo.readthedocs.io/en/latest/objects.html#dbputcurve
 [points]: https://silo.readthedocs.io/en/latest/objects.html#dbputpointmesh
 [structured]: https://silo.readthedocs.io/en/latest/objects.html#dbputquadmesh
-[unstructured]: https://silo.readthedocs.io/en/latest/objects.html#dbgetucdmesh
+[unstructured]: https://silo.readthedocs.io/en/latest/objects.html#dbputucdmesh
 [arbitrary]: https://silo.readthedocs.io/en/latest/objects.html#dbputphzonelist
 [AMR]: https://silo.readthedocs.io/en/latest/subsets.html#dbmakemrgtree
 [CSG]: https://silo.readthedocs.io/en/latest/objects.html#dbputcsgmesh
