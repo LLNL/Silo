@@ -9,7 +9,7 @@ One of the more popular tools to process Silo data is the [VisIt](https://github
 
 Silo supports a vareity of mesh types (pictured below) including simple curves, gridless (point), structured, unstructured-zoo and unstructured-arbitrary, block structured AMR, and constructive solid geometry (CSG).
 
-<center><img src="silo_objects.png" style="height:500px;" /></center>
+<center><img src="docs/images/silo_objects.png" style="height:500px;" /></center>
 
 In addition, Silo supports piecewise-constant (e.g., zone-centered) and piecewise-linear (e.g. node-centered) variables (e.g. *fields*) defined on the node, edge, face or volume elements of meshes.
 
