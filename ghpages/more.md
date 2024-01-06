@@ -14,7 +14,7 @@ permalink: /more/
   * [LibMESH](https://libmesh.github.io)
   * [Conduit](https://llnl-conduit.readthedocs.io/en/latest/) / [Blueprint](https://llnl-conduit.readthedocs.io/en/latest/blueprint_mesh.html) ([slides](https://www.ascent-dav.org/2019_04_24_doecfg_conduit_blueprint.pdf))
   * [TSTT](https://tstt-scidac.org) / [ITAPS](https://www.researchgate.net/publication/230957447_Interoperable_mesh_and_geometry_tools_for_advanced_petascale_simulations)
-  * The Sets and Fields (SAF) [Data Model](https://github.com/markcmiller86/SAF/blob/master/src/safapi/docs/miller001.pdf) and [API](https://sets-and-fields.readthedocs.io/en/latest/docs/safapi_refman.rest/index.html)
+  * The Sets and Fields (SAF) [Data Model](https://docs.google.com/viewer?url=https://raw.githubusercontent.com/markcmiller86/SAF/master/src/safapi/docs/miller001.pdf) and [API](https://sets-and-fields.readthedocs.io/en/latest/docs/safapi_refman.rest/index.html)
   * Advanced Mathematical Abstractions by David Butler
     * [Vector Bundle Data Model](https://www.sheafsystem.org/publications/Butler_Bryson_1992.pdf) (1992)
     * [Fiber Bundle Data Model](https://www.researchgate.net/publication/236382996_A_Visualization_Model_Based_on_the_Mathematics_of_Fiber_Bundles) (2003)
