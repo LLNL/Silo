@@ -12,11 +12,12 @@ permalink: /more/
   * From XFiles to SAF: The early pedigree of HDF5 ([video](https://youtu.be/0oCWg5UD6iE?si=IHPF1J3dmoujvFFw) / [slides](https://www.hdfgroup.org/wp-content/uploads/2023/08/hdf5_history_Mark_Miller.pdf))
 * Research Computing & Engineering (RCE) [Discussion about Silo](assets/20RCE-silo.mp3) (2009)
 * Related technologies (Arrays and other (regularized) data structure Models)
-  * [PDB](https://www.researchgate.net/publication/274023212_Software_for_Portable_Scientific_Data_Management)
+  * [PDBLib](https://www.researchgate.net/publication/274023212_Software_for_Portable_Scientific_Data_Management)
   * [HDF5](https://docs.hdfgroup.org/hdf5/develop/)
   * [netCDF](https://www.unidata.ucar.edu/software/netcdf/)
 * Related technologies (Mesh and Field Models)
   * [ExodusII](https://www.osti.gov/servlets/purl/10102115) (implemented on top of [netCDF](https://www.unidata.ucar.edu/software/netcdf/))
+    * Similar to how Silo is implemented on top of either PDB or HDF5.
   * [LibMESH](https://libmesh.github.io)
   * [CGNS](http://cgns.github.io)
   * [netCDF - regularized](https://www.unidata.ucar.edu/software/netcdf/)
