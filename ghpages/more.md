@@ -10,12 +10,9 @@ permalink: /more/
 * [A brief history](history.md)
 * Research Computing & Engineering (RCE) [Discussion about Silo](assets/20RCE-silo.mp3) (2009)
 * Related technologies (Arrays and other (regularized) data structure Models)
-<details>
-  <summary>Technologies supporting arrays and other data structures.</summary>
   * [PDB](https://www.researchgate.net/publication/274023212_Software_for_Portable_Scientific_Data_Management)
   * [HDF5](https://docs.hdfgroup.org/hdf5/develop/)
   * [netCDF](https://www.unidata.ucar.edu/software/netcdf/)
-</details>
 * Related technologies (Mesh and Field Models)
   * [ExodusII](https://www.osti.gov/servlets/purl/10102115) (implemented on top of [netCDF](https://www.unidata.ucar.edu/software/netcdf/))
   * [LibMESH](https://libmesh.github.io)
