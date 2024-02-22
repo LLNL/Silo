@@ -16,8 +16,7 @@ permalink: /more/
   * [HDF5](https://docs.hdfgroup.org/hdf5/develop/)
   * [netCDF](https://www.unidata.ucar.edu/software/netcdf/)
 * Related technologies (Mesh and Field Models)
-  * [ExodusII](https://www.osti.gov/servlets/purl/10102115) (implemented on top of [netCDF](https://www.unidata.ucar.edu/software/netcdf/))
-    * Similar to how Silo is implemented on top of either PDB or HDF5.
+  * [ExodusII](https://www.osti.gov/servlets/purl/10102115) (implemented on top of [netCDF](https://www.unidata.ucar.edu/software/netcdf/), like Silo on PDBLib or HDF5)
   * [LibMESH](https://libmesh.github.io)
   * [CGNS](http://cgns.github.io)
   * [netCDF - regularized](https://www.unidata.ucar.edu/software/netcdf/)
