@@ -51,13 +51,12 @@ product endorsement purposes.
 */
 #include <stdio.h>
 #include <silo.h>
+#include <string.h>
 #ifndef _WIN32
 #include <sys/time.h>
-#else
-#include <string.h>
-#include <time.h>
 #endif
 #include <sys/timeb.h>
+#include <time.h>
 #include <std.c>
 
 /* To compile this program on hyper, here is the command:
