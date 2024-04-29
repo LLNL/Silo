@@ -50,6 +50,8 @@
 
 #include "pydbtoc.h"
 #include "pysilo.h"
+#include <stdlib.h>
+#include <string.h>
 
 // ****************************************************************************
 //  Method:  DBtoc_dealloc
@@ -240,8 +242,14 @@ GET_FUNC_DEFS(mrgvar);
 GET_FUNC_DEFS(groupelmap);
 GET_FUNC_DEFS(obj);
 
-#define GET_FUNC_N(nm) if (!strcmp(name, "n" #nm)) return DBtoc_GetN ## nm(self, NULL);
-#define GET_FUNC_NAMES(nm) if (!strcmp(name, #nm "_names")) return DBtoc_Get ## nm ## names(self, NULL);
+#define HANDLE_ENTRY(nm) \
+    if (!strcmp(name, "n" #nm)) return DBtoc_GetN ## nm(self, NULL);                                             \
+    else if (!strcmp(name, #nm "_names")) return DBtoc_Get ## nm ## names(self, NULL);                           \
+    else if (!strcmp(name, "__dict__"))                                                                          \
+    {                                                                                                            \
+        PyDict_SetItem(__dict__result, PyString_FromString("n" #nm), DBtoc_GetN ## nm(self, NULL));              \
+        PyDict_SetItem(__dict__result, PyString_FromString(#nm "_names"), DBtoc_Get ## nm ## names(self, NULL)); \
+    }
 
 // ****************************************************************************
 //  Method: DBtoc_getattr 
@@ -261,55 +269,52 @@ GET_FUNC_DEFS(obj);
 // ****************************************************************************
 static PyObject *DBtoc_getattr(PyObject *self, char *name)
 {
-    GET_FUNC_N(var);
-    GET_FUNC_N(dir);
-    GET_FUNC_N(curve);
-    GET_FUNC_N(multimesh);
-    GET_FUNC_N(multivar);
-    GET_FUNC_N(multimat);
-    GET_FUNC_N(multimatspecies);
-    GET_FUNC_N(csgmesh);
-    GET_FUNC_N(csgvar);
-    GET_FUNC_N(defvars);
-    GET_FUNC_N(qmesh);
-    GET_FUNC_N(qvar);
-    GET_FUNC_N(ucdmesh);
-    GET_FUNC_N(ucdvar);
-    GET_FUNC_N(ptmesh);
-    GET_FUNC_N(ptvar);
-    GET_FUNC_N(mat);
-    GET_FUNC_N(matspecies);
-    GET_FUNC_N(array);
-    GET_FUNC_N(mrgtree);
-    GET_FUNC_N(mrgvar);
-    GET_FUNC_N(groupelmap);
-    GET_FUNC_N(obj);
+    PyObject *__dict__result = strcmp(name, "__dict__") ? 0 : PyDict_New();
 
-    GET_FUNC_NAMES(var);
-    GET_FUNC_NAMES(dir);
-    GET_FUNC_NAMES(curve);
-    GET_FUNC_NAMES(multimesh);
-    GET_FUNC_NAMES(multivar);
-    GET_FUNC_NAMES(multimat);
-    GET_FUNC_NAMES(multimatspecies);
-    GET_FUNC_NAMES(csgmesh);
-    GET_FUNC_NAMES(csgvar);
-    GET_FUNC_NAMES(defvars);
-    GET_FUNC_NAMES(qmesh);
-    GET_FUNC_NAMES(qvar);
-    GET_FUNC_NAMES(ucdmesh);
-    GET_FUNC_NAMES(ucdvar);
-    GET_FUNC_NAMES(ptmesh);
-    GET_FUNC_NAMES(ptvar);
-    GET_FUNC_NAMES(mat);
-    GET_FUNC_NAMES(matspecies);
-    GET_FUNC_NAMES(array);
-    GET_FUNC_NAMES(mrgtree);
-    GET_FUNC_NAMES(mrgvar);
-    GET_FUNC_NAMES(groupelmap);
-    GET_FUNC_NAMES(obj);
+    HANDLE_ENTRY(var);
+    HANDLE_ENTRY(dir);
+    HANDLE_ENTRY(curve);
+    HANDLE_ENTRY(multimesh);
+    HANDLE_ENTRY(multivar);
+    HANDLE_ENTRY(multimat);
+    HANDLE_ENTRY(multimatspecies);
+    HANDLE_ENTRY(csgmesh);
+    HANDLE_ENTRY(csgvar);
+    HANDLE_ENTRY(defvars);
+    HANDLE_ENTRY(qmesh);
+    HANDLE_ENTRY(qvar);
+    HANDLE_ENTRY(ucdmesh);
+    HANDLE_ENTRY(ucdvar);
+    HANDLE_ENTRY(ptmesh);
+    HANDLE_ENTRY(ptvar);
+    HANDLE_ENTRY(mat);
+    HANDLE_ENTRY(matspecies);
+    HANDLE_ENTRY(array);
+    HANDLE_ENTRY(mrgtree);
+    HANDLE_ENTRY(mrgvar);
+    HANDLE_ENTRY(groupelmap);
+    HANDLE_ENTRY(obj);
 
+    if (!strcmp(name, "__dict__"))
+        return __dict__result;
+
+    PyErr_SetString(PyExc_AttributeError, "attribute not found");
     return 0;
+}
+
+static PyObject *DBtoc_getattro(PyObject *self, PyObject *o)
+{
+    PyObject *retval;
+    char *dupname;
+    char const *name = PyString_AsString(o);
+    if (!name) {
+        PyErr_SetString(PyExc_TypeError, "Could not convert argument C string");
+        return NULL;
+    }
+    dupname = strdup(name);
+    retval = DBtoc_getattr(self, dupname);
+    free(dupname);
+    return retval;
 }
 
 // ****************************************************************************
@@ -352,7 +357,7 @@ PyTypeObject DBtocType =
     0,                                   // tp_hash
     0,                                   // tp_call
     (reprfunc)DBtoc_str,                 // tp_str
-    0,                                   // tp_getattro
+    (getattrofunc)DBtoc_getattro,        // tp_getattro
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
     0,                                   // tp_flags
