@@ -30,7 +30,7 @@ Oct 2007 | 4.6.1 | [Legacy][461] | [User Manual][46um]
 [4111]: https://github.com/LLNL/Silo/releases/download/4.11.1/silo-4.11.1.tar.xz "Legacy License but includes all features"
 [4111b]: https://github.com/LLNL/Silo/releases/download/4.11.1/silo-4.11.1-bsd.tar.xz "BSD License, fpzip/hzip compressors removed"
 [4111rn]: https://github.com/LLNL/Silo/releases/tag/4.11.1
-[4111um]: https://silo.readthedocs.io/en/latest/ 
+[4111um]: https://silo.readthedocs.io// 
 [411]: https://github.com/LLNL/Silo/releases/download/v4.11/silo-4.11.tar.gz "Legacy License but includes all features"
 [411b]: https://github.com/LLNL/Silo/releases/download/v4.11/silo-4.11-bsd.tar.gz "BSD License, fpzip/hzip compressors removed"
 [411rn]:https://github.com/LLNL/Silo/wiki/4.11-Release-Notes-September,-2021

@@ -1,4 +1,4 @@
 ---
 title: Documentation
-exturl: https://silo.readthedocs.io/en/latest/
+exturl: https://silo.readthedocs.io/
 ---
