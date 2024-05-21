@@ -11089,139 +11089,106 @@ _DBdarrminmax(double arr[], int len, double *arr_min, double *arr_max)
     return 0;
 }
 
-/***********************************************************************
- *
- * Purpose: Return the min and max values of a subset of the given
- *          array.
- *
- * Programmer: Eric S. Brugger
- * Date:       May 26, 1995
- *
- * Input arguments:
- *    arr      : The array to evaluate.
- *    datatype : The data type of the array.
- *    nx       : The x dimension of the array.
- *    ny       : The y dimension of the array.
- *    nz       : The z dimension of the array.
- *    ixmin    : The 0 origin min index in the x direction.
- *    ixmax    : The 0 origin max index in the x direction.
- *    iymin    : The 0 origin min index in the y direction.
- *    iymax    : The 0 origin max index in the y direction.
- *    izmin    : The 0 origin min index in the z direction.
- *    izmax    : The 0 origin max index in the z direction.
- *
- * Output arguments:
- *    amin     : The minimum value in the array.
- *    amax     : The maximum value in the array.
- *
- * Input/Output arguments:
- *
- * Notes:
- *
- * Modifications:
- *    Eric Brugger, Tue May 30 17:03:51 PDT 1995
- *    I changed the initial calculation of the index to use ixmin,
- *    iymin, and izmin instead of i, j, k which were not initialized.
- *
- *    Jim Reus, 23 Apr 97
- *    I changed to prototype form, moved location within file.
- *
- *    Eric Brugger, Thu Sep 23 15:05:18 PDT 1999
- *    I removed the unused argument nz.
- ***********************************************************************/
-
 INTERNAL int
-_DBSubsetMinMax3(float arr[], int datatype, float *amin, float *amax , int nx,
-                 int ny, int ixmin, int ixmax, int iymin , int iymax,
-                 int izmin, int izmax)
+include_point(int ptidx, int ndims, int const *dims,
+    int const *minidx, int const *maxidx)
 {
-    int             i, j, k, index, nxy;
-    float           tmin, tmax;
-    double          dtmin, dtmax;
-    double         *darr, *damin, *damax;
+    if (dims == 0) return 1;
 
-    switch (datatype)
-    {
-    case DB_FLOAT:
+    int i = ndims>0 ? (ptidx)                   % dims[0] : 0;
+    int j = ndims>1 ? (ptidx/dims[0])           % dims[1] : 0;
+    int k = ndims>2 ? (ptidx/(dims[1]*dims[0])) % dims[2] : 0;
 
-        nxy = nx * ny;
+    if (i < minidx[0]) return 0;
+    if (i > maxidx[0]) return 0;
+    if (j < minidx[1]) return 0;
+    if (j > maxidx[1]) return 0;
+    if (k < minidx[2]) return 0;
+    if (k > maxidx[2]) return 0;
 
-        index = INDEX3(ixmin, iymin, izmin, nx, nxy);
-        tmin = arr[index];
-        tmax = arr[index];
-
-        for (k = izmin; k <= izmax; k++)
-        {
-            for (j = iymin; j <= iymax; j++)
-            {
-                for (i = ixmin; i <= ixmax; i++)
-                {
-                    index = INDEX3(i, j, k, nx, nxy);
-                    tmin = MIN(tmin, arr[index]);
-                    tmax = MAX(tmax, arr[index]);
-                }
-            }
-        }
-
-        *amin = tmin;
-        *amax = tmax;
-        break;
-
-    case DB_DOUBLE:
-
-        darr = (double *)arr;
-
-        nxy = nx * ny;
-
-        index = INDEX3(ixmin, iymin, izmin, nx, nxy);
-        dtmin = darr[index];
-        dtmax = darr[index];
-
-        for (k = izmin; k <= izmax; k++)
-        {
-            for (j = iymin; j <= iymax; j++)
-            {
-                for (i = ixmin; i <= ixmax; i++)
-                {
-                    index = INDEX3(i, j, k, nx, nxy);
-                    dtmin = MIN(dtmin, darr[index]);
-                    dtmax = MAX(dtmax, darr[index]);
-                }
-            }
-        }
-
-        damin = (double *)amin;
-        damax = (double *)amax;
-        *damin = dtmin;
-        *damax = dtmax;
-        break;
-
-    default:
-        break;
-    }
-
-    return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
- * Routine                                               CSGM_CalcExtents
+ * Routine                                               _CalcExtents
  *
- * Purpose
+ * Purpose: Return min/max of each dimension of coordinate array data
  *
- *      Return the extents of the given csg mesh.
+ * Modifications:
+ *      Sean Ahern, Wed Oct 21 10:55:21 PDT 1998
+ *      Changed the function so that the min_extents and max_extents are 
+ *      passed in as void* variables.
  *
+ *      Mark C. Miller, Mon May 20 12:25:25 PDT 2024
+ *      Adjusted to avoid strict pointer aliasing optimization issues.
  *--------------------------------------------------------------------*/
 INTERNAL int
-CSGM_CalcExtents(int datatype, int ndims, int nbounds,
-               const int *typeflags, const void *coeffs,
-               double *min_extents, double *max_extents)
+_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
+             void *min_extents, void *max_extents,
+             int const *dims, int const *minidx, int const *maxidx)
 {
-    min_extents[0] = -DBL_MAX;
-    min_extents[1] = -DBL_MAX;
-    min_extents[2] = -DBL_MAX;
-    max_extents[0] = DBL_MAX;
-    max_extents[1] = DBL_MAX;
-    max_extents[2] = DBL_MAX;
+    int i, j, first=0;
+
+    if (npts <= 0) return 0;
+
+    if (datatype == DB_DOUBLE) {
+
+        double *dmin_extents = (double *) min_extents;
+        double *dmax_extents = (double *) max_extents;
+        double const * const * _coord_arrays = (double const * const *) coord_arrays;
+        double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+
+        for (i = 0; i < ndims; i++)
+        {
+            for (j = 0; j < npts; j++)
+            {
+                if (include_point(j, ndims, dims, minidx, maxidx))
+                {
+                    if (first)
+                    {
+                        first = 0;
+                        dmin_extents[i] = dcoord_arrays[i][j];
+                        dmax_extents[i] = dcoord_arrays[i][j];
+                    }
+                    else
+                    {
+                        dmin_extents[i] = MIN(dmin_extents[i], dcoord_arrays[i][j]);
+                        dmax_extents[i] = MAX(dmax_extents[i], dcoord_arrays[i][j]);
+                    }
+                }
+            }
+        }
+
+    }
+    else
+    {
+        float *fmin_extents = (float *) min_extents;
+        float *fmax_extents = (float *) max_extents;
+        float  const * const * _coord_arrays = (float const * const *) coord_arrays;
+        float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+
+        for (i = 0; i < ndims; i++)
+        {
+            for (j = 0; j < npts; j++)
+            {
+                if (include_point(j, ndims, dims, minidx, maxidx))
+                {
+                    if (first)
+                    {
+                        first = 0;
+                        fmin_extents[i] = fcoord_arrays[i][j];
+                        fmax_extents[i] = fcoord_arrays[i][j];
+                    }
+                    else
+                    {
+                        fmin_extents[i] = MIN(fmin_extents[i], fcoord_arrays[i][j]);
+                        fmax_extents[i] = MAX(fmax_extents[i], fcoord_arrays[i][j]);
+                    }
+                }
+            }
+        }
+    }
+
     return 0;
 }
 
@@ -11258,343 +11225,72 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
                  int const *max_index, int const *dims, int ndims, int coordtype,
                  void *min_extents, void *max_extents)
 {
-    float         *x = NULL, *y = NULL, *z = NULL;
-    double        *dx = NULL, *dy = NULL, *dz = NULL;
-    double        *dmin_extents = NULL, *dmax_extents = NULL;
-    float         *fmin_extents = NULL, *fmax_extents = NULL;
-    int            i, is_empty = 1;
-    char          *me = "_DBQMCalcExtents";
+    int i, npts;
 
+    npts = 1;
     for (i = 0; i < ndims; i++)
+        npts *= dims[i];
+
+    if (npts <= 0) return 0;
+
+    if (coordtype == DB_COLLINEAR)
     {
-        if (dims[i] > 0)
+        if (datatype == DB_DOUBLE)
         {
-            is_empty = 0;
-            break;
+            double *dmin_extents = (double *) min_extents;
+            double *dmax_extents = (double *) max_extents;
+            double const * const * _coord_arrays = (double const * const *) coord_arrays;
+            double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            for (i = 0; i < ndims; i++)
+                _CalcExtents(&dcoord_arrays[i], datatype, 1, dims[i], &dmin_extents[i], &dmax_extents[i],
+                    &dims[i], &min_index[i], &max_index[i]);
+        }
+        else
+        {
+            float *fmin_extents = (float *) min_extents;
+            float *fmax_extents = (float *) max_extents;
+            float const * const * _coord_arrays = (float const * const *) coord_arrays;
+            float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            for (i = 0; i < ndims; i++)
+                _CalcExtents(&fcoord_arrays[i], datatype, 1, dims[i], &fmin_extents[i], &fmax_extents[i],
+                    &dims[i], &min_index[i], &max_index[i]);
         }
     }
-
-    if (is_empty) return 0;
-
-    if (datatype == DB_FLOAT)
+    else
     {
-        fmin_extents = (float*)min_extents;
-        fmax_extents = (float*)max_extents;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            fmin_extents[i] = 0.;
-            fmax_extents[i] = 0.;
-        }
-    } else if (datatype == DB_DOUBLE)
-    {
-        dmin_extents = (double*)min_extents;
-        dmax_extents = (double*)max_extents;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            dmin_extents[i] = 0.;
-            dmax_extents[i] = 0.;
-        }
-    }
-
-    /* Read default coordinate variables. */
-    switch (ndims) {
-        case 3:
-            z = ((float**)coord_arrays)[2];
-            /* Fall through */
-        case 2:
-            y = ((float**)coord_arrays)[1];
-            /* Fall through */
-        case 1:
-            x = ((float**)coord_arrays)[0];
-            break;
-        default:
-            break;
-    }
-
-    if (datatype == DB_DOUBLE) {
-        dx = (double *)x;
-        dy = (double *)y;
-        dz = (double *)z;
-    }
-
-    /* Get mesh coordinate extents. */
-    switch (coordtype) {
-
-        case DB_COLLINEAR:
-
-            switch (ndims) {
-                case 3:
-                    if (datatype == DB_DOUBLE) {
-                        dmin_extents[2] = dz[min_index[2]];
-                        dmax_extents[2] = dz[max_index[2]];
-                    }
-                    else {
-                        fmin_extents[2] = z[min_index[2]];
-                        fmax_extents[2] = z[max_index[2]];
-                    }
-                case 2:
-                    if (datatype == DB_DOUBLE) {
-                        dmin_extents[1] = dy[min_index[1]];
-                        dmax_extents[1] = dy[max_index[1]];
-                    }
-                    else {
-                        fmin_extents[1] = y[min_index[1]];
-                        fmax_extents[1] = y[max_index[1]];
-                    }
-                case 1:
-                    if (datatype == DB_DOUBLE) {
-                        dmin_extents[0] = dx[min_index[0]];
-                        dmax_extents[0] = dx[max_index[0]];
-                    }
-                    else {
-                        fmin_extents[0] = x[min_index[0]];
-                        fmax_extents[0] = x[max_index[0]];
-                    }
-                    break;
-            }
-            break;
-
-        case DB_NONCOLLINEAR:
-
-            switch (ndims) {
-                case 3:
-                    if (datatype == DB_DOUBLE) {
-                        _DBSubsetMinMax3((float *)dx, datatype,
-                                         (float *)(&dmin_extents[0]),
-                                         (float *)(&dmax_extents[0]),
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3((float *)dy, datatype,
-                                         (float *)(&dmin_extents[1]),
-                                         (float *)(&dmax_extents[1]),
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3((float *)dz, datatype,
-                                         (float *)(&dmin_extents[2]),
-                                         (float *)(&dmax_extents[2]),
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                    }
-                    else {
-                        _DBSubsetMinMax3(x, datatype,
-                                         &fmin_extents[0], &fmax_extents[0],
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3(y, datatype,
-                                         &fmin_extents[1], &fmax_extents[1],
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3(z, datatype,
-                                         &fmin_extents[2], &fmax_extents[2],
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                    }
-                    break;
-                case 2:
-                    if (datatype == DB_DOUBLE) {
-                        _DBSubsetMinMax2((float *)dx, datatype,
-                                         (float *)(&dmin_extents[0]),
-                                         (float *)(&dmax_extents[0]),
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-                        _DBSubsetMinMax2((float *)dy, datatype,
-                                         (float *)(&dmin_extents[1]),
-                                         (float *)(&dmax_extents[1]),
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-                    }
-                    else {
-
-                        _DBSubsetMinMax2(x, datatype,
-                                         &fmin_extents[0], &fmax_extents[0],
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-
-                        _DBSubsetMinMax2(y, datatype,
-                                         &fmin_extents[1], &fmax_extents[1],
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-                    }
-                    break;
-                case 1:
-                    return db_perror("1-d noncollinear", E_NOTIMP, me);
-            }
-            break;
-
-        default:
-            return db_perror("default case", E_INTERNAL, me);
+        _CalcExtents(coord_arrays, datatype, ndims, npts, min_extents, max_extents,
+            dims, min_index, max_index);
     }
 
     return 0;
 }
 
-/*--------------------------------------------------------------------------
- *  Routine                                                  _DBSubsetMinMax2
- *
- *  Purpose
- *
- *      Return the min and max values of a subset of the given array.
- *
- *  Paramters
- *
- *      arr       =|  The array to evaluate
- *      datatype  =|  The type of data pointed to by 'arr'. (float or double)
- *      amin,amax  |= Returned min,max values
- *      nx,ny     =|  The dimensions of 'arr'
- *      ixmin...  =|  The actual 0-origin indeces to use for subselection
- *
- * Modified
- *    Robb Matzke, Wed Jan 11 06:46:23 PST 1995
- *    Changed name from SubsetMinMax2 since that conflicted with MeshTV.
- *
- *    Eric Brugger, Thu Mar 14 16:22:08 PST 1996
- *    I corrected a bug in the calculation of the minimum, where it
- *    got the initial minimum value by indexing into the coordinate
- *    arrays as 1d arrays instead of a 2d arrays.
- *
- *    Eric Brugger, Thu Sep 23 15:05:18 PDT 1999
- *    I removed the unused argument ny.
- *--------------------------------------------------------------------------*/
 INTERNAL int
-_DBSubsetMinMax2(void const *arr, int datatype, float *amin, float *amax, int nx,
-                 int ixmin, int ixmax, int iymin, int iymax)
+UM_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
+               void *min_extents, void *max_extents)
 {
-    int            k, j, index;
-    float          tmin, tmax;
-    double         dtmin, dtmax;
-    double        *darr = NULL, *damin = NULL, *damax = NULL;
-    float         *farr = NULL;
-
-    switch (datatype) {
-        case DB_FLOAT:
-
-            farr = (float *)arr;
-
-            index = INDEX (ixmin, iymin, nx);
-            tmin = farr[index];
-            tmax = farr[index];
-
-            for (j = iymin; j <= iymax; j++) {
-                for (k = ixmin; k <= ixmax; k++) {
-                    index = INDEX (k, j, nx);
-                    tmin = MIN (tmin, farr[index]);
-                    tmax = MAX (tmax, farr[index]);
-                }
-            }
-            *amin = tmin;
-            *amax = tmax;
-            break;
-
-        case DB_DOUBLE:
-
-            darr = (double *)arr;
-
-            index = INDEX (ixmin, iymin, nx);
-            dtmin = darr[index];
-            dtmax = darr[index];
-
-            for (j = iymin; j <= iymax; j++) {
-                for (k = ixmin; k <= ixmax; k++) {
-                    index = INDEX (k, j, nx);
-                    dtmin = MIN (dtmin, darr[index]);
-                    dtmax = MAX (dtmax, darr[index]);
-                }
-            }
-
-            damin = (double *)amin;
-            damax = (double *)amax;
-            *damin = dtmin;
-            *damax = dtmax;
-            break;
-
-        default:
-            break;
-    }
-    return 0;
+    return _CalcExtents(coord_arrays, datatype, ndims, npts, min_extents, max_extents,0,0,0);
 }
 
 /*----------------------------------------------------------------------
- * Routine                                               UM_CalcExtents
+ * Routine                                               CSGM_CalcExtents
  *
  * Purpose
  *
- *      Return the extents of the given ucd mesh.
+ *      Return the extents of the given csg mesh.
  *
- * Modifications:
- *      Sean Ahern, Wed Oct 21 10:55:21 PDT 1998
- *      Changed the function so that the min_extents and max_extents are 
- *      passed in as void* variables.
  *--------------------------------------------------------------------*/
 INTERNAL int
-UM_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int nnodes,
-               void *min_extents, void *max_extents)
+CSGM_CalcExtents(int datatype, int ndims, int nbounds,
+               const int *typeflags, const void *coeffs,
+               double *min_extents, double *max_extents)
 {
-    int            i, j;
-    double       **dcoord_arrays = NULL;
-    double        *dmin_extents = NULL, *dmax_extents = NULL;
-    float         *fmin_extents = NULL, *fmax_extents = NULL;
-    float        **fcoord_arrays = NULL;
-
-    if (nnodes <= 0) return 0;
-
-    if (datatype == DB_DOUBLE) {
-
-        dmin_extents = (double *)min_extents;
-        dmax_extents = (double *)max_extents;
-        dcoord_arrays = (double **)coord_arrays;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            dmin_extents[i] = dcoord_arrays[i][0];
-            dmax_extents[i] = dcoord_arrays[i][0];
-        }
-
-        for (i = 0; i < ndims; i++) {
-            for (j = 0; j < nnodes; j++) {
-                dmin_extents[i] = MIN(dmin_extents[i], dcoord_arrays[i][j]);
-                dmax_extents[i] = MAX(dmax_extents[i], dcoord_arrays[i][j]);
-            }
-        }
-
-    }
-    else {
-        fmin_extents = (float *)min_extents;
-        fmax_extents = (float *)max_extents;
-        fcoord_arrays = (float **)coord_arrays;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            fmin_extents[i] = fcoord_arrays[i][0];
-            fmax_extents[i] = fcoord_arrays[i][0];
-        }
-
-        for (i = 0; i < ndims; i++) {
-            for (j = 0; j < nnodes; j++) {
-                fmin_extents[i] = MIN(fmin_extents[i], fcoord_arrays[i][j]);
-                fmax_extents[i] = MAX(fmax_extents[i], fcoord_arrays[i][j]);
-            }
-        }
-
-    }
-
+    min_extents[0] = -DBL_MAX;
+    min_extents[1] = -DBL_MAX;
+    min_extents[2] = -DBL_MAX;
+    max_extents[0] = DBL_MAX;
+    max_extents[1] = DBL_MAX;
+    max_extents[2] = DBL_MAX;
     return 0;
 }
 
