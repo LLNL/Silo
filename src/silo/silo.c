@@ -11127,7 +11127,7 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
              void *min_extents, void *max_extents,
              int const *dims, int const *minidx, int const *maxidx)
 {
-    int i, j, first=0;
+    int i, j, first;
 
     if (npts <= 0) return 0;
 
@@ -11140,7 +11140,7 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
 
         for (i = 0; i < ndims; i++)
         {
-            for (j = 0; j < npts; j++)
+            for (j = 0, first = 1; j < npts; j++)
             {
                 if (include_point(j, ndims, dims, minidx, maxidx))
                 {
@@ -11158,7 +11158,6 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
                 }
             }
         }
-
     }
     else
     {
@@ -11169,7 +11168,7 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
 
         for (i = 0; i < ndims; i++)
         {
-            for (j = 0; j < npts; j++)
+            for (j = 0, first = 1; j < npts; j++)
             {
                 if (include_point(j, ndims, dims, minidx, maxidx))
                 {

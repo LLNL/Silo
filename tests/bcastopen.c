@@ -28,6 +28,7 @@ DBfile *DBOpenByBcast(char const *filename, int comm, int rank_of_root)
         hid_t fapl, fid;
         ssize_t read_len;
 
+#if 0
         /* Just open the file at the HDF5 level
            using default (sec2) and get file image from it */
         /* Could just use stat/open to read the whole file too? */
@@ -36,6 +37,7 @@ DBfile *DBOpenByBcast(char const *filename, int comm, int rank_of_root)
         file_buf = malloc((size_t)file_len);
         read_len = H5Fget_file_image(fid, file_buf, (size_t)file_len);
         H5Fclose(fid);
+#endif
 
 #ifdef HAVE_MPI
         /* bcast the size */
