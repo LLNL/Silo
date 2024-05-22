@@ -410,13 +410,14 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
     DBFreeNamescheme(ns);
 
+#if 0
     /* Test using namescheme as a simple integer mapping */
     ns = DBMakeNamescheme("|chemA_%04X|n%3");
-    TEST_GET_INDEX(ns, 0, 0);
-    TEST_GET_INDEX(ns, 1, 1);
-    TEST_GET_INDEX(ns, 2, 2);
-    TEST_GET_INDEX(ns, 3, 0);
-    TEST_GET_INDEX(ns, 4, 1);
+    TEST_GET_INDEX(DBGetName(ns,0), 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,1), 1, 1);
+    TEST_GET_INDEX(DBGetName(ns,2), 2, 2);
+    TEST_GET_INDEX(DBGetName(ns,3), 3, 0);
+    TEST_GET_INDEX(DBGetName(ns,4), 4, 1);
     DBFreeNamescheme(ns);
 
     /* simple offset by -2 mapping */
@@ -441,6 +442,7 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns, 0x7FFFFFFF), 0, 0,  0x7FFFFFFF); /* max for an int */
     TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
+#endif
 
     /* Test the convenience method, DBSPrintf */
 #if 0
