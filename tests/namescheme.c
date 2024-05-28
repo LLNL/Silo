@@ -81,15 +81,9 @@ else                                                                            
     }                                                                                                      \
 }
 
-#define TEST_GET_INDEX(NS,I,IND)                                                                           \
-if (!NS)                                                                                                   \
+#define TEST_GET_INDEX(STR,FLD,BASE,IND)                                                                   \
 {                                                                                                          \
-    fprintf(stderr, "Got NULL namescheme from DBMakeNamescheme at line %d\n", __LINE__);                   \
-    return 1;                                                                                              \
-}                                                                                                          \
-else                                                                                                       \
-{                                                                                                          \
-    if (DBGetIndex(NS, I) != IND)                                                                          \
+    if (DBGetIndex(STR,FLD,BASE) != IND)                                                                   \
     {                                                                                                      \
         fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",\
             __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,BASE));                                \
@@ -165,10 +159,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test embedded string value results */
-    ns = DBMakeNamescheme("@foo_%s@(n-5)?'master':'slave':");
-    TEST_GET_NAME(ns, 4, "foo_master");
-    TEST_GET_NAME(ns, 5, "foo_slave");
-    TEST_GET_NAME(ns, 6, "foo_master");
+    ns = DBMakeNamescheme("@foo_%s@(n-5)?'leader':'follower':");
+    TEST_GET_NAME(ns, 4, "foo_leader");
+    TEST_GET_NAME(ns, 5, "foo_follower");
+    TEST_GET_NAME(ns, 6, "foo_leader");
     DBFreeNamescheme(ns);
 
     /* Test array-based references to int valued arrays and whose
@@ -411,12 +405,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test using namescheme as a simple integer mapping */
-    ns = DBMakeNamescheme("|chemA_%04X|n%3");
-    TEST_GET_INDEX(ns, 0, 0);
-    TEST_GET_INDEX(ns, 1, 1);
-    TEST_GET_INDEX(ns, 2, 2);
-    TEST_GET_INDEX(ns, 3, 0);
-    TEST_GET_INDEX(ns, 4, 1);
+    ns = DBMakeNamescheme("|chemA_0x%04X|n");
+    TEST_GET_INDEX(DBGetName(ns,  1), 0, 0, 1);
+    TEST_GET_INDEX(DBGetName(ns, 50), 0, 0, 50);
+    TEST_GET_INDEX(DBGetName(ns, 37), 0, 0, 37);
     DBFreeNamescheme(ns);
 
     /* simple offset by -2 mapping */
@@ -443,12 +435,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test the convenience method, DBSPrintf */
-#if 0
     snprintf(teststr, sizeof(teststr), "%s, %s",
         DBSPrintf("block_%d,level_%04d", 505, 17),
-        DBSPrintf("side_%s_%cx%g", "master",'z',1.0/3));
-    TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
-#endif
+        DBSPrintf("side_%s_%cx%g", "leader",'z',1.0/3));
+    TEST_STR(teststr, "block_505,level_0017, side_leader_zx0.333333")
     
     /* Test case where fewer expressions that conversion specs */
     ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
