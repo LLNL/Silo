@@ -8762,18 +8762,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                                   H5T_NATIVE_INT);
                 memcpy(mem_value, file_value, H5Tget_size(atype));
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
-#if 0
                 DBAddIntNComponent(obj, name, nelmts, (int*)mem_value);
-#else
-                if (1==nelmts) {
-                    DBAddIntComponent(obj, name, *((int*)mem_value));
-                } else {
-                    for (j=0; (size_t)j<nelmts; j++) {
-                        sprintf(bigname, "%s%d", name, j+1);
-                        DBAddIntComponent(obj, bigname, ((int*)mem_value)[j]);
-                    }
-                }
-#endif
                 break;
 
             case H5T_FLOAT:
@@ -8783,35 +8772,11 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
                 if (4 == (int) H5Tget_size(member_type))
                 {
-#if 0
                     DBAddFltNComponent(obj, name, nelmts, (double*)mem_value);
-#else
-                    if (1==nelmts) {
-                        DBAddFltComponent(obj, name, *((double*)mem_value));
-                    } else {
-                        for (j=0; (size_t)j<nelmts; j++) {
-                            sprintf(bigname, "%s%d", name, j+1);
-                            DBAddFltComponent(obj, bigname,
-                                              ((double*)mem_value)[j]);
-                        }
-                    }
-#endif
                 }
                 else
                 {
-#if 0
                     DBAddDblNComponent(obj, name, nelmts, (double*)mem_value);
-#else
-                    if (1==nelmts) {
-                        DBAddDblComponent(obj, name, *((double*)mem_value));
-                    } else {
-                        for (j=0; (size_t)j<nelmts; j++) {
-                            sprintf(bigname, "%s%d", name, j+1);
-                            DBAddDblComponent(obj, bigname,
-                                              ((double*)mem_value)[j]);
-                        }
-                    }
-#endif
                 }
                 break;
 
