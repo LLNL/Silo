@@ -322,50 +322,40 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
                 continue;
             }
         }
-        string typestr = "";
         int ival = -1;
         switch (type)
         {
           case DB_INT:
-            typestr = "int";
             ival = *((int*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_SHORT:
-            typestr = "short";
             ival = *((short*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_LONG:
-            typestr = "long";
             ival = (int) *((long*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_LONG_LONG:
-            typestr = "long long";
             ival = (int) *((long long*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_FLOAT:
-            typestr = "float";
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble((double)*((float*)comp)));
             break;
           case DB_DOUBLE:
-            typestr = "double";
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble(*((double*)comp)));
             break;
           case DB_CHAR:
-            typestr = "char";
             if (*((char*)comp)== 0)
                 PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(""));
             else
                 PyDict_SetItemString(retval, compname.c_str(), PyString_FromString((char*)comp));
             break;
           case DB_NOTYPE:
-            typestr = "notype";
             break;
           default:
-            typestr = "var";
             string valStr = std::string(pdbname.c_str());
             if (pdbname.find("'<s>") == 0)
             {
