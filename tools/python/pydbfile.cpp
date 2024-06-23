@@ -383,9 +383,13 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
                 int len = pdbname.length();
                 valStr = string((const char*)(pdbname.c_str()),4,len-5);
             }
-            if (get_data_flag)
+            bool is_meta_data = false;
+            if ((compname == "align") || (compname == "baseindex") || (compname == "dims") ||
+                (compname == "dtime") || (compname == "max_extents") || (compname == "max_index") ||
+                (compname == "min_extents") || (compname == "min_index") || (compname == "time"))
+                is_meta_data = true;
+            if (get_data_flag || is_meta_data)
             {
-
                 PyObject *argTuple = PyTuple_New(2);
                 PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(valStr.c_str()));
                 PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
