@@ -357,7 +357,13 @@ typedef enum {
     DB_DOUBLE=20,
     DB_CHAR=21,
     DB_LONG_LONG=22,
-    DB_NOTYPE=25           /*unknown type */
+
+    /* mini-array types for things like dims[3] or min_extents[3] */
+    DB_INTA=23,
+    DB_FLOATA=24,
+    DB_DOUBLEA=25,
+
+    DB_NOTYPE=26           /*unknown type */
 } DBdatatype;
 
 /* Flags for DBCreate */
