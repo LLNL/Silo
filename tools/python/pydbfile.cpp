@@ -305,13 +305,13 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     PyDict_SetItemString(retval, "type", PyString_FromString(silo_obj->type));
     for (int i=0; i<silo_obj->ncomponents; i++)
     {
+        PyObject *tmpTuple;
         string compname = silo_obj->comp_names[i];
         string pdbname  = silo_obj->pdb_names[i];
         int type = DBGetComponentType(db, str, compname.c_str());
         void *comp = 0;
 
-        if (type == DB_INT || type == DB_SHORT || type == DB_LONG || type == DB_LONG_LONG ||
-            type == DB_FLOAT || type == DB_DOUBLE || type == DB_CHAR)
+        if (type != DB_NOTYPE)
         {
             comp  = DBGetComponent(db, str, compname.c_str());
             if (!comp)
@@ -329,6 +329,13 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             ival = *((int*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
+          case DB_INTA:
+            tmpTuple = PyTuple_New(3);
+            PyTuple_SET_ITEM(tmpTuple, 0, PyInt_FromLong((long)((int*)comp)[0]));
+            PyTuple_SET_ITEM(tmpTuple, 1, PyInt_FromLong((long)((int*)comp)[1]));
+            PyTuple_SET_ITEM(tmpTuple, 2, PyInt_FromLong((long)((int*)comp)[2]));
+            PyDict_SetItemString(retval, compname.c_str(), tmpTuple);
+            break;
           case DB_SHORT:
             ival = *((short*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
@@ -344,8 +351,22 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
           case DB_FLOAT:
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble((double)*((float*)comp)));
             break;
+          case DB_FLOATA:
+            tmpTuple = PyTuple_New(3);
+            PyTuple_SET_ITEM(tmpTuple, 0, PyFloat_FromDouble((double)((float*)comp)[0]));
+            PyTuple_SET_ITEM(tmpTuple, 1, PyFloat_FromDouble((double)((float*)comp)[1]));
+            PyTuple_SET_ITEM(tmpTuple, 2, PyFloat_FromDouble((double)((float*)comp)[2]));
+            PyDict_SetItemString(retval, compname.c_str(), tmpTuple);
+            break;
           case DB_DOUBLE:
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble(*((double*)comp)));
+            break;
+          case DB_DOUBLEA:
+            tmpTuple = PyTuple_New(3);
+            PyTuple_SET_ITEM(tmpTuple, 0, PyFloat_FromDouble((double)((double*)comp)[0]));
+            PyTuple_SET_ITEM(tmpTuple, 1, PyFloat_FromDouble((double)((double*)comp)[1]));
+            PyTuple_SET_ITEM(tmpTuple, 2, PyFloat_FromDouble((double)((double*)comp)[2]));
+            PyDict_SetItemString(retval, compname.c_str(), tmpTuple);
             break;
           case DB_CHAR:
             if (*((char*)comp)== 0)
