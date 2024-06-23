@@ -7097,10 +7097,10 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
                 UNWIND();
             }
 
+            for (i=0, mult=1; i<ndims; i++) mult *= dim[i];
+
             if (just_get_datatype == 0)
             {
-                for (i=0, mult=1; i<ndims; i++) mult *= dim[i];
-
                 /* Allocate the return value */
                 if (NULL==(retval=calloc(mult, db_GetMachDataSize(datatype)))) {
                     db_perror(compname, E_CALLFAIL, me);
@@ -7138,6 +7138,15 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
             else
             {
                 *just_get_datatype = datatype;
+                if (mult > 1)
+                {
+                    if (datatype == DB_INT)
+                        *just_get_datatype = DB_INTA;
+                    else if (datatype == DB_FLOAT)
+                        *just_get_datatype = DB_FLOATA;
+                    else if (datatype == DB_DOUBLE)
+                        *just_get_datatype = DB_DOUBLEA;
+                }
             }
         }
         
