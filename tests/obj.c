@@ -55,7 +55,7 @@ be used for advertising or product endorsement purposes.
 #include "silo.h"
 #include <math.h>
 #include <stdlib.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <string.h>
 #endif
 #include <std.c>
