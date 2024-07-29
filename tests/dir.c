@@ -51,7 +51,7 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #else
 #include <direct.h>
@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
     /* test attempt to DBCreate a file without clobbering it and
        for which the path is really a dir in the host filesystem */
     unlink("dir-test-foo");
-#ifndef WIN32
+#ifndef _WIN32
     mkdir("dir-test-foo", 0777);
 #else
     mkdir("dir-test-foo");
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
     unlink("dir-test-foo");
     if (dbfile2 != 0)
         exit(EXIT_FAILURE);
-#ifndef WIN32
+#ifndef _WIN32
     mkdir("dir-test-foo", 0777);
 #else
     mkdir("dir-test-foo");
