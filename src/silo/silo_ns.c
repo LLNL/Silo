@@ -609,41 +609,60 @@ DBGetName(DBnamescheme const *ns, long long natnum)
 }
 
 PUBLIC long long
-DBGetIndex(char const *dbns_name_str, int fieldSelector, int base)
+DBGetIndex(char const *dbns_name_str, int fieldSelector, int minFieldWidth, int base)
 {
     int currentField = 0;
     char const *currentPosition = dbns_name_str;
+    char const *lastPosition = currentPosition + strlen(dbns_name_str);
     char *endPtr;
-    long long value = LLONG_MAX;
 
-    while (*currentPosition != '\0')
+    /* Note: leading zeros, which are probably quite common in fields in
+       nameschemes will get treated automatically as octal (base 8) if base
+       is not explicitly specified by caller. */
+
+    while (currentPosition < lastPosition)
     {
-        /* x and X and b and B allow use of hexidecimal and binary numbers as in
-           0xDeadBeef and 0b101101 though the latter is non-converntional.
-           Note that leading zeros, which are probably quite common in fields in
-           nameschemes will get treated automatically as octal (base 8) if base
-           is not explicitly specified. */
-        if (isdigit(*currentPosition) || strchr("-+xXbB", *currentPosition))
+        long long mult = 1;
+        long long value;
+
+        /* skip forward over chars that cannot be part of a number */
+        if (!strchr("+-0123456789ABCDEFabcdefxX", *currentPosition))
         {
-            errno = 0;
-            /* Found a digit, attempt to convert it to an integer value */
-            value = strtoll(currentPosition, &endPtr, base);
-            if (errno == 0)
-            {
-                if (currentField == fieldSelector)
-                    return value;
-                currentPosition = endPtr; /* moved to end of whatever was parsed by strtol */
-                currentField++;
-            }
-            else
-                currentPosition++;
-        } else {
-            /* Skip non-digit characters */
+            currentPosition++;
+            continue;
+        }
+
+        /* walk over any sign if present */
+        if (*currentPosition == '-')
+        {
+            mult = -1;
             currentPosition++;
         }
+        else if (*currentPosition == '+')
+            currentPosition++;
+
+        /* Try to detect unconventional '0b' base-2 designator */
+        if (base == 0 && (!strncmp(currentPosition,"0b0",3) || !strncmp(currentPosition,"0b1",3)))
+        {
+            currentPosition += 2;
+            base = 2; /* explicitly set base to 2 */
+        }
+        
+        /* Attempt a conversion. A successful conversion implies its a field. */
+        errno = 0;
+        value = strtoll(currentPosition, &endPtr, base);
+        if (errno == 0 && endPtr >= currentPosition + minFieldWidth)
+        {
+            if (currentField == fieldSelector)
+                return mult * value;
+            currentPosition = endPtr;
+            currentField++;
+        }
+        else
+            currentPosition++;
     }
 
-    return value;
+    return LLONG_MAX;
 }
 
 PUBLIC char const *
