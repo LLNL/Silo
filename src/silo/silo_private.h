@@ -264,13 +264,15 @@ typedef struct context_t {
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
                         if (DBDebugAPI>0) {                                   \
-                           write (DBDebugAPI, M, strlen(M));                  \
-                           write (DBDebugAPI, "\n", 1);                       \
+                           size_t _nbyt;                                      \
+                           _nbyt = write (DBDebugAPI, M, strlen(M));          \
+                           _nbyt = write (DBDebugAPI, "\n", 1);               \
                         }                                                     \
                         if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
                            if (setjmp(SILO_Globals.Jstk->jbuf)) {             \
-                              while (SILO_Globals.Jstk) jstk_pop () ;         \
+                              size_t _nbyt;                                   \
+                              _nbyt = while (SILO_Globals.Jstk) jstk_pop () ; \
                               db_perror ("", db_errno, me) ;                  \
                               return R ;                                      \
                            }                                                  \
@@ -295,8 +297,9 @@ typedef struct context_t {
                             return R;                                         \
                         }                                                     \
                         if (DBDebugAPI>0) {                                   \
-                           write (DBDebugAPI, M, strlen(M));                  \
-                           write (DBDebugAPI, "\n", 1);                       \
+                           size_t _nbyt;                                      \
+                           _nbyt = write (DBDebugAPI, M, strlen(M));          \
+                           _nbyt = write (DBDebugAPI, "\n", 1);               \
                         }                                                     \
                         if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
