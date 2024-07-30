@@ -140,6 +140,10 @@ mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 testpdb_CPPFLAGS += -DPDB_LITE
 pdbtst_CPPFLAGS += -DPDB_LITE
 mk_nasf_pdb_CPPFLAGS += -DPDB_LITE
+BCASTOPEN =
+if HDF5_DRV_NEEDED
+  BCASTOPEN += bcastopen
+endif
 PDBTESTS = testpdb pdbtst
 JSONTESTS =
 if JSON_NEEDED
@@ -159,8 +163,8 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile dbversion namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      test_mat_compression bcastopen memfile_simple \
-      empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
+      test_mat_compression memfile_simple empty majorder realloc_obj_and_opts \
+      $(PDBTESTS) $(JSONTESTS) $(BCASTOPEN)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
@@ -254,8 +258,8 @@ check_PROGRAMS = \
  majorder \
  realloc_obj_and_opts \
  test_mat_compression \
- bcastopen \
  memfile_simple \
+ $(BCASTOPEN) \
  $(PDBTESTS) \
  $(JSONTESTS)
 
