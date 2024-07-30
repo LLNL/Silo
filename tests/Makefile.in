@@ -1248,7 +1248,8 @@ check_LTLIBRARIES = rocket_silo.la ioperf_silo.la ioperf_pdb.la \
 rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
 rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
+@HDF5_DRV_NEEDED_FALSE@EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
+@HDF5_DRV_NEEDED_TRUE@EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
 ioperf_LDFLAGS = -ldl
 ioperf_CXXFALGS = -rdynamic
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
