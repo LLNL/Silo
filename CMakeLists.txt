@@ -110,7 +110,7 @@ file(MAKE_DIRECTORY ${silo_build_include_dir})
 ###---------------------------------------------------------------------------
 
 option(SILO_ENABLE_SHARED  "Build silo shared library." ON)
-option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
+option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt6)" OFF)
 option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)

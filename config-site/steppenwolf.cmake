@@ -78,9 +78,9 @@ silo_option_default(VAR SILO_HDF5_SZIP_DIR VALUE ${TP_DIR}/szip/2.1.1/cmake)
 silo_option_default(VAR SILO_ZLIB_DIR VALUE ${TP_DIR}/zlib/1.2.13/cmake)
 
 ##
-# QT5 (must be the location of Qt5Config.cmake)
+# QT6 (must be the location of Qt6Config.cmake)
 ##
-#silo_option_default(VAR SILO_QT5_DIR VALUE ${TP_DIR}/Qt/5.14.2/lib/cmake/Qt5)
+silo_option_default(VAR SILO_QT6_DIR VALUE ${TP_DIR}/Qt/6.4.2/lib/cmake/Qt6)
 
 ##
 # python
@@ -88,7 +88,7 @@ silo_option_default(VAR SILO_ZLIB_DIR VALUE ${TP_DIR}/zlib/1.2.13/cmake)
 silo_option_default(VAR SILO_PYTHON_DIR VALUE ${TP_DIR}/python/3.9.18)
 
 # enable silex
-#silo_option_default(VAR SILO_ENABLE_SILEX VALUE ON TYPE BOOL)
+silo_option_default(VAR SILO_ENABLE_SILEX VALUE ON TYPE BOOL)
 
 # disable fortran
 silo_option_default(VAR SILO_ENABLE_FORTRAN VALUE OFF TYPE BOOL)
@@ -97,6 +97,6 @@ silo_option_default(VAR SILO_ENABLE_FORTRAN VALUE OFF TYPE BOOL)
 silo_option_default(VAR SILO_ENABLE_PYTHON_MODULE VALUE ON TYPE BOOL)
 
 # enable tests
-#silo_option_default(VAR SILO_ENABLE_TESTS VALUE ON TYPE BOOL)
+silo_option_default(VAR SILO_ENABLE_TESTS VALUE ON TYPE BOOL)
 
 
