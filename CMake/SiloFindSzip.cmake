@@ -75,7 +75,7 @@ if(SZIP_FOUND)
     set(HAVE_LIBSZ 1)
     if(WIN32)
         get_target_property(SZIP_DLL szip IMPORTED_LOCATION_RELEASE )
-        if(SILO_ENABLE_SILEX OR SILEX_ENABLE_BROWSER)
+        if(SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER)
             install(FILES ${SZIP_DLL} DESTINATION bin
                     PERMISSIONS OWNER_READ OWNER_WRITE
                                 GROUP_READ GROUP_WRITE
