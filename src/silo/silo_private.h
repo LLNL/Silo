@@ -271,8 +271,7 @@ typedef struct context_t {
                         if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
                            if (setjmp(SILO_Globals.Jstk->jbuf)) {             \
-                              size_t _nbyt;                                   \
-                              _nbyt = while (SILO_Globals.Jstk) jstk_pop () ; \
+                              while (SILO_Globals.Jstk) jstk_pop () ;         \
                               db_perror ("", db_errno, me) ;                  \
                               return R ;                                      \
                            }                                                  \
