@@ -16,6 +16,7 @@ jobs:
     - name: build
       run: |
         mkdir silo-main-build
+        ls
         cd silo-main-build
         ../Silo/configure --prefix=`pwd`/myinstall
         make -j 8 install
