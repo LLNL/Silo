@@ -61,7 +61,7 @@
 
 if(DEFINED SILO_ZLIB_DIR AND EXISTS ${SILO_ZLIB_DIR}/zlib-config.cmake)
     # this works for zlib with CMake
-    find_package(ZLIB PATHS ${SILO_ZLIB_DIR} CONFIG)
+    find_package(ZLIB PATHS ${SILO_ZLIB_DIR} CONFIG NO_DEFAULT_PATH)
 else()
     if(DEFINED SILO_ZLIB_DIR AND EXISTS ${SILO_ZLIB_DIR})
         # help CMake find the specified zlib
@@ -76,7 +76,7 @@ if(ZLIB_FOUND)
     set(HAVE_ZLIB_H 1)
     if(WIN32)
         get_target_property(ZLIB_DLL zlib IMPORTED_LOCATION_RELEASE)
-        if(SILO_ENABLE_SILEX OR SILEX_ENABLE_BROWSER)
+        if(SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER)
             install(FILES ${ZLIB_DLL} DESTINATION bin
                     PERMISSIONS OWNER_READ OWNER_WRITE
                                 GROUP_READ GROUP_WRITE
