@@ -68,7 +68,7 @@ static PyObject             *siloModule = 0;
 std::vector<PyMethodDef> SiloMethods;
 
 #if defined(_WIN32)
-# if defined(Silo_EXPORTS)
+# if defined(SiloPy_EXPORTS) || defined(Silo_EXPORTS)
 #  define SILOMODULE_API __declspec(dllexport)
 # else
 #  define SILOMODULE_API __declspec(dllimport)

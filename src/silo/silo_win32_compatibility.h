@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef _WIN32
 #ifndef SILO_WIN32_COMPATIBILITY
 #define SILO_WIN32_COMPATIBILITY
 #include <io.h>  /* Include Windows IO */
