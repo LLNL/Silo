@@ -1,0 +1,23 @@
+name: Basic
+
+on:
+  push:
+    branches: ["mcm86-30jul24-gh-actions-ci"]
+  pull_request:
+    branches: [ "main" ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: build
+      run: |
+        mkdir -f silo-main-build
+        cd silo-main-build
+        ../Silo/configure --prefix=`pwd`/myinstall
+        make -j 8 install
+        make -j 8 check
+        h5cc --show
