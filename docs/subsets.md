@@ -590,7 +590,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 * **C Signature:**
 
   ```
-  long long DBGetIndex(char const *dbns_name_str, int field, int base)
+  long long DBGetIndex(char const *dbns_name_str, int field, int min_width, int base)
   ```
 
 * **Fortran Signature:**
@@ -605,7 +605,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   :---|:---
   `dbns_name_str` | An arbitrary string but most commonly with one or more substring *fields* consisting entirely of digits (in an arbitrary base numbering system) representing different *fields* generated from various conversion specifiers in a namescheme.
   `field` | Of the various substrings of digits, numbered starting at zero from left to right in `dbns_name_str`, this argument selects which of the digit substrings is to be processed
-  `base` | The numeric base to use to interpret the digit substring field passed to [`strtoll()`](https://man7.org/linux/man-pages/man3/strtoll.3p.html). Passing 0 (to let `strtoll` automatically determine base) is ok but potentially risky.
+  `min_width` | Minimum field width. Any indices found but smaller than this field width will be ignored.
+  `base` | The numeric base to use to interpret the digit substring field passed to [`strtoll()`](https://man7.org/linux/man-pages/man3/strtoll.3p.html). The C language GNU extension using `0b` leading a binary number is supported. Passing 0 (to let `strtoll` automatically determine base) is supported but potentially risky.
   
 * **Returned value:**
 
@@ -615,16 +616,17 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 Nameschemes often generate names of the form `foo_0050.0210.silo`.
 Sometimes, it is useful to obtain the decimal values of the numbered fields in such a string.
-Calling `DBGetIndex("foo_0050.0210.silo", 0, 10)` will retrieve the first digit field, "0050", and convert it to a decimal number using a number base of 10.
-Calling `DBGetIndex("foo_0050.0210.silo", 1, 10)` will retrieve the second digit field, "0210", and convert it to a decimal number using a number base of 10.
+Calling `DBGetIndex("foo_0090.0210.silo", 0, 4, 10)` will retrieve the first digit field, "0090", and convert it to a decimal number of `90` using a number base of 10.
+Calling `DBGetIndex("foo_0050.0210.silo", 1, 4, 10)` will retrieve the second digit field, "0210", and convert it to a decimal number of `210` using a number base of 10.
 
-Passing a base of 0 is allowed but may also result in unintended outcomes.
-In the example string, `foo_0050.0210.silo`, calling `DBGetIndex("foo_0050.0210.silo", 0, 0)` will return 40, not 50.
-This is because a leading 0 is interpreted as an octal number.
+Passing a base of 0 is supported.
+This informs `DBGetIndex()`, like [`strtoll()`](https://man7.org/linux/man-pages/man3/strtoll.3p.html), to *infer* the base from the way the number is formatted in the string.
+However, this may also result in unintended outcomes.
+In the example string, `foo_0090.0210.silo`, calling `DBGetIndex("foo_0090.0210.silo", 0, 4, 0)` will fail because `0090` will be treated as a base-8 (octal) number and `9` is not a valid octal digit.
+Calling `DBGetIndex("foo_0090.0210.silo", 1, 4, 0)` will return `136` which is `210` (base 8).
 
 In the string `block_030x021.silo` (which could have the interpretation of a block at 2D index [30,21] in a 2D arrangement of blocks), the `0x021` will be interpreted as a digit field in hexadecimal format which may not have been the intention.
 The solution is to ensure the string has characters separating fields that are not also interpreted as part of an integer constant in the C programming language.
-
 
 {{ EndFunc }}
 
