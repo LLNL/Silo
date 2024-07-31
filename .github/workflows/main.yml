@@ -13,10 +13,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: build
+    - name: Install HDF5
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libhdf5-dev
+        apt-cache show libhdf5-dev
+        rehash
+        which h5cc
+        h5cc --help
+
+    - name: Build and Check Silo
       run: |
         mkdir build
-        ls
         cd build
         ../configure --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
         make -j 8 install
