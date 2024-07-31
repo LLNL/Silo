@@ -18,6 +18,6 @@ jobs:
         mkdir build
         ls
         cd build
-        ../configure --disable-fortran --prefix=`pwd`/myinstall
+        ../configure --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
         make -j 8 install
         make -j 8 check
