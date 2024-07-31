@@ -15,17 +15,14 @@ jobs:
     
     - name: Install HDF5
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libhdf5-dev
-        apt-cache show libhdf5-dev
-        rehash
-        which h5cc
-        h5cc --help
+        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.4/bin/unix/hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
+        mkdir hdf5-1.14.4-3
+        tar -xf hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz --strip-components=4 -C hdf5-1.14.4-3
 
     - name: Build and Check Silo
       run: |
         mkdir build
         cd build
-        ../configure --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
+        ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
         make -j 8 install
         make -j 8 check
