@@ -18,7 +18,7 @@ jobs:
         mkdir build
         ls
         cd build
-        ../configure --prefix=`pwd`/myinstall
+        ../configure --disable-fortran --prefix=`pwd`/myinstall
         make -j 8 install
         make -j 8 check
         h5cc --show
