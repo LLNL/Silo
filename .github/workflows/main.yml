@@ -12,12 +12,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Probe system
+      run: |
+        pwd
+        ls
     
     - name: Install HDF5
       run: |
         wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.4/bin/unix/hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
         mkdir hdf5-1.14.4-3
         tar -xf hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz --strip-components=4 -C hdf5-1.14.4-3
+        pwd
+        ls
 
     - name: Build and Check Silo
       run: |
