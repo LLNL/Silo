@@ -39,7 +39,4 @@ jobs:
         cat config.log
         make -j 8 install
         make -j 8 check
-        ./tests/dbversion
-        ./tests/onehex DB_HDF5
-        ldd ./tests/.libs/onehex
-        env LD_LIBRARY_PATH=`pwd`/../hdf5-1.14.4-3/lib ./tests/onehex DB_HDF5
+        cat ./tests/testsuite.dir/*/*.log
