@@ -13,11 +13,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Probe system
-      run: |
-        pwd
-        ls
-    
     - name: Install HDF5
       run: |
         wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.4/bin/unix/hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
@@ -32,15 +27,9 @@ jobs:
 
     - name: Build and Check Silo
       run: |
-        set +e
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
-        rehash
-        which h5stat
         mkdir build
         cd build
         env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
-        env PATH=`pwd`/../hdf5-1.14.4-3/bin:$PATH which h5stat
-        cat config.log
         make -j 8 install
         make -j 8 check
-        cat ./tests/testsuite.dir/*/*.log
