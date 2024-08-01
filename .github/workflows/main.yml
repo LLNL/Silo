@@ -28,6 +28,7 @@ jobs:
         pwd
         ls
         ls hdf5-1.14.4-3
+        ./hdf5-1.14.4-3/bin/h5ls --help
 
     - name: Build and Check Silo
       run: |
