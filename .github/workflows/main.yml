@@ -30,6 +30,6 @@ jobs:
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         mkdir build
         cd build
-        env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
+        env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
         make -j 8 install
         make -j 8 check
