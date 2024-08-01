@@ -39,3 +39,5 @@ jobs:
         cat config.log
         make -j 8 install
         make -j 8 check
+        ./tests/dbversion
+        ./tests/onehex DB_HDF5
