@@ -33,7 +33,7 @@ jobs:
     - name: Build and Check Silo
       run: |
         set +e
-        export PATH="$PWD/../hdf5-1.14.4-3/bin:$PATH"
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         rehash
         which h5stat
         mkdir build
