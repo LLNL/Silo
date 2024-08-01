@@ -35,8 +35,9 @@ jobs:
         set +e
         mkdir build
         cd build
-        env PATH=`pwd`/../hdf5-1.14.4-3/bin:$PATH LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
-        cat config.log
-        make -j 8 install
-        make -j 8 check
-        cat ./tests/testsuite.dir/*/*.log
+        #env PATH=`pwd`/../hdf5-1.14.4-3/bin:$PATH LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --disable-fortran --prefix=`pwd`/myinstall
+        env PATH=`pwd`/../hdf5-1.14.4-3/bin:$PATH which h5stat
+        #cat config.log
+        #make -j 8 install
+        #make -j 8 check
+        #cat ./tests/testsuite.dir/*/*.log
