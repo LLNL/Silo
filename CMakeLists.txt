@@ -297,11 +297,11 @@ check_symbol_exists(stat64 "sys/stat.h" HAVE_STAT64)
 check_symbol_exists(stat "sys/stat.h" HAVE_STAT)
 
 if (HAVE_STAT64)
-	add_definitions(-DHAVE_STAT64)
+    add_definitions(-DHAVE_STAT64)
 endif()
 
 if (HAVE_STAT)
-	add_definitions(-DHAVE_STAT)
+    add_definitions(-DHAVE_STAT)
 endif()
 
 ###-----------------------------------------------------------------------------

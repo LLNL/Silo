@@ -54,7 +54,6 @@ product endorsement purposes.
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
-#include <regex.h>
 #include <string.h>
 #include <silo_private.h>
 

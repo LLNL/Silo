@@ -59,8 +59,19 @@ project(SILO_TESTS)
 # Set the output dir for test executables
 ###-------------------------------------------------------------------------------------
 
-# runtime output dir is bin, so append bin to current binary dir
-set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)
+if(WIN32)
+    ##
+    # For windows, the standard output dir (${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>) causes
+    # problems with the script writing used when creating test-runners because the value
+    # of $<CONFIG> isn't known until build time.  Instead use a non-configuration location
+    # subdir directly off build-dir
+    ##
+    set(silo_test_output_dir ${Silo_BINARY_DIR}/all_tests/)
+    file(MAKE_DIRECTORY ${silo_test_output_dir})
+else()
+    # runtime output dir is bin, so append bin to current binary dir
+    set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin)
+endif()
 
 ###-------------------------------------------------------------------------------------
 # Copy dependencies needed for running tests.
@@ -88,10 +99,25 @@ if(WIN32)
              ${SZIP_DLL} ${silo_test_output_dir})
     endif()
 
+    # hdf5
     if(HDF5_FOUND AND DEFINED HDF5_DLL)
             add_custom_command(TARGET copy_test_deps POST_BUILD
                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
                  ${HDF5_DLL} ${silo_test_output_dir})
+    endif()
+
+    # python
+    if(SILO_ENABLE_PYTHON_MODULE)
+      if(PYTHON_DLL)
+            add_custom_command(TARGET copy_test_deps POST_BUILD
+                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                 ${PYTHON_DLL} ${silo_test_output_dir})
+      endif()
+      if(TARGET SiloPy)
+          add_custom_command(TARGET copy_test_deps POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                     $<TARGET_FILE:SiloPy> ${silo_test_output_dir})
+      endif()
     endif()
 
 endif()
