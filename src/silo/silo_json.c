@@ -239,9 +239,9 @@ json_object_new_strptr(void *p)
 {
     static char tmp[32];
     if (sizeof(p) == sizeof(unsigned))
-        snprintf(tmp, sizeof(tmp), "0x%016x", (unsigned) p);
+        snprintf(tmp, sizeof(tmp), "0x%016x", (unsigned) ((unsigned long long) p));
     else if (sizeof(p) == sizeof(unsigned long))
-        snprintf(tmp, sizeof(tmp), "0x%016lx", (unsigned long) p);
+        snprintf(tmp, sizeof(tmp), "0x%016lx", (unsigned long) ((unsigned long long) p));
     else if (sizeof(p) == sizeof(unsigned long long))
         snprintf(tmp, sizeof(tmp), "0x%016llx", (unsigned long long) p);
 
@@ -479,10 +479,11 @@ int
 json_object_to_binary_file(char const *filename, struct json_object *obj)
 {
     void *buf; int len; int fd;
+    size_t _nbyt;
 
     json_object_to_binary_buf(obj, 0, &buf, &len);
     fd = open(filename, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
-    write(fd, buf, len);
+    _nbyt = write(fd, buf, len);
     close(fd);
     free(buf);
     return 0;
@@ -1639,10 +1640,11 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
         else if (!strncmp(sobj->pdb_names[i], "'<s>", 4))
         {
             char tmp[256];
+            char *tmp_path;
             size_t len = strlen(sobj->pdb_names[i])-5;
             memset(tmp, 0, sizeof(tmp));
             strncpy(tmp, sobj->pdb_names[i]+4, len);
-            char *tmp_path = db_join_path(obj_dirname, tmp);
+            tmp_path = db_join_path(obj_dirname, tmp);
             if (DBInqVarExists(dbfile, tmp_path))
             {
                 if (DBInqVarType(dbfile, tmp_path) == DB_VARIABLE)
