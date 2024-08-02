@@ -484,10 +484,10 @@ db_taur_NewToc(DBfile *_dbfile)
                 toc->dir_names[i] = ALLOC_N(char, 12);
 
                 if (taurus->nstates < 100) {
-                    sprintf(toc->dir_names[i], "state%02d", i);
+                    snprintf(toc->dir_names[i], 12, "state%02d", i);
                 }
                 else {
-                    sprintf(toc->dir_names[i], "state%03d", i);
+                    snprintf(toc->dir_names[i], 12, "state%03d", i);
                 }
             }
             toc->ndir = taurus->nstates;
@@ -1455,9 +1455,9 @@ db_taur_InqMeshname(DBfile *_dbfile, char const *var_name, char *mesh_name)
              */
             if (strcmp(var_name, "mat1") == 0) {
                 if (taurus->nstates < 100)
-                    sprintf(mesh_name, "/state%02d/mesh1", taurus->state);
+                    snprintf(mesh_name, 14, "/state%02d/mesh1", taurus->state);
                 else
-                    sprintf(mesh_name, "/state%03d/mesh1", taurus->state);
+                    snprintf(mesh_name, 15, "/state%03d/mesh1", taurus->state);
                 return (0);
             }
         }
@@ -1480,10 +1480,10 @@ db_taur_InqMeshname(DBfile *_dbfile, char const *var_name, char *mesh_name)
 
             if (taur_var_list[i].idir == idir) {
                 if (taurus->nstates < 100)
-                    sprintf(mesh_name, "/state%02d/%s", taurus->state,
+                    snprintf(mesh_name, 256, "/state%02d/%s", taurus->state,
                             taur_var_list[i].mesh);
                 else
-                    sprintf(mesh_name, "/state%03d/%s", taurus->state,
+                    snprintf(mesh_name, 256, "/state%03d/%s", taurus->state,
                             taur_var_list[i].mesh);
                 return (0);
             }
@@ -1786,7 +1786,7 @@ db_taur_cd(TAURUSfile *taurus, char const *path)
     }
     else {
         db_taur_pwd(taurus, opath);
-        sprintf(npath, "%s/%s", opath, path);
+        snprintf(npath, 256, "%s/%s", opath, path);
     }
     reduce_path(npath);
 
@@ -1873,19 +1873,19 @@ db_taur_pwd(TAURUSfile *taurus, char *path)
     else {
         if (taurus->idir == -1) {
             if (taurus->nstates < 100) {
-                sprintf(path, "/state%02d", taurus->state);
+                snprintf(path, 7, "/state%02d", taurus->state);
             }
             else {
-                sprintf(path, "/state%03d", taurus->state);
+                snprintf(path, 8, "/state%03d", taurus->state);
             }
         }
         else {
             if (taurus->nstates < 100) {
-                sprintf(path, "/state%02d/%s", taurus->state,
+                snprintf(path, 256, "/state%02d/%s", taurus->state,
                         dir_names[taurus->idir]);
             }
             else {
-                sprintf(path, "/state%03d/%s", taurus->state,
+                snprintf(path, 256, "/state%03d/%s", taurus->state,
                         dir_names[taurus->idir]);
             }
         }

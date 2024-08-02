@@ -70,6 +70,7 @@ be used for advertising or product endorsement purposes.
 #ifdef HAVE_FNMATCH_H
 #  include <fnmatch.h>
 #endif
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -2333,9 +2334,9 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
     if (DBGetDir(file, cwd)<0) return NIL;
     if ('/'!=name[0]) {
         if (!strcmp(cwd, "/")) {
-            sprintf(fullname, "/%s", name);
+            snprintf(fullname, sizeof(fullname), "/%s", name);
         } else {
-            sprintf(fullname, "%s/%s", cwd, name);
+            snprintf(fullname, sizeof(fullname), "%s/%s", cwd, name);
         }
         name = fullname;
     }

@@ -1,0 +1,36 @@
+name: Basic
+
+on:
+  push:
+    branches: ["mcm86-30jul24-gh-actions-ci"]
+  pull_request:
+    branches: [ "main" ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install HDF5
+      run: |
+        wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.4/bin/unix/hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
+        mkdir hdf5-1.14.4-3
+        tar -xf hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
+        tar -xf hdf5/HDF5-1.14.4.3-Linux.tar.gz --strip-components=4 -C hdf5-1.14.4-3
+        rm -rf hdf5
+
+    - name: Build Silo
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        mkdir build
+        cd build
+        env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
+        make -j 8 install
+
+    - name: Check Silo
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        cd build
+        make -j 8 check
