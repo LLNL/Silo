@@ -1647,34 +1647,34 @@ H5FD_silo_close(H5FD_t *_file)
         hsize_t tot_raw_count, tot_raw_bytes, tot_md_count, tot_md_bytes;
         FILE* logf = fopen(file->log_name, "w");
         fprintf(logf, "======== Interactions between the VFD and the filesystem ========\n");
-        fprintf(logf, "block size = %llu\n", file->block_size);
+        fprintf(logf, "block size = %llu\n", (long long unsigned) file->block_size);
         fprintf(logf, "block count = %d\n", file->max_blocks);
         fprintf(logf, "\n");
-        fprintf(logf, "max block id = %llu\n", file->stats.max_block_id);
-        fprintf(logf, "max blocks in mem = %llu\n", file->stats.max_blocks_in_mem);
+        fprintf(logf, "max block id = %llu\n", (long long unsigned) file->stats.max_block_id);
+        fprintf(logf, "max blocks in mem = %llu\n", (long long unsigned) file->stats.max_blocks_in_mem);
         fprintf(logf, "\n");
-        fprintf(logf, "total seeks = %llu\n", file->stats.total_seeks);
+        fprintf(logf, "total seeks = %llu\n", (long long unsigned) file->stats.total_seeks);
         fprintf(logf, "\n");
-        fprintf(logf, "number of multi-block writes = %llu\n", file->stats.num_multiblock_writes);
-        fprintf(logf, "number of multi-block reads = %llu\n", file->stats.num_multiblock_reads);
+        fprintf(logf, "number of multi-block writes = %llu\n", (long long unsigned) file->stats.num_multiblock_writes);
+        fprintf(logf, "number of multi-block reads = %llu\n", (long long unsigned) file->stats.num_multiblock_reads);
         fprintf(logf, "\n");
-        fprintf(logf, "number of blocks majority md = %llu\n", file->stats.num_blocks_majority_md);
-        fprintf(logf, "number of blocks majority raw = %llu\n", file->stats.num_blocks_majority_raw);
+        fprintf(logf, "number of blocks majority md = %llu\n", (long long unsigned) file->stats.num_blocks_majority_md);
+        fprintf(logf, "number of blocks majority raw = %llu\n", (long long unsigned) file->stats.num_blocks_majority_raw);
         fprintf(logf, "\n");
-        fprintf(logf, "number of writes = %llu\n", file->stats.total_write_count);
-        fprintf(logf, "number of bytes written = %llu\n", file->stats.total_write_bytes);
+        fprintf(logf, "number of writes = %llu\n", (long long unsigned) file->stats.total_write_count);
+        fprintf(logf, "number of bytes written = %llu\n", (long long unsigned) file->stats.total_write_bytes);
         fprintf(logf, "\n");
-        fprintf(logf, "number of times a raw block was written = %llu\n", file->stats.total_block_raw_writes);
-        fprintf(logf, "number of times a raw block was written more than once = %llu\n", file->stats.total_block_raw_re_writes);
+        fprintf(logf, "number of times a raw block was written = %llu\n", (long long unsigned) file->stats.total_block_raw_writes);
+        fprintf(logf, "number of times a raw block was written more than once = %llu\n", (long long unsigned) file->stats.total_block_raw_re_writes);
         fprintf(logf, "\n");
-        fprintf(logf, "number of times an md block was written = %llu\n", file->stats.total_block_md_writes);
-        fprintf(logf, "number of times an md block was written more than once = %llu\n", file->stats.total_block_md_re_writes);
+        fprintf(logf, "number of times an md block was written = %llu\n", (long long unsigned) file->stats.total_block_md_writes);
+        fprintf(logf, "number of times an md block was written more than once = %llu\n", (long long unsigned) file->stats.total_block_md_re_writes);
         fprintf(logf, "\n");
-        fprintf(logf, "number of reads = %llu\n", file->stats.total_read_count);
-        fprintf(logf, "number of bytes read = %llu\n", file->stats.total_read_bytes);
+        fprintf(logf, "number of reads = %llu\n", (long long unsigned) file->stats.total_read_count);
+        fprintf(logf, "number of bytes read = %llu\n", (long long unsigned) file->stats.total_read_bytes);
         fprintf(logf, "\n");
-        fprintf(logf, "number of times a block was read = %llu\n", file->stats.total_block_reads);
-        fprintf(logf, "number of times a block was read more than once = %llu\n", file->stats.total_block_re_reads);
+        fprintf(logf, "number of times a block was read = %llu\n", (long long unsigned) file->stats.total_block_reads);
+        fprintf(logf, "number of times a block was read more than once = %llu\n", (long long unsigned) file->stats.total_block_re_reads);
         fprintf(logf, "\n");
         fprintf(logf, "number of hot blocks %d\n", file->stats.num_hot_blocks);
         fprintf(logf, "hot blocks...\n");
@@ -1682,7 +1682,7 @@ H5FD_silo_close(H5FD_t *_file)
         {
             silo_vfd_hot_block_stats_t *hb = &(file->stats.hot_block_list[i]); 
             fprintf(logf,"    %8llu: %4s (%f), #writes=%8llu, #reads=%8llu\n",
-                hb->id, (hb->raw_frac>0.5?"raw":"meta"), hb->raw_frac, hb->num_block_writes+1, hb->num_block_reads+1);
+                (long long unsigned) hb->id, (hb->raw_frac>0.5?"raw":"meta"), hb->raw_frac, (long long unsigned) hb->num_block_writes+1, (long long unsigned) hb->num_block_reads+1);
         }
         if (file->stats.hot_block_list) free(file->stats.hot_block_list);
         if (file->was_written_map.bitmap) free(file->was_written_map.bitmap);
@@ -1691,10 +1691,10 @@ H5FD_silo_close(H5FD_t *_file)
         fprintf(logf, "\n");
         fprintf(logf, "\n");
         fprintf(logf, "======== Interactions between HDF5 library and the VFD ========\n");
-        fprintf(logf, "number raw writes = %llu\n", file->stats.total_vfd_raw_write_count);
-        fprintf(logf, "number raw bytes written = %llu\n", file->stats.total_vfd_raw_write_bytes);
-        fprintf(logf, "number md writes = %llu\n", file->stats.total_vfd_md_write_count);
-        fprintf(logf, "number md bytes written = %llu\n", file->stats.total_vfd_md_write_bytes);
+        fprintf(logf, "number raw writes = %llu\n", (long long unsigned) file->stats.total_vfd_raw_write_count);
+        fprintf(logf, "number raw bytes written = %llu\n", (long long unsigned) file->stats.total_vfd_raw_write_bytes);
+        fprintf(logf, "number md writes = %llu\n", (long long unsigned) file->stats.total_vfd_md_write_count);
+        fprintf(logf, "number md bytes written = %llu\n", (long long unsigned) file->stats.total_vfd_md_write_bytes);
         fprintf(logf, "histogram...\n");
         cum_raw_count = 0;
         cum_raw_bytes = 0;
@@ -1730,16 +1730,16 @@ H5FD_silo_close(H5FD_t *_file)
 
             fprintf(logf,"%2d: %8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%) | "
                               "%8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%)\n", i,
-                file->stats.vfd_raw_write_count_hist[i],
+                (long long unsigned) file->stats.vfd_raw_write_count_hist[i],
                 (int) (100.0 * file->stats.vfd_raw_write_count_hist[i] / tot_raw_count),
                 (int) (100.0 * cum_raw_count / tot_raw_count),
-                file->stats.vfd_raw_write_bytes_hist[i],
+                (long long unsigned) file->stats.vfd_raw_write_bytes_hist[i],
                 (int) (100.0 * file->stats.vfd_raw_write_bytes_hist[i] / tot_raw_bytes),
                 (int) (100.0 * cum_raw_bytes / tot_raw_bytes),
-                file->stats.vfd_md_write_count_hist[i],
+                (long long unsigned) file->stats.vfd_md_write_count_hist[i],
                 (int) (100.0 * file->stats.vfd_md_write_count_hist[i] / tot_md_count),
                 (int) (100.0 * cum_md_count / tot_md_count),
-                file->stats.vfd_md_write_bytes_hist[i],
+                (long long unsigned) file->stats.vfd_md_write_bytes_hist[i],
                 (int) (100.0 * file->stats.vfd_md_write_bytes_hist[i] / tot_md_bytes),
                 (int) (100.0 * cum_md_bytes / tot_md_bytes));
         }
@@ -1777,16 +1777,16 @@ H5FD_silo_close(H5FD_t *_file)
 
             fprintf(logf,"%2d: %8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%) | "
                               "%8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%)\n", i,
-                file->stats.vfd_raw_read_count_hist[i],
+                (long long unsigned) file->stats.vfd_raw_read_count_hist[i],
                 (int) (100.0 * file->stats.vfd_raw_read_count_hist[i] / tot_raw_count),
                 (int) (100.0 * cum_raw_count / tot_raw_count),
-                file->stats.vfd_raw_read_bytes_hist[i],
+                (long long unsigned) file->stats.vfd_raw_read_bytes_hist[i],
                 (int) (100.0 * file->stats.vfd_raw_read_bytes_hist[i] / tot_raw_bytes),
                 (int) (100.0 * cum_raw_bytes / tot_raw_bytes),
-                file->stats.vfd_md_read_count_hist[i],
+                (long long unsigned) file->stats.vfd_md_read_count_hist[i],
                 (int) (100.0 * file->stats.vfd_md_read_count_hist[i] / tot_md_count),
                 (int) (100.0 * cum_md_count / tot_md_count),
-                file->stats.vfd_md_read_bytes_hist[i],
+                (long long unsigned) file->stats.vfd_md_read_bytes_hist[i],
                 (int) (100.0 * file->stats.vfd_md_read_bytes_hist[i] / tot_md_bytes),
                 (int) (100.0 * cum_md_bytes / tot_md_bytes));
         }

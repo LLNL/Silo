@@ -4026,7 +4026,7 @@ static int run_test(PFTest test, int n, char *host, int native)
 #else
     PRINT(STDOUT,
           "\t\t     %3d    %8lld  %8lld   %7lld     %.2g\n",
-          n, bytaa, bytfa, bytaa - bytfa, time);
+          n, (long long) bytaa, (long long) bytfa, (long long) bytaa - bytfa, time);
 #endif
 
     return(fail);}
