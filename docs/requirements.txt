@@ -47,7 +47,7 @@ pytz==2023.3.post1
     # via babel
 pyyaml==6.0.1
     # via myst-parser
-requests==2.31.0
+requests==2.32.2
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
