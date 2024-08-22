@@ -115,6 +115,9 @@ static PyObject *DBfile_DBGetToc(PyObject *self, PyObject *args)
 //    construct is used for *both* string valued members and variable
 //    members whose value is also a string but is the name of another dataset
 //    in the file.
+//
+//    Mark C. Miller, Thu Aug 22 00:34:52 PDT 2024
+//    Skip possible empty first and last strings in a string list.
 // ****************************************************************************
 static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
 {
@@ -199,13 +202,19 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
                 char **strArr = DBStringListToStringArray((char*)var, &narr, 0);
                 if (narr > 0 && strArr)
                 {
-                    tmp = PyTuple_New(narr);
+                    PyObject *tmp2 = PyList_New(0);
                     for (int i = 0; i < narr; i++)
                     {
-                        PyTuple_SET_ITEM(tmp, i, PyString_FromString(strArr[i]));
+                        if (i == 0 && strArr[i] && strArr[i][0] == '\0')
+                            continue; // skip an empty first entry
+                        if (i == (narr-1) && strArr[i] && strArr[i][0] == '\0')
+                            continue; // skip an empty last entry
+                        PyList_Append(tmp2, PyString_FromString(strArr[i]));
                         FREE(strArr[i]);
                     }
                     FREE(strArr);
+                    tmp = PyList_AsTuple(tmp2);
+                    Py_DECREF(tmp2);
                 }
                 else
                 {
