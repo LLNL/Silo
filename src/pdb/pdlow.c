@@ -513,6 +513,7 @@ _lite_PD_rd_chrt (PDBfile *file) {
     */
    chrt_sz     = file->symtaddr - file->chrtaddr + 1;
    _lite_PD_tbuffer = MAKE_N(char, chrt_sz);
+   if (chrt_sz <= 0) return(FALSE);
    if (io_read(_lite_PD_tbuffer, 1, chrt_sz, fp) != chrt_sz) return(FALSE);
    _lite_PD_tbuffer[chrt_sz-1] = (char) EOF;
 
