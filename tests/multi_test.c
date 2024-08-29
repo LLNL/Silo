@@ -3392,6 +3392,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     FREE(mix_next);
     FREE(mix_mat);
     FREE(mix_zone);
+    FREE(mix_zone2);
+    FREE(mix_zone_map);
     FREE(matlist2);
     FREE(ghost);
 

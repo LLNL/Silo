@@ -296,6 +296,7 @@ main(int argc, char *argv[])
         /*ASSERT(DBWrite(dbfile,"empty_writeb",0,    0,ZZ,DB_FLOAT),retval<0,retval==0);*/
     }
 
+    DBFreeOptlist(ol);
     DBClose(dbfile);
     dbfile = 0;
 
