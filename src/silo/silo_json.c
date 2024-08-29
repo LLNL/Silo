@@ -109,9 +109,11 @@ static void json_object_set_deleter(json_object *jso,
 void
 json_object_extptr_delete(struct json_object *jso)
 {
-    void *extptr = json_object_get_extptr_ptr(jso);
+    void *extptr = json_object_get_strptr(jso);
     if (extptr) free(extptr);
-    json_object_put(jso);
+    free(jso->o.c_string.str);
+    printbuf_free(jso->_pb);
+    free(jso);
 }
 
 static int
@@ -238,6 +240,8 @@ struct json_object *
 json_object_new_strptr(void *p)
 {
     static char tmp[32];
+    struct json_object *retval;
+
     if (sizeof(p) == sizeof(unsigned))
         snprintf(tmp, sizeof(tmp), "0x%016x", (unsigned) ((unsigned long long) p));
     else if (sizeof(p) == sizeof(unsigned long))
@@ -245,7 +249,9 @@ json_object_new_strptr(void *p)
     else if (sizeof(p) == sizeof(unsigned long long))
         snprintf(tmp, sizeof(tmp), "0x%016llx", (unsigned long long) p);
 
-    return json_object_new_string(tmp);
+    retval = json_object_new_string(tmp);
+    json_object_set_deleter(retval, json_object_extptr_delete);
+    return retval;
 }
 
 void *
@@ -265,17 +271,17 @@ json_object_new_extptr(void *p, int ndims, int const *dims, int datatype)
     int i;
     struct json_object *jobj = json_object_new_object();
     struct json_object *jarr = json_object_new_array();
+    struct json_object *jptr = json_object_new_strptr(p);
 
     json_object_set_serializer(jobj, json_object_extptr_to_json_string, 0, 0);
-    json_object_set_deleter(jobj, json_object_extptr_delete); 
 
     for (i = 0; i < ndims; i++)
         json_object_array_add(jarr, json_object_new_int(dims[i]));
 
-    json_object_object_add(jobj, "ptr", json_object_new_strptr(p));
     json_object_object_add(jobj, "datatype", json_object_new_int(datatype));
     json_object_object_add(jobj, "ndims", json_object_new_int(ndims));
     json_object_object_add(jobj, "dims", jarr);
+    json_object_object_add(jobj, "ptr", jptr);
 
     return jobj;
 }
@@ -412,8 +418,7 @@ json_object_from_binary_buf_recurse(struct json_object *jso, void *buf)
                 p = malloc(nvals*db_GetMachDataSize(datatype));
                 memcpy(p, buf+offset, nvals*db_GetMachDataSize(datatype));
                 json_object_object_del(iter.val,"ptr");
-                snprintf(strptr, sizeof(strptr), "%p", p);
-                json_object_object_add(iter.val, "ptr", json_object_new_string(strptr));
+                json_object_object_add(iter.val, "ptr", json_object_new_strptr(p));
             }
             else
             {
@@ -608,6 +613,7 @@ json_object_reconstitute_extptrs(struct json_object *obj)
             json_object_object_add(pobj, mname,
                 json_object_new_extptr(pdata, ndims, dims, datatype));
 
+            free(dims);
             free(mname);
         }
     }
@@ -1770,8 +1776,6 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
                 break;
             }
 
-/* warning STRDUPS ARE LEAKS */
-
             case json_type_object: /* must be extptr array reference */
             {
                 if (json_object_object_get_ex(mobj, "ptr", 0) &&
@@ -1783,12 +1787,13 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
                     long dims[32];
                     void *p = json_object_get_strptr(json_object_object_get(mobj, "ptr"));
                     int datatype = json_object_get_int(json_object_object_get(mobj, "datatype"));
+                    char *dtstr = db_GetDatatypeString(datatype);
                     int ndims = json_object_get_int(json_object_object_get(mobj, "ndims"));
                     struct json_object *darr = json_object_object_get(mobj, "dims");
                     for (i = 0; i < ndims; i++)
                         dims[i] = (long) json_object_get_int(json_object_array_get_idx(darr, i));
-                    DBWriteComponent(dbfile, sobj, mname, strdup(objnm),
-                        db_GetDatatypeString(datatype), p, ndims, dims);
+                    DBWriteComponent(dbfile, sobj, mname, objnm, dtstr, p, ndims, dims);
+                    free(dtstr);
                 }
                 else
                 {
@@ -1800,9 +1805,9 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
                     snprintf(tmp, sizeof(tmp), "anon_%d", cnt);
 
                     if (has_silo_name && has_silo_type)
-                        DBAddStrComponent(sobj, mname, strdup(json_object_get_string(silo_name_subobj)));
+                        DBAddStrComponent(sobj, mname, json_object_get_string(silo_name_subobj));
                     else
-                        DBAddStrComponent(sobj, mname, strdup(tmp));
+                        DBAddStrComponent(sobj, mname, tmp);
                     DBWriteJsonObject(dbfile, mobj);
                 }
 
