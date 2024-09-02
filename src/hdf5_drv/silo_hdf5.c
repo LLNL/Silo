@@ -1811,7 +1811,7 @@ db_hdf5_cwg(DBfile *_dbfile)
              *dscount = m.MEMCNT;                                \
         *dsnames = (char **) calloc(*dscount, sizeof(char**));   \
         for (i = 0; i < *dscount; i++)                           \
-            (*dsnames)[i] = strdup(m.MEMNAME[i]);                \
+            (*dsnames)[i] = strdup(m.MEMNAME);                   \
         break;                                                   \
     }
 
@@ -1859,15 +1859,15 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
 
         switch(_objtype)
         {
-            DB_OBJ_CASE(DB_QUADVAR, DBquadvar_mt, nvals, value)
-            /*DB_OBJ_CASE(DB_QUAD_RECT, DBquadmesh_mt, nspace, coord) wont work for rect case */
-            DB_OBJ_CASE(DB_QUAD_CURV, DBquadmesh_mt, nspace, coord)
-            DB_OBJ_CASE(DB_QUADMESH, DBquadmesh_mt, nspace, coord)
-            DB_OBJ_CASE(DB_UCDVAR, DBucdvar_mt, nvals, value)
-            DB_OBJ_CASE(DB_UCDMESH, DBucdmesh_mt, ndims, coord)
-            DB_OBJ_CASE(DB_POINTVAR, DBpointvar_mt, nvals, data)
-            DB_OBJ_CASE(DB_POINTMESH, DBpointmesh_mt, ndims, coord)
-            DB_OBJ_CASE(DB_CSGVAR, DBcsgvar_mt, nvals, vals)
+            DB_OBJ_CASE(DB_QUADVAR, DBquadvar_mt, nvals, value[i])
+            /*DB_OBJ_CASE(DB_QUAD_RECT, DBquadmesh_mt, nspace, coord[i]) wont work for rect case */
+            DB_OBJ_CASE(DB_QUAD_CURV, DBquadmesh_mt, nspace, coord[i])
+            DB_OBJ_CASE(DB_QUADMESH, DBquadmesh_mt, nspace, coord[i])
+            DB_OBJ_CASE(DB_UCDVAR, DBucdvar_mt, nvals, value[i])
+            DB_OBJ_CASE(DB_UCDMESH, DBucdmesh_mt, ndims, coord[i])
+            DB_OBJ_CASE(DB_POINTVAR, DBpointvar_mt, nvals, data[i])
+            DB_OBJ_CASE(DB_POINTMESH, DBpointmesh_mt, ndims, coord[i])
+            DB_OBJ_CASE(DB_CSGVAR, DBcsgvar_mt, nvals, vals[i])
             DB_OBJ_CASE(DB_CURVE, DBcurve_mt, npts?1:1, yvarname)
         }
         H5Tclose(o);
