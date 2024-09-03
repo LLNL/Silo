@@ -441,6 +441,13 @@
       integer, parameter :: DB_ZONETYPE_PYRAMID = 35
       integer, parameter :: DB_ZONETYPE_PRISM = 36
       integer, parameter :: DB_ZONETYPE_HEX = 38
+      integer, parameter :: DB_ZONETYPE_QUAD_BEAM = 11
+      integer, parameter :: DB_ZONETYPE_QUAD_TRIANGLE = 25
+      integer, parameter :: DB_ZONETYPE_QUAD_QUAD = 26
+      integer, parameter :: DB_ZONETYPE_QUAD_TET = 118
+      integer, parameter :: DB_ZONETYPE_QUAD_PYRAMID = 120
+      integer, parameter :: DB_ZONETYPE_QUAD_PRISM = 113
+      integer, parameter :: DB_ZONETYPE_QUAD_HEX = 116
       integer, parameter :: DB_MAX_H5_OBJ_VALS = 64
       character (len=10), parameter :: DB_F77NULLSTRING = "NULLSTRING"
 

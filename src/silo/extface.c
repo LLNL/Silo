@@ -307,6 +307,7 @@ CalcExternalFaces(int *zoneList, int nNodes, int lowOffset, int highOffset,
     {
         switch (shapeType[i])
         {
+            case DB_ZONETYPE_QUAD_TET:
             case DB_ZONETYPE_TET:
                 for (j = 0; j < shapeCnt[i]; j++)
                 {
@@ -330,6 +331,7 @@ CalcExternalFaces(int *zoneList, int nNodes, int lowOffset, int highOffset,
                     iZoneList += 4;
                 }
                 break;
+            case DB_ZONETYPE_QUAD_PYRAMID:
             case DB_ZONETYPE_PYRAMID:
                 for (j = 0; j < shapeCnt[i]; j++)
                 {
@@ -358,6 +360,7 @@ CalcExternalFaces(int *zoneList, int nNodes, int lowOffset, int highOffset,
                     iZoneList += 5;
                 }
                 break;
+            case DB_ZONETYPE_QUAD_PRISM:
             case DB_ZONETYPE_PRISM:
                 for (j = 0; j < shapeCnt[i]; j++)
                 {
@@ -388,6 +391,7 @@ CalcExternalFaces(int *zoneList, int nNodes, int lowOffset, int highOffset,
                     iZoneList += 6;
                 }
                 break;
+            case DB_ZONETYPE_QUAD_HEX:
             case DB_ZONETYPE_HEX:
                 for (j = 0; j < shapeCnt[i]; j++)
                 {
@@ -435,6 +439,30 @@ CalcExternalFaces(int *zoneList, int nNodes, int lowOffset, int highOffset,
                         InsertFace(&st, &zoneList[iZoneList], nEdges, iZone);
                         iZoneList += nEdges;
                     }
+                    iZone++;
+                }
+                break;
+            case DB_ZONETYPE_QUAD_BEAM:
+                for (j = 0; j < shapeCnt[i]; j++)
+                {
+                    InsertFace(&st, &zoneList[iZoneList], 2, iZone);
+                    iZoneList += shapeSize[i];
+                    iZone++;
+                }
+                break;
+            case DB_ZONETYPE_QUAD_TRIANGLE:
+                for (j = 0; j < shapeCnt[i]; j++)
+                {
+                    InsertFace(&st, &zoneList[iZoneList], 3, iZone);
+                    iZoneList += shapeSize[i];
+                    iZone++;
+                }
+                break;
+            case DB_ZONETYPE_QUAD_QUAD:
+                for (j = 0; j < shapeCnt[i]; j++)
+                {
+                    InsertFace(&st, &zoneList[iZoneList], 4, iZone);
+                    iZoneList += shapeSize[i];
                     iZone++;
                 }
                 break;
