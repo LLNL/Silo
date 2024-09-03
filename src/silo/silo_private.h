@@ -904,10 +904,6 @@ INTERNAL int _DBQMCalcExtents (DBVCP2_t, int, int const *, int const *, int cons
                                    int, void *, void *);
 INTERNAL int UM_CalcExtents (DBVCP2_t, int, int, int, void *,
                                  void *);
-INTERNAL int _DBSubsetMinMax2 (DBVCP1_t, int, float *, float *, int,
-                                   int, int, int, int);
-INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
-                               int, int, int, int, int, int);
 INTERNAL int db_ProcessOptlist (int, DBoptlist const * const);
 INTERNAL int db_VariableNameValid(char const *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);
