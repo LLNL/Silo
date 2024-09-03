@@ -96,8 +96,9 @@ include_HEADERS = \
  ioperf.h
 
 # Note: use top entry in check_SCRIPTS as sole target to
-# copy all scripts and data in one rule
+# copy all scripts in one rule
 check_SCRIPTS= \
+ cp_scripts \
  checksums \
  testhzip \
  testxvers \
@@ -109,7 +110,10 @@ check_SCRIPTS= \
  testsilock \
  testdtypes
 
+# Note: use top entry in check_DATA as sole target to
+# copy all data in one rule
 check_DATA= \
+ cp_data \
  xvers_data.tar.xz \
  pion0244.silo \
  zeros.dat
@@ -468,11 +472,20 @@ resample.lo: resample.c
 
 tests: $(PROGS)
 
-# Single rule to capture anything put into check_DATA or check_SCRIPTS
+# Single rule to capture anything put into check_DATA
 # this assumes the only action necessary to create is a copy
-checksums: copy_cksd
-copy_cksd:
-	@for f in $(check_SCRIPTS) $(check_DATA); do \
+cp_data:
+	@for f in $(check_DATA); do \
+	    if test ! -e $$f ; then \
+	        cp $(srcdir)/$$f . ;\
+	    fi ;\
+	done
+	touch $@
+
+# Single rule to capture anything put into check_SCRIPTS
+# this assumes the only action necessary to create is a copy
+cp_scripts:
+	@for f in $(check_SCRIPTS); do \
 	    if test ! -e $$f ; then \
 	        cp $(srcdir)/$$f . ;\
 	    fi ;\

@@ -82,13 +82,15 @@ else                                                                            
     }                                                                                                      \
 }
 
-/* Uses a hard-coded min field width of 3 */
-#define TEST_GET_INDEX(STR, FLD, BASE, EXP)                                                                \
-if (DBGetIndex(STR, FLD, 3, BASE) != (long long) EXP)                                                      \
+#define TEST_GET_INDEX(STR,FLD,BASE,IND)                                                                   \
 {                                                                                                          \
-    fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",    \
-        __LINE__, FLD, STR, (long long) EXP, DBGetIndex(STR,FLD,3,BASE));                                  \
-    return 1;                                                                                              \
+    if (DBGetIndex(STR,FLD,BASE) != IND)                                                                   \
+    {                                                                                                      \
+        fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",\
+            __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,BASE));                                \
+        return 1;                                                                                          \
+    }                                                                                                      \
+
 }
 
 #define TEST_STR(A,B)                                                                                      \
@@ -159,10 +161,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test embedded string value results */
-    ns = DBMakeNamescheme("@foo_%s@(n-5)?'master':'slave':");
-    TEST_GET_NAME(ns, 4, "foo_master");
-    TEST_GET_NAME(ns, 5, "foo_slave");
-    TEST_GET_NAME(ns, 6, "foo_master");
+    ns = DBMakeNamescheme("@foo_%s@(n-5)?'leader':'follower':");
+    TEST_GET_NAME(ns, 4, "foo_leader");
+    TEST_GET_NAME(ns, 5, "foo_follower");
+    TEST_GET_NAME(ns, 6, "foo_leader");
     DBFreeNamescheme(ns);
 
     /* Test array-based references to int valued arrays and whose
@@ -404,14 +406,12 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
     DBFreeNamescheme(ns);
 
-#if 0
     /* Test using namescheme as a simple integer mapping */
-    ns = DBMakeNamescheme("|chemA_%04X|n%3");
-    TEST_GET_INDEX(DBGetName(ns, 0), 0, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns, 1), 0, 0, 1);
-    TEST_GET_INDEX(DBGetName(ns, 2), 0, 0, 2);
-    TEST_GET_INDEX(DBGetName(ns, 3), 0, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns, 4), 0, 0, 1);
+    ns = DBMakeNamescheme("|chemA_0x%04X|n");
+    TEST_GET_INDEX(DBGetName(ns,  1), 0, 0, 1);
+    TEST_GET_INDEX(DBGetName(ns, 50), 0, 0, 50);
+    TEST_GET_INDEX(DBGetName(ns, 37), 0, 0, 37);
+
     DBFreeNamescheme(ns);
 
     /* simple offset by -2 mapping */
@@ -436,7 +436,6 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns, 0x7FFFFFFF), 0, 0,  0x7FFFFFFF); /* max for an int */
     TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
-#endif
 
     /* Test inferring base 2 (binary, leading '0b') */
     TEST_GET_INDEX("block_0b0101", 0, 0, 5);
@@ -460,10 +459,10 @@ int main(int argc, char **argv)
     /* Test the convenience method, DBSPrintf */
     snprintf(teststr, sizeof(teststr), "%s, %s",
         DBSPrintf("block_%d,level_%04d", 505, 17),
-        DBSPrintf("side_%s_%cx%g", "master",'z',1.0/3));
-    TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
-    
-    /* Test case where fewer expressions that conversion specs */
+        DBSPrintf("side_%s_%cx%g", "leader",'z',1.0/3));
+    TEST_STR(teststr, "block_505,level_0017, side_leader_zx0.333333")
+
+    /* Test case where fewer expressions than conversion specs */
     ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
     if (ns) return 1;
 
