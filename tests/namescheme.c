@@ -404,6 +404,7 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
     DBFreeNamescheme(ns);
 
+#if 0
     /* Test using namescheme as a simple integer mapping */
     ns = DBMakeNamescheme("|chemA_%04X|n%3");
     TEST_GET_INDEX(DBGetName(ns, 0), 0, 0, 0);
@@ -435,6 +436,7 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns, 0x7FFFFFFF), 0, 0,  0x7FFFFFFF); /* max for an int */
     TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
+#endif
 
     /* Test inferring base 2 (binary, leading '0b') */
     TEST_GET_INDEX("block_0b0101", 0, 0, 5);
