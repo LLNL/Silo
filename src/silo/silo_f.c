@@ -3871,6 +3871,7 @@ DBGETCURVE_FC (int *dbid, FCD_DB _name, int *lname, int *maxpts, void *xvals,
       memcpy (xvals, cu->x, total_size) ;
       memcpy (yvals, cu->y, total_size) ;
       DBFreeCurve (cu) ;
+      if (name) free(name);
    } API_END ;
    return 0 ;
 }
