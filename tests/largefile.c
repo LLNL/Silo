@@ -54,14 +54,14 @@ be used for advertising or product endorsement purposes.
 
 #include "silo.h"               /*include public silo           */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdlib.h>
 #endif
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 

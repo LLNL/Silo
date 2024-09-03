@@ -58,15 +58,33 @@
 ###
 
 
-if(DEFINED SILO_PYTHON_DIR)
+if(SILO_PYTHON_DIR)
     # help CMake find the specified python
-    set(Python_ROOT ${SILO_PYTHON_DIR})
+    set(Python_ROOT_DIR ${SILO_PYTHON_DIR})
+
+    # prefer python3
+    if(EXISTS ${SILO_PYTHON_DIR}/bin/python3)
+        set(Python_EXECUTABLE ${SILO_PYTHON_DIR}/bin/python3)
+    elseif(EXISTS ${SILO_PYTHON_DIR}/bin/python)
+        set(Python_EXECUTABLE ${SILO_PYTHON_DIR}/bin/python)
+    endif()
 endif()
 
 find_package(Python COMPONENTS Interpreter Development)
 
 if(Python_FOUND)
+    # Need to ensure these vars are available by testing, so make
+    # them live in PARENT_SCOPE.
+    set(Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
+    if(WIN32)
+        if(TARGET Python::Module)
+            get_target_property(PYTHON_DLL Python::Module IMPORTED_LOCATION)
+            if(PYTHON_DLL)
+                set(PYTHON_DLL ${PYTHON_DLL} PARENT_SCOPE)
+            endif()
+        endif()
+    endif()
 else()
-    message(FATAL_ERROR "An explicit request for Silo's python module was made but python could not be found. You may want to try setting SILO_PYTHON_DIR")
+    message(FATAL_ERROR "An explicit request for Silo's python module was made but python3 could not be found. You may want to try setting SILO_PYTHON_DIR")
 endif()
 

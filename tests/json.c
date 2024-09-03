@@ -112,8 +112,8 @@ main(int argc, char *argv[])
 
     /* Example of getting a Silo object from a silo file as a json object */
     jsilo_obj = DBGetJsonObject(dbfile, "hex");
-    printf("%s\n", json_object_to_json_string_ext(jsilo_obj, 0));
     DBClose(dbfile);
+    printf("%s\n", json_object_to_json_string_ext(jsilo_obj, 0));
 
     /* Test interface to query extptr members from jsilo_obj */
     {
@@ -194,6 +194,7 @@ main(int argc, char *argv[])
     /* Example of taking a standard silo object and adding some arbitrary stuff to it */
     json_object_to_file("onehex.json", jsilo_obj);
     json_object_put(jsilo_obj);
+
     fil_obj = json_object_from_file("onehex.json");
     json_object_reconstitute_extptrs(fil_obj);
     printf("fil_obj=%s\n", json_object_to_json_string(fil_obj));

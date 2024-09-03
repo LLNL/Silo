@@ -246,11 +246,13 @@ main(int argc, char *argv[])
         vfrac_varnames = (char **) malloc(narrs * sizeof(char*));
         for (i = 0; i < narrs; i++)
         {
+            int nchars;
             vfrac_varnames[i] = (char *) malloc(256*sizeof(char));
             if (mat->matnames && mat->matnames[i])
-                snprintf(vfrac_varnames[i], 256, "%s_%s_%d_vfracs", omat, mat->matnames[i], mat->matnos[i]); 
+                nchars = snprintf(vfrac_varnames[i], 256, "%s_%s_%d_vfracs", omat, mat->matnames[i], mat->matnos[i]); 
             else
-                snprintf(vfrac_varnames[i], 256, "%s_%d_vfracs", omat, mat->matnos[i]); 
+                nchars = snprintf(vfrac_varnames[i], 256, "%s_%d_vfracs", omat, mat->matnos[i]); 
+            assert(nchars > 0 && nchars < 256);
             DBWrite(outfile, vfrac_varnames[i], vfracs[i], mat->dims, mat->ndims, mat->datatype);
             total_file_bytes += DBGetVarByteLengthInFile(outfile, vfrac_varnames[i]);
             total_mem_bytes += DBGetVarByteLength(outfile, vfrac_varnames[i]);

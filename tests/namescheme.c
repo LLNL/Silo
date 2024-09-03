@@ -64,6 +64,7 @@ be used for advertising or product endorsement purposes.
 #include <silo.h>
 #include <std.c>
 #include <string.h>
+#include <limits.h>
 
 #define TEST_GET_NAME(NS,I,EXP)                                                                            \
 if (!NS)                                                                                                   \
@@ -89,6 +90,7 @@ else                                                                            
             __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,BASE));                                \
         return 1;                                                                                          \
     }                                                                                                      \
+
 }
 
 #define TEST_STR(A,B)                                                                                      \
@@ -409,6 +411,7 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns,  1), 0, 0, 1);
     TEST_GET_INDEX(DBGetName(ns, 50), 0, 0, 50);
     TEST_GET_INDEX(DBGetName(ns, 37), 0, 0, 37);
+
     DBFreeNamescheme(ns);
 
     /* simple offset by -2 mapping */
@@ -422,10 +425,10 @@ int main(int argc, char **argv)
 
     /* Get different fields as indices from nameschemed strings */
     ns = DBMakeNamescheme("|foo_%03d_%03d|n/5|n%5");
-    TEST_GET_INDEX(DBGetName(ns,0), 0, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns,0), 1, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns,18), 0, 2, 0);
-    TEST_GET_INDEX(DBGetName(ns,18), 1, 3, 0);
+    TEST_GET_INDEX(DBGetName(ns,0),  0, 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,0),  1, 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,18), 0, 0, 3);
+    TEST_GET_INDEX(DBGetName(ns,17), 1, 0, 2);
     DBFreeNamescheme(ns);
 
     /* Case where index is bigger than an int */
@@ -434,13 +437,32 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
 
+    /* Test inferring base 2 (binary, leading '0b') */
+    TEST_GET_INDEX("block_0b0101", 0, 0, 5);
+    TEST_GET_INDEX("block_0b0101_0b1100", 1, 0, 12);
+
+    /* Test inferring base 8 (octal, leading '0') */
+    TEST_GET_INDEX("slice1_035", 0, 0, 29);
+
+    /* Test non-standard base 5 */
+    TEST_GET_INDEX("VisIt_docs_section_0002_chapter_1234", 1, 5, 194);
+
+    /* Test negative values */
+    TEST_GET_INDEX("block_-0b0101", 0, 0, -5);
+
+    /* Test some cases that could lead to error */
+    TEST_GET_INDEX("block_0b0", 1, 0, LLONG_MAX);
+    TEST_GET_INDEX("block_+", 1, 0, LLONG_MAX);
+    TEST_GET_INDEX("block_0x", 1, 0, LLONG_MAX);
+    TEST_GET_INDEX("VisIt_docs_section_0002_chapter_1234", 5, 5, LLONG_MAX);
+
     /* Test the convenience method, DBSPrintf */
     snprintf(teststr, sizeof(teststr), "%s, %s",
         DBSPrintf("block_%d,level_%04d", 505, 17),
         DBSPrintf("side_%s_%cx%g", "leader",'z',1.0/3));
     TEST_STR(teststr, "block_505,level_0017, side_leader_zx0.333333")
-    
-    /* Test case where fewer expressions that conversion specs */
+
+    /* Test case where fewer expressions than conversion specs */
     ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
     if (ns) return 1;
 

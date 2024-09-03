@@ -68,7 +68,7 @@ static PyObject             *siloModule = 0;
 std::vector<PyMethodDef> SiloMethods;
 
 #if defined(_WIN32)
-# if defined(Silo_EXPORTS)
+# if defined(SiloPy_EXPORTS) || defined(Silo_EXPORTS)
 #  define SILOMODULE_API __declspec(dllexport)
 # else
 #  define SILOMODULE_API __declspec(dllimport)
@@ -350,6 +350,14 @@ void SILOMODULE_API initSilo(void)
     ADD_CONSTANT(DB_ZONETYPE_PYRAMID);
     ADD_CONSTANT(DB_ZONETYPE_PRISM);
     ADD_CONSTANT(DB_ZONETYPE_HEX);
+
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_BEAM);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_TRIANGLE);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_QUAD);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_TET);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_PYRAMID);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_PRISM);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD_HEX);
 
 #if PY_VERSION_GE(3,0,0)
 
