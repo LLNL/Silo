@@ -1,14 +1,14 @@
 #include <netcdf.h>
 #include <stdio.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdlib.h>
 #endif
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 

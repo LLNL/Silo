@@ -5934,7 +5934,7 @@ db_can_overwrite_dstobj_with_srcobj(
 
     for (q = 0; q < srcObj->ncomponents; q++)
     {
-        int r, dstr = -1;;
+        int r, dstr = -1;
         char const *curr_compname = srcObj->comp_names[q];
 
         for (r = 0; r < dstObj->ncomponents && dstr==-1; r++)

@@ -99,10 +99,25 @@ if(WIN32)
              ${SZIP_DLL} ${silo_test_output_dir})
     endif()
 
+    # hdf5
     if(HDF5_FOUND AND DEFINED HDF5_DLL)
             add_custom_command(TARGET copy_test_deps POST_BUILD
                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
                  ${HDF5_DLL} ${silo_test_output_dir})
+    endif()
+
+    # python
+    if(SILO_ENABLE_PYTHON_MODULE)
+      if(PYTHON_DLL)
+            add_custom_command(TARGET copy_test_deps POST_BUILD
+                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                 ${PYTHON_DLL} ${silo_test_output_dir})
+      endif()
+      if(TARGET SiloPy)
+          add_custom_command(TARGET copy_test_deps POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                     $<TARGET_FILE:SiloPy> ${silo_test_output_dir})
+      endif()
     endif()
 
 endif()

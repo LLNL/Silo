@@ -1031,6 +1031,17 @@ typedef struct DBmultimatspecies_ {
 #define DB_ZONETYPE_PRISM       36
 #define DB_ZONETYPE_HEX         38
 
+/* Definitions for quadratic elements */
+#define DB_ZONETYPE_QUAD_BEAM      11
+
+#define DB_ZONETYPE_QUAD_TRIANGLE  25
+#define DB_ZONETYPE_QUAD_QUAD      26
+
+#define DB_ZONETYPE_QUAD_TET      118
+#define DB_ZONETYPE_QUAD_PYRAMID  120
+#define DB_ZONETYPE_QUAD_PRISM    113
+#define DB_ZONETYPE_QUAD_HEX      116
+
 typedef struct DBzonelist_ {
     int            ndims;       /* Number of dimensions (2,3) */
     int            nzones;      /* Number of zones in list */
@@ -2174,7 +2185,7 @@ SILO_API extern DBgroupelmap *         DBGetGroupelmap(DBfile *dbfile, char cons
 SILO_API extern DBmrgvar *             DBGetMrgvar(DBfile *dbfile, char const *name);
 SILO_API extern DBnamescheme *         DBMakeNamescheme(char const *fmt, ...);
 SILO_API extern char const *           DBGetName(DBnamescheme const *ns, long long natnum);
-SILO_API long long                     DBGetIndex(char const *dbns_name_str, int field, int base);
+SILO_API long long                     DBGetIndex(char const *dbns_name_str, int field, int width, int base);
 SILO_API extern char const *           DBSPrintf(char const *fmt, ...);
 
 /* Multi-block objects and parallel I/O */
