@@ -9381,7 +9381,6 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
 
     PROTECT {
         db_ResetGlobalData_Csgmesh();
-        strcpy(_csgm._meshname, meshname);
         db_ProcessOptlist(DB_CSGMESH, optlist);
 
         /* Write variable arrays: vars[] */
@@ -9417,7 +9416,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
         m.datatype = datatype;
         m.conserved = _csgm._conserved;
         m.extensive = _csgm._extensive;
-        strcpy(m.meshname, OPT(_csgm._meshname));
+        strcpy(m.meshname, OPT(meshname));
         strcpy(m.label, OPT(_csgm._label));
         strcpy(m.units, OPT(_csgm._unit));
         db_SetMissingValueForPut(m.missing_value, _csgm._missing_value);
@@ -10045,7 +10044,6 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
     int                 compressionFlags;
     void const * const *coords = (void const * const *) _coords;
 
-    FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m); 
 
@@ -10500,7 +10498,6 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         }
     }
 
-    FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m);
 
@@ -10514,7 +10511,6 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         _qm._group_no = -1;
         _qm._missing_value = DB_MISSING_VALUE_NOT_SET;
         db_ProcessOptlist(DB_QUADMESH, optlist); /*yes, QUADMESH*/
-        _qm._meshname = STRDUP(meshname);
         _qm._nzones = _qm._nnodes = 1; /*initial value only*/
         for (nels=(ndims?1:0), i=0; i<ndims; i++) {
             nels *= dims[i];
@@ -10588,7 +10584,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         m.centering = centering;
         strcpy(m.label, OPT(_qm._label));
         strcpy(m.units, OPT(_qm._unit));
-        strcpy(m.meshid, OPT(_qm._meshname));
+        strcpy(m.meshid, OPT(meshname));
         db_SetMissingValueForPut(m.missing_value, _qm._missing_value);
 
         for (i=0; i<ndims; i++) {
@@ -10651,10 +10647,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
             MEMBER_S(str(m.region_pnames), region_pnames);
         } OUTPUT(dbfile, DB_QUADVAR, name, &m);
         
-        FREE(_qm._meshname);
     } CLEANUP {
-        FREE(_qm._meshname);
-        /*void*/
+        void;
     } END_PROTECT;
     return 0;
 }
@@ -10920,7 +10914,6 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char const *name, int ndims, char const * co
         }
 
         /* Set global options */
-        strcpy(_um._meshname, name);
         _um._coord_sys = DB_OTHER;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = ndims;
@@ -11113,7 +11106,6 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char const *name, char const *parentmesh,
         H5Tclose(o);
 
         /* Set global options */
-        strcpy(_um._meshname, name);
         _um._coord_sys = DB_OTHER;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = m.ndims;
@@ -11510,7 +11502,6 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         _um._use_specmf = DB_OFF;
         _um._group_no = -1;
         _um._missing_value = DB_MISSING_VALUE_NOT_SET;
-        strcpy(_um._meshname, meshname);
         db_ProcessOptlist(DB_UCDMESH, optlist); /*yes, UCDMESH*/
 
         /* Prepare for possible compression of ucdvars */
@@ -11566,7 +11557,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         m.conserved = _um._conserved;
         m.extensive = _um._extensive;
         db_SetMissingValueForPut(m.missing_value, _um._missing_value);
-        strcpy(m.meshid, OPT(_um._meshname));
+        strcpy(m.meshid, OPT(meshname));
         strcpy(m.label, OPT(_um._label));
         strcpy(m.units, OPT(_um._unit));
 
