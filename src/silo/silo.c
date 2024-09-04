@@ -12798,7 +12798,6 @@ db_ResetGlobalData_PointMesh (int ndims) {
 INTERNAL int
 db_ResetGlobalData_QuadMesh (int ndims) {
 
-   FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
 
    _qm._coord_sys = DB_OTHER;
@@ -13137,7 +13136,7 @@ db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAt
     char **retval;
 
     /* handle null case */
-    if (!strList)
+    if (!strList || strList[0] == '\0')
     {
         if (_n && *_n < 0) *_n = 0;
         return 0;
@@ -13159,6 +13158,12 @@ db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAt
     else
     {
         n = *_n;
+    }
+
+    if (n <= 0)
+    {
+        if (_n && *_n < 0) *_n = n;
+        return 0;
     }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
