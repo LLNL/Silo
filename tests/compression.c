@@ -223,7 +223,13 @@ main(int argc, char *argv[])
             if (DBWrite(dbfile, tmpname, fval, fdims, ndims, DB_FLOAT) < 0)
             {
                 if (DBErrno() == E_COMPRESSION)
+                {
+                    free(fval);
+                    free(frval);
+                    free(dval);
+                    free(drval);
                     return GNU_AUTOTEST_SKIP_CODE; /* compression requested not supported in this build */
+                }
                 nerrors++;
                 break;
             }
@@ -249,7 +255,13 @@ main(int argc, char *argv[])
             if (DBWrite(dbfile, tmpname, dval, ddims, ndims, DB_DOUBLE) < 0)
             {
                 if (DBErrno() == E_COMPRESSION)
+                {
+                    free(fval);
+                    free(frval);
+                    free(dval);
+                    free(drval);
                     return GNU_AUTOTEST_SKIP_CODE; /* compression requested not supported in this build */
+                }
                 nerrors++;
                 break;
             }
@@ -273,7 +285,13 @@ main(int argc, char *argv[])
     }
 
     if (nerrors)
+    {
+        free(fval);
+        free(frval);
+        free(dval);
+        free(drval);
         return nerrors;
+    }
 
     /*
      * Now try opening the file again and verify the simple

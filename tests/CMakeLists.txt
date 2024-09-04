@@ -59,8 +59,19 @@ project(SILO_TESTS)
 # Set the output dir for test executables
 ###-------------------------------------------------------------------------------------
 
-# runtime output dir is bin, so append bin to current binary dir
-set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)
+if(WIN32)
+    ##
+    # For windows, the standard output dir (${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>) causes
+    # problems with the script writing used when creating test-runners because the value
+    # of $<CONFIG> isn't known until build time.  Instead use a non-configuration location
+    # subdir directly off build-dir
+    ##
+    set(silo_test_output_dir ${Silo_BINARY_DIR}/all_tests/)
+    file(MAKE_DIRECTORY ${silo_test_output_dir})
+else()
+    # runtime output dir is bin, so append bin to current binary dir
+    set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin)
+endif()
 
 ###-------------------------------------------------------------------------------------
 # Copy dependencies needed for running tests.
