@@ -86,7 +86,7 @@ silo_option_default(VAR SILO_QT6_DIR VALUE ${TP_DIR}/Qt/6.4.2/lib/cmake/Qt6)
 silo_option_default(VAR SILO_PYTHON_DIR VALUE ${TP_DIR}/python/3.9.18)
 
 # enable silex
-#silo_option_default(VAR SILO_ENABLE_SILEX VALUE ON TYPE BOOL)
+silo_option_default(VAR SILO_ENABLE_SILEX VALUE ON TYPE BOOL)
 
 # disable fortran
 silo_option_default(VAR SILO_ENABLE_FORTRAN VALUE OFF TYPE BOOL)
