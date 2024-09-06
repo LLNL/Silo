@@ -48,15 +48,16 @@
 # National  Security, LLC,  and shall  not  be used  for advertising  or
 # product endorsement purposes.
 import Silo
+import os
 
 db = Silo.Create("foo.silo", "test file")
 db.Write("t1", 12)
 db.Write("t2", "hello")
 db.Write("t3", (13,))
 db.Write("t4", 14.5)
-db.Write("t5", (1.2, 10))
+db.Write("t5", (1.2, 10.2))
 db.Write("t6", (1.2, 10.2))
-db.Write("t7", (10, 1.2))
+db.Write("t7", (10, 12))
 db.Write("t8", "a")
 db.MkDir("a")
 db.Write("a/t8", "x2")
@@ -65,6 +66,9 @@ db.Write("t9", "x3")
 db.Write("../t10", "x4")
 db.SetDir("..")
 db.Write("t11", "x5")
+db.Write("t12",(1,2,3,4,5,6),(2,3),2,Silo.DB_INT)
+db.Write("t13",(1.1,2.2,3.3,4.4,5.5,6.6),(3,2),2,Silo.DB_FLOAT)
+db.Write("t14",(1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9),(3,3),2,Silo.DB_DOUBLE)
 db.Close()
 
 db2=Silo.Open("foo.silo")
@@ -76,3 +80,30 @@ db2.SetDir("a")
 print("t9=%s"%db2.GetVar("t9"))
 print("/t5=%.2f,%.2f"%db2.GetVar("../t5"))
 db2.Close()
+
+#
+# Now, test reading a raw DB_FLOAT array and overwritting it
+#
+
+# Lets get original size of file before the overwrite
+origSize = os.path.getsize("sami.silo")
+
+# Open file for overwrite
+db3 = Silo.Open("sami.silo", Silo.DB_APPEND)
+
+#
+# This call gets the "raw" array as a dict holding
+# 'dims', 'ndims', 'datatype' and 'data'
+#
+dv = db3.GetVarInfo("4d_float", 1)
+
+# Ok, lets create alternative data
+dvl = [x*3.1415926 if x < 65 else x for x in dv['data']]
+
+# Now, overwrite the original data in the file
+db3.Write("4d_float",dvl,dv['dims'],dv['ndims'],dv['datatype'])
+
+db3.Close()
+
+newSize = os.path.getsize("sami.silo")
+assert newSize == origSize
