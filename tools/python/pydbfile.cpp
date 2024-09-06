@@ -303,6 +303,39 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     DBobject *silo_obj = DBGetObject(db, str);
     if (!silo_obj)
     {
+        int vtype = DBInqVarType(db, str);
+        if (vtype == DB_VARIABLE)
+        {
+            int dims[50];
+            int const maxdims = (int) sizeof(dims)/sizeof(dims[0]);
+            int ndims = DBGetVarDims(db, str, maxdims, dims);
+            int dtype = DBGetVarType(db, str);
+
+            PyObject *dimsTuple = PyTuple_New(ndims);
+            for (int i = 0; i < ndims; i++)
+                PyTuple_SET_ITEM(dimsTuple, i, PyInt_FromLong((long)dims[i]));
+
+            PyObject *retval = PyDict_New();
+            PyDict_SetItemString(retval, "ndims", PyInt_FromLong((long)ndims));
+            PyDict_SetItemString(retval, "datatype", PyInt_FromLong((long)dtype));
+            PyDict_SetItemString(retval, "dims", dimsTuple);
+            Py_DECREF(dimsTuple);
+            if (get_data_flag)
+            {
+                PyObject *argTuple = PyTuple_New(2);
+                PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(str));
+                PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
+                PyObject *dobj = DBfile_DBGetVar(self, argTuple);
+                Py_DECREF(argTuple);
+                if (dobj)
+                {
+                    PyDict_SetItemString(retval, "data", dobj);
+                    Py_DECREF(dobj);
+                }
+            }
+            return retval;
+        }
+
         char msg[256];
         snprintf(msg, sizeof(msg), "Unable to get object \"%s\"", str);
         SiloErrorFunc(msg);
