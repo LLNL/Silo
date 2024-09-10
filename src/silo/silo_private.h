@@ -536,7 +536,6 @@ struct _qm {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char          *_meshname;
     int            _baseindex[3];
     int            _baseindex_set;
     int            _group_no;
@@ -612,7 +611,6 @@ struct _um {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char           _meshname[256];
     char           _nm_dims[64];
     char           _nm_zones[64];
     char           _nm_alignz[64];
@@ -657,7 +655,6 @@ struct _csgm {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char           _meshname[256];
     char           _nm_time[64];
     char           _nm_dtime[64];
     char           _nm_cycle[64];
