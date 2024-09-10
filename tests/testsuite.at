@@ -235,8 +235,8 @@ AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.l
 AT_CLEANUP
 AT_SETUP(write)
 AT_KEYWORDS(python)
-AT_DATA(expout,[toc=nvar = 12
-var_names = (_fileinfo, _silolibinfo, t1, t10, t11, t2, t3, t4, t5, t6, t7, t8)
+AT_DATA(expout,[toc=nvar = 15
+var_names = (_fileinfo, _silolibinfo, t1, t10, t11, t12, t13, t14, t2, t3, t4, t5, t6, t7, t8)
 ndir = 1
 dir_names = (a)
 
@@ -244,8 +244,9 @@ t2='hello'
 t6=1.20,10.20
 a/t8='x2'
 t9=x3
-/t5=1.20,10.00
+/t5=1.20,10.20
 ])
+AT_CHECK(sami $STARGS,,ignore,ignore)
 AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_write.py,,expout,ignore)
 AT_CLEANUP
 AT_SETUP(error handling)

@@ -298,6 +298,45 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             PyErr_Clear();
     }
 
+    int vtype = DBInqVarType(db, str);
+    if (vtype == DB_INVALID_OBJECT)
+    {
+        SiloErrorFunc("Silo object not found.");
+        return NULL;
+    }
+
+    if (vtype == DB_VARIABLE)
+    {
+        int dims[50];
+        int const maxdims = (int) sizeof(dims)/sizeof(dims[0]);
+        int ndims = DBGetVarDims(db, str, maxdims, dims);
+        int dtype = DBGetVarType(db, str);
+
+        PyObject *dimsTuple = PyTuple_New(ndims);
+        for (int i = 0; i < ndims; i++)
+            PyTuple_SET_ITEM(dimsTuple, i, PyInt_FromLong((long)dims[i]));
+
+        PyObject *retval = PyDict_New();
+        PyDict_SetItemString(retval, "ndims", PyInt_FromLong((long)ndims));
+        PyDict_SetItemString(retval, "datatype", PyInt_FromLong((long)dtype));
+        PyDict_SetItemString(retval, "dims", dimsTuple);
+        Py_DECREF(dimsTuple);
+        if (get_data_flag)
+        {
+            PyObject *argTuple = PyTuple_New(2);
+            PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(str));
+            PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
+            PyObject *dobj = DBfile_DBGetVar(self, argTuple);
+            Py_DECREF(argTuple);
+            if (dobj)
+            {
+                PyDict_SetItemString(retval, "data", dobj);
+                Py_DECREF(dobj);
+            }
+        }
+        return retval;
+    }
+
     //
     // Note that because we read the object through Silo's generic object
     // interface, the Silo library will not be able to correctly apply
@@ -307,13 +346,6 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     // necessary to prepare for its decompression. Too much work for now.
     //
     DBobject *silo_obj = DBGetObject(db, str);
-    if (!silo_obj)
-    {
-        char msg[256];
-        snprintf(msg, sizeof(msg), "Unable to get object \"%s\"", str);
-        SiloErrorFunc(msg);
-        return NULL;
-    }
 
     PyObject *retval = PyDict_New();
     PyDict_SetItemString(retval, "name", PyString_FromString(silo_obj->name));
@@ -452,101 +484,253 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    int dims;
-    int err;
     char *str;
-
+    int len = 0, ndims, dtype = DB_NOTYPE, err = 1;
+    int dims[10];
     int ivar;
     double dvar;
     char *svar;
-    PyObject *tuple;
-    if (PyArg_ParseTuple(args, "sd", &str, &dvar))
+    char *data = 0;
+    int dsize[DB_NOTYPE];
+
+    dsize[DB_INT] = sizeof(int);
+    dsize[DB_SHORT] = sizeof(short);
+    dsize[DB_LONG] = sizeof(long);
+    dsize[DB_FLOAT] = sizeof(float);
+    dsize[DB_DOUBLE] = sizeof(double);
+    dsize[DB_CHAR] = sizeof(char);
+    dsize[DB_LONG_LONG] = sizeof(long long);
+    dsize[DB_NOTYPE] = 0;
+
+    PyObject *pydata = 0, *pydims;
+    if (PyArg_ParseTuple(args, "si", &str, &ivar))
     {
-        dims = 1;
+        ndims = 1;
+        dims[0] = len = 1;
+        data = (char*) &ivar;
+        dtype = DB_INT;
+    }
+    else if (PyArg_ParseTuple(args, "sd", &str, &dvar) ||
+             PyArg_ParseTuple(args, "sO!", &str, &PyFloat_Type, &dvar))
+    {
+        ndims = 1;
+        dims[0] = len = 1;
         if (dvar == (int) dvar)
         {
             ivar = (int) dvar;
-            err = DBWrite(db, str, &ivar, &dims,1, DB_INT);
+            data = (char*) &ivar;
+            dtype = DB_INT;
         }
         else
         {
-            err = DBWrite(db, str, &dvar, &dims,1, DB_DOUBLE);
+            data = (char*) &dvar;
+            dtype = DB_DOUBLE;
         }
     }
     else if (PyArg_ParseTuple(args, "ss", &str, &svar))
     {
-        dims = strlen(svar);
-        err = DBWrite(db, str, svar, &dims,1, DB_CHAR);
+        data = svar;
+        ndims = 1;
+        dims[0] = len = strlen(svar);
+        dtype = DB_CHAR;
     }
-    else if (PyArg_ParseTuple(args, "sO", &str, &tuple))
+    else if (PyArg_ParseTuple(args, "sO", &str, &pydata))
     {
-        if(!PyTuple_Check(tuple))
-            return NULL;
-
-        int len = PyTuple_Size(tuple);
-        if (len < 1)
+        if (!PyTuple_Check(pydata) && !PyList_Check(pydata))
         {
-            PyErr_SetString(PyExc_TypeError, "Tuple must be of size > 0");
+            PyErr_SetString(PyExc_TypeError, "For 2-arg: only tuple or list as second arg");
             return NULL;
         }
 
-        PyObject *item = PyTuple_GET_ITEM(tuple, 0);
-        if (PyInt_Check(item))
+        ndims = 1;
+        dims[0] = len = (int) PySequence_Length(pydata);
+        if (dims[0] < 1)
         {
-            int *values = new int[len];
-            for (int i=0; i<len; i++)
-            {
-                item = PyTuple_GET_ITEM(tuple, i);
-                if (PyInt_Check(item))
-                    values[i] = int(PyInt_AS_LONG(PyTuple_GET_ITEM(tuple, i)));
-                else if (PyFloat_Check(item))
-                    values[i] = int(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(tuple, i)));
-                else
-                {
-                    PyErr_SetString(PyExc_TypeError,
-                                    "Only int or float tuples are supported");
-                    return NULL;
-                }
-            }
-
-            dims = len;
-            err = DBWrite(db, str, values, &len,1, DB_INT);
+            PyErr_SetString(PyExc_TypeError, "Tuple or list must have size > 0");
+            return NULL;
         }
+
+        PyObject *item = PySequence_GetItem(pydata, 0);
+        if (PyUnicode_Check(item) && PyUnicode_GET_SIZE(item)==1)
+            dtype = DB_CHAR;
+        else if (PyInt_Check(item))
+            dtype = DB_INT;
         else if (PyFloat_Check(item))
-        {
-            double *values = new double[len];
-            for (int i=0; i<len; i++)
-            {
-                item = PyTuple_GET_ITEM(tuple, i);
-                if (PyInt_Check(item))
-                    values[i] = double(PyInt_AS_LONG(PyTuple_GET_ITEM(tuple, i)));
-                else if (PyFloat_Check(item))
-                    values[i] = double(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(tuple, i)));
-                else
-                {
-                    PyErr_SetString(PyExc_TypeError,
-                                    "Only int or float tuples are supported");
-                    return NULL;
-                }
-            }
-
-            dims = len;
-            err = DBWrite(db, str, values, &len,1, DB_DOUBLE);
-        }
+            dtype = DB_DOUBLE;
         else
         {
-            PyErr_SetString(PyExc_TypeError,
-                            "Only int or float tuples are supported");
+            PyErr_SetString(PyExc_TypeError, "For 2-arg: only int or double tuples are supported");
             return NULL;
+        }
+    }
+    else if (PyArg_ParseTuple(args, "sOOi", &str, &pydata, &pydims, &dtype))
+    {
+        if (!PyTuple_Check(pydata) && !PyList_Check(pydata))
+        {
+            PyErr_SetString(PyExc_TypeError, "Only tuple or list for data");
+            return NULL;
+        }
+        if (PySequence_Length(pydata) < 1)
+        {
+            PyErr_SetString(PyExc_TypeError, "Data tuple or list must have size > 0");
+            return NULL;
+        }
+
+        if (!PyTuple_Check(pydims) && !PyList_Check(pydims))
+        {
+            PyErr_SetString(PyExc_TypeError, "Only tuple or list for dimensions");
+            return NULL;
+        }
+        if (PySequence_Length(pydims) < 1)
+        {
+            PyErr_SetString(PyExc_TypeError, "Dimensions tuple or list must have size > 0");
+            return NULL;
+        }
+
+        if (!(dtype == DB_CHAR || dtype == DB_SHORT || dtype == DB_INT || dtype == DB_LONG ||
+            dtype == DB_LONG_LONG || dtype == DB_FLOAT || dtype == DB_DOUBLE))
+        {
+            PyErr_SetString(PyExc_TypeError, "Invalid Silo data type");
+            return NULL;
+        }
+
+        ndims = len = (int) PySequence_Length(pydims);
+        int nvals = 1;
+        for (int i = 0; i < len; i++)
+        {
+            PyObject *item = PySequence_GetItem(pydims, i);
+            if (!PyInt_Check(item))
+            {
+                PyErr_SetString(PyExc_TypeError, "Dimensions must all be integer");
+                return NULL;
+            }
+            dims[i] = int(PyInt_AS_LONG(item));
+            if (dims[i] <= 0)
+            {
+                PyErr_SetString(PyExc_TypeError, "Dimension data must all be positive");
+                return NULL;
+            }
+            nvals *= dims[i];
+        }
+
+        len = (int) PySequence_Length(pydata);
+        if (nvals != len)
+        {
+            {
+                PyErr_SetString(PyExc_TypeError, "Data tuple or list size does not match dimensions");
+                return NULL;
+            }
         }
     }
     else
     {
-        PyErr_SetString(PyExc_TypeError, "Function takes 2 arguments");
+        PyErr_SetString(PyExc_TypeError, "Problem parsing arguments");
         return NULL;
     }
 
-    if (err != 0)
+    if (len && pydata)
+    {
+        data = new char[len * dsize[dtype]];
+        char *p = (char*) data;
+        for (int i = 0; i < len; i++)
+        {
+            PyObject *item = PySequence_GetItem(pydata, i);
+            switch (dtype)
+            {
+                case DB_CHAR:
+                {
+                    if (!PyUnicode_Check(item) || PyUnicode_GET_SIZE(item)>1)
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_CHAR");
+                        goto fail_exit;
+                    }
+                    *p = *(PyUnicode_AS_DATA(item));
+                    break;
+                }
+                case DB_SHORT:
+                {
+                    if (!PyInt_Check(item))
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_SHORT");
+                        goto fail_exit;
+                    }
+                    short *ps = (short*)p;
+                    *ps = (short) PyInt_AsLong(item);
+                    break;
+                }
+                case DB_INT:
+                {
+                    if (!PyInt_Check(item))
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_INT");
+                        goto fail_exit;
+                    }
+                    int *pi = (int*)p;
+                    *pi = (int) PyInt_AsLong(item);
+                    break;
+                }
+                case DB_LONG:
+                {
+                    if (!PyLong_Check(item))
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_LONG");
+                        goto fail_exit;
+                    }
+                    long *pl = (long*)p;
+                    *pl = PyLong_AsLong(item);
+                    break;
+                }
+                case DB_LONG_LONG:
+                {
+                    if (!PyLong_Check(item))
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_LONG");
+                        goto fail_exit;
+                    }
+                    long long *pll = (long long*)p;
+                    *pll = (long long) PyFloat_AsDouble(item);
+                    break;
+                }
+                case DB_FLOAT:
+                {
+                    if (!PyFloat_Check(item))
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_FLOAT");
+                        goto fail_exit;
+                    }
+                    float *pf = (float*)p;
+                    *pf = (float) PyFloat_AsDouble(item);
+                    break;
+                }
+                case DB_DOUBLE:
+                {
+                    if (!PyFloat_Check(item))
+                    {
+                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_DOUBLE");
+                        goto fail_exit;
+                    }
+                    double *pd = (double*)p;
+                    *pd = PyFloat_AsDouble(item);
+                    break;
+                }
+                default:
+                    break;
+            }
+            p += dsize[dtype];
+        }
+    }
+
+    err = DBWrite(db, str, data, dims, ndims, dtype);
+
+fail_exit:
+
+    if (data && data != (char*)&ivar && data != (char*)&dvar && data != svar)
+        delete [] data;
+
+    if (err == 1)
+        return NULL;
+
+    if (err == -1)
     {
         PyErr_SetString(PyExc_TypeError, "DBWrite failed");
         return NULL;
@@ -845,7 +1029,8 @@ static struct PyMethodDef DBfile_methods[] = {
         ">>> db = Silo.Open('globe.silo')\n"
         ">>> x = db.GetVar('cycle')\n"
         ">>> print(x)\n"
-        "48\n"},
+        "48\n"
+        "If you want the data type and dimensions of the raw variable, use GetVarInfo().\n"},
     {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS,
         "Return either metadata or metadata+rawdata for any Silo object. For example...\n"
         ">>> db = Silo.Open('globe.silo')\n"
@@ -857,7 +1042,13 @@ static struct PyMethodDef DBfile_methods[] = {
         ">>> dx_meta_and_raw = db.GetVarInfo('dx', 1) # use non-zero to also get raw data\n"
         ">>> print(dx_meta_and_raw)\n"
         "{'name': 'dx', 'type': 'ucdvar', 'meshid': 'mesh1',\n"
-        " 'value0': (0.125606125, 0.113311, 0.089924125, 0.057734875, ...\n"},
+        " 'value0': (0.125606125, 0.113311, 0.089924125, 0.057734875, ...\n"
+        "\n"
+        "If you use GetVarInfo('v',0) on a raw variable, it will return a python dictionary\n"
+        "object of the form {'datatype': 16, 'dims': (3,), 'ndims': 1} holding the\n"
+        "variable's datatype and dimensions. If you pass a '1' for the second argument,\n"
+        "it will return a python dictionary of the form\n"
+        "{'datatype': 16, 'dims': (3,), 'ndims': 1, 'data': (...)}\n"},
     {"Write", DBfile_DBWrite, METH_VARARGS,
         "Write a miscellaneous scalar or array to a Silo file. For example...\n"
         ">>> db = Silo.Create('foo.silo', 'no comment', Silo.DB_PDB, Silo.DB_CLOBBER)\n"
