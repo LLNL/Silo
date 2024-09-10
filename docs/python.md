@@ -144,11 +144,11 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 * **Description:**
 
-  Returns a Python dictionary object for a Silo high level object (e.g. not a primitive array).
-  This method cannot be used to read the contents of a primitive array.
-  It can be used for any object the Silo C interface's `DBGetObject()` would also be used.
-  If object bulk data is not also read, then the dictionary members for those sub-objects will contain a string holding the path of either a sub-object or a primitive array.
-  Note that on the HDF5 driver, if friendly HDF5 names were not used to create the file, then the string paths for these sub-objects are often cryptic references to primitive arrays in the hidden `/.silo` directory of the Silo file.
+  Returns a Python dictionary object for any Silo object.
+  If object bulk data is not also read, then the dictionary members for those sub-objects will contain a string holding the name/path of either a sub-object or a primitive array.
+  Note that on the HDF5 driver, if friendly HDF5 names were not used to create the file, then the string paths for these sub-objects are often cryptic references to primitive arrays in the hidden `/.silo` directory of the Silo file such as `/.silo/#000042`.
+
+  When this method is applied to raw (or primitive) variable object, it will return a python dictionary object indicating the data type and dimensions of the primitive variable.
 
   This method is poorly named.
   A better name is probably `GetObject`.
@@ -173,7 +173,12 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 * **Description:**
 
-  This method returns a primitive array as a Python tuple
+  This method returns the bulk data of a raw Silo variable as a Python tuple.
+  However, because the method provides no means for returning the variable's type, it will return python integer data for anything that has Silo type `DB_SHORT`, `DB_INT`, `DB_LONG` or `DB_LONG_LONG` and python floating point data for `DB_FLOAT` or `DB_DOUBLE`.
+  This is potentially problematic when a writer intends to *overwrite* the data in the file with new raw variable data.
+  Overwriting Silo data requires that the new data take no more space in the file than the original data.
+  Otherwise, bad things will happen.
+  To get better information regarding a raw Silo variable's true data type in the file, use [`DBGetVarInfo()`](#dbfile-getvarinfo).
 
 {{ EndFunc }}
 
@@ -240,7 +245,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 
   So, you can use this method to write objects that can be read later via Silo's C language, high-level object methods such as `DBGetUcdmesh` and `DBGetMaterial`, etc. as long as the Python dictionary's members match what Silo expects.
 
-  Often, the easiest way to interrogate how a given Python dict object should be structured to match a Silo high-level object is to find an example object in some Silo file and read it into Python with `GetVarInfo()`.
+  Often, the easiest way to interrogate how a given Python dict object should be structured to match a Silo high-level object is to find an example object in some Silo file and read it into Python with [`GetVarInfo()`](#dbfile-getvarinfo).
   Be aware, however, that many Silo objects have a lot of optional members which are not *required* to ensure the given object matches a high-level Silo object.
 
   We demonstrate this approach by first reading a multi-mesh object from an existing Silo file.
@@ -364,7 +369,7 @@ Type "help", "copyright", "credits" or "license" for more info.
 * **C Signature:**
 
   ```
-  NoneType <DBfile>.Write(name, data)
+  NoneType <DBfile>.Write(name, data, [dims, datatype])
   ```
 
 * **Arguments:**
@@ -373,12 +378,13 @@ Type "help", "copyright", "credits" or "license" for more info.
   :---|:---
   `name` | [required string] `name` of the primitive array
   `data` | [required tuple] the `data` to write
+  `dims` | [optional tuple] the dimensions of `data`. If not present, defaults to size of `data`.
+  `datatype` | [optional int] the Silo data type (e.g. `DB_INT`, ...). If not present, guessed by type of first value in `data`.
 
 * **Description:**
 
-  This method will write a primitve array to a Silo file.
-  However, it presently handles only one dimensional tuples.
-  Furthermore, the tuples must be consistent in type (e.g. all floats or all ints).
+  This method will write a raw variable to a Silo file.
+  If you need to *overwrite* Silo data, this is the method to use because it allows the writer to *specify* the Silo datatype.
 
 {{ EndFunc }}
 
