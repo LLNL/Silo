@@ -66,9 +66,9 @@ db.Write("t9", "x3")
 db.Write("../t10", "x4")
 db.SetDir("..")
 db.Write("t11", "x5")
-db.Write("t12",(1,2,3,4,5,6),(2,3),2,Silo.DB_INT)
-db.Write("t13",(1.1,2.2,3.3,4.4,5.5,6.6),(3,2),2,Silo.DB_FLOAT)
-db.Write("t14",(1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9),(3,3),2,Silo.DB_DOUBLE)
+db.Write("t12",(1,2,3,4,5,6),(2,3),Silo.DB_INT)
+db.Write("t13",(1.1,2.2,3.3,4.4,5.5,6.6),(3,2),Silo.DB_FLOAT)
+db.Write("t14",(1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9),(3,3),Silo.DB_DOUBLE)
 db.Close()
 
 db2=Silo.Open("foo.silo")
@@ -101,7 +101,7 @@ dv = db3.GetVarInfo("4d_float", 1)
 dvl = [x*3.1415926 if x < 65 else x for x in dv['data']]
 
 # Now, overwrite the original data in the file
-db3.Write("4d_float",dvl,dv['dims'],dv['ndims'],dv['datatype'])
+db3.Write("4d_float",dvl,dv['dims'],dv['datatype'])
 
 db3.Close()
 

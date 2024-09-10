@@ -292,6 +292,45 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             PyErr_Clear();
     }
 
+    int vtype = DBInqVarType(db, str);
+    if (vtype == DB_INVALID_OBJECT)
+    {
+        SiloErrorFunc("Silo object not found.");
+        return NULL;
+    }
+
+    if (vtype == DB_VARIABLE)
+    {
+        int dims[50];
+        int const maxdims = (int) sizeof(dims)/sizeof(dims[0]);
+        int ndims = DBGetVarDims(db, str, maxdims, dims);
+        int dtype = DBGetVarType(db, str);
+
+        PyObject *dimsTuple = PyTuple_New(ndims);
+        for (int i = 0; i < ndims; i++)
+            PyTuple_SET_ITEM(dimsTuple, i, PyInt_FromLong((long)dims[i]));
+
+        PyObject *retval = PyDict_New();
+        PyDict_SetItemString(retval, "ndims", PyInt_FromLong((long)ndims));
+        PyDict_SetItemString(retval, "datatype", PyInt_FromLong((long)dtype));
+        PyDict_SetItemString(retval, "dims", dimsTuple);
+        Py_DECREF(dimsTuple);
+        if (get_data_flag)
+        {
+            PyObject *argTuple = PyTuple_New(2);
+            PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(str));
+            PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
+            PyObject *dobj = DBfile_DBGetVar(self, argTuple);
+            Py_DECREF(argTuple);
+            if (dobj)
+            {
+                PyDict_SetItemString(retval, "data", dobj);
+                Py_DECREF(dobj);
+            }
+        }
+        return retval;
+    }
+
     //
     // Note that because we read the object through Silo's generic object
     // interface, the Silo library will not be able to correctly apply
@@ -301,46 +340,6 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     // necessary to prepare for its decompression. Too much work for now.
     //
     DBobject *silo_obj = DBGetObject(db, str);
-    if (!silo_obj)
-    {
-        int vtype = DBInqVarType(db, str);
-        if (vtype == DB_VARIABLE)
-        {
-            int dims[50];
-            int const maxdims = (int) sizeof(dims)/sizeof(dims[0]);
-            int ndims = DBGetVarDims(db, str, maxdims, dims);
-            int dtype = DBGetVarType(db, str);
-
-            PyObject *dimsTuple = PyTuple_New(ndims);
-            for (int i = 0; i < ndims; i++)
-                PyTuple_SET_ITEM(dimsTuple, i, PyInt_FromLong((long)dims[i]));
-
-            PyObject *retval = PyDict_New();
-            PyDict_SetItemString(retval, "ndims", PyInt_FromLong((long)ndims));
-            PyDict_SetItemString(retval, "datatype", PyInt_FromLong((long)dtype));
-            PyDict_SetItemString(retval, "dims", dimsTuple);
-            Py_DECREF(dimsTuple);
-            if (get_data_flag)
-            {
-                PyObject *argTuple = PyTuple_New(2);
-                PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(str));
-                PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
-                PyObject *dobj = DBfile_DBGetVar(self, argTuple);
-                Py_DECREF(argTuple);
-                if (dobj)
-                {
-                    PyDict_SetItemString(retval, "data", dobj);
-                    Py_DECREF(dobj);
-                }
-            }
-            return retval;
-        }
-
-        char msg[256];
-        snprintf(msg, sizeof(msg), "Unable to get object \"%s\"", str);
-        SiloErrorFunc(msg);
-        return NULL;
-    }
 
     PyObject *retval = PyDict_New();
     PyDict_SetItemString(retval, "name", PyString_FromString(silo_obj->name));
@@ -558,7 +557,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
             return NULL;
         }
     }
-    else if (PyArg_ParseTuple(args, "sOOii", &str, &pydata, &pydims, &ndims, &dtype))
+    else if (PyArg_ParseTuple(args, "sOOi", &str, &pydata, &pydims, &dtype))
     {
         if (!PyTuple_Check(pydata) && !PyList_Check(pydata))
         {
@@ -589,7 +588,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
             return NULL;
         }
 
-        len = (int) PySequence_Length(pydims);
+        ndims = len = (int) PySequence_Length(pydims);
         int nvals = 1;
         for (int i = 0; i < len; i++)
         {
@@ -1024,7 +1023,8 @@ static struct PyMethodDef DBfile_methods[] = {
         ">>> db = Silo.Open('globe.silo')\n"
         ">>> x = db.GetVar('cycle')\n"
         ">>> print(x)\n"
-        "48\n"},
+        "48\n"
+        "If you want the data type and dimensions of the raw variable, use GetVarInfo().\n"},
     {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS,
         "Return either metadata or metadata+rawdata for any Silo object. For example...\n"
         ">>> db = Silo.Open('globe.silo')\n"
@@ -1036,7 +1036,13 @@ static struct PyMethodDef DBfile_methods[] = {
         ">>> dx_meta_and_raw = db.GetVarInfo('dx', 1) # use non-zero to also get raw data\n"
         ">>> print(dx_meta_and_raw)\n"
         "{'name': 'dx', 'type': 'ucdvar', 'meshid': 'mesh1',\n"
-        " 'value0': (0.125606125, 0.113311, 0.089924125, 0.057734875, ...\n"},
+        " 'value0': (0.125606125, 0.113311, 0.089924125, 0.057734875, ...\n"
+        "\n"
+        "If you use GetVarInfo('v',0) on a raw variable, it will return a python dictionary\n"
+        "object of the form {'datatype': 16, 'dims': (3,), 'ndims': 1} holding the\n"
+        "variable's datatype and dimensions. If you pass a '1' for the second argument,\n"
+        "it will return a python dictionary of the form\n"
+        "{'datatype': 16, 'dims': (3,), 'ndims': 1, 'data': (...)}\n"},
     {"Write", DBfile_DBWrite, METH_VARARGS,
         "Write a miscellaneous scalar or array to a Silo file. For example...\n"
         ">>> db = Silo.Create('foo.silo', 'no comment', Silo.DB_PDB, Silo.DB_CLOBBER)\n"

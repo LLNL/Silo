@@ -84,13 +84,12 @@ else                                                                            
 
 #define TEST_GET_INDEX(STR,FLD,BASE,IND)                                                                   \
 {                                                                                                          \
-    if (DBGetIndex(STR,FLD,BASE) != IND)                                                                   \
+    if (DBGetIndex(STR,FLD,3,BASE) != IND)                                                                 \
     {                                                                                                      \
         fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",\
-            __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,BASE));                                \
+            __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,3,BASE));                              \
         return 1;                                                                                          \
     }                                                                                                      \
-
 }
 
 #define TEST_STR(A,B)                                                                                      \
