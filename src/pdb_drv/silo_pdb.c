@@ -10513,8 +10513,6 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
-   strcpy(_csgm._meshname, name);
-
    db_InitCsg(dbfile, name, optlist);
 
    obj = DBMakeObject(name, DB_CSGMESH, 34);
@@ -10929,8 +10927,6 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char const *name, int ndims, char const * con
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
-   strcpy(_um._meshname, name);
-
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
    obj = DBMakeObject(name, DB_UCDMESH, 33);
@@ -11126,8 +11122,6 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char const *name, char const *parentmesh,
    /*-------------------------------------------------------------
     *  Now we can initialize global data, and process options.
     *-------------------------------------------------------------*/
-
-   strcpy(_um._meshname, name);
 
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
@@ -12456,8 +12450,6 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
     *--------------------------------------------------*/
    _qm._nzones = nzones;
    _qm._nnodes = nnodes;
-   FREE(_qm._meshname);
-   _qm._meshname = STRDUP(meshname);
 
    for (i = 0; i < ndims; i++) {
       _qm._dims[i] = dims[i];

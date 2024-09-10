@@ -110,3 +110,4 @@ print("mesh1_coord0=",db.GetVar("mesh1_coord0"))
 
 db.SetDir("/")
 toc = db.GetToc()
+db.Close()
