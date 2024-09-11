@@ -551,7 +551,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
         }
 
         PyObject *item = PySequence_GetItem(pydata, 0);
-        if (PyUnicode_Check(item) && PyUnicode_GET_SIZE(item)==1)
+        if (PyString_Check(item) && PyString_Size(item)==1)
             dtype = DB_CHAR;
         else if (PyInt_Check(item))
             dtype = DB_INT;
@@ -639,12 +639,12 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
             {
                 case DB_CHAR:
                 {
-                    if (!PyUnicode_Check(item) || PyUnicode_GET_SIZE(item)>1)
+                    if (!PyString_Check(item) || PyString_Size(item)>1)
                     {
                         PyErr_SetString(PyExc_TypeError, "Data is not a single DB_CHAR");
                         goto fail_exit;
                     }
-                    *p = *(PyUnicode_AS_DATA(item));
+                    *p = *(PyString_AsString(item));
                     break;
                 }
                 case DB_SHORT:
@@ -655,7 +655,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                         goto fail_exit;
                     }
                     short *ps = (short*)p;
-                    *ps = (short) PyInt_AsLong(item);
+                    *ps = (short) PyLong_AsLong(item);
                     break;
                 }
                 case DB_INT:
@@ -666,7 +666,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                         goto fail_exit;
                     }
                     int *pi = (int*)p;
-                    *pi = (int) PyInt_AsLong(item);
+                    *pi = (int) PyLong_AsLong(item);
                     break;
                 }
                 case DB_LONG:
