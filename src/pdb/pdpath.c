@@ -1842,13 +1842,11 @@ _PD_parse (void) {
                         3,  0,  0, 7, 3, 5, 0, 12, 14, 17,
                         18, 10, 11, 2, 9, 3, 3, 13, 15,  3, 16};
 
-   static int negative_one = -1;
-
    /*
     * Initialize externals - _PD_parse may be called more than once.
     */
-   FRAME(pv) = &FRAME(v)[negative_one];
-   FRAME(ps) = &FRAME(s)[negative_one];
+   FRAME(pv) = &FRAME(v)[0] - 1;
+   FRAME(ps) = &FRAME(s)[0] - 1;
 
    FRAME(state)         = 0;
    FRAME(tmp)           = 0;
