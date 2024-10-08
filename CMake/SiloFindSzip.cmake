@@ -76,7 +76,7 @@ if(SZIP_FOUND)
     if(WIN32)
         get_target_property(SZIP_DLL szip IMPORTED_LOCATION_RELEASE )
         if(SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER)
-            install(FILES ${SZIP_DLL} DESTINATION bin
+            install(FILES ${SZIP_DLL} DESTINATION ${CMAKE_INSTALL_BINDIR}
                     PERMISSIONS OWNER_READ OWNER_WRITE
                                 GROUP_READ GROUP_WRITE
                                 WORLD_READ)

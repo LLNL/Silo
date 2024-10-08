@@ -101,14 +101,14 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     target_link_libraries(browser ${HDF5_C_LIBRARIES})
 endif()
 
-install(TARGETS browser DESTINATION bin EXPORT ${silo_targets_name}
+install(TARGETS browser DESTINATION ${CMAKE_INSTALL_BINDIR} EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
 
 if(NOT WIN32)
     install(FILES silodiff silofile
-            DESTINATION bin
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
