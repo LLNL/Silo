@@ -336,6 +336,9 @@ configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
 # Create config.h from config.h.in
 ###-----------------------------------------------------------------------------
 
+# define and populate CMAKE_INSTALL_*DIR variables
+include(GNUInstallDirs)
+
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
     include(FortranCInterface)
@@ -343,7 +346,7 @@ if(SILO_ENABLE_FORTRAN)
     FortranCInterface_HEADER(${silo_build_include_dir}/silo_FC.h MACRO_NAMESPACE "FC_")
     if(EXISTS ${silo_build_include_dir}/silo_FC.h)
         set(HAVE_SILO_FC_H 1)
-        install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION include
+        install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
                 PERMISSIONS OWNER_READ OWNER_WRITE
                             GROUP_READ GROUP_WRITE
                             WORLD_READ)
@@ -611,7 +614,7 @@ set(silo_headers
 if(WIN32)
     list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
     # Also install silodiff.bat into bin
-    install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION bin
+    install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION ${CMAKE_INSTALL_BINDIR}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
@@ -624,7 +627,7 @@ if(WIN32)
     endif()
 endif()
 
-install(FILES ${silo_headers} DESTINATION include
+install(FILES ${silo_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
@@ -639,7 +642,7 @@ endif()
 # setting up for installing Silo CMake config files
 set(silo_targets_name "SiloTargets")
 install(TARGETS silo EXPORT ${silo_targets_name}
-        LIBRARY DESTINATION lib
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
@@ -674,7 +677,7 @@ if(SILO_ENABLE_SILOCK AND NOT WIN32)
     target_include_directories(silock PRIVATE
         ${silo_build_include_dir}
         ${Silo_SOURCE_DIR}/src/silo)
-    install(TARGETS silock DESTINATION bin EXPORT ${silo_targets_name}
+    install(TARGETS silock DESTINATION ${CMAKE_INSTALL_BINDIR} EXPORT ${silo_targets_name}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
@@ -699,18 +702,23 @@ endif()
 # INSTALL
 #-----------------------------------------------------------------------------
 
-install(EXPORT ${silo_targets_name} DESTINATION cmake)
+###
+# Set up the CMAKE install location
+###
+set(CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Silo)
+
+install(EXPORT ${silo_targets_name} DESTINATION ${CMAKE_MODULE_INSTALL_DIR})
 
 include(${CMAKE_ROOT}/Modules/CMakePackageConfigHelpers.cmake)
 
 ###
 # Set up the include install location for use with the package config files
 ###
-set(INCLUDE_INSTALL_DIR include)
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
 
 configure_package_config_file(${Silo_SOURCE_DIR}/CMake/SiloConfig.cmake.in
   ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
-  INSTALL_DESTINATION cmake
+  INSTALL_DESTINATION ${CMAKE_MODULE_INSTALL_DIR}
   PATH_VARS INCLUDE_INSTALL_DIR
   )
 
@@ -723,7 +731,7 @@ write_basic_package_version_file(
 
 install(FILES ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
               ${Silo_BINARY_DIR}/cmake/SiloConfigVersion.cmake
-        DESTINATION cmake
+        DESTINATION ${CMAKE_MODULE_INSTALL_DIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)

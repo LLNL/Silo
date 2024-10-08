@@ -92,7 +92,7 @@ target_include_directories(silex PRIVATE
      ${Silo_SOURCE_DIR}/src/silo
      ${Silo_SOURCE_DIR}/tools/silex)
 
-install(TARGETS silex DESTINATION bin EXPORT ${silo_targets_name}
+install(TARGETS silex DESTINATION ${CMAKE_INSTALL_BINDIR} EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
@@ -125,7 +125,7 @@ if(WIN32 AND TARGET Qt6::windeployqt)
     install(
         DIRECTORY
         "${CMAKE_CURRENT_BINARY_DIR}/windeployqt/"
-        DESTINATION bin
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 endif()
 

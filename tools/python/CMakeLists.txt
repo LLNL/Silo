@@ -74,9 +74,9 @@ Python_add_library(SiloPy MODULE
 # Have the output be relative to the root build dir, not in tools/python subdir
 if(WIN32)
   # on Windows, the module should live alongside the silo dll, so put it in bin
-  set(mod_dest bin)
+  set(mod_dest ${CMAKE_INSTALL_BINDIR})
 else()
-  set(mod_dest lib)
+  set(mod_dest ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 set_target_properties(SiloPy PROPERTIES
@@ -94,7 +94,7 @@ install(TARGETS SiloPy DESTINATION ${mod_dest} EXPORT ${silo_targets_name}
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
 
-install(FILES s2ex.py DESTINATION bin
+install(FILES s2ex.py DESTINATION ${CMAKE_INSTALL_BINDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
