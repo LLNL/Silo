@@ -13,5 +13,5 @@ A [GitHub Q&A Discussion](https://github.com/LLNL/Silo/discussions/new?category=
 
 For LLNL users who have matters requiring *special handling*, please follow the same procedure as for VisIt and use the unpublished VisIt email list.
 
-In general, coverage is during normal West Coast business hours, 8am-12pm and 1-5pm (GMT-8, San Francisco time zone), Monday through Friday excluding [LLNL holidays](https://supplychain.llnl.gov/poattach/pdf/llnl_holidays.pdf).
+In general, coverage is during normal West Coast business hours, 8am-12pm and 1-5pm (GMT-8, San Francisco time zone), Monday through Friday excluding [LLNL holidays](https://supplychain.llnl.gov/sites/supplychain/files/2024-03/llnl_holidays.pdf).
 Response time may be as much as four hours due to team member’s multi-tasking among many responsibilities.
