@@ -1,7 +1,7 @@
 ---
 title: About
 ---
-Silo is a [C/Fortran API](https://silo.readthedocs.io/en/latest/) for reading and writing a wide variety of scientific data to binary files.
+Silo is a [C/Fortran API](https://silo.readthedocs.io/) for reading and writing a wide variety of scientific data to binary files.
 Silo files can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
 
 Consequently, Silo facilitates the development of general purpose tools for processing scientific data.
