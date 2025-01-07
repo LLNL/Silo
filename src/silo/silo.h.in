@@ -1011,6 +1011,7 @@ typedef struct DBmultimatspecies_ {
     int            empty_cnt;   /* size of empty list */
     int            repr_block_idx; /* index of a 'representative' block */
     char          *specnames_alloc; /* original alloc of matnames as string list */
+    char          *matname; /* associated multi-mat object name */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------
