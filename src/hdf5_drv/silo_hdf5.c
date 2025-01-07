@@ -14846,6 +14846,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
 
         /* Create object and initialize meta data */
         if (NULL==(mm=DBAllocMultimatspecies(0))) return NULL;
+        mm->matname = OPTDUP(m.matname);
         mm->nspec = m.nspec;
         mm->ngroups = m.ngroups;
         mm->blockorigin = m.blockorigin;

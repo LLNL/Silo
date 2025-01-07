@@ -4022,7 +4022,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
       if (tmpnames != NULL) {
          if (mm->nblocks > 0)
              db_StringListToStringArrayMBOpt(tmpnames, &(mm->meshnames), &(mm->meshnames_alloc), mm->nblocks);
-         FREE(tmpnames);
+       /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
       if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
          mm->groupnames = DBStringListToStringArray(tmpgnames, &(mm->lgroupings), !skipFirstSemicolon);
@@ -4300,7 +4300,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
       if (tmpnames != NULL) {
          if (mv->nvars > 0)
              db_StringListToStringArrayMBOpt(tmpnames, &(mv->varnames), &(mv->varnames_alloc), mv->nvars);
-         FREE(tmpnames);
+       /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
 
       if (rpnames != NULL)
@@ -4439,7 +4439,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
       if (tmpnames != NULL) {
           if (mt->nmats > 0)
               db_StringListToStringArrayMBOpt(tmpnames, &(mt->matnames), &(mt->matnames_alloc), mt->nmats);
-          FREE(tmpnames);
+        /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
 
       if (tmpmaterial_names && mt->nmatnos > 0)
@@ -4539,6 +4539,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       DEFALL_OBJ("empty_list", &tmpmms.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmms.empty_cnt, DB_INT);
       DEFINE_OBJ("repr_block_idx", &tmpmms.repr_block_idx, DB_INT);
+      DEFALL_OBJ("matname", &tmpmms.matname, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMATSPECIES) < 0)
          return NULL;
@@ -4560,7 +4561,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       {
           if (mms->nspec > 0)
               db_StringListToStringArrayMBOpt(tmpnames, &(mms->specnames), &(mms->specnames_alloc), mms->nspec);
-          FREE(tmpnames);
+          /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
 
       if (tmpspecnames != NULL)
