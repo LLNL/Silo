@@ -4539,6 +4539,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       DEFALL_OBJ("empty_list", &tmpmms.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmms.empty_cnt, DB_INT);
       DEFINE_OBJ("repr_block_idx", &tmpmms.repr_block_idx, DB_INT);
+      DEFALL_OBJ("matname", &tmpmms.matname, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMATSPECIES) < 0)
          return NULL;
