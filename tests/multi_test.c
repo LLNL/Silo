@@ -51,6 +51,8 @@ product endorsement purposes.
 */
 #include <config.h>
 
+#include <hdf5.h>
+
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -892,6 +894,7 @@ main(int argc, char *argv[])
         }
     }
 
+    DBSetCompatibilityMode(compat);
     DBShowErrors(DB_ALL_AND_DRVR, NULL);
     if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
     DBSetEnableChecksums(dochecks);
@@ -975,7 +978,6 @@ main(int argc, char *argv[])
     /* 
      * Create the multi-block curvilinear 2d mesh.
      */
-    DBSetCompatibilityMode(compat);
     for (t = 0; t < time_series; t++)
     {
        int emb = 1;
@@ -1012,7 +1014,6 @@ main(int argc, char *argv[])
            fprintf(stderr, "Error in creating '%s'.\n", filename);
        }
     }
-    DBSetCompatibilityMode(0);
 
     /* 
      * Create the multi-block point 2d mesh.
@@ -3254,6 +3255,18 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                 ghost[j] = itemp;
             }
         }
+
+        if (block % (nblocks_x*nblocks_y*nblocks_z/2) == 0)
+
+if (!check_early_close)
+{
+const void *fidvp = DBGrabDriver(dbfile);
+hid_t fid = *((hid_t*)fidvp);
+H5Fflush(fid, H5F_SCOPE_LOCAL );
+H5Fflush(fid, H5F_SCOPE_GLOBAL);
+H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_LATEST);
+DBUngrabDriver(dbfile, fidvp);
+}
 
         /* 
          * Calculate the external face list.

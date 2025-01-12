@@ -373,6 +373,7 @@ typedef enum {
    occupy the 2nd most significant nibble. */
 #define DB_COMPAT_OVER_PERF     0x00000010
 #define DB_PERF_OVER_COMPAT     0x00000020 
+#define DB_H5DEFAULT_COMPAT     0x00000040 
 
 /* Target machine for DBCreate */
 #define         DB_LOCAL        0
@@ -553,7 +554,7 @@ typedef enum {
 #define     E_NOHDF5 33         /*HDF5 driver not available */
 #define     E_EMPTYOBJECT 34    /*Empty object not currently permitted*/
 #define     E_OBJBUFFULL  35    /*No more temp. buffer space for object */
-#define     E_NOSILOHDF5 36     /*Not HDF5 silo produced by silo */
+#define     E_NOSILOHDF5 36     /*Not HDF5 file produced by silo */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
