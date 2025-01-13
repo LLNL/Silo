@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
@@ -93,23 +93,23 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 # So, we have to make sure that we corrupt the file somewhere withn
 # some dataset raw data. We're aiming to corrupt the raw data for
 # the facelist object, "fl1" in block 2 in the file by using octal
-# dump (od) to find a sequence of 4 integers associated with that
-# data, 167, 179, 323, 311. There are 6 facelist objects in the
-# multi_ucd3d.h5 file that conain this sequence for blocks 2, 11,
-# 14, 23, 26 and 35. And, no other raw data contains this sequence.
-# We do this using octal dump (od) and treating the *entire* contents
-# of the file as type d4 (decimal, 4-byte ints) and then looking for
-# the sequence of ints we know should exist in the file. But, this
-# approach has two issues both having to do with the offset at which
-# od begins to a) treat each sequence of 4 bytes as a decimal integer
-# and b) treat a sequence of 4 such integers as a single line it outputs.
-# In either case, the wrong offset can defeat our logic. However, for
-# the sequence of 4, 4-byte integers, there are only 16 unique offsets
-# we need to consider before we either find a match or conclude none exists.
-# So, we loop over successive offsets starting from 0 each 1 byte
-# further down the file until we find what we're looking for. We then
-# take the *minimum* offset we find as that will be associated with the 
-# raw data of the object "fl1" for block 2.
+# dump (od). First, we find a sequence of 4 integers associated with
+# that data, 167, 179, 323, 311. 6 facelist objects in multi_ucd3d.h5
+# contain this sequence; blocks 2, 11, 14, 23, 26 and 35. And, no other
+# raw data contains this sequence. We use octal dump (od) and treat
+# the *entire* contents of the file as type d4 (decimal, 4-byte ints)
+# and then grep for the sequence of ints we know should exist in the
+# file. But, this approach has two issues both having to do with the
+# skip at which od begins to a) treat each sequence of 4 bytes as a
+# decimal integer and b) treat each sequence of 4 such integers as a
+# single line it outputs. In either case, the wrong skip can defeat
+# grep logic. However, for the sequence of 4, 4-byte integers, there
+# are only 16 unique skips we need to try before we either find a
+# match or conclude none exists. So, we loop over successive skips 
+# starting from 0 each 1 byte further down the file until we find what
+# we're looking for. We then take the *minimum* offset we find as that
+# will be associated with the first "fl1" object raw data written to
+# the file for block 2.
 #
 minoffset=$(ls -l h5_check_files/multi_ucd3d.h5 | cut -d' ' -f5)
 skip=0
@@ -139,22 +139,21 @@ leftover=`expr $size - $minoffset - 16`
 tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 
 #
-# Now, run browser with checksumming turned on and make sure we
-# detect a checksumming error
+# First, run browser with checksumming not turned on and make sure
+# we just see the zero'd data we expect.
 #
 result=0
-brOut=`$topDir/../tools/browser/browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1`
-if test -z "`echo $brOut | grep 'Checksum failure'`"; then
+brOut=`$topDir/../tools/browser/browser -q -e 'block2/fl1.nodelist[523:528]' multi_ucd3d_corrupt.h5`
+if test -z "`echo $brOut | grep '{299, 0, 0, 0, 0, 179}'`"; then
     result=1
 fi
 
 #
-# Now, run browser with checksumming not turned on and make sure
-# we just see a diff in the file
+# Now, run browser with checksumming turned on and make sure we
+# detect a checksumming error.
 #
-brOut=`$topDir/../tools/browser/browser -q -e block2/fl1 multi_ucd3d_corrupt.h5`
-# Just look for a large output of characters
-if test -n "`echo $brOut | grep 'Checksum failure'`"; then
+brOut=`$topDir/../tools/browser/browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1`
+if test -z "`echo $brOut | grep 'Checksum failure'`"; then
     result=1
 fi
 
