@@ -52,9 +52,8 @@
 
 # -----------------------------------------------------------------------------
 # Test checksumming capability in silo by generating checksummed data
-# file, copying it, corrupting the copy and then diffing it with browser
-# against the original with and without checksumming turned on during
-# the diff
+# file, copying it, corrupting the copy and then reading it with browser
+# with and without checksumming turned enabled.
 #
 # Programmer: Mark C. Miller
 # Creation:   February 20, 2007
@@ -90,25 +89,40 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 #
 # Determine the offset of an hdf5 dataset in the silo file.
 # We do this because we can't indescriminently corrupt the file.
-# Silo's checksumming is done only on the dataset objects in
-# the file. So, we have to make sure that we corrupt a dataset.
-# We do this using octal dump (od) and looking for some numbers
-# we expect in a silo object (domain_23/fl). Note that od breaks
-# data up into lines of 16 bytes each. Due to variations in HDF5
-# library, the offset at which the sequence 167 179 323 211 can
-# occur can vary. So, we loop over successive starting points
-# each 1 byte further down the file until we find one.
+# Silo's checksumming is done only on the dataset raw data.
+# So, we have to make sure that we corrupt the file somewhere withn
+# some dataset raw data. We're aiming to corrupt the raw data for
+# the facelist object, "fl1" in block 2 in the file by using octal
+# dump (od) to find a sequence of 4 integers associated with that
+# data, 167, 179, 323, 311. There are 6 facelist objects in the
+# multi_ucd3d.h5 file that conain this sequence for blocks 2, 11,
+# 14, 23, 26 and 35. And, no other raw data contains this sequence.
+# We do this using octal dump (od) and treating the *entire* contents
+# of the file as type d4 (decimal, 4-byte ints) and then looking for
+# the sequence of ints we know should exist in the file. But, this
+# approach has two issues both having to do with the offset at which
+# od begins to a) treat each sequence of 4 bytes as a decimal integer
+# and b) treat a sequence of 4 such integers as a single line it outputs.
+# In either case, the wrong offset can defeat our logic. However, for
+# the sequence of 4, 4-byte integers, there are only 16 unique offsets
+# we need to consider before we either find a match or conclude none exists.
+# So, we loop over successive offsets starting from 0 each 1 byte
+# further down the file until we find what we're looking for. We then
+# take the *minimum* offset we find as that will be associated with the 
+# raw data of the object "fl1" for block 2.
 #
-offset=0
+minoffset=$(ls -l h5_check_files/multi_ucd3d.h5 | cut -d' ' -f5)
 skip=0
-while [ $offset -eq 0 -a $skip -lt 17 ]; do
+while [ $skip -lt 16 ]; do
     offset=`od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
     if [ -z "$offset" ]; then
         skip=$(expr $skip + 1)
-        offset=0
         continue
     fi
     offset=`echo $offset | cut -d' ' -f1 | sed 's/^0*//'`
+    if [ $offset -lt $minoffset ]; then
+        minoffset=$offset
+    fi
     skip=$(expr $skip + 1)
 done
 size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
@@ -119,9 +133,9 @@ size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
 # and the last part of the file (minus the part we've zeroed)
 #
 rm -f multi_ucd3d_corrupt.h5
-head -c $offset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
+head -c $minoffset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
 cat $topDir/zeros.dat >> multi_ucd3d_corrupt.h5
-leftover=`expr $size - $offset - 16`
+leftover=`expr $size - $minoffset - 16`
 tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 
 #
@@ -129,7 +143,7 @@ tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 # detect a checksumming error
 #
 result=0
-brOut=`$topDir/../tools/browser/browser -q -c -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5 2>&1`
+brOut=`$topDir/../tools/browser/browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1`
 if test -z "`echo $brOut | grep 'Checksum failure'`"; then
     result=1
 fi
@@ -138,16 +152,16 @@ fi
 # Now, run browser with checksumming not turned on and make sure
 # we just see a diff in the file
 #
-brOut=`$topDir/../tools/browser/browser -q -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5`
+brOut=`$topDir/../tools/browser/browser -q -e block2/fl1 multi_ucd3d_corrupt.h5`
 # Just look for a large output of characters
-if test ${#brOut} -lt 250; then
+if test -n "`echo $brOut | grep 'Checksum failure'`"; then
     result=1
 fi
 
 #
 # Cleanup
 #
-#rm -rf h5_check_files
-#rm -f multi_ucd3d_corrupt.h5
+rm -rf h5_check_files
+rm -f multi_ucd3d_corrupt.h5
 
 exit $result 
