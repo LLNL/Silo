@@ -328,6 +328,9 @@ if(SILO_VERS_PAT)
     string(APPEND SILO_VERS_TAG "_${SILO_VERS_PAT}")
 endif()
 
+# Bump if API changes
+set(SILO_SOVERSION 4)
+
 configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
                ${silo_build_include_dir}/silo.h)
 
@@ -589,6 +592,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 add_library(silo ${silo_library_sources})
+set_target_properties(silo PROPERTIES SOVERSION ${SILO_SOVERSION})
 
 if(UNIX)
     target_link_libraries(silo m)
