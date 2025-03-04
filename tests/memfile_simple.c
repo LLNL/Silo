@@ -61,10 +61,12 @@ product endorsement purposes.
 #include <silo.h>
 #include <std.c>
 
+#include <hdf5.h>
+
 #define ASSERT(A,M) \
-{   errno = 0; \
-    if (!(A)) \
-    { char const *errmsg = errno ? strerror(errno) : ""; \
+{   db_errno = 0; \
+    if (!(A) || db_errno!=0) \
+    { char const *errmsg = db_errno ? DBErrString() : ""; \
         fprintf(stderr, "%s:%d:%s: assert=\"%s\", msg=\"%s\", sys=\"%s\".\n", \
             __FILE__, __LINE__, __func__, #A, #M, errmsg); \
         abort(); \
@@ -147,9 +149,13 @@ main(int argc, char *argv[])
     DBquadvar     *qv;
     DBoptlist *src_file_optlist;
     int fic_vfd = DB_H5VFD_FIC;
+    int fic_flags = 0x02 | 0x04;
+    int core_vfd = DB_H5VFD_CORE;
+    int src_core_optset; 
     int src_fic_optset;
     DBoptlist *dst_file_optlist;
     int dst_fic_optset;
+    int no_backing_store = 1;
 
     /*
      * Parse the command-line.
@@ -157,12 +163,14 @@ main(int argc, char *argv[])
     for (i = 1; i < argc; i++)
     {
         if (!strncmp(argv[i], "DB_HDF5", 7))
-        {
             driver = StringToDriver(argv[i]);
-        }
+        else if (!strcmp(argv[i], "show-all-errors"))
+            show_all_errors = 1;
 	else if (argv[i][0] != '\0')
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
     }
+
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
     /* Read whole file into a buf + 64 kilobytes (2^6*2^10) of extra space */
     if (ReadWholeFileToMem(filename, (1<<16), &srcbuf) != 0)
@@ -176,24 +184,37 @@ main(int argc, char *argv[])
        its contents into the newly created memory file using cpbuf...
        This works because I've been sure to allocate the destination 
        buffer large enough that no reallocs will be needed. */
-#ifndef _WIN32
-#warning WHAT ABOUT THE FILENAMES USED HERE. ONLY TIME RELEVANT IS BACKING_STORE ON 
-#endif
     src_file_optlist = DBMakeOptlist(10);
     DBAddOption(src_file_optlist, DBOPT_H5_VFD, &fic_vfd);
     DBAddOption(src_file_optlist, DBOPT_H5_FIC_SIZE, &(srcbuf.size));
     DBAddOption(src_file_optlist, DBOPT_H5_FIC_BUF, srcbuf.buf);
+    DBAddOption(src_file_optlist, DBOPT_H5_FIC_FLAGS, &(fic_flags));
     src_fic_optset = DBRegisterFileOptionsSet(src_file_optlist);
 
     /* Ok, now have Silo open this buffer */
     ASSERT(srcdb = DBOpen("dummy.silo", DB_HDF5_OPTS(src_fic_optset), DB_READ),"");
 
+    /* Open the same buffer a second time in read-only mode. In theory, this should
+     * work similarly to having the same actual file open multiple times in read-only */
+    ASSERT(dstdb = DBOpen("dummy1.silo", DB_HDF5_OPTS(src_fic_optset), DB_READ),"");
+    DBClose(dstdb);
+
+    /* Confirm we can "read" this Silo file by accessing an object that should
+       be present and interrogating its value(s). */
+    ASSERT(qv=DBGetQuadvar(srcdb, "v"),"");
+    ASSERT(!strcmp(qv->meshname,"quadmesh2d"),"");
+    ASSERT(qv->nels==1271,"");
+    ASSERT(qv->dims[0]==31&&qv->dims[1]==41,"");
+    DBFreeQuadvar(qv);
+
     dst_file_optlist = DBMakeOptlist(10);
-    DBAddOption(dst_file_optlist, DBOPT_H5_VFD, &fic_vfd);
-    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_SIZE, &(dstbuf.size));
-    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_BUF, dstbuf.buf);
+    DBAddOption(dst_file_optlist, DBOPT_H5_VFD, &core_vfd);
+    DBAddOption(dst_file_optlist, DBOPT_H5_CORE_NO_BACK_STORE, &no_backing_store);
     dst_fic_optset = DBRegisterFileOptionsSet(dst_file_optlist);
 
+    /* Lets *create* a file in memory using CORE vfd, copy something from the
+       original file image we have already opened and then get the resulting buffer
+       core file image and open that buffer as an HDF5 file. */
     ASSERT(dstdb = DBCreate("foo.silo", DB_CLOBBER, DB_LOCAL,
         "Copy", DB_HDF5_OPTS(dst_fic_optset)),"");
     {
@@ -202,22 +223,27 @@ main(int argc, char *argv[])
         int vals[256]; /* 1 kilobyte worth of data */
         DBWrite(dstdb, DBSPrintf("foo_%02d",i), vals, &nvals, 1, DB_INT);
     }
-    /*ASSERT(DBCp("-r", srcdb, dstdb, "mat1", "foo", DB_EOA) >= 0, "");*/
+    ASSERT(DBCp("-r", srcdb, dstdb, "mat1", "foo", DB_EOA)>=0, "");
 
+    /* Ok, we've created a "core" file. Lets flush it and get the
+     * buffer of it back */
+    {
+        DBFlush(dstdb);
+        hid_t hdf5_file_id = *((hid_t*) DBGrabDriver(dstdb));
+        dstbuf.used = H5Fget_file_image(hdf5_file_id, NULL, 0);
+        H5Fget_file_image(hdf5_file_id, dstbuf.buf, dstbuf.size);
+        DBUngrabDriver(dstdb,0);
+    }
+
+    /* Now, close the files we were using */
     DBClose(srcdb);
     DBClose(dstdb);
-#ifndef _WIN32
-#warning MAYBE NEED ALLOC/FREE METHODS FOR BUFINFOs
-#endif
-    /*free(dstbuf.buf);*/
-    exit(1);
 
     /* open origional file again, just to make sure the buffer is still ok */
-    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5_OPTS(src_fic_optset), DB_READ),"2nd open w/DB_READ");
+    ASSERT(srcdb = DBOpen("dummy.silo", DB_HDF5_OPTS(src_fic_optset), DB_READ),"2nd open w/DB_READ");
 
-    ASSERT(qm = DBGetQuadmesh(dbfile, "quadmesh2d"),"");
-    DBFreeQuadmesh(qm); /* we should use the qm below */
-    DBClose(dbfile);
+    ASSERT(qm = DBGetQuadmesh(srcdb, "quadmesh2d"),"");
+    DBClose(srcdb);
 
     /* free up the file options set */
     DBUnregisterFileOptionsSet(src_fic_optset);
@@ -225,35 +251,44 @@ main(int argc, char *argv[])
     DBUnregisterFileOptionsSet(dst_fic_optset);
     DBFreeOptlist(dst_file_optlist);
 
-#if 0
+    dst_file_optlist = DBMakeOptlist(10);
+    DBAddOption(dst_file_optlist, DBOPT_H5_VFD, &fic_vfd);
+    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_SIZE, &(dstbuf.size));
+    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_BUF, dstbuf.buf);
+    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_FLAGS, &(fic_flags));
+    dst_fic_optset = DBRegisterFileOptionsSet(dst_file_optlist);
+
     /* Now, open for append and write something to it */
-    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5|DB_MEMFILE_INITIAL_BUFINFO|DB_MEMFILE_FINAL_BUFINFO,
-                     DB_APPEND, srcbuf, &dstbuf), DB_APPEND);
+    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5_OPTS(dst_fic_optset), DB_APPEND), "Open core image");
 
     /* Try to write something to this file, but not so big it would cause a realloc */
-    ASSERT(DBPutQuadmesh(dbfile "quadmesh2d_dup", 0, qm->coords, qm->dims, qm->ndims,
-        qm->datatype, qm->coordtype, 0),"");
+    ASSERT(DBPutQuadmesh(dbfile, "quadmesh2d_dup", 0, qm->coords, qm->dims, qm->ndims,
+        qm->datatype, qm->coordtype, 0)==0,"");
+    DBFreeQuadmesh(qm);
 
+    /* Lets close that file now too */
     DBClose(dbfile);
 
     /* The memfile buffer should be larger */
-    ASSERT(dstbuf.size == srcbuf.size && dstbuf.used > srcbuf.used,"");
+    ASSERT(dstbuf.size == srcbuf.size && dstbuf.used < srcbuf.used,"");
 
     /* Ok, now open again for append and write so much we cause a realloc */
-    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5|DB_MEMFILE_INITIAL_BUFINFO|DB_MEMFILE_FINAL_BUFINFO, DB_APPEND,
-                     srcbuf, &dstbuf), DB_APPEND and overflow);
+    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5_OPTS(dst_fic_optset), DB_APPEND), "2nd core image open");
 
     /* compute how many 1K writes we can do before we overrun the destination buffer */
-    nwrites = (dstbuf.size - dstbuf.used) / (1<<10);
+    nwrites = (dstbuf.size - dstbuf.used) / (1<<10) / 2;
     for (i = 0; i < nwrites+1; i++)
     {
         int nvals = 256;
         int vals[256]; /* 1 kilobyte worth of data */
-        DBWrite(dbfile, DBsprintf("foo_%02d",i), vals, &nvals, 1, DB_INT);
+        DBWrite(dbfile, DBSPrintf("foo_%02d",i), vals, &nvals, 1, DB_INT);
     }
 
     DBClose(dbfile);
-#endif
+    DBSPrintf(0,0);
+    DBFreeOptlist(dst_file_optlist);
+    free(srcbuf.buf);
+    free(dstbuf.buf);
 
     return 0;
 }
