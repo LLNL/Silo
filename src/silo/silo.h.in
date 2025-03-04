@@ -360,11 +360,11 @@ typedef enum {
     DB_NOTYPE=25           /*unknown type */
 } DBdatatype;
 
-/* Flags for DBCreate */
+/* Flags for DBCreate (used only in DBCreate) */
 #define         DB_CLOBBER      0
 #define         DB_NOCLOBBER    1
 
-/* Flags for DBOpen */
+/* Flags for DBOpen (used only in DBOpen) */
 #define         DB_READ         1
 #define         DB_APPEND       2
 
@@ -374,6 +374,10 @@ typedef enum {
 #define DB_COMPAT_OVER_PERF     0x00000010
 #define DB_PERF_OVER_COMPAT     0x00000020 
 #define DB_H5DEFAULT_COMPAT     0x00000040 
+
+/* File image in core (FIC) flags (used only with FIC VFD) */
+#define DB_H5_FIC_DONT_COPY    0x0002
+#define DB_H5_FIC_DONT_RELEASE 0x0004
 
 /* Target machine for DBCreate */
 #define         DB_LOCAL        0

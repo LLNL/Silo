@@ -149,7 +149,7 @@ main(int argc, char *argv[])
     DBquadvar     *qv;
     DBoptlist *src_file_optlist;
     int fic_vfd = DB_H5VFD_FIC;
-    int fic_flags = 0x02 | 0x04;
+    int fic_flags = DB_H5_FIC_DONT_COPY | DB_H5_FIC_DONT_RELEASE;
     int core_vfd = DB_H5VFD_CORE;
     int src_core_optset; 
     int src_fic_optset;

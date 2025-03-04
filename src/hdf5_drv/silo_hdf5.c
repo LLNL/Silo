@@ -223,7 +223,6 @@ extern void zfp_init_zfp();
 #define BASEDUP(S)       ((S)&&*(S)?db_FullName2BaseName(S):NULL)
 #define ALIGN(ADDR,N)   (((ADDR)+(N)-1)&~((N)-1))
 
-/* copies of equiv. symbols in H5LT library */
 #define db_hdf5_H5LT_FILE_IMAGE_OPEN_RW      0x0001
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_COPY    0x0002
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE 0x0004
@@ -5256,6 +5255,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                         db_hdf5_H5LT_file_image_ud_t *udata;
 
                         /* no possible default values can be specified for FIC */
+                        unsigned h5flags = 0x0;
                         int flags = 0x0, size = -1;
                         void *buf = 0;
 
@@ -5282,7 +5282,15 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 
                         /* get optional flags */
                         if ((p = DBGetOption(opts, DBOPT_H5_FIC_FLAGS)))
+                        {
                             flags = *((int*)p);
+                            if (flags & DB_H5_FIC_DONT_COPY)
+                                h5flags |= db_hdf5_H5LT_FILE_IMAGE_DONT_COPY;
+                            if (flags & DB_H5_FIC_DONT_RELEASE)
+                                h5flags |= db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE;
+                        }
+                        if (mode != DB_READ)
+                            h5flags |= db_hdf5_H5LT_FILE_IMAGE_OPEN_RW;
 
                         /* Set callbacks for file image ops ONLY if the file image is NOT copied */
                         if (flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)
