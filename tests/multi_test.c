@@ -515,6 +515,7 @@ int matcounts[MAXBLOCKS];
 int matlists[MAXBLOCKS][MAXMATNO+1];
 int driver = DB_PDB;
 int check_early_close = FALSE;
+int check_libver = FALSE;
 int testread = FALSE;
 int testbadread = FALSE;
 int testflush = FALSE;
@@ -857,6 +858,8 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "fpziplossless")) {
             DBSetCompression("METHOD=FPZIP");
         /* Tests that Silo library responds well if file object is closed pre-maturely */
+        } else if (!strcmp(argv[i], "libver")) {
+            check_libver = TRUE;
         } else if (!strcmp(argv[i], "earlyclose")) {
             check_early_close = TRUE;
         } else if (!strcmp(argv[i], "check")) {
@@ -3258,15 +3261,15 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         if (block % (nblocks_x*nblocks_y*nblocks_z/2) == 0)
 
-if (!check_early_close)
-{
-const void *fidvp = DBGrabDriver(dbfile);
-hid_t fid = *((hid_t*)fidvp);
-H5Fflush(fid, H5F_SCOPE_LOCAL );
-H5Fflush(fid, H5F_SCOPE_GLOBAL);
-H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_LATEST);
-DBUngrabDriver(dbfile, fidvp);
-}
+        if (!check_early_close && driver != DB_PDB && check_libver)
+        {
+            const void *fidvp = DBGrabDriver(dbfile);
+            hid_t fid = *((hid_t*)fidvp);
+            H5Fflush(fid, H5F_SCOPE_LOCAL );
+            H5Fflush(fid, H5F_SCOPE_GLOBAL);
+            H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_LATEST);
+            DBUngrabDriver(dbfile, fidvp);
+        }
 
         /* 
          * Calculate the external face list.
