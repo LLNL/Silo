@@ -505,8 +505,9 @@ typedef enum {
 #define DBOPT_H5_SILO_USE_DIRECT    530
 #define DBOPT_H5_FIC_SIZE           531
 #define DBOPT_H5_FIC_BUF            532
-#define DBOPT_H5_FCPL_HID_T         533
-#define DBOPT_H5_FAPL_HID_T         534
+#define DBOPT_H5_FIC_FLAGS          533
+#define DBOPT_H5_FCPL_HID_T         597
+#define DBOPT_H5_FAPL_HID_T         598
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
