@@ -86,7 +86,7 @@ On old silo file handle returned from DBOpen...
 AT_CHECK($VALGRIND dbversion $STARGS,,expout,ignore)
 AT_CLEANUP
 AT_SETUP(namescheme)
-AT_CHECK($VALGRIND namescheme,,ignore)
+AT_CHECK($VALGRIND namescheme,,[ignore])
 AT_CLEANUP
 AT_SETUP(realloc_obj_and_opts)
 AT_CHECK($VALGRIND realloc_obj_and_opts $STARGS,,ignore)
@@ -111,6 +111,9 @@ AT_CHECK($VALGRIND array $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test testread)
 AT_CHECK($VALGRIND multi_test testread $STARGS,,ignore)
+AT_CLEANUP
+AT_SETUP(multi_test testread libver)
+AT_CHECK($VALGRIND multi_test testread libver $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test testbadread)
 AT_CHECK($VALGRIND multi_test testbadread $STARGS,,ignore)
@@ -279,7 +282,7 @@ AT_BANNER(HDF5 Driver Specific)
 AT_SETUP(grab)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
 AT_CLEANUP
-AT_SETUP(onehex with split driver)
+AT_SETUP(onehex with split VFD)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(onehex with custom fapl/fcpl)
@@ -336,10 +339,10 @@ AT_SETUP(largefile)
 AT_KEYWORDS(large)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile,,ignore,ignore)
 AT_CLEANUP
-#AT_SETUP(memfile_simple)
-#AT_CHECK(testall -small $STARGS,,ignore)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
-#AT_CLEANUP
+AT_SETUP(memfile_simple)
+AT_CHECK(testall -small $STARGS,,ignore)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
+AT_CLEANUP
 
 AT_BANNER(Fortran)
 AT_SETUP(arrayf77)
