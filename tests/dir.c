@@ -219,21 +219,24 @@ int main(int argc, char *argv[])
     /* try to copy the smaller trimesh on top of the larger one */
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh", DB_EOA);
 
-    int nlist  = ndirs + 5;
-    char **list = malloc((nlist) * sizeof(char*));
-    DBSetDir(dbfile, "/");
-    for (i = 0; i < nlist; i++) list[i] = 0;
-    DBLs(dbfile, 0, 0, &nlist);
-    DBLs(dbfile, 0, list, &nlist);
-    for (i = 0; i < nlist; i++)
-        printf("\"%s\"\n", list[i]);
+    /* Test DBLs */
+    {
+        int nlist  = ndirs + 5;
+        char **list = malloc((nlist) * sizeof(char*));
+        DBSetDir(dbfile, "/");
+        for (i = 0; i < nlist; i++) list[i] = 0;
+        DBLs(dbfile, 0, 0, &nlist);
+        DBLs(dbfile, 0, list, &nlist);
+        for (i = 0; i < nlist; i++)
+            printf("\"%s\"\n", list[i]);
 
-    nlist = ndirs + 5;
-    DBSetDir(dbfile, "/tri_dir");
-    for (i = 0; i < nlist; i++) list[i] = 0;
-    DBLs(dbfile, 0, list, &nlist);
-    for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
-    free(list);
+        nlist = ndirs + 5;
+        DBSetDir(dbfile, "/tri_dir");
+        for (i = 0; i < nlist; i++) list[i] = 0;
+        DBLs(dbfile, 0, list, &nlist);
+        for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+        free(list);
+    }
 
     /* make some hellaciously long directory names which are almost the same */
     if (ntocs)
