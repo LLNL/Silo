@@ -51,7 +51,9 @@ product endorsement purposes.
 */
 #include <config.h>
 
+#if HAVE_HDF5_H
 #include <hdf5.h>
+#endif
 
 #include <math.h>
 #include <stdarg.h>
@@ -858,10 +860,10 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "fpziplossless")) {
             DBSetCompression("METHOD=FPZIP");
         /* Tests that Silo library responds well if file object is closed pre-maturely */
-        } else if (!strcmp(argv[i], "libver")) {
-            check_libver = TRUE;
         } else if (!strcmp(argv[i], "earlyclose")) {
             check_early_close = TRUE;
+        } else if (!strcmp(argv[i], "libver")) {
+            check_libver = TRUE;
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly")) {
@@ -3259,17 +3261,25 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             }
         }
 
-        if (block % (nblocks_x*nblocks_y*nblocks_z/2) == 0)
-
-        if (!check_early_close && driver != DB_PDB && check_libver)
+        /* Fiddle with libver settings directly in the middle of a file
+           creation to understand the effects. */
+#if HAVE_HDF5_H
+        if (block == 10 || block == 20)
         {
-            const void *fidvp = DBGrabDriver(dbfile);
-            hid_t fid = *((hid_t*)fidvp);
-            H5Fflush(fid, H5F_SCOPE_LOCAL );
-            H5Fflush(fid, H5F_SCOPE_GLOBAL);
-            H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_LATEST);
-            DBUngrabDriver(dbfile, fidvp);
+            if (!check_early_close && driver != DB_PDB && check_libver)
+            {
+                const void *fidvp = DBGrabDriver(dbfile);
+                hid_t fid = *((hid_t*)fidvp);
+                H5Fflush(fid, H5F_SCOPE_LOCAL );
+                H5Fflush(fid, H5F_SCOPE_GLOBAL);
+                if (block == 10)
+                    H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+                else
+                    H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18);
+                DBUngrabDriver(dbfile, fidvp);
+            }
         }
+#endif
 
         /* 
          * Calculate the external face list.
