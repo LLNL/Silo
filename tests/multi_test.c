@@ -53,6 +53,12 @@ product endorsement purposes.
 
 #if HAVE_HDF5_H
 #include <hdf5.h>
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+#else
+#define HDF5_VERSION_GE(Maj,Min,Rel)  0>1
 #endif
 
 #include <math.h>
@@ -3263,7 +3269,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         /* Fiddle with libver settings directly in the middle of a file
            creation to understand the effects. */
-#if HAVE_HDF5_H
+#if HDF5_VERSION_GE(1,10,2)
         if (block == 10 || block == 20)
         {
             if (!check_early_close && driver != DB_PDB && check_libver)
