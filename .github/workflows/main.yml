@@ -36,3 +36,16 @@ jobs:
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
         make -j 8 check
+
+    - name: Gather failed logs
+      if: failure()
+      run: |
+        find tests/testsuite.dir -size +1M -exec rm -f {} \;
+        tar cvf - tests/testsuite.dir | xz -T0 -e -9 -z > testsuite.dir.tar.xz
+
+    - name: Upload log artifact
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: failed-logs
+        path: testsuite.dir.tar.xz        
