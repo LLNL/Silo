@@ -40,8 +40,8 @@ jobs:
     - name: Gather failed logs
       if: failure()
       run: |
-        find tests/testsuite.dir -size +1M -exec rm -f {} \;
-        tar cvf - tests/testsuite.dir | xz -T0 -e -9 -z > testsuite.dir.tar.xz
+        find build/tests/testsuite.dir -size +1M -exec rm -f {} \;
+        tar cvf - build/tests/testsuite.dir | xz -T0 -e -9 -z > testsuite.dir.tar.xz
 
     - name: Upload log artifact
       if: failure()
