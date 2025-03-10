@@ -90,7 +90,7 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 # Determine the offset of an hdf5 dataset in the silo file.
 # We do this because we can't indescriminently corrupt the file.
 # Silo's checksumming is done only on the dataset raw data.
-# So, we have to make sure that we corrupt the file somewhere withn
+# So, we have to make sure that we corrupt the file somewhere within
 # some dataset raw data. We're aiming to corrupt the raw data for
 # the facelist object, "fl1" in block 2 in the file by using octal
 # dump (od). First, we find a sequence of 4 integers associated with
