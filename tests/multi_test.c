@@ -51,6 +51,16 @@ product endorsement purposes.
 */
 #include <config.h>
 
+#if HAVE_HDF5_H
+#include <hdf5.h>
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+#else
+#define HDF5_VERSION_GE(Maj,Min,Rel)  0>1
+#endif
+
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -513,6 +523,7 @@ int matcounts[MAXBLOCKS];
 int matlists[MAXBLOCKS][MAXMATNO+1];
 int driver = DB_PDB;
 int check_early_close = FALSE;
+int check_libver = FALSE;
 int testread = FALSE;
 int testbadread = FALSE;
 int testflush = FALSE;
@@ -857,6 +868,8 @@ main(int argc, char *argv[])
         /* Tests that Silo library responds well if file object is closed pre-maturely */
         } else if (!strcmp(argv[i], "earlyclose")) {
             check_early_close = TRUE;
+        } else if (!strcmp(argv[i], "libver")) {
+            check_libver = TRUE;
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly")) {
@@ -892,6 +905,7 @@ main(int argc, char *argv[])
         }
     }
 
+    DBSetCompatibilityMode(compat);
     DBShowErrors(DB_ALL_AND_DRVR, NULL);
     if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
     DBSetEnableChecksums(dochecks);
@@ -975,7 +989,6 @@ main(int argc, char *argv[])
     /* 
      * Create the multi-block curvilinear 2d mesh.
      */
-    DBSetCompatibilityMode(compat);
     for (t = 0; t < time_series; t++)
     {
        int emb = 1;
@@ -1012,7 +1025,6 @@ main(int argc, char *argv[])
            fprintf(stderr, "Error in creating '%s'.\n", filename);
        }
     }
-    DBSetCompatibilityMode(0);
 
     /* 
      * Create the multi-block point 2d mesh.
@@ -3254,6 +3266,26 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                 ghost[j] = itemp;
             }
         }
+
+        /* Fiddle with libver settings directly in the middle of a file
+           creation to understand the effects. */
+#if HDF5_VERSION_GE(1,10,2)
+        if (block == 10 || block == 20)
+        {
+            if (!check_early_close && driver != DB_PDB && check_libver)
+            {
+                const void *fidvp = DBGrabDriver(dbfile);
+                hid_t fid = *((hid_t*)fidvp);
+                H5Fflush(fid, H5F_SCOPE_LOCAL );
+                H5Fflush(fid, H5F_SCOPE_GLOBAL);
+                if (block == 10)
+                    H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+                else
+                    H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18);
+                DBUngrabDriver(dbfile, fidvp);
+            }
+        }
+#endif
 
         /* 
          * Calculate the external face list.

@@ -2395,16 +2395,16 @@ read at_status <"$at_status_file"
 #AT_STOP_9
 #AT_START_10
 at_fn_group_banner 10 'testsuite.at:115' \
-  "multi_test testbadread" "                         " 1
+  "multi_test testread libver" "                     " 1
 at_xfail=no
 (
   $as_echo "10. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:116: \$VALGRIND multi_test testbadread \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multi_test testbadread $STARGS" "testsuite.at:116"
-( $at_check_trace; $VALGRIND multi_test testbadread $STARGS
+$as_echo "$at_srcdir/testsuite.at:116: \$VALGRIND multi_test testread libver \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_test testread libver $STARGS" "testsuite.at:116"
+( $at_check_trace; $VALGRIND multi_test testread libver $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2421,16 +2421,16 @@ read at_status <"$at_status_file"
 #AT_STOP_10
 #AT_START_11
 at_fn_group_banner 11 'testsuite.at:118' \
-  "multi_test testflush" "                           " 1
+  "multi_test testbadread" "                         " 1
 at_xfail=no
 (
   $as_echo "11. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:119: \$VALGRIND multi_test testflush \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multi_test testflush $STARGS" "testsuite.at:119"
-( $at_check_trace; $VALGRIND multi_test testflush $STARGS
+$as_echo "$at_srcdir/testsuite.at:119: \$VALGRIND multi_test testbadread \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_test testbadread $STARGS" "testsuite.at:119"
+( $at_check_trace; $VALGRIND multi_test testbadread $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2447,7 +2447,7 @@ read at_status <"$at_status_file"
 #AT_STOP_11
 #AT_START_12
 at_fn_group_banner 12 'testsuite.at:121' \
-  "multi_test testflushread" "                       " 1
+  "multi_test testflush" "                           " 1
 at_xfail=no
 (
   $as_echo "12. $at_setup_line: testing $at_desc ..."
@@ -2466,40 +2466,40 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:122"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
-{ set +x
-$as_echo "$at_srcdir/testsuite.at:123: \$VALGRIND multi_test testflushread \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multi_test testflushread $STARGS" "testsuite.at:123"
-( $at_check_trace; $VALGRIND multi_test testflushread $STARGS
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:123"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_12
 #AT_START_13
-at_fn_group_banner 13 'testsuite.at:125' \
-  "multi_test earlyclose" "                          " 1
+at_fn_group_banner 13 'testsuite.at:124' \
+  "multi_test testflushread" "                       " 1
 at_xfail=no
 (
   $as_echo "13. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:126: \$VALGRIND multi_test earlyclose \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multi_test earlyclose $STARGS" "testsuite.at:126"
-( $at_check_trace; $VALGRIND multi_test earlyclose $STARGS
+$as_echo "$at_srcdir/testsuite.at:125: \$VALGRIND multi_test testflush \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_test testflush $STARGS" "testsuite.at:125"
+( $at_check_trace; $VALGRIND multi_test testflush $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo stderr:; cat "$at_stderr"
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:125"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/testsuite.at:126: \$VALGRIND multi_test testflushread \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_test testflushread $STARGS" "testsuite.at:126"
+( $at_check_trace; $VALGRIND multi_test testflushread $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:126"
 $at_failed && at_fn_log_failure
@@ -2512,20 +2512,20 @@ read at_status <"$at_status_file"
 #AT_STOP_13
 #AT_START_14
 at_fn_group_banner 14 'testsuite.at:128' \
-  "partial_io" "                                     " 1
+  "multi_test earlyclose" "                          " 1
 at_xfail=no
 (
   $as_echo "14. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:129: \$VALGRIND partial_io \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND partial_io $STARGS" "testsuite.at:129"
-( $at_check_trace; $VALGRIND partial_io $STARGS
+$as_echo "$at_srcdir/testsuite.at:129: \$VALGRIND multi_test earlyclose \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_test earlyclose $STARGS" "testsuite.at:129"
+( $at_check_trace; $VALGRIND multi_test earlyclose $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:129"
 $at_failed && at_fn_log_failure
@@ -2538,16 +2538,16 @@ read at_status <"$at_status_file"
 #AT_STOP_14
 #AT_START_15
 at_fn_group_banner 15 'testsuite.at:131' \
-  "simple" "                                         " 1
+  "partial_io" "                                     " 1
 at_xfail=no
 (
   $as_echo "15. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:132: \$VALGRIND simple \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND simple $STARGS" "testsuite.at:132"
-( $at_check_trace; $VALGRIND simple $STARGS
+$as_echo "$at_srcdir/testsuite.at:132: \$VALGRIND partial_io \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND partial_io $STARGS" "testsuite.at:132"
+( $at_check_trace; $VALGRIND partial_io $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2564,16 +2564,16 @@ read at_status <"$at_status_file"
 #AT_STOP_15
 #AT_START_16
 at_fn_group_banner 16 'testsuite.at:134' \
-  "ucd" "                                            " 1
+  "simple" "                                         " 1
 at_xfail=no
 (
   $as_echo "16. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:135: \$VALGRIND ucd \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND ucd $STARGS" "testsuite.at:135"
-( $at_check_trace; $VALGRIND ucd $STARGS
+$as_echo "$at_srcdir/testsuite.at:135: \$VALGRIND simple \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND simple $STARGS" "testsuite.at:135"
+( $at_check_trace; $VALGRIND simple $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2590,16 +2590,16 @@ read at_status <"$at_status_file"
 #AT_STOP_16
 #AT_START_17
 at_fn_group_banner 17 'testsuite.at:137' \
-  "ucdsamp3" "                                       " 1
+  "ucd" "                                            " 1
 at_xfail=no
 (
   $as_echo "17. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:138: \$VALGRIND ucdsamp3 \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND ucdsamp3 $STARGS" "testsuite.at:138"
-( $at_check_trace; $VALGRIND ucdsamp3 $STARGS
+$as_echo "$at_srcdir/testsuite.at:138: \$VALGRIND ucd \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND ucd $STARGS" "testsuite.at:138"
+( $at_check_trace; $VALGRIND ucd $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2616,16 +2616,16 @@ read at_status <"$at_status_file"
 #AT_STOP_17
 #AT_START_18
 at_fn_group_banner 18 'testsuite.at:140' \
-  "testall -small -fortran" "                        " 1
+  "ucdsamp3" "                                       " 1
 at_xfail=no
 (
   $as_echo "18. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:141: \$VALGRIND testall -small -fortran \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND testall -small -fortran $STARGS" "testsuite.at:141"
-( $at_check_trace; $VALGRIND testall -small -fortran $STARGS
+$as_echo "$at_srcdir/testsuite.at:141: \$VALGRIND ucdsamp3 \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND ucdsamp3 $STARGS" "testsuite.at:141"
+( $at_check_trace; $VALGRIND ucdsamp3 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2642,16 +2642,16 @@ read at_status <"$at_status_file"
 #AT_STOP_18
 #AT_START_19
 at_fn_group_banner 19 'testsuite.at:143' \
-  "obj" "                                            " 1
+  "testall -small -fortran" "                        " 1
 at_xfail=no
 (
   $as_echo "19. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:144: test \"\$STARGS\" = DB_HDF5 && \$VALGRIND obj \$STARGS allow-long-str-components || \$VALGRIND obj \$STARGS"
-at_fn_check_prepare_dynamic "test \"$STARGS\" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS" "testsuite.at:144"
-( $at_check_trace; test "$STARGS" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS
+$as_echo "$at_srcdir/testsuite.at:144: \$VALGRIND testall -small -fortran \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND testall -small -fortran $STARGS" "testsuite.at:144"
+( $at_check_trace; $VALGRIND testall -small -fortran $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2668,16 +2668,16 @@ read at_status <"$at_status_file"
 #AT_STOP_19
 #AT_START_20
 at_fn_group_banner 20 'testsuite.at:146' \
-  "onehex" "                                         " 1
+  "obj" "                                            " 1
 at_xfail=no
 (
   $as_echo "20. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:147: \$VALGRIND onehex \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND onehex $STARGS" "testsuite.at:147"
-( $at_check_trace; $VALGRIND onehex $STARGS
+$as_echo "$at_srcdir/testsuite.at:147: test \"\$STARGS\" = DB_HDF5 && \$VALGRIND obj \$STARGS allow-long-str-components || \$VALGRIND obj \$STARGS"
+at_fn_check_prepare_dynamic "test \"$STARGS\" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS" "testsuite.at:147"
+( $at_check_trace; test "$STARGS" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2694,16 +2694,16 @@ read at_status <"$at_status_file"
 #AT_STOP_20
 #AT_START_21
 at_fn_group_banner 21 'testsuite.at:149' \
-  "oneprism" "                                       " 1
+  "onehex" "                                         " 1
 at_xfail=no
 (
   $as_echo "21. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:150: \$VALGRIND oneprism \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND oneprism $STARGS" "testsuite.at:150"
-( $at_check_trace; $VALGRIND oneprism $STARGS
+$as_echo "$at_srcdir/testsuite.at:150: \$VALGRIND onehex \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND onehex $STARGS" "testsuite.at:150"
+( $at_check_trace; $VALGRIND onehex $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2720,16 +2720,16 @@ read at_status <"$at_status_file"
 #AT_STOP_21
 #AT_START_22
 at_fn_group_banner 22 'testsuite.at:152' \
-  "onepyramid" "                                     " 1
+  "oneprism" "                                       " 1
 at_xfail=no
 (
   $as_echo "22. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:153: \$VALGRIND onepyramid \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND onepyramid $STARGS" "testsuite.at:153"
-( $at_check_trace; $VALGRIND onepyramid $STARGS
+$as_echo "$at_srcdir/testsuite.at:153: \$VALGRIND oneprism \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND oneprism $STARGS" "testsuite.at:153"
+( $at_check_trace; $VALGRIND oneprism $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2746,16 +2746,16 @@ read at_status <"$at_status_file"
 #AT_STOP_22
 #AT_START_23
 at_fn_group_banner 23 'testsuite.at:155' \
-  "onetet" "                                         " 1
+  "onepyramid" "                                     " 1
 at_xfail=no
 (
   $as_echo "23. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:156: \$VALGRIND onetet \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND onetet $STARGS" "testsuite.at:156"
-( $at_check_trace; $VALGRIND onetet $STARGS
+$as_echo "$at_srcdir/testsuite.at:156: \$VALGRIND onepyramid \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND onepyramid $STARGS" "testsuite.at:156"
+( $at_check_trace; $VALGRIND onepyramid $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2772,16 +2772,16 @@ read at_status <"$at_status_file"
 #AT_STOP_23
 #AT_START_24
 at_fn_group_banner 24 'testsuite.at:158' \
-  "subhex" "                                         " 1
+  "onetet" "                                         " 1
 at_xfail=no
 (
   $as_echo "24. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:159: \$VALGRIND subhex \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND subhex $STARGS" "testsuite.at:159"
-( $at_check_trace; $VALGRIND subhex $STARGS
+$as_echo "$at_srcdir/testsuite.at:159: \$VALGRIND onetet \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND onetet $STARGS" "testsuite.at:159"
+( $at_check_trace; $VALGRIND onetet $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2798,16 +2798,16 @@ read at_status <"$at_status_file"
 #AT_STOP_24
 #AT_START_25
 at_fn_group_banner 25 'testsuite.at:161' \
-  "twohex" "                                         " 1
+  "subhex" "                                         " 1
 at_xfail=no
 (
   $as_echo "25. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:162: \$VALGRIND twohex \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND twohex $STARGS" "testsuite.at:162"
-( $at_check_trace; $VALGRIND twohex $STARGS
+$as_echo "$at_srcdir/testsuite.at:162: \$VALGRIND subhex \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND subhex $STARGS" "testsuite.at:162"
+( $at_check_trace; $VALGRIND subhex $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2824,16 +2824,16 @@ read at_status <"$at_status_file"
 #AT_STOP_25
 #AT_START_26
 at_fn_group_banner 26 'testsuite.at:164' \
-  "multispec" "                                      " 1
+  "twohex" "                                         " 1
 at_xfail=no
 (
   $as_echo "26. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:165: \$VALGRIND multispec \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multispec $STARGS" "testsuite.at:165"
-( $at_check_trace; $VALGRIND multispec $STARGS
+$as_echo "$at_srcdir/testsuite.at:165: \$VALGRIND twohex \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND twohex $STARGS" "testsuite.at:165"
+( $at_check_trace; $VALGRIND twohex $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2850,20 +2850,20 @@ read at_status <"$at_status_file"
 #AT_STOP_26
 #AT_START_27
 at_fn_group_banner 27 'testsuite.at:167' \
-  "sami" "                                           " 1
+  "multispec" "                                      " 1
 at_xfail=no
 (
   $as_echo "27. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:168: \$VALGRIND sami \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND sami $STARGS" "testsuite.at:168"
-( $at_check_trace; $VALGRIND sami $STARGS
+$as_echo "$at_srcdir/testsuite.at:168: \$VALGRIND multispec \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multispec $STARGS" "testsuite.at:168"
+( $at_check_trace; $VALGRIND multispec $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo stderr:; cat "$at_stderr"
+at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:168"
 $at_failed && at_fn_log_failure
@@ -2876,16 +2876,16 @@ read at_status <"$at_status_file"
 #AT_STOP_27
 #AT_START_28
 at_fn_group_banner 28 'testsuite.at:170' \
-  "newsami" "                                        " 1
+  "sami" "                                           " 1
 at_xfail=no
 (
   $as_echo "28. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:171: \$VALGRIND newsami \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND newsami $STARGS" "testsuite.at:171"
-( $at_check_trace; $VALGRIND newsami $STARGS
+$as_echo "$at_srcdir/testsuite.at:171: \$VALGRIND sami \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND sami $STARGS" "testsuite.at:171"
+( $at_check_trace; $VALGRIND sami $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2902,20 +2902,20 @@ read at_status <"$at_status_file"
 #AT_STOP_28
 #AT_START_29
 at_fn_group_banner 29 'testsuite.at:173' \
-  "specmix" "                                        " 1
+  "newsami" "                                        " 1
 at_xfail=no
 (
   $as_echo "29. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:174: \$VALGRIND specmix \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND specmix $STARGS" "testsuite.at:174"
-( $at_check_trace; $VALGRIND specmix $STARGS
+$as_echo "$at_srcdir/testsuite.at:174: \$VALGRIND newsami \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND newsami $STARGS" "testsuite.at:174"
+( $at_check_trace; $VALGRIND newsami $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:174"
 $at_failed && at_fn_log_failure
@@ -2928,16 +2928,16 @@ read at_status <"$at_status_file"
 #AT_STOP_29
 #AT_START_30
 at_fn_group_banner 30 'testsuite.at:176' \
-  "spec" "                                           " 1
+  "specmix" "                                        " 1
 at_xfail=no
 (
   $as_echo "30. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:177: \$VALGRIND spec \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND spec $STARGS" "testsuite.at:177"
-( $at_check_trace; $VALGRIND spec $STARGS
+$as_echo "$at_srcdir/testsuite.at:177: \$VALGRIND specmix \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND specmix $STARGS" "testsuite.at:177"
+( $at_check_trace; $VALGRIND specmix $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2954,20 +2954,20 @@ read at_status <"$at_status_file"
 #AT_STOP_30
 #AT_START_31
 at_fn_group_banner 31 'testsuite.at:179' \
-  "group_test" "                                     " 1
+  "spec" "                                           " 1
 at_xfail=no
 (
   $as_echo "31. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:180: \$VALGRIND group_test 0 0 0 \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND group_test 0 0 0 $STARGS" "testsuite.at:180"
-( $at_check_trace; $VALGRIND group_test 0 0 0 $STARGS
+$as_echo "$at_srcdir/testsuite.at:180: \$VALGRIND spec \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND spec $STARGS" "testsuite.at:180"
+( $at_check_trace; $VALGRIND spec $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo stderr:; cat "$at_stderr"
+at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:180"
 $at_failed && at_fn_log_failure
@@ -2980,35 +2980,22 @@ read at_status <"$at_status_file"
 #AT_STOP_31
 #AT_START_32
 at_fn_group_banner 32 'testsuite.at:182' \
-  "listtypes" "                                      " 1
+  "group_test" "                                     " 1
 at_xfail=no
 (
   $as_echo "32. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:183: \$VALGRIND ucd \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND ucd $STARGS" "testsuite.at:183"
-( $at_check_trace; $VALGRIND ucd $STARGS
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:183"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-$as_echo "$at_srcdir/testsuite.at:184: test -z \"\$STARGS\" && \$VALGRIND listtypes ucd.pdb || \$VALGRIND listtypes ucd.h5"
-at_fn_check_prepare_dynamic "test -z \"$STARGS\" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5" "testsuite.at:184"
-( $at_check_trace; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5
+$as_echo "$at_srcdir/testsuite.at:183: \$VALGRIND group_test 0 0 0 \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND group_test 0 0 0 $STARGS" "testsuite.at:183"
+( $at_check_trace; $VALGRIND group_test 0 0 0 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:184"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:183"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3018,21 +3005,34 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_32
 #AT_START_33
-at_fn_group_banner 33 'testsuite.at:186' \
-  "alltypes" "                                       " 1
+at_fn_group_banner 33 'testsuite.at:185' \
+  "listtypes" "                                      " 1
 at_xfail=no
 (
   $as_echo "33. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:187: \$VALGRIND alltypes \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND alltypes $STARGS" "testsuite.at:187"
-( $at_check_trace; $VALGRIND alltypes $STARGS
+$as_echo "$at_srcdir/testsuite.at:186: \$VALGRIND ucd \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND ucd $STARGS" "testsuite.at:186"
+( $at_check_trace; $VALGRIND ucd $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:186"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/testsuite.at:187: test -z \"\$STARGS\" && \$VALGRIND listtypes ucd.pdb || \$VALGRIND listtypes ucd.h5"
+at_fn_check_prepare_dynamic "test -z \"$STARGS\" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5" "testsuite.at:187"
+( $at_check_trace; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:187"
 $at_failed && at_fn_log_failure
@@ -3045,16 +3045,16 @@ read at_status <"$at_status_file"
 #AT_STOP_33
 #AT_START_34
 at_fn_group_banner 34 'testsuite.at:189' \
-  "wave" "                                           " 1
+  "alltypes" "                                       " 1
 at_xfail=no
 (
   $as_echo "34. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:190: \$VALGRIND wave \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND wave $STARGS" "testsuite.at:190"
-( $at_check_trace; $VALGRIND wave $STARGS
+$as_echo "$at_srcdir/testsuite.at:190: \$VALGRIND alltypes \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND alltypes $STARGS" "testsuite.at:190"
+( $at_check_trace; $VALGRIND alltypes $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3071,16 +3071,16 @@ read at_status <"$at_status_file"
 #AT_STOP_34
 #AT_START_35
 at_fn_group_banner 35 'testsuite.at:192' \
-  "polyzl" "                                         " 1
+  "wave" "                                           " 1
 at_xfail=no
 (
   $as_echo "35. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:193: \$VALGRIND polyzl \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND polyzl $STARGS" "testsuite.at:193"
-( $at_check_trace; $VALGRIND polyzl $STARGS
+$as_echo "$at_srcdir/testsuite.at:193: \$VALGRIND wave \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND wave $STARGS" "testsuite.at:193"
+( $at_check_trace; $VALGRIND wave $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3097,16 +3097,16 @@ read at_status <"$at_status_file"
 #AT_STOP_35
 #AT_START_36
 at_fn_group_banner 36 'testsuite.at:195' \
-  "csg" "                                            " 1
+  "polyzl" "                                         " 1
 at_xfail=no
 (
   $as_echo "36. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:196: \$VALGRIND csg \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND csg $STARGS" "testsuite.at:196"
-( $at_check_trace; $VALGRIND csg $STARGS
+$as_echo "$at_srcdir/testsuite.at:196: \$VALGRIND polyzl \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND polyzl $STARGS" "testsuite.at:196"
+( $at_check_trace; $VALGRIND polyzl $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3266,7 +3266,7 @@ at_fn_check_prepare_dynamic "$VALGRIND arbpoly2d $STARGS" "testsuite.at:214"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:214"
 $at_failed && at_fn_log_failure
@@ -3283,6 +3283,32 @@ at_fn_group_banner 43 'testsuite.at:216' \
 at_xfail=no
 (
   $as_echo "43. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+{ set +x
+$as_echo "$at_srcdir/testsuite.at:220: \$VALGRIND arbpoly2d \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND arbpoly2d $STARGS" "testsuite.at:220"
+( $at_check_trace; $VALGRIND arbpoly2d $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:220"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_44
+#AT_START_45
+at_fn_group_banner 45 'testsuite.at:222' \
+  "readstuff" "                                      " 1
+at_xfail=no
+(
+  $as_echo "45. $at_setup_line: testing $at_desc ..."
   $at_traceon
  # needs data file from multi_test
 { set +x
@@ -4077,6 +4103,7 @@ at_xfail=no
   $as_echo "66. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
+
 { set +x
 $as_echo "$at_srcdir/testsuite.at:330: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testxvers \`pwd\`"
 at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:330"
@@ -4129,7 +4156,6 @@ at_xfail=no
 (
   $as_echo "68. $at_setup_line: testing $at_desc ..."
   $at_traceon
-
 
 { set +x
 $as_echo "$at_srcdir/testsuite.at:344: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77 \$STARGS"
@@ -4184,6 +4210,18 @@ at_xfail=no
   $as_echo "70. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
+{ set +x
+$as_echo "$at_srcdir/testsuite.at:343: testall -small \$STARGS"
+at_fn_check_prepare_dynamic "testall -small $STARGS" "testsuite.at:343"
+( $at_check_trace; testall -small $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:343"
+$at_failed && at_fn_log_failure
+$at_traceon; }
 
 { set +x
 $as_echo "$at_srcdir/testsuite.at:352: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77 \$STARGS"
