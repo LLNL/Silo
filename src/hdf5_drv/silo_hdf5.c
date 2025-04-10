@@ -183,9 +183,13 @@ be used for advertising or product endorsement purposes.
 
 */
 
-/* For Lindstrom compression libs */
-#define DB_HDF5_HZIP_ID (H5Z_FILTER_RESERVED+1)
-#define DB_HDF5_FPZIP_ID (H5Z_FILTER_RESERVED+2)
+/* For Lindstrom compression libs, hzip and fpzip.
+   These IDS were reserved by The HDF Group 11/22/2024.
+   Previously they had been computed offsets from H5Z_FILTER_RESERVED.
+   fpzip also has a reserved ID of 32014 for an implementation from NCAR,
+   https://github.com/NCAR/fpzip_plugin */
+#define DB_HDF5_HZIP_ID 257
+#define DB_HDF5_FPZIP_ID 258
 #ifdef HAVE_HZIP
 #include "hzip.h"
 #ifdef HAVE_LIBZ
