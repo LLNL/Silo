@@ -1,0 +1,338 @@
+/*
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+LLNL-CODE-425250.
+All rights reserved.
+
+This file is part of Silo. For details, see silo.llnl.gov.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the disclaimer below.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the disclaimer (as noted
+     below) in the documentation and/or other materials provided with
+     the distribution.
+   * Neither the name of the LLNS/LLNL nor the names of its
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
+"AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
+LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
+LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
+CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
+PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
+NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This work was produced at Lawrence Livermore National Laboratory under
+Contract  No.   DE-AC52-07NA27344 with  the  DOE.  Neither the  United
+States Government  nor Lawrence  Livermore National Security,  LLC nor
+any of  their employees,  makes any warranty,  express or  implied, or
+assumes   any   liability   or   responsibility  for   the   accuracy,
+completeness, or usefulness of any information, apparatus, product, or
+process  disclosed, or  represents  that its  use  would not  infringe
+privately-owned   rights.  Any  reference   herein  to   any  specific
+commercial products,  process, or  services by trade  name, trademark,
+manufacturer or otherwise does not necessarily constitute or imply its
+endorsement,  recommendation,   or  favoring  by   the  United  States
+Government or Lawrence Livermore National Security, LLC. The views and
+opinions  of authors  expressed  herein do  not  necessarily state  or
+reflect those  of the United  States Government or  Lawrence Livermore
+National  Security, LLC,  and shall  not  be used  for advertising  or
+product endorsement purposes.
+*/
+#include <assert.h>
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <float.h>
+
+#include <silo.h>
+
+#include <std.c>
+
+#define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
+
+/******************************************************************************
+ * Purpose: Write a UCD mesh with degen tet, pyramid and wedge elements.
+ * 
+ * Mark C. Miller, Wed Apr 16 10:58:14 PDT 2025
+ * 
+ *****************************************************************************/
+
+
+/*
+    --------------------+----------------------------------------------------------
+        Ordinary Hex    |                Degenerate Hex Cases
+    --------------------+------------------+-----------------+---------------------
+        VTK_HEXAHEDRON  |    VTK_WEDGE     |    VTK_PYRAMID  |     VTK_TETRA
+                        |   3==2, 7==6     |    7==6==5==4   |  3==2,7==6==5==4
+                        |                  |                 | 
+           7--------6   |          .- 7|6  |      4|5|6|7    |        4|5|6|7
+          /|       /|   |       .-    /|   |        /\       |          /\
+         / |      / |   |    .-      / |   |       /.|\      |         / |\
+        4--------5  |   |  4--------5  |   |      /. | \     |        /  | \
+        |  |     |  |   |  |        |  |   |     /.  |  \    |       /   |  \
+        |  3-----|--2   |  |       .- 3|2  |    3.----|--2   |      /     |.3|2
+        | /      | /    |  |    .-  | /    |   /.     | /    |     /   .- | /
+        |/       |/     |  | .-     |/     |  /.      |/     |    / .-    |/
+        0--------1      |  0--------1      | 0--------1      |   0--------1
+                        |                  |                 |
+*/
+
+static int pointIndex = 0;
+double xcoords[50], ycoords[50], zcoords[50];
+static int AddPoint(double x, double y, double z)
+{
+    assert(pointIndex<sizeof(xcoords)/sizeof(xcoords[0]));
+    xcoords[pointIndex] = x;
+    ycoords[pointIndex] = y;
+    zcoords[pointIndex] = z;
+    return pointIndex++;
+}
+
+static int nodelistIndex = 0;
+static int nodelist[300];
+static int AddHexList(int const nl[8])
+{
+    static int const nhex = 8;
+    assert(nodelistIndex<sizeof(nodelist)/sizeof(nodelist[0]));
+    for (int i = 0; i < nhex; i++)
+        nodelist[nodelistIndex+i] = nl[i];
+    nodelistIndex += nhex;
+    return nodelistIndex-nhex;
+}
+static int AddHexArgs(int i0, int i1, int i2, int i3,
+                      int i4, int i5, int i6, int i7)
+{
+    int nl[8] = {i0, i1, i2, i3, i4, i5, i6, i7};
+    return AddHexList(nl);
+}
+
+static void Add2DegenWedgesInPlaceOfHex0()
+{
+    /* Hex 0: AddHexArgs(0,3,4,1,9,12,13,10);
+                         0 1 2 3 4  5  6  7 */
+
+    /* No new points to add */
+
+    /* Add two degenerate wedges in place of Hex zone 0 */
+
+    /* Node duplication pattern: 01223455 */
+    AddHexArgs(0,3,4,4,9,12,13,13);
+
+    /* Node duplication pattern: 02334677  */
+    AddHexArgs(0,4,1,1,9,13,10,10);
+}
+
+static void Add6DegenPyramidsInPlaceOfHex1()
+{
+
+    /* Hex1: AddHexArgs(1,4,5,2,10,13,14,11);
+                        0 1 2 3  4  5  6  7 */ 
+    int hex[8] = {1,4,5,2,10,13,14,11};
+
+    /* compute center of hex for apex of each pyramid */
+    double c[3] = {0,0,0};
+    for (int i = 0; i < 8; i++)
+    {
+        c[0] += xcoords[hex[i]];
+        c[1] += ycoords[hex[i]];
+        c[2] += zcoords[hex[i]];
+    }
+    c[0] /= 8.0;
+    c[1] /= 8.0;
+    c[2] /= 8.0;
+
+    /* Add one new point in center of this hex */
+    int i = AddPoint(c[0],c[1],c[2]);
+
+    /* create 6 degenerate pyramids */
+
+    /* Node duplication pattern: 0123iiii */
+    AddHexArgs(1,4,5,2,i,i,i,i);
+
+    /* Node duplication pattern: 0374iiii */
+    AddHexArgs(1,2,11,10,i,i,i,i);
+
+    /* Node duplication pattern: 0451iiii */
+    AddHexArgs(1,10,13,4,i,i,i,i);
+
+    /* Node duplication pattern: 1562iiii */
+    AddHexArgs(4,13,14,5,i,i,i,i);
+
+    /* Node duplication pattern: 2673iiii */
+    AddHexArgs(5,14,11,2,i,i,i,i);
+
+    /* Node duplication pattern: 4765iiii */
+    AddHexArgs(10,11,14,13,i,i,i,i);
+}
+
+static void Add4DegenTetsForFace(int i0, int i1, int i2, int i3, int ic)
+{
+    int face[4] = {i0, i1, i2, i3};
+
+    /* compute center of face */
+    double fc[3] = {0,0,0};
+    for (int i = 0; i < 4; i++)
+    {
+        fc[0] += xcoords[face[i]];
+        fc[1] += ycoords[face[i]];
+        fc[2] += zcoords[face[i]];
+    }
+    fc[0] /= 4.0;
+    fc[1] /= 4.0;
+    fc[2] /= 4.0;
+
+    /* Add one new point in center of this face */
+    int ifc = AddPoint(fc[0],fc[1],fc[2]);
+
+    /* Add 4 degenerate tets covering this face */
+    AddHexArgs(i0,i1,ifc,ifc,ic,ic,ic,ic);
+    AddHexArgs(i1,i2,ifc,ifc,ic,ic,ic,ic);
+    AddHexArgs(i2,i3,ifc,ifc,ic,ic,ic,ic);
+    AddHexArgs(i3,i0,ifc,ifc,ic,ic,ic,ic);
+}
+
+static void Add24DegenTetsInPlaceOfHex2()
+{
+    /* Hex2: AddHexArgs(3,6,7,4,12,15,16,13);
+                        0 1 2 3  4  5  6  7 */
+
+    int hex[8] = {3,6,7,4,12,15,16,13};
+
+    /* compute center of hex */
+    double c[3] = {0,0,0};
+    for (int i = 0; i < 8; i++)
+    {
+        c[0] += xcoords[hex[i]];
+        c[1] += ycoords[hex[i]];
+        c[2] += zcoords[hex[i]];
+    }
+    c[0] /= 8.0;
+    c[1] /= 8.0;
+    c[2] /= 8.0;
+
+    /* Add one new point in center of this hex */
+    int i = AddPoint(c[0],c[1],c[2]);
+
+    /* Add 4 tets for face 0 (0123) */
+    Add4DegenTetsForFace(3,6,7,4,i);
+
+    /* Add 4 tets for face 1 (0154) */
+    Add4DegenTetsForFace(3,6,15,12,i);
+
+    /* Add 4 tets for face 2 (0473) */
+    Add4DegenTetsForFace(3,12,13,4,i);
+
+    /* Add 4 tets for face 3 (1265) */
+    Add4DegenTetsForFace(6,7,16,15,i);
+
+    /* Add 4 tets for face 4 (2376) */
+    Add4DegenTetsForFace(7,4,13,16,i);
+
+    /* Add 4 tets for face 5 (4567) */
+    Add4DegenTetsForFace(12,15,16,13,i);
+}
+
+int
+main(int argc, char *argv[])
+{
+    int i;
+    DBfile         *dbfile = NULL;
+    char const * const coordnames[3] = {"xcoords", "ycoords", "zcoords"};
+    double         *coords[3] = {xcoords, ycoords, zcoords};
+    int             shapesize[1], shapecnt[1], shapetyp[1];
+    int		    driver = DB_PDB;
+    char 	    *filename = "degen_hex.silo";
+    int             show_all_errors = FALSE;
+
+    /* Parse command-line */
+    for (i=1; i<argc; i++) {
+	if (!strncmp(argv[i], "DB_", 3)) {
+	    driver = StringToDriver(argv[i]);
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
+	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+	}
+    }
+
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
+    printf("Creating test file \"%s\".\n", filename);
+    dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "Example of degenerate tets", driver);
+
+    /* Bottom layer 3x3 nodes */
+    AddPoint(0,0,0); /* 00 */
+    AddPoint(1,0,0); /* 01 */
+    AddPoint(2,0,0); /* 02 */
+    AddPoint(0,0,1); /* 03 */
+    AddPoint(1,0,1); /* 04 */
+    AddPoint(2,0,1); /* 05 */
+    AddPoint(0,0,2); /* 06 */
+    AddPoint(1,0,2); /* 07 */
+    AddPoint(2,0,2); /* 08 */
+
+    /* Middle layer 3x3 nodes */
+    AddPoint(0,1,0); /* 09 */
+    AddPoint(1,1,0); /* 10 */
+    AddPoint(2,1,0); /* 11 */
+    AddPoint(0,1,1); /* 12 */
+    AddPoint(1,1,1); /* 13 */
+    AddPoint(2,1,1); /* 14 */
+    AddPoint(0,1,2); /* 15 */
+    AddPoint(1,1,2); /* 16 */
+    AddPoint(2,1,2); /* 17 */
+
+    /* Output a point mesh for a confirmation check */
+    DBPutPointmesh(dbfile, "points", 3, coords, pointIndex, DB_DOUBLE, 0);
+
+    AddHexArgs(0,3,4,1,9,12,13,10);  /* Hex 0 */
+    AddHexArgs(1,4,5,2,10,13,14,11); /* Hex 1 */
+    AddHexArgs(3,6,7,4,12,15,16,13); /* Hex 2 */
+    AddHexArgs(4,7,8,5,13,16,17,14); /* Hex 3 */
+
+    /* Output a normal hex mesh for a confirmation check */
+    shapecnt[0] = 4;
+    shapesize[0] = 8;
+    shapetyp[0] = DB_ZONETYPE_HEX;
+    DBPutZonelist2(dbfile, "zonelist", 4, 3, nodelist, nodelistIndex, 0,
+                         0, 0, shapetyp, shapesize, shapecnt, 1, NULL);
+    DBPutUcdmesh(dbfile, "hex", 3, coordnames, coords, 18, 1, "zonelist", NULL, DB_DOUBLE, NULL);
+
+    /* Reset zone list to create degenerate hex cases */
+    nodelistIndex = 0;
+    shapecnt[0] = 0;
+
+    /* Construct the same hex mesh as above except replace each of the first 3 hexs with
+       degenerate cell types that fill them */
+    Add2DegenWedgesInPlaceOfHex0();
+    shapecnt[0] += 2;
+
+    Add6DegenPyramidsInPlaceOfHex1();
+    shapecnt[0] += 6;
+
+    Add24DegenTetsInPlaceOfHex2();
+    shapecnt[0] += 24;
+
+    AddHexArgs(4,7,8,5,13,16,17,14);
+    shapecnt[0] += 1;
+
+    DBPutZonelist2(dbfile, "zonelist2", shapecnt[0], 3, nodelist, nodelistIndex, 0,
+                         0, 0, shapetyp, shapesize, shapecnt, 1, NULL);
+    DBPutUcdmesh(dbfile, "hex2", 3, coordnames, coords, pointIndex, 1, "zonelist2", NULL, DB_DOUBLE, NULL);
+
+    DBClose(dbfile);
+
+    CleanupDriverStuff();
+
+    return 0;
+}
