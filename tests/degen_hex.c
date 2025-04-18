@@ -66,6 +66,7 @@ product endorsement purposes.
  * 
  *****************************************************************************/
 
+/* Add a point to a mesh we are constructing */
 static int pointIndex = 0;
 double xcoords[50], ycoords[50], zcoords[50];
 static int AddPoint(double x, double y, double z)
@@ -77,6 +78,7 @@ static int AddPoint(double x, double y, double z)
     return pointIndex++;
 }
 
+/* Add a hexahedral zone to a mesh we are constructing */
 static int nodelistIndex = 0;
 static int nodelist[300];
 static int AddHexList(int const nl[8])
@@ -104,8 +106,8 @@ static void Add2DegenWedgesInPlaceOfHex0()
        Wedge/Prism. In VTK, the first 3 nodes define one of the triangle ends.
 
        This then effects the degeneracy scheme used to represent a Wedge/Prism
-       as a degenerate hex. For VTK, the degeneracy scheme is 01223455. For
-       Silo it is 01234554. 
+       as a degenerate hex. For VTK with Verdict in VisIt, the degeneracy scheme
+       is 01223455. For Silo it is documented as 01234554. 
 
        We output one of either form based on a command-line argument.  */
 
@@ -114,21 +116,21 @@ static void Add2DegenWedgesInPlaceOfHex0()
 
     /* No new points to add */
 
-    /* Add two degenerate wedges in place of Hex zone 0 */
-    if (vtk_degen)
+    /* Create wedges as degenerate hexs in place of Hex zone 0 */
+    if (vtk_degen) /* use Verdict degeneracy scheme used by VisIT for VTK */
     {
-        /* Node duplication pattern: 01223455 */
+        /* Node duplication pattern for first half of original hex: 01223455 */
         AddHexArgs(0,3,4,4,9,12,13,13);
 
-        /* Node duplication pattern: 02334677  */
+        /* Node duplication pattern for second half of original hex: 02334677  */
         AddHexArgs(0,4,1,1,9,13,10,10);
     }
-    else
+    else /* use Silo degeneracy scheme */
     {
-        /* Node duplication pattern: 01234554 */
+        /* Node duplication pattern for first half of original hex: 01234554 */
         AddHexArgs(0,3,4,1,9,12,12,9);
 
-        /* Node duplication pattern: 45673223 */
+        /* Node duplication pattern for second half of original hex: 45673223 */
         AddHexArgs(9,12,13,10,1,4,4,1);
     }
 }
@@ -155,7 +157,7 @@ static void Add6DegenPyramidsInPlaceOfHex1()
     /* Add one new point in center of this hex */
     int i = AddPoint(c[0],c[1],c[2]);
 
-    /* create 6 degenerate pyramids */
+    /* Create 6 pyramids as degenerate hexs to fill the original Hex1 */
 
     /* Node duplication pattern: 0123iiii */
     AddHexArgs(1,4,5,2,i,i,i,i);
@@ -195,7 +197,7 @@ static void Add4DegenTetsForFace(int i0, int i1, int i2, int i3, int ic)
     /* Add one new point in center of this face */
     int ifc = AddPoint(fc[0],fc[1],fc[2]);
 
-    /* Add 4 degenerate tets covering this face */
+    /* Add 4 tets as degenerate hexs covering this face */
     AddHexArgs(i0,i1,ifc,ifc,ic,ic,ic,ic);
     AddHexArgs(i1,i2,ifc,ifc,ic,ic,ic,ic);
     AddHexArgs(i2,i3,ifc,ifc,ic,ic,ic,ic);
@@ -315,7 +317,7 @@ main(int argc, char *argv[])
     shapecnt[0] = 0;
 
     /* Construct the same hex mesh as above except replace each of the first 3 hexs with
-       degenerate cell types that fill them */
+       different cell types, each as degenerate hexes, that fill the original hexs */
     Add2DegenWedgesInPlaceOfHex0();
     shapecnt[0] += 2;
 
@@ -325,6 +327,7 @@ main(int argc, char *argv[])
     Add24DegenTetsInPlaceOfHex2();
     shapecnt[0] += 24;
 
+    /* Add the final normal hex */
     AddHexArgs(4,7,8,5,13,16,17,14);
     shapecnt[0] += 1;
 
