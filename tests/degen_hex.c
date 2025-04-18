@@ -59,34 +59,12 @@ product endorsement purposes.
 
 #include <std.c>
 
-#define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
-
 /******************************************************************************
  * Purpose: Write a UCD mesh with degen tet, pyramid and wedge elements.
  * 
  * Mark C. Miller, Wed Apr 16 10:58:14 PDT 2025
  * 
  *****************************************************************************/
-
-
-/*
-    --------------------+----------------------------------------------------------
-        Ordinary Hex    |                Degenerate Hex Cases
-    --------------------+------------------+-----------------+---------------------
-        VTK_HEXAHEDRON  |    VTK_WEDGE     |    VTK_PYRAMID  |     VTK_TETRA
-                        |   3==2, 7==6     |    7==6==5==4   |  3==2,7==6==5==4
-                        |                  |                 | 
-           7--------6   |          .- 7|6  |      4|5|6|7    |        4|5|6|7
-          /|       /|   |       .-    /|   |        /\       |          /\
-         / |      / |   |    .-      / |   |       /.|\      |         / |\
-        4--------5  |   |  4--------5  |   |      /. | \     |        /  | \
-        |  |     |  |   |  |        |  |   |     /.  |  \    |       /   |  \
-        |  3-----|--2   |  |       .- 3|2  |    3.----|--2   |      /     |.3|2
-        | /      | /    |  |    .-  | /    |   /.     | /    |     /   .- | /
-        |/       |/     |  | .-     |/     |  /.      |/     |    / .-    |/
-        0--------1      |  0--------1      | 0--------1      |   0--------1
-                        |                  |                 |
-*/
 
 static int pointIndex = 0;
 double xcoords[50], ycoords[50], zcoords[50];
@@ -117,27 +95,49 @@ static int AddHexArgs(int i0, int i1, int i2, int i3,
     return AddHexList(nl);
 }
 
+int vtk_degen = 0;
 static void Add2DegenWedgesInPlaceOfHex0()
 {
-    /* Hex 0: AddHexArgs(0,3,4,1,9,12,13,10);
-                         0 1 2 3 4  5  6  7 */
+    /* Silo's Wedge/Prism node ordering differs from VTK's. 
+
+       In Silo, the first 4 nodes define one of the quad faces of the
+       Wedge/Prism. In VTK, the first 3 nodes define one of the triangle ends.
+
+       This then effects the degeneracy scheme used to represent a Wedge/Prism
+       as a degenerate hex. For VTK, the degeneracy scheme is 01223455. For
+       Silo it is 01234554. 
+
+       We output one of either form based on a command-line argument.  */
+
+    /* Hex 0 is the hex created by AddHexArgs(0,3,4,1,9,12,13,10);
+                                              0 1 2 3 4  5  6  7 */
 
     /* No new points to add */
 
     /* Add two degenerate wedges in place of Hex zone 0 */
+    if (vtk_degen)
+    {
+        /* Node duplication pattern: 01223455 */
+        AddHexArgs(0,3,4,4,9,12,13,13);
 
-    /* Node duplication pattern: 01223455 */
-    AddHexArgs(0,3,4,4,9,12,13,13);
+        /* Node duplication pattern: 02334677  */
+        AddHexArgs(0,4,1,1,9,13,10,10);
+    }
+    else
+    {
+        /* Node duplication pattern: 01234554 */
+        AddHexArgs(0,3,4,1,9,12,12,9);
 
-    /* Node duplication pattern: 02334677  */
-    AddHexArgs(0,4,1,1,9,13,10,10);
+        /* Node duplication pattern: 45673223 */
+        AddHexArgs(9,12,13,10,1,4,4,1);
+    }
 }
 
 static void Add6DegenPyramidsInPlaceOfHex1()
 {
 
-    /* Hex1: AddHexArgs(1,4,5,2,10,13,14,11);
-                        0 1 2 3  4  5  6  7 */ 
+    /* Hex1 is the hex created by AddHexArgs(1,4,5,2,10,13,14,11);
+                                             0 1 2 3  4  5  6  7 */ 
     int hex[8] = {1,4,5,2,10,13,14,11};
 
     /* compute center of hex for apex of each pyramid */
@@ -204,8 +204,8 @@ static void Add4DegenTetsForFace(int i0, int i1, int i2, int i3, int ic)
 
 static void Add24DegenTetsInPlaceOfHex2()
 {
-    /* Hex2: AddHexArgs(3,6,7,4,12,15,16,13);
-                        0 1 2 3  4  5  6  7 */
+    /* Hex2 is the hex created by AddHexArgs(3,6,7,4,12,15,16,13);
+                                             0 1 2 3  4  5  6  7 */
 
     int hex[8] = {3,6,7,4,12,15,16,13};
 
@@ -261,6 +261,8 @@ main(int argc, char *argv[])
 	    driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strcmp(argv[i], "vtk-degen")) {
+            vtk_degen = 1;
 	} else if (argv[i][0] != '\0') {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
@@ -281,7 +283,7 @@ main(int argc, char *argv[])
     AddPoint(1,0,2); /* 07 */
     AddPoint(2,0,2); /* 08 */
 
-    /* Middle layer 3x3 nodes */
+    /* Top layer 3x3 nodes */
     AddPoint(0,1,0); /* 09 */
     AddPoint(1,1,0); /* 10 */
     AddPoint(2,1,0); /* 11 */
@@ -295,7 +297,7 @@ main(int argc, char *argv[])
     /* Output a point mesh for a confirmation check */
     DBPutPointmesh(dbfile, "points", 3, coords, pointIndex, DB_DOUBLE, 0);
 
-    AddHexArgs(0,3,4,1,9,12,13,10);  /* Hex 0 */
+    AddHexArgs(0,3,4,1, 9,12,13,10); /* Hex 0 */
     AddHexArgs(1,4,5,2,10,13,14,11); /* Hex 1 */
     AddHexArgs(3,6,7,4,12,15,16,13); /* Hex 2 */
     AddHexArgs(4,7,8,5,13,16,17,14); /* Hex 3 */
