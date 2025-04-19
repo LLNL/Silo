@@ -98,7 +98,7 @@ static int AddHexArgs(int i0, int i1, int i2, int i3,
 }
 
 int vtk_degen = 0;
-static void Add2DegenWedgesInPlaceOfHex0()
+static int Add2DegenWedgesInPlaceOfHex0()
 {
     /* Silo's Wedge/Prism node ordering differs from VTK's. 
 
@@ -133,9 +133,11 @@ static void Add2DegenWedgesInPlaceOfHex0()
         /* Node duplication pattern for second half of original hex: 45673223 */
         AddHexArgs(9,12,13,10,1,4,4,1);
     }
+
+    return 2;
 }
 
-static void Add6DegenPyramidsInPlaceOfHex1()
+static int Add6DegenPyramidsInPlaceOfHex1()
 {
 
     /* Hex1 is the hex created by AddHexArgs(1,4,5,2,10,13,14,11);
@@ -159,26 +161,28 @@ static void Add6DegenPyramidsInPlaceOfHex1()
 
     /* Create 6 pyramids as degenerate hexs to fill the original Hex1 */
 
-    /* Node duplication pattern: 0123iiii */
+    /* Node duplication pattern: local nodes 0123iiii */
     AddHexArgs(1,4,5,2,i,i,i,i);
 
-    /* Node duplication pattern: 0374iiii */
+    /* Node duplication pattern: local nodes 0374iiii */
     AddHexArgs(1,2,11,10,i,i,i,i);
 
-    /* Node duplication pattern: 0451iiii */
+    /* Node duplication pattern: local nodes 0451iiii */
     AddHexArgs(1,10,13,4,i,i,i,i);
 
-    /* Node duplication pattern: 1562iiii */
+    /* Node duplication pattern: local nodes 1562iiii */
     AddHexArgs(4,13,14,5,i,i,i,i);
 
-    /* Node duplication pattern: 2673iiii */
+    /* Node duplication pattern: local nodes 2673iiii */
     AddHexArgs(5,14,11,2,i,i,i,i);
 
-    /* Node duplication pattern: 4765iiii */
+    /* Node duplication pattern: local nodes 4765iiii */
     AddHexArgs(10,11,14,13,i,i,i,i);
+
+    return 6;
 }
 
-static void Add4DegenTetsForFace(int i0, int i1, int i2, int i3, int ic)
+static int Add4DegenTetsForFace(int i0, int i1, int i2, int i3, int ic)
 {
     int face[4] = {i0, i1, i2, i3};
 
@@ -202,10 +206,14 @@ static void Add4DegenTetsForFace(int i0, int i1, int i2, int i3, int ic)
     AddHexArgs(i1,i2,ifc,ifc,ic,ic,ic,ic);
     AddHexArgs(i2,i3,ifc,ifc,ic,ic,ic,ic);
     AddHexArgs(i3,i0,ifc,ifc,ic,ic,ic,ic);
+
+    return 4;
 }
 
-static void Add24DegenTetsInPlaceOfHex2()
+static int Add24DegenTetsInPlaceOfHex2()
 {
+    int retval = 0;
+
     /* Hex2 is the hex created by AddHexArgs(3,6,7,4,12,15,16,13);
                                              0 1 2 3  4  5  6  7 */
 
@@ -226,23 +234,39 @@ static void Add24DegenTetsInPlaceOfHex2()
     /* Add one new point in center of this hex */
     int i = AddPoint(c[0],c[1],c[2]);
 
-    /* Add 4 tets for face 0 (0123) */
-    Add4DegenTetsForFace(3,6,7,4,i);
+    /* Add 4 tets for face 0 (local nodes 0123) */
+    retval += Add4DegenTetsForFace(3,6,7,4,i);
 
-    /* Add 4 tets for face 1 (0154) */
-    Add4DegenTetsForFace(3,6,15,12,i);
+    /* Add 4 tets for face 1 (local nodes 0154) */
+    retval += Add4DegenTetsForFace(3,6,15,12,i);
 
-    /* Add 4 tets for face 2 (0473) */
-    Add4DegenTetsForFace(3,12,13,4,i);
+    /* Add 4 tets for face 2 (local nodes 0473) */
+    retval += Add4DegenTetsForFace(3,12,13,4,i);
 
-    /* Add 4 tets for face 3 (1265) */
-    Add4DegenTetsForFace(6,7,16,15,i);
+    /* Add 4 tets for face 3 (local nodes 1265) */
+    retval += Add4DegenTetsForFace(6,7,16,15,i);
 
-    /* Add 4 tets for face 4 (2376) */
-    Add4DegenTetsForFace(7,4,13,16,i);
+    /* Add 4 tets for face 4 (local nodes 2376) */
+    retval += Add4DegenTetsForFace(7,4,13,16,i);
 
-    /* Add 4 tets for face 5 (4567) */
-    Add4DegenTetsForFace(12,15,16,13,i);
+    /* Add 4 tets for face 5 (local nodes 4567) */
+    retval += Add4DegenTetsForFace(12,15,16,13,i);
+
+    return retval;
+}
+
+static int Add5DegenTetsInPlaceOfHex2()
+{
+    /* Hex2 is the hex created by AddHexArgs(3,6,7,4,12,15,16,13);
+                                             0 1 2 3  4  5  6  7 */
+
+    AddHexArgs(3,7,13,13,15,15,15,15);  /* Inner, middle from local nodes 0,2,5,7 */
+    AddHexArgs(3,7,15,15,6,6,6,6);      /* For region between middle and local node 1 */
+    AddHexArgs(3,13,7,7,4,4,4,4);       /* For region between middle and local node 3 */
+    AddHexArgs(3,13,15,15,12,12,12,12); /* For region between middle and local node 4 */
+    AddHexArgs(7,15,13,13,16,16,16,16); /* For region between middle and local node 6 */
+
+    return 5;
 }
 
 int
@@ -318,14 +342,15 @@ main(int argc, char *argv[])
 
     /* Construct the same hex mesh as above except replace each of the first 3 hexs with
        different cell types, each as degenerate hexes, that fill the original hexs */
-    Add2DegenWedgesInPlaceOfHex0();
-    shapecnt[0] += 2;
+    shapecnt[0] += Add2DegenWedgesInPlaceOfHex0();
 
-    Add6DegenPyramidsInPlaceOfHex1();
-    shapecnt[0] += 6;
+    shapecnt[0] += Add6DegenPyramidsInPlaceOfHex1();
 
-    Add24DegenTetsInPlaceOfHex2();
-    shapecnt[0] += 24;
+#if 0
+    shapecnt[0] += Add24DegenTetsInPlaceOfHex2();
+#else
+    shapecnt[0] += Add6DegenTetsInPlaceOfHex2();
+#endif
 
     /* Add the final normal hex */
     AddHexArgs(4,7,8,5,13,16,17,14);
