@@ -175,6 +175,7 @@ silo_add_test(NAME compression SRC compression.c)
 silo_add_test(NAME cpz1plt SRC cpz1plt.c)
 silo_add_test(NAME csg SRC csg.c)
 # change the executable name for the 'dir' test since it is also a sys command
+silo_add_test(NAME degen_hex SRC degen_hex.c)
 silo_add_test(NAME sdir SRC dir.c testlib.c)
 silo_add_test(NAME efcentering SRC efcentering.c)
 silo_add_test(NAME empty SRC empty.c)

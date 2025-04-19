@@ -164,6 +164,9 @@ AT_CLEANUP
 AT_SETUP(twohex)
 AT_CHECK($VALGRIND twohex $STARGS,,ignore)
 AT_CLEANUP
+AT_SETUP(degen_hex)
+AT_CHECK($VALGRIND degen_hex $STARGS,,ignore)
+AT_CLEANUP
 AT_SETUP(multispec)
 AT_CHECK($VALGRIND multispec $STARGS,,ignore)
 AT_CLEANUP
