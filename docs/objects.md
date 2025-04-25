@@ -796,15 +796,40 @@ Finally, Silo also supports the specification of expressions representing derive
   Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
   The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
 
-  ```{figure} ./images/ucdzoo.gif
-  :name: ucdzoo
+  ```{figure} ./images/hex_node_orders.png
+  :name: Silo standard hex
   :align: "center"
-  :alt: "Node, edge and face ordering for zoo-type UCD zone shapes."
+  :alt: "Node, edge and face ordering for Silo standard hex."
 
-  Node, edge and face ordering for zoo-type UCD zone shapes.
+  Node, edge and face ordering for Silo standard hex.
   ```
 
-  Given the node ordering in the left-most column, there is indeed an algorithm for determining the other orderings for each cell type.
+  ```{figure} ./images/wedge_node_orders.png
+  :name: Silo standard wedge/prism
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard wedge/prism."
+
+  Node, edge and face ordering for Silo standard wedge/prism.
+  ```
+
+  ```{figure} ./images/pyramid_node_orders.png
+  :name: Silo standard pyramid
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard pyramid."
+
+  Node, edge and face ordering for Silo standard pyramid.
+  ```
+
+  ```{figure} ./images/tet_node_orders.png
+  :name: Silo standard tetrahedron
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard tet."
+
+  Node, edge and face ordering for Silo standard tet.
+  ```
+
+  Given the node ordering in the Silo standard hexahedron, there is indeed an algorithm for determining the other orderings for the other shapes.
+
 
   For edges, each edge is identified by a pair of integer indices; the first being the "tail" of an arrow oriented along the edge and the second being the "head" with the smaller node index always placed first (at the tail).
   Next, the ordering of edges is akin to a lexicographic ordering of these pairs of integers.
@@ -822,6 +847,10 @@ Finally, Silo also supports the specification of expressions representing derive
   We find all faces that share this node.
   Of these, the face that enumerates the next lowest node number as we traverse the nodes using the right hand rule, is placed first in the ordering.
   Then, the face that has the next lowest node number and so on.
+
+  **Global orderings of edges and faces:**
+
+  For global traversals and orderings of all edges or faces in a mesh, the local orderings are repeated for each zone in the mesh starting with the first zone and, of course, skipping edges and faces in later zones that are already accounted for by having been visited in an earlier zone.
 
   An example using arbitrary polyhedrons for some zones is illustrated, below.
   The nodes of a `DB_ZONETYPE_POLYHEDRON` are specified in the following fashion: First specify the number of faces in the polyhedron.
@@ -841,6 +870,20 @@ Finally, Silo also supports the specification of expressions representing derive
 
   This example is intended to illustrate the representation of arbitrary polyhedra.
   So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a 'normal' zonelist, they are expressed using arbitrary connectivity here.
+
+  **Conventions for other shapes as degenerate hexahedra:**
+
+  Finally, among the commonly used finite element shapes, hexahedra are frequently the only supported element type in many applications, particularly engineering applications.
+  Sometimes, for developers of these applications it is easiest to support other element types such as tetrahedra, pyramids and/or prism/wedges, by simply handling them as degenerate hexahedra.
+  This means that among the 8 nodes (e.g. corer points) of a hexahedron, some points are duplicated to pinch off or collapse an edge or face of a hexahedron to create the desired alternative shapes.
+
+  For degenerate hexahedra in Silo, creating these shapes as degenerate hexs in Silo is done following the pattern of collapsing two or more of the highest number nodes into a single node to produce the required shape.
+  Form each edge by starting with lowest numbered node at tail and next highest numbered node on an incident edge as head.
+  Repeat for all edges incident to this starting node.
+  Then move to the next highest numbered node involving a new edge and repeat for all edges incident to that node.
+  Form each face starting always with lowest numbered node in a face and working around it to the next highest numbered node on the face right-hand rule, outward normal order.
+  Repeat for all faces incident to this starting node.
+  Then, move to the next highest numbered node involving a new face and repeat for all faces incident to that node.
 
   The following table describes the options accepted by this function:
 
