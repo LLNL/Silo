@@ -769,6 +769,7 @@ Finally, Silo also supports the specification of expressions representing derive
   A Silo UCD mesh object contains all necessary information for describing a mesh.
   This includes the coordinate arrays, the spatial dimension of the mesh (1,2,3,...) and the name(s) of the zonelist object(s) to be associated with the mesh.
   In addition, other information is useful and is therefore included (time and cycle of mesh, plus coordinate system type).
+  See [`DBPutZonelist2`](#dbputzonelist2) for a description of the standard element types.
 
   While the name of the zonelist object, `zonel_name`, is **NOT** optional, the name of the facelist object, `facel_name`, is.
   See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or `DBCalcExternalFacelist2` for an automated way of computing a facelist object to be named in this call.
@@ -934,7 +935,7 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBPutZonelist` function writes a zonelist object into a Silo file.
   The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
 
-  See [`DBPutUcdmesh`](#dbputucdmesh) for a full description of the zonelist data structures.
+  See [`DBPutZonelist2`](#dbputzonelist2) for a full description of the standard element types and the zonelist object.
 
 {{ EndFunc }}
 
@@ -1017,14 +1018,6 @@ Finally, Silo also supports the specification of expressions representing derive
 
   **Standard Silo element types:**
 
-  ```{figure} ./images/ucdmesh.gif
-  :name: ucdmesh-example
-  :align: "center"
-  :alt: "Example usage of UCD zonelist and external facelist variables."
-
-  Example usage of UCD zonelist and external facelist variables.
-  ```
-
   The order in which nodes are defined in the zonelist is important, especially for 3D cells.
   Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
   The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
@@ -1098,7 +1091,17 @@ Finally, Silo also supports the specification of expressions representing derive
 
   For global traversals and orderings of all edges or faces in a mesh, the local orderings are repeated for each zone in the mesh starting with the first zone in the associated zonelist and, of course, skipping edges and faces encountered in later zones that are already accounted for by having been visited through an earlier zone in the traversal.
 
-  **Combining standard shape and polyhedral zonelists:**
+  **Example of zonelist data:**
+
+  ```{figure} ./images/ucdmesh.gif
+  :name: ucdmesh-example
+  :align: "center"
+  :alt: "Example usage of UCD zonelist and external facelist variables."
+
+  Example usage of UCD zonelist and external facelist variables.
+  ```
+
+  **Combining standard zonelist with arbitrary polyhedral zonelist:**
 
   The zonelist of a Silo UCD mesh may be composed of either zoo-type elements or arbitrary, polyhedral elements or a mixture of both zoo-type and arbitrary, polyhedral elements.
   The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist2`.
@@ -1128,7 +1131,7 @@ Finally, Silo also supports the specification of expressions representing derive
   ```
 
   This example is intended to illustrate the representation of arbitrary polyhedra.
-  So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a 'normal' zonelist, they are expressed using arbitrary connectivity here.
+  So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a *standard* zonelist, they are expressed using arbitrary connectivity here for demonstration purposes.
 
 {{ EndFunc }}
 
@@ -1230,9 +1233,13 @@ Finally, Silo also supports the specification of expressions representing derive
   int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
   ```
 
-  1[](./images/ucd_hex_outward_normals.gif)
+  ```{figure} ./images/ucd_hex_outward_normals.gif
+  :name: normals-example
+  :align: "center"
+  :alt: "Example of a polyhedral zonelist representation for two hexahedral elements"
 
-  Figure 0-4: Example of a polyhedral zonelist representation for two hexahedral elements.
+  Example of a polyhedral zonelist representation for two hexahedral elements
+  ```
 
 {{ EndFunc }}
 
