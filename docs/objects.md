@@ -1101,18 +1101,11 @@ Finally, Silo also supports the specification of expressions representing derive
   Example usage of UCD zonelist and external facelist variables.
   ```
 
-  **Combining standard zonelist with arbitrary polyhedral zonelist:**
+  **Arbitrary polyhedral zonelists:**
 
-  The zonelist of a Silo UCD mesh may be composed of either zoo-type elements or arbitrary, polyhedral elements or a mixture of both zoo-type and arbitrary, polyhedral elements.
-  The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist2`.
-  When there are only zoo-type elements in the mesh, this is the only zonelist information associated with the mesh.
-  However, the caller can optionally specify the `name` of an arbitrary, polyhedral zonelist written with a call to `DBPutPHZonelist` using the `DBOPT_PHZONELIST` option.
-  If the mesh consists solely of arbitrary, polyhedral elements, the only zonelist associated with the mesh will be the one written with the call to `DBPutPHZonelist`.
-
-  When a mesh is composed of both zoo-type elements and polyhedral elements, it is assumed that all the zoo-type elements come first in the mesh followed by all the polyhedral elements.
-  This has implications for any `DBPutUcdvar` calls made on such a mesh.
-  For zone-centered data, the variable array should be organized so that values corresponding to zoo-type zones come first followed by values corresponding to polyhedral zones.
-  Also, since both the zoo-type zonelist and the polyhedral zonelist support hi- and lo- offsets for ghost zones, the ghost-zones of a mesh may consist of zoo-type or polyhedral zones or a mixture of both.
+  There are two ways of handling arbitrary polyehdral zones.
+  One of these, the old way, is to encode arbitrary polyhedral zones directly into a standard zonelist using the `DB_ZONETYPE_POLYHEDRON`. 
+  The other is to use a fully arbitrarily connected zonelist object via the [`DBPutPHZonelist()`](#dbputphzonelist) call.
 
   An example using arbitrary polyhedrons for some zones is illustrated, below.
   The nodes of a `DB_ZONETYPE_POLYHEDRON` are specified in the following fashion: First specify the number of faces in the polyhedron.
@@ -1124,14 +1117,24 @@ Finally, Silo also supports the specification of expressions representing derive
 
   ```{figure} ./images/ucdmesh_warbzone.gif
   :name: ucdmesh-warbzone
-  align: "center"
-  alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
+  :align: "center"
+  :alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
 
   Example usage of UCD zonelist combining a hex and 2 polyhedra.
   ```
 
   This example is intended to illustrate the representation of arbitrary polyhedra.
   So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a *standard* zonelist, they are expressed using arbitrary connectivity here for demonstration purposes.
+
+  The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist2`.
+  When there are only zoo-type elements in the mesh, this is the only zonelist information associated with the mesh.
+  However, the caller can optionally specify the `name` of an arbitrary, polyhedral zonelist written with a call to `DBPutPHZonelist` using the `DBOPT_PHZONELIST` option.
+  If the mesh consists solely of arbitrary, polyhedral elements, the only zonelist associated with the mesh will be the one written with the call to `DBPutPHZonelist`.
+
+  When a mesh is composed of both zoo-type elements and polyhedral elements, it is assumed that all the zoo-type elements come first in the mesh followed by all the polyhedral elements.
+  This has implications for any `DBPutUcdvar` calls made on such a mesh.
+  For zone-centered data, the variable array should be organized so that values corresponding to zoo-type zones come first followed by values corresponding to polyhedral zones.
+  Also, since both the zoo-type zonelist and the polyhedral zonelist support hi- and lo- offsets for ghost zones, the ghost-zones of a mesh may consist of zoo-type or polyhedral zones or a mixture of both.
 
 {{ EndFunc }}
 
@@ -1233,16 +1236,6 @@ Finally, Silo also supports the specification of expressions representing derive
   int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
   ```
 
-  ```{figure} ./images/ucdmesh_warbzone.gif
-  :name: ucdmesh-warbzone
-  align: "center"
-  alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
-
-  Example usage of UCD zonelist combining a hex and 2 polyhedra.
-  ```
-
-  Some gorfo text.
-
   ```{figure} ./images/ucd_hex_outward_normals.gif
   :name: normals-example
   :align: "center"
@@ -1250,8 +1243,6 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Example of a polyhedral zonelist representation for two hexahedral elements
   ```
-
-  More foobar text.
 
 {{ EndFunc }}
 
