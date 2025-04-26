@@ -1197,11 +1197,11 @@ Finally, Silo also supports the specification of expressions representing derive
   In the example code below, the list of nodes for a given face begin with the node nearest its corresponding letter.
 
   For toplogically 2D meshes, two different approaches are possible for creating a polyhedral zonelist.
-  One is to simple have a single list of "faces" representing the polygons of the 2D mesh.
+  One is to have a single list of "faces" representing the polygons of the 2D mesh.
   The other is to create an explicit list of "edges" and then define each polygon in terms of the edges it comprises.
   Either is appropriate.
 
-  ```C
+  ```
   #define NNODES 12
   #define NFACES 11
   #define NZONES 2
@@ -1233,6 +1233,16 @@ Finally, Silo also supports the specification of expressions representing derive
   int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
   ```
 
+  ```{figure} ./images/ucdmesh_warbzone.gif
+  :name: ucdmesh-warbzone
+  align: "center"
+  alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
+
+  Example usage of UCD zonelist combining a hex and 2 polyhedra.
+  ```
+
+  Some gorfo text.
+
   ```{figure} ./images/ucd_hex_outward_normals.gif
   :name: normals-example
   :align: "center"
@@ -1240,6 +1250,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Example of a polyhedral zonelist representation for two hexahedral elements
   ```
+
+  More foobar text.
 
 {{ EndFunc }}
 
