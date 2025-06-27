@@ -1032,6 +1032,7 @@ process_switches(switches_t *switches, int pass)
 
     if ((sw=switch_find(switches, "--single")) && sw->seen) {
         DBForceSingle(1);
+        /*DBSetEvalNameschemes(1);*/
     }
     
     if ((sw=switch_find(switches, "--height")) && sw->seen) {

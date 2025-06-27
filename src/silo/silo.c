@@ -302,6 +302,7 @@ SILO_Globals_t SILO_Globals = {
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
     0,     /* compatability mode */
+    0,     /* evalNameschemes */
     {      /* file options sets [32 of them] */
         0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -2550,6 +2551,7 @@ DB_SETGET(int, CompatibilityMode, compatibilityMode, DB_INTBOOL_NOT_SET)
 #ifndef _WIN32
 #warning WHAT ABOUT FORCESINGLE SHOWERRORS
 #endif
+DB_SETGET(int, EvalNameschemes, evalNameschemes, DB_INTBOOL_NOT_SET)
 
 /* The compression stuff has some custom initialization */
 static void _db_set_compression_params(char **dst, char const *s)
@@ -6835,6 +6837,7 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
+#warning FIXME
 #if 0
         /* We don't know what name to pass to DBInqVarExists here because it
            is the driver that knows how to construct component names */
@@ -7238,6 +7241,109 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+static char *GenerateName(int idx,
+    DBnamescheme *fileNS, DBnamescheme *blockNS,
+    int emptyCnt, int const *emptyLst)
+{
+    static char res[4096]; /* result is intended to be immediately strdup'd */
+    int avail = (int) sizeof(res)-1;
+
+    strcpy(res, "EMPTY");
+    if (emptyLst)
+    {
+        int bot = 0;
+        int top = emptyCnt - 1;
+        int mid;
+        while (bot <= top)
+        {
+            mid = (bot + top) >> 1;
+
+            if (idx > emptyLst[mid])
+                bot = mid + 1;
+            else if (idx < emptyLst[mid])
+                top = mid - 1;
+            else
+                return res;
+        }
+    }
+
+    // namescheme case
+    res[0] = '\0';
+    if (fileNS != 0)
+    {
+        const char *file_res = DBGetName(fileNS,idx);
+        if (file_res != 0)
+        {
+            strncat(res, file_res, avail);
+            avail -= strlen(file_res);
+            strncat(res, ":", avail);
+            avail--;
+        }
+    }
+
+    if (blockNS != 0)
+    {
+        const char *block_res = DBGetName(blockNS,idx);
+        if (block_res != 0)
+            strncat(res, block_res, avail);
+    }
+
+    return res;
+}
+
+PRIVATE void _dbEvalMultiblockNameschemes(
+    DBfile *dbfile,
+    int nblocks,
+    int block_type,
+    char const *file_ns,
+    char const *block_ns,
+    int empty_cnt,
+    int const * empty_list,
+    int **block_types,
+    char ***block_names
+)
+{
+    DBnamescheme *fileNS = DBMakeNamescheme(file_ns, 0, dbfile, 0);
+    DBnamescheme *blockNS = DBMakeNamescheme(block_ns, 0, dbfile, 0);
+
+    *block_names = (char **) malloc(nblocks * sizeof(char*));
+    *block_types = (int *) malloc(nblocks * sizeof(int));
+
+    for (int i = 0; i < nblocks; i++)
+    {
+        (*block_names)[i] = strdup(GenerateName(i, fileNS, blockNS, empty_cnt, empty_list));
+        (*block_types)[i] = block_type;
+    }
+
+    DBFreeNamescheme(fileNS);
+    DBFreeNamescheme(blockNS);
+}
+
+
+PRIVATE void _dbEvalMultimeshNameschemes(DBfile *dbfile, DBmultimesh *mm)
+{
+    if (mm->meshnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mm->nblocks, mm->block_type,
+        mm->file_ns, mm->block_ns, mm->empty_cnt, mm->empty_list,
+        &mm->meshtypes, &mm->meshnames);
+
+    FREE(mm->file_ns);
+    FREE(mm->block_ns);
+}
+
+PRIVATE void _dbEvalMultivarNameschemes(DBfile *dbfile, DBmultivar *mv)
+{
+}
+
+PRIVATE void _dbEvalMultimatNameschemes(DBfile *dbfile, DBmultimat *mm)
+{
+}
+
+PRIVATE void _dbEvalMultimatspeciesNameschemes(DBfile *dbfile, DBmultimesh *ms)
+{
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBGetMultimesh
  *
@@ -7278,6 +7384,8 @@ DBGetMultimesh(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mm) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          _dbEvalMultimeshNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
