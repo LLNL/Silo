@@ -7307,12 +7307,14 @@ PRIVATE void _dbEvalMultiblockNameschemes(
     DBnamescheme *blockNS = DBMakeNamescheme(block_ns, 0, dbfile, 0);
 
     *block_names = (char **) malloc(nblocks * sizeof(char*));
-    *block_types = (int *) malloc(nblocks * sizeof(int));
+    if (block_types)
+        *block_types = (int *) malloc(nblocks * sizeof(int));
 
     for (int i = 0; i < nblocks; i++)
     {
         (*block_names)[i] = strdup(GenerateName(i, fileNS, blockNS, empty_cnt, empty_list));
-        (*block_types)[i] = block_type;
+        if (block_types)
+            (*block_types)[i] = block_type;
     }
 
     DBFreeNamescheme(fileNS);
@@ -7334,14 +7336,38 @@ PRIVATE void _dbEvalMultimeshNameschemes(DBfile *dbfile, DBmultimesh *mm)
 
 PRIVATE void _dbEvalMultivarNameschemes(DBfile *dbfile, DBmultivar *mv)
 {
+    if (mv->varnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mv->nvars, mv->block_type,
+        mv->file_ns, mv->block_ns, mv->empty_cnt, mv->empty_list,
+        &mv->vartypes, &mv->varnames);
+
+    FREE(mv->file_ns);
+    FREE(mv->block_ns);
 }
 
 PRIVATE void _dbEvalMultimatNameschemes(DBfile *dbfile, DBmultimat *mm)
 {
+    if (mm->matnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mm->nmats, 0 /*no mm->block_type */,
+        mm->file_ns, mm->block_ns, mm->empty_cnt, mm->empty_list,
+        0 /*no mm->mattypes */, &mm->matnames);
+
+    FREE(mm->file_ns);
+    FREE(mm->block_ns);
 }
 
-PRIVATE void _dbEvalMultimatspeciesNameschemes(DBfile *dbfile, DBmultimesh *ms)
+PRIVATE void _dbEvalMultimatspeciesNameschemes(DBfile *dbfile, DBmultimatspecies *ms)
 {
+    if (ms->specnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, ms->nspec, 0 /* no ms->block_type */,
+        ms->file_ns, ms->block_ns, ms->empty_cnt, ms->empty_list,
+        0 /* no ms->spectypes */, &ms->specnames);
+
+    FREE(ms->file_ns);
+    FREE(ms->block_ns);
 }
 
 /*-------------------------------------------------------------------------
@@ -7470,6 +7496,8 @@ DBGetMultivar(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mv) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          _dbEvalMultivarNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7512,6 +7540,8 @@ DBGetMultimat(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mt) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          _dbEvalMultimatNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7554,6 +7584,8 @@ DBGetMultimatspecies(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mms) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          _dbEvalMultimatspeciesNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
