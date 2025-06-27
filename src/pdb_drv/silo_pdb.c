@@ -2114,7 +2114,7 @@ db_pdb_Open(char const *name, int mode, int opts_set_id)
     }
     if (mode == DB_READ)
     {
-       if (NULL == (pdb = lite_PD_open((char*)name, "r")))
+        if (NULL == (pdb = lite_PD_open((char*)name, "r")))
         {
             db_perror(NULL, E_DRVRCANTOPEN, me);
             return NULL;
