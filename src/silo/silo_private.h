@@ -846,6 +846,7 @@ typedef struct SILO_Globals_t {
     float compressionMinratio;
     int compressionErrmode;
     int compatibilityMode;
+    int evalNameschemes;
     const DBoptlist *fileOptionsSets[MAX_FILE_OPTIONS_SETS];
     int _db_err_level;
     void  (*_db_err_func)(char *);
