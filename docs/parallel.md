@@ -70,7 +70,9 @@ The functions described in this section of the manual include...
   So, the `name` of each mesh block is specified using its full Silo path `name`.
   The full Silo pathname is the form...
 
+  ```
   [<silo-filename>:]<path-to-mesh>
+  ```
 
   The existence of a colon (':') anywhere in meshnames[i] indicates that the ith mesh block `name` is specified using both the Silo filename and the path in the file.
   All characters before the colon are the Silo file pathname within the file system on which the file(s) reside.
