@@ -1346,6 +1346,7 @@ Longer than normal component strings can result in creating objects in Silo file
   The `DBSetEvalNameschemes()` methods allow a consumer to force the Silo library to *evaluate* nameschemes whenever multi-block objects involving them are read.
   This means that when multi-block objects are read and they involve nameschemes, the Silo library will produce what would have been the contents of the list of block names member of a the object and the `file_ns` and `block_ns` members will be `NULL`'d out. 
   This allows consumers to make a one-line change to their code and continue operating as they have before without having to deal with nameschemes.
+  Alternatively, consumers can use [individual multi-block object conversion functions](utility.md#dbevalmultimeshnameschemes) directly themselves.
 
   :::{danger}
   The downside is that forcing the Silo library to evaluate nameschemes when reading multi-block objects involving nameschemes will be slower and will require potentially substantially more memory.

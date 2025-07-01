@@ -515,4 +515,6 @@ ct.
   Calling these methods will `NULL` out the `file_ns` and `block_ns` namescheme members and populate the list of block names (and types) members of the associated object.
   The resulting objects may be freed using the appropriate `DBFreeMultixxx()` method.
 
+  Alternatively, there is a [global library property](globals.md#dbsetevalnameschemes) which will cause the Silo library do these conversions automatically during read.
+
 {{ EndFunc }}
