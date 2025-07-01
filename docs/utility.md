@@ -471,3 +471,48 @@ ct.
   Often, the [`DBmaterial`](header.md#dbmaterial) representation is a much more efficient storage format and requires far less memory.
 
 {{ EndFunc }}
+
+## `DBEvalMultimeshNameschemes()`
+
+## `DBEvalMultivarNameschemes()`
+
+## `DBEvalMultimatNameschemes()`
+
+## `DBEvalMultimatspeciesNameschemes()`
+
+* **Summary:** Evaluate nameschemes for a multi-block object
+
+* **C Signature:** 
+
+  ```
+  void DBEvalMultimeshNameschemes(DBfile *dbfile, DBmultimesh *mm);
+  void DBEvalMultivarNameschemes(DBfile *dbfile, DBmultivar *mv);
+  void DBEvalMultimatNameschemes(DBfile *dbfile, DBmultimat *mm);
+  void DBEvalMultimatspeciesNameschemes(DBfile *dbfile, DBmultimatspecies *ms);
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg Name | Description
+  :--- | :---
+  `dbfile` | the Silo file the multi-block object was read from
+  `mm` | a multi-block object which may involve nameschemes
+
+* **Returned value:**
+
+  `None`
+
+* **Description:**
+
+  These functions can be called to take an existing multi-block object which uses nameschemes and convert it to the standard list of block names.
+  It is harmless to call these methods on a multi-block object that does not involve nameschemes.
+  Calling these methods will `NULL` out the `file_ns` and `block_ns` namescheme members and populate the list of block names (and types) members of the associated object.
+  The resulting objects may be freed using the appropriate `DBFreeMultixxx()` method.
+
+{{ EndFunc }}
