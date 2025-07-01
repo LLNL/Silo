@@ -1319,7 +1319,7 @@ Longer than normal component strings can result in creating objects in Silo file
 * **Fortran Signature:**
 
   ```
-  integer function dbsetevalns(mode)
+  None
   ```
 
 * **Arguments:**
@@ -1338,14 +1338,19 @@ Longer than normal component strings can result in creating objects in Silo file
   When the number of blocks in a multi-block object gets large (say > 10,000), it can wind up taking a lot of memory space and taking a long time to write and read.
   For example, a multi-block object with 50,000 blocks where each block has a file path consisting of 100 characters and a Silo object path of another 100 characters, the list of block names is 10 million characters or 10 mega bytes!
   Typically, however, all the block names are very similar and easily computable using an sprintf-style name generation scheme.
+
   [Nameschemes](subsets.md#dbmakenamescheme) where introduced as an optimization for this.
   In a `DBmultimesh` object, for example, that uses nameschemes, the `meshnames` member is `NULL`.
   A Silo data consumer that is not prepared for this can wind up `SEGV`'ing when attempting to reference block names.
 
   The `DBSetEvalNameschemes()` methods allow a consumer to force the Silo library to *evaluate* nameschemes whenever multi-block objects involving them are read.
-  This allows consumers to make a one-line change to their code and continue operating as normal.
-  The downside is that reading multi-block objects involving nameschemes will be slower and will require potentially substantially more memory.
+  This means that when multi-block objects are read and they involve nameschemes, the Silo library will produce what would have been the contents of the list of block names member of a the object and the `file_ns` and `block_ns` members will be `NULL`'d out. 
+  This allows consumers to make a one-line change to their code and continue operating as they have before without having to deal with nameschemes.
+
+  :::{danger}
+  The downside is that forcing the Silo library to evaluate nameschemes when reading multi-block objects involving nameschemes will be slower and will require potentially substantially more memory.
   So, this feature should be used with care.
+  :::
 
   There is no question that introducing [nameschemes](subsets.md#dbmakenamescheme) to Silo created a backward compatibility issue which, in retrospect, could have been easily resolved by introducing this feature along with them and having it on by default.
 
@@ -1366,7 +1371,7 @@ Longer than normal component strings can result in creating objects in Silo file
 * **Fortran Signature:**
 
   ```
-  integer function dbgetevalns()
+  None
   ```
 
 * **Arguments:**
