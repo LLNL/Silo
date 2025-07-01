@@ -678,8 +678,8 @@ at_help_all="1;testsuite.at:63;dbversion;;
 80;testsuite.at:391;force single;conversions;
 81;testsuite.at:396;multi_file;large;
 82;testsuite.at:400;multi_file use-ns;large;
-83;testsuite.at:404;testall -medium;large;
-84;testsuite.at:408;testall -large;large;
+83;testsuite.at:405;testall -medium;large;
+84;testsuite.at:409;testall -large;large;
 "
 # List of the all the test groups.
 at_groups_all=`$as_echo "$at_help_all" | sed 's/;.*//'`
@@ -4535,13 +4535,26 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:402"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+$as_echo "$at_srcdir/testsuite.at:403: \$VALGRIND namescheme eval-ns \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND namescheme eval-ns $STARGS" "testsuite.at:403"
+( $at_check_trace; $VALGRIND namescheme eval-ns $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:403"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_82
 #AT_START_83
-at_fn_group_banner 83 'testsuite.at:404' \
+at_fn_group_banner 83 'testsuite.at:405' \
   "testall -medium" "                                " 7
 at_xfail=no
 (
@@ -4550,15 +4563,15 @@ at_xfail=no
 
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:406: \$VALGRIND testall -medium \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND testall -medium $STARGS" "testsuite.at:406"
+$as_echo "$at_srcdir/testsuite.at:407: \$VALGRIND testall -medium \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND testall -medium $STARGS" "testsuite.at:407"
 ( $at_check_trace; $VALGRIND testall -medium $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:406"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:407"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4568,7 +4581,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_83
 #AT_START_84
-at_fn_group_banner 84 'testsuite.at:408' \
+at_fn_group_banner 84 'testsuite.at:409' \
   "testall -large" "                                 " 7
 at_xfail=no
 (
@@ -4577,15 +4590,15 @@ at_xfail=no
 
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:410: \$VALGRIND testall -large \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND testall -large $STARGS" "testsuite.at:410"
+$as_echo "$at_srcdir/testsuite.at:411: \$VALGRIND testall -large \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND testall -large $STARGS" "testsuite.at:411"
 ( $at_check_trace; $VALGRIND testall -large $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:410"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:411"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
