@@ -1030,9 +1030,12 @@ process_switches(switches_t *switches, int pass)
         sym_bi_set("writeable", tmp, NULL, NULL);
     }
 
+    if ((sw=switch_find(switches, "--evalns")) && sw->seen) {
+        DBSetEvalNameschemes(1);
+    }
+
     if ((sw=switch_find(switches, "--single")) && sw->seen) {
         DBForceSingle(1);
-        DBSetEvalNameschemes(1);
     }
     
     if ((sw=switch_find(switches, "--height")) && sw->seen) {
@@ -1433,6 +1436,12 @@ main(int argc, char *argv[])
                "displayed. The default is that these types of data are "
                "displayed with a type-dependent printf(3C) format string "
                "which is user defined (e.g., `$fmt_int').");
+
+    switch_add(sws, NULL, "--evalns",   "b=1",          NULL);
+    switch_doc(NULL,
+               "If this switch is specified then all files will be open with "
+               "DBSetEvalNameschemes(1) meaning that any multiblock objects "
+               "with nameschemes will be presented as explicit lists of names.");
 
     switch_add(sws, "-W", "--writeable",   "b=1",          NULL);
     switch_doc(NULL,
