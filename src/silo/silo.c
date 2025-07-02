@@ -7248,11 +7248,29 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
-static char *GenerateName(int idx,
-    DBnamescheme *fileNS, DBnamescheme *blockNS,
-    int emptyCnt, int const *emptyLst)
+/*----------------------------------------------------------------------
+ *  Routine                                          GenerateMBBlockName
+ *
+ *  Purpose: Use multiblock object block and file nameschemes and empty
+ *  list information to generate a multiblock object block name for a 
+ *  given block index. The result is returned in a static local variable
+ *  and should be *IMMEDIATELY COPIED*.
+ *
+ *  This code was taken entirely from VisIt's Silo plugin.
+ *
+ *  Mark C. Miller (copied from Cyrus Harrison), Wed Jul  2 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PRIVATE char
+*GenerateMBBlockName(
+    int idx,               /* block index for name to be generated */
+    DBnamescheme *fileNS,  /* file path namescheme */
+    DBnamescheme *blockNS, /* block path namescheme */
+    int emptyCnt,          /* empty list size */
+    int const *emptyLst)   /* list of empty block numbers */
 {
-    static char res[4096]; /* result is intended to be immediately strdup'd */
+    static char res[4096];
     int avail = (int) sizeof(res)-1;
 
     strcpy(res, "EMPTY");
@@ -7298,16 +7316,27 @@ static char *GenerateName(int idx,
     return res;
 }
 
-PRIVATE void _dbEvalMultiblockNameschemes(
-    DBfile *dbfile,
-    int nblocks,
-    int block_type,
-    char const *file_ns,
-    char const *block_ns,
-    int empty_cnt,
-    int const * empty_list,
-    int **block_types,
-    char ***block_names
+/*----------------------------------------------------------------------
+ *  Routine                                 _dbEvalMultiblockNameschemes
+ *
+ *  Purpose: Workhorse to iterate over relevant members of a multiblock
+ *  object with nameschemes to generate an explicit list of names.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PRIVATE void
+_dbEvalMultiblockNameschemes(
+    DBfile *dbfile,         /* Silo file the associated MB object was obtained from */
+    int nblocks,            /* number of names to generate */
+    int block_type,         /* homogeneous block type of all blocks */
+    char const *file_ns,    /* The file path namescheme */
+    char const *block_ns,   /* The block path (within a file) namescheme */
+    int empty_cnt,          /* Size of empty list */
+    int const * empty_list, /* List of empty block indices */
+    int **block_types,      /* Returned block types array */
+    char ***block_names     /* Returned block names array */
 )
 {
     DBnamescheme *fileNS = DBMakeNamescheme(file_ns, 0, dbfile, 0);
@@ -7319,7 +7348,7 @@ PRIVATE void _dbEvalMultiblockNameschemes(
 
     for (int i = 0; i < nblocks; i++)
     {
-        (*block_names)[i] = strdup(GenerateName(i, fileNS, blockNS, empty_cnt, empty_list));
+        (*block_names)[i] = strdup(GenerateMBBlockName(i, fileNS, blockNS, empty_cnt, empty_list));
         if (block_types)
             (*block_types)[i] = block_type;
     }
@@ -7329,7 +7358,22 @@ PRIVATE void _dbEvalMultiblockNameschemes(
 }
 
 
-PUBLIC void DBEvalMultimeshNameschemes(DBfile *dbfile, DBmultimesh *mm)
+/*----------------------------------------------------------------------
+ *  Routine                                   DBEvalMultimeshNameschemes
+ *
+ *  Purpose: Convert a DBmultimesh object with nameschemes to an
+ *  explicit list of names. The object is converted in place. It is
+ *  harmless to call this method on an object that is not using
+ *  nameschemes
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimeshNameschemes(
+    DBfile *dbfile,  /* The file the object was read from */
+    DBmultimesh *mm) /* The object to convert */
 {
     if (mm->meshnames) return;
 
@@ -7341,7 +7385,22 @@ PUBLIC void DBEvalMultimeshNameschemes(DBfile *dbfile, DBmultimesh *mm)
     FREE(mm->block_ns);
 }
 
-PUBLIC void DBEvalMultivarNameschemes(DBfile *dbfile, DBmultivar *mv)
+/*----------------------------------------------------------------------
+ *  Routine                                    DBEvalMultivarNameschemes
+ *
+ *  Purpose: Convert a DBmultivar object with nameschemes to an
+ *  explicit list of names. The object is converted in place. It is
+ *  harmless to call this method on an object that is not using
+ *  nameschemes
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultivarNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultivar *mv) /* The object to convert */
 {
     if (mv->varnames) return;
 
@@ -7353,7 +7412,25 @@ PUBLIC void DBEvalMultivarNameschemes(DBfile *dbfile, DBmultivar *mv)
     FREE(mv->block_ns);
 }
 
-PUBLIC void DBEvalMultimatNameschemes(DBfile *dbfile, DBmultimat *mm)
+/*----------------------------------------------------------------------
+ *  Routine                                    DBEvalMultimatNameschemes
+ *
+ *  Purpose: Convert a DBmultimat object with nameschemes to an
+ *  explicit list of names.
+ *
+ *  Note: A DBmultimat has no member for the mesh or variable type of
+ *  each block. So, those arguments to _dbEvalMultiblockNameschemes are
+ *  NULL'd out. The object is converted in place. It is harmless to call
+ *  this method on an object that is not using nameschemes.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimatNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultimat *mm) /* The object to convert */
 {
     if (mm->matnames) return;
 
@@ -7365,7 +7442,25 @@ PUBLIC void DBEvalMultimatNameschemes(DBfile *dbfile, DBmultimat *mm)
     FREE(mm->block_ns);
 }
 
-PUBLIC void DBEvalMultimatspeciesNameschemes(DBfile *dbfile, DBmultimatspecies *ms)
+/*----------------------------------------------------------------------
+ *  Routine                             DBEvalMultimatspeciesNameschemes
+ *
+ *  Purpose: Convert a DBmultimatspecies object with nameschemes to an
+ *  explicit list of names.
+ *
+ *  Note: A DBmultimatspecies has no member for mesh or variable type of
+ *  each block. So, those arguments to _dbEvalMultiblockNameschemes are
+ *  NULL'd out. The object is converted in place. It is harmless to call
+ *  this method on an object that is not using nameschemes.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimatspeciesNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultimatspecies *ms) /* The object to convert */
 {
     if (ms->specnames) return;
 
