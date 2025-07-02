@@ -486,6 +486,7 @@ int main(int argc, char **argv)
         {
             DBfile *dbfile;
             DBmultimesh *mm_w_ns, *mm;
+            DBmultimat *mmat;
             DBnamescheme *fns, *bns;
 
             if (DBStat(rootFiles[i]) == -1) continue;
@@ -501,15 +502,18 @@ int main(int argc, char **argv)
             if (mm_w_ns->file_ns == 0 || mm_w_ns->block_ns == 0)
                 FAILED("selected root file candidate has no nameschemes.");
 
-            /* Get a multi-block object from the root file while also
+            /* Get some multi-block objects from the root file while also
                evaluating nameschemes */
             dbfile = DBOpen(rootFiles[i], DB_UNKNOWN, DB_READ);
             DBSetEvalNameschemesFile(dbfile,1);
             mm = DBGetMultimesh(dbfile, "mesh1");
+            mmat = DBGetMultimat(dbfile, "mat1");
             DBClose(dbfile);
 
             /* if the acquired multiblock object has nameschemes, the test fails */
             if (mm->file_ns != 0 || mm->block_ns != 0)
+                FAILED("Requested eval nameschemes but still get them.");
+            if (mmat->file_ns != 0 || mmat->block_ns != 0)
                 FAILED("Requested eval nameschemes but still get them.");
 
             /* Ok, now lets generate a Silo object block name from mm_w_ns and compare it
@@ -523,8 +527,12 @@ int main(int argc, char **argv)
             DBFreeNamescheme(fns);
             DBFreeNamescheme(bns);
 
+            /* Just explicitly test an entry in a multimat */
+            TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+
             DBFreeMultimesh(mm_w_ns);
             DBFreeMultimesh(mm);
+            DBFreeMultimat(mmat);
 
             /* Arriving here at the end of the loop's body, we're done with the test */
             break; 
