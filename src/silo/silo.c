@@ -7320,7 +7320,8 @@ PRIVATE char
  *  Routine                                 _dbEvalMultiblockNameschemes
  *
  *  Purpose: Workhorse to iterate over relevant members of a multiblock
- *  object with nameschemes to generate an explicit list of names.
+ *  object with nameschemes to generate an explicit list of names and,
+ *  where needed, block types.
  *
  *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
  *
