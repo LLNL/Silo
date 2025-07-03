@@ -41,7 +41,7 @@ jobs:
         working-directory: Silo.rpm
         run: |
           pwd
-          which fedpkg
+          type fedpkg
           ls
           fedpkg local
 
