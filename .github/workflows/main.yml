@@ -43,8 +43,8 @@ jobs:
       with:
         name: test-artifacts
         path: |
-          tests/testsuite.log
-          tests/testsuite.dir
+          build/tests/testsuite.log
+          build/tests/testsuite.dir
           
     - name: Fail job if tests failed
       if: steps.check-silo.outcome == 'failure'
