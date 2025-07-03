@@ -30,6 +30,7 @@ jobs:
         make -j 8 install
 
     - name: Check Silo
+      id: check-silo
       continue-on-error: true
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
@@ -37,7 +38,7 @@ jobs:
         make -j 8 check
 
     - name: Upload Artifacts
-      if: steps.run-tests.outcome == 'failure'
+      if: steps.check-silo.outcome == 'failure'
       uses: actions/upload-artifact@v4
       with:
         name: test-artifacts
@@ -46,5 +47,5 @@ jobs:
           testsuite.dir
           
     - name: Fail job if tests failed
-      if: steps.run-tests.outcome == 'failure'
+      if: steps.check-silo.outcome == 'failure'
       run: exit 1
