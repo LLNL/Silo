@@ -34,3 +34,12 @@ jobs:
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
         make -j 8 check
+
+    - name: Upload Artifacts
+      if: steps.run-tests.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-artifacts
+        path: |
+          testsuite.log
+          testsuite.dir
