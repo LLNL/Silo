@@ -35,3 +35,4 @@ jobs:
       - name: Build rpm
         working-directory: Silo.rpm
         run: fedpkg local
+
