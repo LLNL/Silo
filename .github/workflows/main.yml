@@ -30,6 +30,7 @@ jobs:
         make -j 8 install
 
     - name: Check Silo
+      continue-on-error: true
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
@@ -43,3 +44,7 @@ jobs:
         path: |
           testsuite.log
           testsuite.dir
+          
+    - name: Fail job if tests failed
+      if: steps.run-tests.outcome == 'failure'
+      run: exit 1
