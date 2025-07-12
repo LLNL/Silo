@@ -475,9 +475,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   Except for a *constant valued* namescheme, the first character of `ns_str` is treated as the *delimiter character definition*.
   Wherever this delimiter character appears (except as the first character), this will indicate the end of one substring within `ns_str` and the beginning of a next substring.
-  The delimiter character cannot be any of the characters used in the expression language (see below) for defining expressions to generate names of a namescheme.
-  The delimiter character divides `ns_str` into one or more substrings.
-  For constant valued nameschemes, however, there is no need to divide the namescheme string into substring and so the delimiter character should not be present
+  The delimiter character cannot be any of the characters used in the expression language (see below).
+  The delimiter character divides `ns_str` into substrings.
+  For constant valued nameschemes, however, there is no need to divide the namescheme string into substrings.
+  So, the delimiter character should not be present.
 
   The first substring of `ns_strs` (that is the characters from position 1 to the first delimiter character after its definition at index 0) will contain the complete printf-style format string the namescheme will generate.
   The remaining substrings will contain simple expressions, one for each conversion specifier found in the format substring, which when evaluated will be used as the corresponding argument in an sprintf call to generate the actual name, when and if needed, on demand.
