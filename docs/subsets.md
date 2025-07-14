@@ -500,6 +500,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   Here are some examples...
 
+  `/mesh1`
+  : There is no delimiter character because the namescheme is constant valued, `/mesh1`.
+    That is, there are no `%` characters appearing in the the first (only) substring of `ns_str`.
+    This could be the *block* path part (see `DBOPT_MB_BLOCK_NS` option of [`DBPutMultimesh()`](./parallel.md#dbputmultimesh)) of a namescheme where each block is at the same path but in a *different* Silo file.
+
   `"|slide_%s|(n%2)?'leader':'follower':"`
   : The delimiter character is `|`.
     The format substring is `slide_%s`.
