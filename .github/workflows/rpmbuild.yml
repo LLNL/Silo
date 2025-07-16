@@ -43,5 +43,6 @@ jobs:
           pwd
           type fedpkg
           ls
-          fedpkg local
+          set -x
+          fedpkg --verbose --debug local
 
