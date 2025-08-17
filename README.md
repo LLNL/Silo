@@ -16,3 +16,4 @@ In addition, Silo supports piecewise-constant (e.g., zone-centered) and piecewis
 Silo also supports the decomposition of meshes into arbitrary subsets and subset hierarchies including materials with optinal mixing.
 
 Although Silo is a serial library, key features enable it to be applied easily and effectively in scalable, parallel applications using the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
+
