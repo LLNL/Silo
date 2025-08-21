@@ -25,7 +25,7 @@
 [Mixing materials]: https://silo.readthedocs.io/objects.html#dbputmaterial
 [species]: https://silo.readthedocs.io/objects.html#dbputmatspecies
 [subset hierarchies]: https://silo.readthedocs.io/subsets.html
-[memory-files]: https://support.hdfgroup.org/documentation/hdf5-docs/advanced_topics/file_image_ops.html
+[memory-files]: https://support.hdfgroup.org/documentation/hdf5/latest/_h5_f_i_m__u_g.html
 [MIF Parallel I/O]: https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/
 [VisIt]: https://visit.llnl.gov
 [compression]: https://silo.readthedocs.io/globals.html#dbsetcompression
