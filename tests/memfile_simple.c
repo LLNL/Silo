@@ -61,7 +61,9 @@ product endorsement purposes.
 #include <silo.h>
 #include <std.c>
 
+#ifdef HAVE_HDF5_H
 #include <hdf5.h>
+#endif
 
 #define ASSERT(A,M) \
 {   db_errno = 0; \
@@ -225,6 +227,7 @@ main(int argc, char *argv[])
     }
     ASSERT(DBCp("-r", srcdb, dstdb, "mat1", "foo", DB_EOA)>=0, "");
 
+#if HAVE_HDF5_H
     /* Ok, we've created a "core" file. Lets flush it and get the
      * buffer of it back */
     {
@@ -234,6 +237,7 @@ main(int argc, char *argv[])
         H5Fget_file_image(hdf5_file_id, dstbuf.buf, dstbuf.size);
         DBUngrabDriver(dstdb,0);
     }
+#endif
 
     /* Now, close the files we were using */
     DBClose(srcdb);
