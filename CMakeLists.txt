@@ -141,7 +141,7 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compress
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
 ##
-set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
+#set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
 
 
 set(BUILD_SHARED_LIBS ${SILO_ENABLE_SHARED})
