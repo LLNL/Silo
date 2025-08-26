@@ -62,8 +62,6 @@ This package contains the development files of %{name}.
 %files devel
 %doc README.md
 %license LICENSE
-%files
-...
 %{_prefix}/SiloInstall/bin/browser
 %{_prefix}/SiloInstall/bin/silock
 %{_prefix}/SiloInstall/bin/silodiff
