@@ -62,22 +62,22 @@ This package contains the development files of %{name}.
 %files devel
 %doc README.md
 %license LICENSE
-%{_prefix}/SiloInstall/bin/browser
-%{_prefix}/SiloInstall/bin/silock
-%{_prefix}/SiloInstall/bin/silodiff
-%{_prefix}/SiloInstall/bin/silofile
-%{_prefix}/SiloInstall/cmake/SiloConfig.cmake
-%{_prefix}/SiloInstall/cmake/SiloConfigVersion.cmake
-%{_prefix}/SiloInstall/cmake/SiloTargets-release.cmake
-%{_prefix}/SiloInstall/cmake/SiloTargets.cmake
-%{_prefix}/SiloInstall/include/lite_pdb.h
-%{_prefix}/SiloInstall/include/lite_score.h
-%{_prefix}/SiloInstall/include/pdform.h
-%{_prefix}/SiloInstall/include/silo.h
-%{_prefix}/SiloInstall/include/silo.inc
-%{_prefix}/SiloInstall/include/silo_FC.h
-%{_prefix}/SiloInstall/include/silo_exports.h
-%{_prefix}/SiloInstall/include/silo_f9x.inc
-%{_prefix}/SiloInstall/lib/libsiloh5.so
+%{_prefix}/bin/browser
+%{_prefix}/bin/silock
+%{_prefix}/bin/silodiff
+%{_prefix}/bin/silofile
+%{_prefix}/cmake/SiloConfig.cmake
+%{_prefix}/cmake/SiloConfigVersion.cmake
+%{_prefix}/cmake/SiloTargets-release.cmake
+%{_prefix}/cmake/SiloTargets.cmake
+%{_prefix}/include/lite_pdb.h
+%{_prefix}/include/lite_score.h
+%{_prefix}/include/pdform.h
+%{_prefix}/include/silo.h
+%{_prefix}/include/silo.inc
+%{_prefix}/include/silo_FC.h
+%{_prefix}/include/silo_exports.h
+%{_prefix}/include/silo_f9x.inc
+%{_prefix}/lib/libsiloh5.so
 %{_prefix}/lib/debug/.../browser-9999-1.fc44.x86_64.debug
 %{_prefix}/lib/debug/.../silock-9999-1.fc44.x86_64.debug
