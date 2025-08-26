@@ -55,7 +55,7 @@ product endorsement purposes.
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -869,7 +869,7 @@ main(int argc, char *argv[])
         /* Tests attempts to read correctly named object using wrong DBGet method */
         } else if (!strcmp(argv[i], "testbadread")) {
             testbadread = TRUE;
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
         /* Tests DBFlush functionality, by execv'ing and re-reading */
         } else if (!strcmp(argv[i], "testflush")) {
             testflush = TRUE;
@@ -936,7 +936,7 @@ main(int argc, char *argv[])
                        newargv[qq] = argv[qq];
                    newargv[qq++] = strdup("testflushread");
                    DBFlush(dbfile);
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
                    execv(argv[0], newargv);
 #endif
                }
