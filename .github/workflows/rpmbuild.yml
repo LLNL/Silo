@@ -42,9 +42,9 @@ jobs:
         run: |
           pwd
           type fedpkg
-          find . -name silo.h
-          find . -name browser
           ls
           set -x
           fedpkg --verbose --debug local
+          find . -name silo.h
+          find . -name browser
 
