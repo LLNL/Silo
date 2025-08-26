@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     nmesh++;
 
     DBSetDir(dbfile, original_dir);
-    DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames, meshtypes, NULL);
+    DBPutMultimesh(dbfile, "mmesh", nmesh, (DBCAS_t) meshnames, meshtypes, NULL);
 
     DBClose(dbfile);
 
