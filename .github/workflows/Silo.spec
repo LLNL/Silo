@@ -79,5 +79,3 @@ This package contains the development files of %{name}.
 %{_prefix}/include/silo_exports.h
 %{_prefix}/include/silo_f9x.inc
 %{_prefix}/lib/libsiloh5.so
-%{_prefix}/lib/debug/.../browser-9999-1.fc44.x86_64.debug
-%{_prefix}/lib/debug/.../silock-9999-1.fc44.x86_64.debug

@@ -1,6 +1,8 @@
 name: rpmbuild
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 concurrency:
