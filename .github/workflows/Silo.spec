@@ -62,7 +62,3 @@ This package contains the development files of %{name}.
 %files devel
 %doc README.md
 %license LICENSE
-%{_includedir}/%{name}*.hpp
-%{_includedir}/impl/%{name}*.hpp
-%{_libdir}/cmake/%{name}
-%{_libdir}/pkgconfig/%{name}.pc
