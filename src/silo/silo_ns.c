@@ -411,13 +411,40 @@ DBMakeNamescheme(char const *fmt, ...)
     }
     rv->fmtptrs[rv->ncspecs] = &(rv->fmt[n+1]);
 
-    /* If there are no conversion specs., we have nothing to do */
-    /* However, in this case, assume the first char is a real char. */
+    /* If there are no conversion specs., we have nothing to do.
+       However, we now have a potential problem too. We do not know
+       for sure if the first character is a (unnecessary) delimiter
+       character or part of the actual namescheme. To "guess" we
+       check if the first and last characters are the same and if
+       they are not any of the characters part of a "valid" Silo
+       name. If all of that is true, we treat the first and last
+       characters as (unnecessary) delimiter characters and remove
+       them. Otherwise, we assume no delimter characters are present
+       and keep everything. */
     if (rv->ncspecs == 0)
     {
+        int rm_unnecessary_delim = 0;
+
         free(rv->fmt);
-        rv->fmt = STRNDUP(&fmt[0],n);
-        rv->fmtlen = n;
+
+        if (fmt[0] == fmt[n-1])
+        {
+            char const *allchars = STRNDUP(&fmt[0],n);
+            int allchars_valid = db_VariableNameValid(allchars);
+            rm_unnecessary_delim = !allchars_valid;
+        }
+
+        if (rm_unnecessary_delim)
+        {
+            rv->fmt = STRNDUP(&fmt[1],n-2);
+            rv->fmtlen = n-3;
+        }
+        else
+        {
+            rv->fmt = STRNDUP(&fmt[0],n);
+            rv->fmtlen = n;
+        }
+
         return rv;
     }
 
