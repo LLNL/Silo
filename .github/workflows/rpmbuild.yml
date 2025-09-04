@@ -5,9 +5,9 @@ on:
       - main
   pull_request:
 
-#concurrency:
-#  group: ${ {github.event_name }}-${{ github.workflow }}-${{ github.ref }}
-#  cancel-in-progress: true 
+concurrency:
+  group: ${ {github.event_name }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true 
 
 jobs:
   rpmbuild:
@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         config:
+          - {arch: 'arm64'}
           - {arch: 'amd64'}
     runs-on: ${{ matrix.config.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     container: fedora:latest
@@ -31,22 +32,12 @@ jobs:
           mkdir Silo.rpm
           tar -cvzf Silo-9999.tar.gz Silo/
           cp Silo-9999.tar.gz Silo/.github/workflows/Silo.spec Silo.rpm
-          pwd
-          ls
       - name: Install build deps
         working-directory: Silo.rpm
         run: |
-          pwd
-          ls
           dnf -y builddep Silo.spec
       - name: Build rpm
         working-directory: Silo.rpm
         run: |
-          pwd
-          type fedpkg
-          ls
-          set -x
           fedpkg --verbose --debug local
-          find . -name silo.h
-          find . -name browser
 
