@@ -57,25 +57,25 @@ This package contains the development files of %{name}.
 %cmake_install
 
 %check
-%cmake_build --target check
+%ctest
 
 %files devel
 %doc README.md
 %license LICENSE
-%{_prefix}/bin/browser
-%{_prefix}/bin/silock
-%{_prefix}/bin/silodiff
-%{_prefix}/bin/silofile
+%{_bindir}/browser
+%{_bindir}/silock
+%{_bindir}/silodiff
+%{_bindir}/silofile
 %{_prefix}/cmake/SiloConfig.cmake
 %{_prefix}/cmake/SiloConfigVersion.cmake
 %{_prefix}/cmake/SiloTargets-release.cmake
 %{_prefix}/cmake/SiloTargets.cmake
-%{_prefix}/include/lite_pdb.h
-%{_prefix}/include/lite_score.h
-%{_prefix}/include/pdform.h
-%{_prefix}/include/silo.h
-%{_prefix}/include/silo.inc
-%{_prefix}/include/silo_FC.h
-%{_prefix}/include/silo_exports.h
-%{_prefix}/include/silo_f9x.inc
-%{_prefix}/lib/libsiloh5.so
+%{_includedir}/lite_pdb.h
+%{_includedir}/lite_score.h
+%{_includedir}/pdform.h
+%{_includedir}/silo.h
+%{_includedir}/silo.inc
+%{_includedir}/silo_FC.h
+%{_includedir}/silo_exports.h
+%{_includedir}/silo_f9x.inc
+%{_libdir}/libsiloh5.so
