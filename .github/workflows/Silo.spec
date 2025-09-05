@@ -78,4 +78,4 @@ This package contains the development files of %{name}.
 %{_includedir}/silo_FC.h
 %{_includedir}/silo_exports.h
 %{_includedir}/silo_f9x.inc
-%{_prefix}/lib/libsiloh5.so
+%{_prefix}/lib/libsiloh5.so
