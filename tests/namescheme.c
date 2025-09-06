@@ -137,6 +137,27 @@ int main(int argc, char **argv)
         TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
         DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("@/Density@");
+        TEST_GET_NAME(ns, 0, "/Density");
+        TEST_GET_NAME(ns, 1, "/Density");
+        TEST_GET_NAME(ns, 513, "/Density");
+        TEST_GET_NAME(ns, 134571, "/Density");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("/radar/");
+        TEST_GET_NAME(ns, 0, "/radar/");
+        TEST_GET_NAME(ns, 1, "/radar/");
+        TEST_GET_NAME(ns, 137, "/radar/");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme(":radar:");
+        TEST_GET_NAME(ns, 0, "radar");
+        TEST_GET_NAME(ns, 1, "radar");
+        TEST_GET_NAME(ns, 137, "radar");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("_radar_");
+        TEST_GET_NAME(ns, 0, "_radar_");
+        TEST_GET_NAME(ns, 1, "_radar_");
+        TEST_GET_NAME(ns, 137, "_radar_");
+        DBFreeNamescheme(ns);
     }
 
     /* Test a somewhat complex expression */ 
