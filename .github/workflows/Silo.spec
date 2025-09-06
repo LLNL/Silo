@@ -66,10 +66,6 @@ This package contains the development files of %{name}.
 %{_bindir}/silock
 %{_bindir}/silodiff
 %{_bindir}/silofile
-%{_cmakedir}/SiloConfig.cmake
-%{_cmakedir}/SiloConfigVersion.cmake
-%{_cmakedir}/SiloTargets-release.cmake
-%{_cmakedir}/SiloTargets.cmake
 %{_includedir}/lite_pdb.h
 %{_includedir}/lite_score.h
 %{_includedir}/pdform.h
@@ -78,4 +74,8 @@ This package contains the development files of %{name}.
 %{_includedir}/silo_FC.h
 %{_includedir}/silo_exports.h
 %{_includedir}/silo_f9x.inc
+%{_libdir}/cmake/SiloConfig.cmake
+%{_libdir}/cmake/SiloConfigVersion.cmake
+%{_libdir}/cmake/SiloTargets-release.cmake
+%{_libdir}/cmake/SiloTargets.cmake
 %{_libdir}/libsiloh5.so
