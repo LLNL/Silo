@@ -589,12 +589,14 @@ DBVariableNameValid(const char *s)
 
         if (! okay)
         {
+#if 0
             if (DB_NONE!=SILO_Globals._db_err_level)
             {
                 fprintf(stderr,"\"%s\" is an invalid name.  Silo variable\n"
                         "names may contain only alphanumeric characters\n"
                         "or the _ character.\n", s);
             }
+#endif
             return 0;
         }
     }
