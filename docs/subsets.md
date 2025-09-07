@@ -473,12 +473,12 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Nameschemes are most often used to define names of regions in region arrays or to define names of multi-block objects.
   The format of a printf-style namescheme is as follows...
 
-  Except for a *constant valued* namescheme, the first character of `ns_str` is treated as the *delimiter character definition*.
+  The first character of `ns_str` is treated as the *delimiter character definition*.
   Wherever this delimiter character appears (except as the first character), this will indicate the end of one substring within `ns_str` and the beginning of a next substring.
   The delimiter character cannot be any of the characters used in the expression language (see below).
   The delimiter character divides `ns_str` into substrings.
-  For constant valued nameschemes, however, there is no need to divide the namescheme string into substrings.
-  So, the delimiter character should not be present.
+  For constant valued nameschemes, there is no need to divide the namescheme string into substrings.
+  So, the delimiter character is not necessary and if found to be present will be ignored.
 
   The first substring of `ns_strs` (that is the characters from position 1 to the first delimiter character after its definition at index 0) will contain the complete printf-style format string the namescheme will generate.
   The remaining substrings will contain simple expressions, one for each conversion specifier found in the format substring, which when evaluated will be used as the corresponding argument in an sprintf call to generate the actual name, when and if needed, on demand.
