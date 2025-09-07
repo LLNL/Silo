@@ -42,7 +42,7 @@ jobs:
       if: ${{ steps.makecheck.outcome == 'failure' }}
       run: |
         cd build/tests
-        tar -cJf testsuite.dir.tar.xz testsuite.dir
+        tar -cJf testsuite.dir.tar.xz testsuite.dir testsuite.log
 
     - name: Upload artifact
       if: ${{ steps.makecheck.outcome == 'failure' }}
