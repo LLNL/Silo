@@ -30,7 +30,30 @@ jobs:
         make -j 8 install
 
     - name: Check Silo
+      id: makecheck
+      continue-on-error: true
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
         make -j 8 check
+
+    - name: Package artifact
+      id: pack
+      if: ${{ steps.makecheck.outcome == 'failure' }}
+      run: |
+        cd build
+        tar -cJf testsuite.dir.tar.xz testsuite.dir
+
+    - name: Upload artifact
+      if: ${{ steps.makecheck.outcome == 'failure' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: testsuite.dir.tar.xz
+        path: build
+        if-no-files-found: error
+        retention-days: 14
+
+    # Re-signal the failure so the job ends red.
+    - name: Fail job if make check failed
+      if: ${{ steps.makecheck.outcome == 'failure' }}
+      run: exit 1
