@@ -213,7 +213,7 @@ static int ProcessArgsForSilo(const int argc, const char *const *const argv)
     return 0;
 }
 
-static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
+static void AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
     const char *className, const char *const *const regnNames,
     int nreg, bool addMaps = false, int remapForProci = -1)
 {
@@ -273,17 +273,14 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
     DBSetCwr(mrgt, "..");
 }
 
-static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
+static void WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     const vector<string>& dom_classes)
 {
     float *coords[3];
     coords[0] = &xvals_g[0];
     coords[1] = &yvals_g[0];
     coords[2] = &zvals_g[0];
-    char *coordnames[3];
-    coordnames[0] = "X";
-    coordnames[1] = "Y";
-    coordnames[2] = "Z";
+    char const *coordnames[3] = {"X", "Y", "Z"};
     int nnodes = nodeClasses.GetNumEntities();
     int nzones = zoneClasses.GetNumEntities();
     int nmats = 5;
@@ -336,14 +333,11 @@ static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     DBFreeMrgtree(mrgt);
 }
 
-static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
+static void WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
     const vector<string>& dom_classes)
 {
     float *coords[3];
-    char *coordnames[3];
-    coordnames[0] = "X";
-    coordnames[1] = "Y";
-    coordnames[2] = "Z";
+    char const *coordnames[3] = {"X", "Y", "Z"};
 
     int nmats = 5;
     int ndoms = dom_classes.size();
@@ -488,7 +482,7 @@ static int WriteFormatReal(int argc, const char *const *const argv)
         return 1;
     }
 
-    char *dclasses[] = {"Domain0", "Domain1", "Domain2", "Domain3", "Domain4"};
+    char const *dclasses[] = {"Domain0", "Domain1", "Domain2", "Domain3", "Domain4"};
     int ndoms = sizeof(dclasses) / sizeof(dclasses[0]);
     vector<string> dom_classes(dclasses, dclasses + ndoms);
     int nmats = 5;
