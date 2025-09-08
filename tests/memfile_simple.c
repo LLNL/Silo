@@ -227,7 +227,7 @@ main(int argc, char *argv[])
     }
     ASSERT(DBCp("-r", srcdb, dstdb, "mat1", "foo", DB_EOA)>=0, "");
 
-#if HAVE_HDF5_H
+#ifdef HAVE_HDF5_H
     /* Ok, we've created a "core" file. Lets flush it and get the
      * buffer of it back */
     {
