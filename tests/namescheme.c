@@ -124,12 +124,38 @@ int main(int argc, char **argv)
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
-    /* test namescheme with constant componets */
+    /* test namescheme with constant componets with and without delimters */
     {
         ns = DBMakeNamescheme("foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
+        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("@/Density@");
+        TEST_GET_NAME(ns, 0, "/Density");
+        TEST_GET_NAME(ns, 1, "/Density");
+        TEST_GET_NAME(ns, 513, "/Density");
+        TEST_GET_NAME(ns, 134571, "/Density");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("/radar/");
+        TEST_GET_NAME(ns, 0, "/radar/");
+        TEST_GET_NAME(ns, 1, "/radar/");
+        TEST_GET_NAME(ns, 137, "/radar/");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme(":radar:");
+        TEST_GET_NAME(ns, 0, "radar");
+        TEST_GET_NAME(ns, 1, "radar");
+        TEST_GET_NAME(ns, 137, "radar");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("_radar_");
+        TEST_GET_NAME(ns, 0, "_radar_");
+        TEST_GET_NAME(ns, 1, "_radar_");
+        TEST_GET_NAME(ns, 137, "_radar_");
         DBFreeNamescheme(ns);
     }
 
