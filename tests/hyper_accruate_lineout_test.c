@@ -272,7 +272,7 @@ static int build_analytic_lineout_curves(
             float ycoords[2] = {y0, y1};
             float *coords[2] = {xcoords, ycoords};
             int dims[2] = {2,1};
-            DBPutQuadmesh(dbfile, "refline", coordnames, coords, dims, 2,
+            DBPutQuadmesh(dbfile, "refline", (DBCAS_t) coordnames, coords, dims, 2,
                 DB_FLOAT, DB_NONCOLLINEAR, 0);
             coords[0] = xvals;
             coords[1] = yvals;
@@ -411,7 +411,7 @@ main(int argc, char **argv)
                    0, 0, &zshapetype, &zshapesize,
                    &zshapecnt, 1, NULL);
 
-    DBPutUcdmesh(dbfile, "mesh", 2, coordnames, coords, 12, 5,
+    DBPutUcdmesh(dbfile, "mesh", 2, (DBCAS_t) coordnames, coords, 12, 5,
                      "zl2d", NULL, DB_FLOAT, NULL);
 
     float zc_var[] = {0.5, 1.5, 2.5, 3.5, 4.5};
@@ -434,7 +434,7 @@ main(int argc, char **argv)
                    &zshapecnt, 1, NULL);
 
     coords[0] = x1; coords[1] = y1;
-    DBPutUcdmesh(dbfile, "mesh2", 2, coordnames, coords, 16, 9,
+    DBPutUcdmesh(dbfile, "mesh2", 2, (DBCAS_t) coordnames, coords, 16, 9,
                      "zl2d2", NULL, DB_FLOAT, NULL);
 
     float zc_var2[] = {1.5, 0, -1.5, 0, 0, 0, -1.5, 0, 1.5};
@@ -491,7 +491,7 @@ main(int argc, char **argv)
     dims[0] = Nx;
     dims[1] = Ny;
 
-    DBPutQuadmesh(dbfile, "qmesh", coordnames, coords, dims, 2,
+    DBPutQuadmesh(dbfile, "qmesh", (DBCAS_t) coordnames, coords, dims, 2,
         DB_FLOAT, DB_COLLINEAR, NULL);
 
     DBPutQuadvar1(dbfile, "qvar", "qmesh", (float*) qvar, dims, 2,

@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_MPI
+#ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 #include <silo.h>
 
 extern void PrintFileComponentTypes(DBfile *dbfile, FILE* outf);
-#if HAVE_MPI
+#ifdef HAVE_MPI
 extern DBfile *DBOpenByBcast(char const *, MPI_Comm, int);
 #else
 extern DBfile *DBOpenByBcast(char const *, int, int);
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-#if HAVE_MPI
+#ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
             char outfile[256];
             FILE* outf;
 
-#if HAVE_MPI
+#ifdef HAVE_MPI
             dbfile = DBOpenByBcast(argv[i], MPI_COMM_WORLD, 0);
 #else
             dbfile = DBOpenByBcast(argv[i], 0, 0);
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     if (argc > 1 && rank == 0)
         printf("Examine results in files with names of the form \"%s-%05d-typelist.txt\"\n", argv[1], 0);
 
-#if HAVE_MPI
+#ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 

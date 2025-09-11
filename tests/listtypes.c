@@ -319,7 +319,7 @@ PrintObjectComponentsType(DBfile *dbfile, FILE* outf, char *objname, char *inden
                 if (DBGetVarDims(dbfile, obj->pdb_names[i], 5, dims) < 0)
                 {
                     char tmpnm[256];
-                    snprintf(tmpnm, sizeof(tmpnm), &(obj->pdb_names[i][4]));
+                    snprintf(tmpnm, sizeof(tmpnm), "%s", &(obj->pdb_names[i][4]));
                     tmpnm[strlen(tmpnm)-1] = '\0';
                     DBGetVarDims(dbfile, tmpnm, 5, dims);
                 }
