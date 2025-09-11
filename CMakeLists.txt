@@ -141,7 +141,7 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compress
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
 ##
-set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
+#set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
 
 
 set(BUILD_SHARED_LIBS ${SILO_ENABLE_SHARED})
@@ -323,6 +323,11 @@ endif()
 configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
                ${silo_build_include_dir}/silo.h)
 
+
+###-----------------------------------------------------------------------------
+# Define and populate CMAKE_INSTALL_*DIR variables
+###-----------------------------------------------------------------------------
+include(GNUInstallDirs)
 
 ###-----------------------------------------------------------------------------
 # Create config.h from config.h.in
@@ -630,6 +635,7 @@ endif()
 # setting up for installing Silo CMake config files
 set(silo_targets_name "SiloTargets")
 install(TARGETS silo EXPORT ${silo_targets_name}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
@@ -687,7 +693,12 @@ endif()
 # INSTALL
 #-----------------------------------------------------------------------------
 
-install(EXPORT ${silo_targets_name} DESTINATION cmake)
+###
+# Set up the CMAKE install location
+###
+set(CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Silo)
+
+install(EXPORT ${silo_targets_name} DESTINATION ${CMAKE_MODULE_INSTALL_DIR})
 
 include(${CMAKE_ROOT}/Modules/CMakePackageConfigHelpers.cmake)
 
@@ -698,7 +709,7 @@ set(INCLUDE_INSTALL_DIR include)
 
 configure_package_config_file(${Silo_SOURCE_DIR}/CMake/SiloConfig.cmake.in
   ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
-  INSTALL_DESTINATION cmake
+  INSTALL_DESTINATION ${CMAKE_MODULE_INSTALL_DIR}
   PATH_VARS INCLUDE_INSTALL_DIR
   )
 
@@ -711,7 +722,7 @@ write_basic_package_version_file(
 
 install(FILES ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
               ${Silo_BINARY_DIR}/cmake/SiloConfigVersion.cmake
-        DESTINATION cmake
+        DESTINATION ${CMAKE_MODULE_INSTALL_DIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
