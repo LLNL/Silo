@@ -51,7 +51,7 @@ product endorsement purposes.
 */
 #include <config.h>
 
-#if HAVE_HDF5_H
+#ifdef HAVE_HDF5_H
 #include <hdf5.h>
 #define HDF5_VERSION_GE(Maj,Min,Rel)  \
         (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
