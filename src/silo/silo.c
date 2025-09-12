@@ -302,6 +302,7 @@ SILO_Globals_t SILO_Globals = {
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
     0,     /* compatability mode */
+    0,     /* evalNameschemes */
     {      /* file options sets [32 of them] */
         0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -2254,6 +2255,13 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
     return retval;
 }
 
+PUBLIC int
+DBStat(char const *fname)
+{
+    db_silo_stat_t dbstat;
+    return db_silo_stat(fname, &dbstat, -1);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    db_filter_install
  *
@@ -2552,6 +2560,7 @@ DB_SETGET(int, CompatibilityMode, compatibilityMode, DB_INTBOOL_NOT_SET)
 #ifndef _WIN32
 #warning WHAT ABOUT FORCESINGLE SHOWERRORS
 #endif
+DB_SETGET(int, EvalNameschemes, evalNameschemes, DB_INTBOOL_NOT_SET)
 
 /* The compression stuff has some custom initialization */
 static void _db_set_compression_params(char **dst, char const *s)
@@ -6837,6 +6846,7 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
+#warning FIXME
 #if 0
         /* We don't know what name to pass to DBInqVarExists here because it
            is the driver that knows how to construct component names */
@@ -7240,6 +7250,231 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+/*----------------------------------------------------------------------
+ *  Routine                                          GenerateMBBlockName
+ *
+ *  Purpose: Use multiblock object block and file nameschemes and empty
+ *  list information to generate a multiblock object block name for a 
+ *  given block index. The result is returned in a static local variable
+ *  and should be *IMMEDIATELY COPIED*.
+ *
+ *  This code was taken entirely from VisIt's Silo plugin.
+ *
+ *  Mark C. Miller (copied from Cyrus Harrison), Wed Jul  2 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PRIVATE char
+*GenerateMBBlockName(
+    int idx,               /* block index for name to be generated */
+    DBnamescheme *fileNS,  /* file path namescheme */
+    DBnamescheme *blockNS, /* block path namescheme */
+    int emptyCnt,          /* empty list size */
+    int const *emptyLst)   /* list of empty block numbers */
+{
+    static char res[4096];
+    int avail = (int) sizeof(res)-1;
+
+    strcpy(res, "EMPTY");
+    if (emptyLst)
+    {
+        int bot = 0;
+        int top = emptyCnt - 1;
+        int mid;
+        while (bot <= top)
+        {
+            mid = (bot + top) >> 1;
+
+            if (idx > emptyLst[mid])
+                bot = mid + 1;
+            else if (idx < emptyLst[mid])
+                top = mid - 1;
+            else
+                return res;
+        }
+    }
+
+    // namescheme case
+    res[0] = '\0';
+    if (fileNS != 0)
+    {
+        const char *file_res = DBGetName(fileNS,idx);
+        if (file_res != 0)
+        {
+            strncat(res, file_res, avail);
+            avail -= strlen(file_res);
+            strncat(res, ":", avail);
+            avail--;
+        }
+    }
+
+    if (blockNS != 0)
+    {
+        const char *block_res = DBGetName(blockNS,idx);
+        if (block_res != 0)
+            strncat(res, block_res, avail);
+    }
+
+    return res;
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                 _dbEvalMultiblockNameschemes
+ *
+ *  Purpose: Workhorse to iterate over relevant members of a multiblock
+ *  object with nameschemes to generate an explicit list of names and,
+ *  where needed, block types.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PRIVATE void
+_dbEvalMultiblockNameschemes(
+    DBfile *dbfile,         /* Silo file the associated MB object was obtained from */
+    int nblocks,            /* number of names to generate */
+    int block_type,         /* homogeneous block type of all blocks */
+    char const *file_ns,    /* The file path namescheme */
+    char const *block_ns,   /* The block path (within a file) namescheme */
+    int empty_cnt,          /* Size of empty list */
+    int const * empty_list, /* List of empty block indices */
+    int **block_types,      /* Returned block types array */
+    char ***block_names     /* Returned block names array */
+)
+{
+    DBnamescheme *fileNS = DBMakeNamescheme(file_ns, 0, dbfile, 0);
+    DBnamescheme *blockNS = DBMakeNamescheme(block_ns, 0, dbfile, 0);
+
+    *block_names = (char **) malloc(nblocks * sizeof(char*));
+    if (block_types)
+        *block_types = (int *) malloc(nblocks * sizeof(int));
+
+    for (int i = 0; i < nblocks; i++)
+    {
+        (*block_names)[i] = strdup(GenerateMBBlockName(i, fileNS, blockNS, empty_cnt, empty_list));
+        if (block_types)
+            (*block_types)[i] = block_type;
+    }
+
+    DBFreeNamescheme(fileNS);
+    DBFreeNamescheme(blockNS);
+}
+
+
+/*----------------------------------------------------------------------
+ *  Routine                                   DBEvalMultimeshNameschemes
+ *
+ *  Purpose: Convert a DBmultimesh object with nameschemes to an
+ *  explicit list of names. The object is converted in place. It is
+ *  harmless to call this method on an object that is not using
+ *  nameschemes
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimeshNameschemes(
+    DBfile *dbfile,  /* The file the object was read from */
+    DBmultimesh *mm) /* The object to convert */
+{
+    if (mm->meshnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mm->nblocks, mm->block_type,
+        mm->file_ns, mm->block_ns, mm->empty_cnt, mm->empty_list,
+        &mm->meshtypes, &mm->meshnames);
+
+    FREE(mm->file_ns);
+    FREE(mm->block_ns);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                    DBEvalMultivarNameschemes
+ *
+ *  Purpose: Convert a DBmultivar object with nameschemes to an
+ *  explicit list of names. The object is converted in place. It is
+ *  harmless to call this method on an object that is not using
+ *  nameschemes
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultivarNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultivar *mv) /* The object to convert */
+{
+    if (mv->varnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mv->nvars, mv->block_type,
+        mv->file_ns, mv->block_ns, mv->empty_cnt, mv->empty_list,
+        &mv->vartypes, &mv->varnames);
+
+    FREE(mv->file_ns);
+    FREE(mv->block_ns);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                    DBEvalMultimatNameschemes
+ *
+ *  Purpose: Convert a DBmultimat object with nameschemes to an
+ *  explicit list of names.
+ *
+ *  Note: A DBmultimat has no member for the mesh or variable type of
+ *  each block. So, those arguments to _dbEvalMultiblockNameschemes are
+ *  NULL'd out. The object is converted in place. It is harmless to call
+ *  this method on an object that is not using nameschemes.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimatNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultimat *mm) /* The object to convert */
+{
+    if (mm->matnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mm->nmats, 0 /*no mm->block_type */,
+        mm->file_ns, mm->block_ns, mm->empty_cnt, mm->empty_list,
+        0 /*no mm->mattypes */, &mm->matnames);
+
+    FREE(mm->file_ns);
+    FREE(mm->block_ns);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                             DBEvalMultimatspeciesNameschemes
+ *
+ *  Purpose: Convert a DBmultimatspecies object with nameschemes to an
+ *  explicit list of names.
+ *
+ *  Note: A DBmultimatspecies has no member for mesh or variable type of
+ *  each block. So, those arguments to _dbEvalMultiblockNameschemes are
+ *  NULL'd out. The object is converted in place. It is harmless to call
+ *  this method on an object that is not using nameschemes.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimatspeciesNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultimatspecies *ms) /* The object to convert */
+{
+    if (ms->specnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, ms->nspec, 0 /* no ms->block_type */,
+        ms->file_ns, ms->block_ns, ms->empty_cnt, ms->empty_list,
+        0 /* no ms->spectypes */, &ms->specnames);
+
+    FREE(ms->file_ns);
+    FREE(ms->block_ns);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBGetMultimesh
  *
@@ -7280,6 +7515,8 @@ DBGetMultimesh(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mm) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultimeshNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7364,6 +7601,8 @@ DBGetMultivar(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mv) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultivarNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7406,6 +7645,8 @@ DBGetMultimat(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mt) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultimatNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7448,6 +7689,8 @@ DBGetMultimatspecies(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mms) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultimatspeciesNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
