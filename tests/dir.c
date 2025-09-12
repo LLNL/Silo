@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
                                    "/ucd_dir/ucdmesh",
                                    "/tri_dir/trimesh"};
     int            nmesh = 3;
-    char          *original_dir[128];
+    char           original_dir[1024];
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
     char          *filename = "dir.pdb";
     char          *filename2 = "dir2.pdb";
