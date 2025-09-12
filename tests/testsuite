@@ -4562,6 +4562,19 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:405"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+$as_echo "$at_srcdir/testsuite.at:403: \$VALGRIND namescheme eval-ns \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND namescheme eval-ns $STARGS" "testsuite.at:403"
+( $at_check_trace; $VALGRIND namescheme eval-ns $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:403"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe

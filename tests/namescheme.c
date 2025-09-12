@@ -99,6 +99,12 @@ if (strcmp(A,B))                                                                
     return 1;                                                                                              \
 }
 
+#define FAILED(MSG)                                                                                        \
+{                                                                                                          \
+    fprintf(stderr, "%s at line %d.\n", MSG, __LINE__);                                                    \
+    return 1;                                                                                              \
+}
+
 int main(int argc, char **argv)
 {
     int i;
@@ -106,6 +112,7 @@ int main(int argc, char **argv)
     char const * const N[3] = {"red","green","blue"};
     char blockName[1024];
     int driver = DB_PDB;
+    int eval_ns = 0;
     int show_all_errors = 0;
 	DBnamescheme *ns, *ns2;
     char teststr[256];
@@ -117,6 +124,8 @@ int main(int argc, char **argv)
             driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strcmp(argv[i], "eval-ns")) { /* test evaluate nameschemes */
+            eval_ns = 1;
         } else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -166,9 +175,8 @@ int main(int argc, char **argv)
 
     /* test returned string is different for successive calls (Dan Laney bug) */
     ns = DBMakeNamescheme("@/foo/bar/proc-%d@n");
-    sprintf(teststr, "%s %s", DBGetName(ns,0), DBGetName(ns,123));
-    if (strcmp(teststr, "/foo/bar/proc-0 /foo/bar/proc-123") != 0)
-        return 1;
+    snprintf(teststr, sizeof(teststr), "%s %s", DBGetName(ns,0), DBGetName(ns,123));
+    TEST_STR(teststr, "/foo/bar/proc-0 /foo/bar/proc-123")
     DBFreeNamescheme(ns);
 
     /* Test ?:: operator */
@@ -219,18 +227,15 @@ int main(int argc, char **argv)
     strcpy(blockName, DBGetName(ns, 123)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 123)); /* blockname part */
-    if (strcmp(blockName, "multi_file.dir/003/ucd3d3.pdb:/block123/mesh1") != 0)
-        return 1;
+    TEST_STR(blockName, "multi_file.dir/003/ucd3d3.pdb:/block123/mesh1")
     strcpy(blockName, DBGetName(ns, 0)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 0)); /* blockname part */
-    if (strcmp(blockName, "multi_file.dir/000/ucd3d0.pdb:/block0/mesh1") != 0)
-        return 1;
+    TEST_STR(blockName, "multi_file.dir/000/ucd3d0.pdb:/block0/mesh1")
     strcpy(blockName, DBGetName(ns, 287)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 287)); /* blockname part */
-    if (strcmp(blockName, "multi_file.dir/007/ucd3d7.pdb:/block287/mesh1") != 0)
-        return 1;
+    TEST_STR(blockName, "multi_file.dir/007/ucd3d7.pdb:/block287/mesh1")
     DBFreeNamescheme(ns);
     DBFreeNamescheme(ns2);
 
@@ -370,9 +375,9 @@ int main(int argc, char **argv)
 
         /* Test invalid namescheme construction */
         ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n");
-        if (ns) return 1;
+        if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
         ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n", 0, dbfile, 0);
-        if (ns) return 1;
+        if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
 
         /* Test construction via retrieval from MB object */
         DBSetDir(dbfile, "/meshes/mesh1");
@@ -430,7 +435,6 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
     DBFreeNamescheme(ns);
 
-#if 0
     /* Test using namescheme as a simple integer mapping */
     ns = DBMakeNamescheme("|chemA_%04X|n%3");
     TEST_GET_INDEX(DBGetName(ns, 0), 0, 0, 0);
@@ -462,7 +466,6 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns, 0x7FFFFFFF), 0, 0,  0x7FFFFFFF); /* max for an int */
     TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
-#endif
 
     /* Test inferring base 2 (binary, leading '0b') */
     TEST_GET_INDEX("block_0b0101", 0, 0, 5);
@@ -491,12 +494,83 @@ int main(int argc, char **argv)
     
     /* Test case where fewer expressions that conversion specs */
     ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
-    if (ns) return 1;
+    if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
 
+    /* Test DBEvalNamescheme() logic. Requires multi_file test to have run
+       with `use-ns` command-line option. This will have produced a root
+       file with multiblock objects in it using nameschemes. */
+    if (eval_ns)
+    {
+        /* Because of how Autotool's testing works, the test may be run next to
+           or two directories below where the files exist. And, we have to handle
+           either the hdf5 or the pdb variants multi_file can produce. */
+        char const *rootFiles[] = {"ucd3d_root.pdb", "ucd3d_root.h5",
+            "../../ucd3d_root.pdb", "../../ucd3d_root.h5"};
+        int const nRootCandidates = sizeof(rootFiles)/sizeof(rootFiles[0]);
+
+        for (i = 0; i < nRootCandidates; i++)
+        {
+            DBfile *dbfile;
+            DBmultimesh *mm_w_ns, *mm;
+            DBmultimat *mmat;
+            DBnamescheme *fns, *bns;
+
+            if (DBStat(rootFiles[i]) == -1) continue;
+
+            /* Get a multi-block object from the root file without
+               evaluating nameschemes */
+            dbfile = DBOpen(rootFiles[i], DB_UNKNOWN, DB_READ);
+            mm_w_ns = DBGetMultimesh(dbfile, "mesh1");
+            DBClose(dbfile);
+
+            /* if the acquired multiblock object is not using nameschemes,
+               we cannot perform this test */
+            if (mm_w_ns->file_ns == 0 || mm_w_ns->block_ns == 0)
+                FAILED("selected root file candidate has no nameschemes.");
+
+            /* Get some multi-block objects from the root file while also
+               evaluating nameschemes */
+            dbfile = DBOpen(rootFiles[i], DB_UNKNOWN, DB_READ);
+            DBSetEvalNameschemesFile(dbfile,1);
+            mm = DBGetMultimesh(dbfile, "mesh1");
+            mmat = DBGetMultimat(dbfile, "mat1");
+            DBClose(dbfile);
+
+            /* if the acquired multiblock object has nameschemes, the test fails */
+            if (mm->file_ns != 0 || mm->block_ns != 0)
+                FAILED("Requested eval nameschemes but still get them.");
+            if (mmat->file_ns != 0 || mmat->block_ns != 0)
+                FAILED("Requested eval nameschemes but still get them.");
+
+            /* Ok, now lets generate a Silo object block name from mm_w_ns and compare it
+               to what we get for the same block in mm (where nameschemes were evaluated). */
+            fns = DBMakeNamescheme(mm_w_ns->file_ns);
+            bns = DBMakeNamescheme(mm_w_ns->block_ns);
+            snprintf(teststr, sizeof(teststr), "%s:%s", DBGetName(fns,5), DBGetName(bns,5));
+            TEST_STR(teststr, mm->meshnames[5]);
+            snprintf(teststr, sizeof(teststr), "%s:%s", DBGetName(fns,73), DBGetName(bns,73));
+            TEST_STR(teststr, mm->meshnames[73]);
+            DBFreeNamescheme(fns);
+            DBFreeNamescheme(bns);
+
+            /* Just explicitly test an entry in a multimat */
+            TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+
+            DBFreeMultimesh(mm_w_ns);
+            DBFreeMultimesh(mm);
+            DBFreeMultimat(mmat);
+
+            /* Arriving here at the end of the loop's body, we're done with the test */
+            break; 
+        }
+        if (i == nRootCandidates)
+            FAILED("test-eval requested but no root file candidates found");
+    }
+    
     /* hackish way to cleanup the circular cache used internally */
     DBSPrintf(0);
     DBGetName(0,-1);
-    
+
     CleanupDriverStuff();
 
     return 0;

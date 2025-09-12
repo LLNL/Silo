@@ -883,6 +883,12 @@ sym_init (void)
               "checksum checks during subsequent read operations. "
               "This variable is set by the --checksums and -c "
               "command-line switches.\n");
+   sym_bi_set("evalns",         "0",
+              "Evaluate nameschemes on multi-block objects.",
+              "If this variable has any true value (nil, zero, and the empty "
+              "string are considered false) then the browser calls DBSetEvalNameschemes(1) "
+              "forcing Silo library to evaluate nameschemes on multi-block objects. "
+              "Note that this feature is NOT compatible with writable.");
    sym_bi_set("h5vfdopts",       NULL,
               "Specify hdf5 (vfd) options sets when attempting to open files.",
               "The value of this variable should be a list of OPTION=VALUE "
