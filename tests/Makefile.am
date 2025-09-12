@@ -164,6 +164,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       rocket mmadjacency largefile dbversion namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
       test_mat_compression memfile_simple empty majorder realloc_obj_and_opts \
+      degen_hex \
       $(PDBTESTS) $(JSONTESTS) $(BCASTOPEN)
 
 dir_SOURCES = dir.c testlib.c
@@ -209,6 +210,7 @@ check_PROGRAMS = \
  arbpoly \
  arbpoly2d \
  array \
+ degen_hex \
  extface \
  multi_test \
  partial_io \
@@ -273,6 +275,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_arbpoly_SOURCES = dummy.cxx
  nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
  nodist_EXTRA_array_SOURCES = dummy.cxx
+ nodist_EXTRA_degen_hex_SOURCES = dummy.cxx
  nodist_EXTRA_extface_SOURCES = dummy.cxx
  nodist_EXTRA_multi_test_SOURCES = dummy.cxx
  nodist_EXTRA_partial_io_SOURCES = dummy.cxx

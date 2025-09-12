@@ -50,6 +50,17 @@ National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
 #include <config.h>
+
+#ifdef HAVE_HDF5_H
+#include <hdf5.h>
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+#else
+#define HDF5_VERSION_GE(Maj,Min,Rel)  0>1
+#endif
+
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
