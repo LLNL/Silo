@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     
     int            meshtypes[3] = {DB_QUAD_RECT,
                                    DB_UCDMESH,
-                                   DB_UCDMESH},
+                                   DB_UCDMESH};
     char const    *meshnames[3] = {"/quad_dir/quadmesh",
                                    "/ucd_dir/ucdmesh",
                                    "/tri_dir/trimesh"};
