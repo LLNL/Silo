@@ -74,8 +74,10 @@ This package contains the development files of %{name}.
 %{_includedir}/silo_FC.h
 %{_includedir}/silo_exports.h
 %{_includedir}/silo_f9x.inc
+%{_includedir}/pmpio.h
 %{_libdir}/cmake/%{name}/SiloConfig.cmake
 %{_libdir}/cmake/%{name}/SiloConfigVersion.cmake
 %{_libdir}/cmake/%{name}/SiloTargets-release.cmake
 %{_libdir}/cmake/%{name}/SiloTargets.cmake
+%{_libdir}/libsiloh5.so.4
 %{_libdir}/libsiloh5.so
