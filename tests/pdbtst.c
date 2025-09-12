@@ -107,11 +107,11 @@ running into problems with this test, you can always re-configure to
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #include <sys/types.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
