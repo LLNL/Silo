@@ -29,6 +29,12 @@ jobs:
         env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
         make -j 8 install
 
+    - name: Build Tests
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        cd build/tests
+        make -j 8 tests
+
     - name: Check Silo
       id: makecheck
       continue-on-error: true

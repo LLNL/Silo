@@ -53,7 +53,7 @@ product endorsement purposes.
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #ifdef _WIN32
@@ -254,7 +254,7 @@ static int StringToDriver(const char *str)
 
 double GetTime()
 {
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
     static double t0 = -1;
     double t1;
     struct timeval tv1;

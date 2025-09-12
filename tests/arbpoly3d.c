@@ -390,7 +390,7 @@ main(int argc, char *argv[])
 
     ol = DBMakeOptlist(3);
     DBAddOption(ol, DBOPT_PHZONELIST, "phzl");
-    DBPutUcdmesh(dbfile, "arbmesh", 3, coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
+    DBPutUcdmesh(dbfile, "arbmesh", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
     DBFreeOptlist(ol);
 
     DBPutPHZonelist(dbfile, "phzl",
@@ -400,7 +400,7 @@ main(int argc, char *argv[])
 
     ol = DBMakeOptlist(3);
     DBAddOption(ol, DBOPT_PHZONELIST, "phzl_r");
-    DBPutUcdmesh(dbfile, "arbmesh_r", 3, coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
+    DBPutUcdmesh(dbfile, "arbmesh_r", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
     DBFreeOptlist(ol);
 
     DBPutPHZonelist(dbfile, "phzl_r",
