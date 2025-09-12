@@ -153,22 +153,22 @@ host_triplet = @host@
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = bcastopen
 @JSON_NEEDED_TRUE@am__append_3 = json
 check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
-	extface$(EXEEXT) multi_test$(EXEEXT) partial_io$(EXEEXT) \
-	point$(EXEEXT) group_test$(EXEEXT) listtypes$(EXEEXT) \
-	simple$(EXEEXT) ucd$(EXEEXT) ucdsamp3$(EXEEXT) \
-	testall$(EXEEXT) alltypes$(EXEEXT) obj$(EXEEXT) \
-	onehex$(EXEEXT) oneprism$(EXEEXT) onepyramid$(EXEEXT) \
-	onetet$(EXEEXT) TestReadMask$(EXEEXT) subhex$(EXEEXT) \
-	twohex$(EXEEXT) multispec$(EXEEXT) specmix$(EXEEXT) \
-	misc$(EXEEXT) sami$(EXEEXT) newsami$(EXEEXT) spec$(EXEEXT) \
-	cpz1plt$(EXEEXT) merge_block$(EXEEXT) mat3d_3across$(EXEEXT) \
-	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
-	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
-	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
-	quad$(EXEEXT) dbversion$(EXEEXT) namescheme$(EXEEXT) \
-	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) ioperf$(EXEEXT) \
-	readstuff$(EXEEXT) testfs$(EXEEXT) empty$(EXEEXT) \
-	majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
+	degen_hex$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
+	partial_io$(EXEEXT) point$(EXEEXT) group_test$(EXEEXT) \
+	listtypes$(EXEEXT) simple$(EXEEXT) ucd$(EXEEXT) \
+	ucdsamp3$(EXEEXT) testall$(EXEEXT) alltypes$(EXEEXT) \
+	obj$(EXEEXT) onehex$(EXEEXT) oneprism$(EXEEXT) \
+	onepyramid$(EXEEXT) onetet$(EXEEXT) TestReadMask$(EXEEXT) \
+	subhex$(EXEEXT) twohex$(EXEEXT) multispec$(EXEEXT) \
+	specmix$(EXEEXT) misc$(EXEEXT) sami$(EXEEXT) newsami$(EXEEXT) \
+	spec$(EXEEXT) cpz1plt$(EXEEXT) merge_block$(EXEEXT) \
+	mat3d_3across$(EXEEXT) ucd1d$(EXEEXT) wave$(EXEEXT) \
+	multi_file$(EXEEXT) polyzl$(EXEEXT) csg$(EXEEXT) \
+	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
+	dir$(EXEEXT) quad$(EXEEXT) dbversion$(EXEEXT) \
+	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
+	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
+	empty$(EXEEXT) majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
 	test_mat_compression$(EXEEXT) memfile_simple$(EXEEXT) \
 	$(am__EXEEXT_2) $(am__EXEEXT_3) $(am__EXEEXT_5) \
 	$(am__EXEEXT_7) $(am__EXEEXT_9)
@@ -343,6 +343,13 @@ dbversion_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@dbversion_DEPENDENCIES = ../src/libsilo.la \
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@dbversion_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+degen_hex_SOURCES = degen_hex.c
+degen_hex_OBJECTS = degen_hex.$(OBJEXT)
+degen_hex_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@degen_hex_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@degen_hex_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am_dir_OBJECTS = dir.$(OBJEXT) testlib.$(OBJEXT)
 dir_OBJECTS = $(am_dir_OBJECTS)
@@ -826,7 +833,8 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_csg_SOURCES) csg.c $(csgmesh_SOURCES) \
 	$(nodist_EXTRA_csgmesh_SOURCES) $(curvef77_SOURCES) \
 	$(nodist_EXTRA_curvef77_SOURCES) \
-	$(nodist_EXTRA_dbversion_SOURCES) dbversion.c $(dir_SOURCES) \
+	$(nodist_EXTRA_dbversion_SOURCES) dbversion.c \
+	$(nodist_EXTRA_degen_hex_SOURCES) degen_hex.c $(dir_SOURCES) \
 	$(nodist_EXTRA_dir_SOURCES) \
 	$(nodist_EXTRA_efcentering_SOURCES) efcentering.c \
 	$(nodist_EXTRA_empty_SOURCES) empty.c \
@@ -890,14 +898,14 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__arrayf90_SOURCES_DIST) \
 	$(bcastopen_SOURCES) $(am__compression_SOURCES_DIST) cpz1plt.c \
 	csg.c $(am__csgmesh_SOURCES_DIST) $(am__curvef77_SOURCES_DIST) \
-	dbversion.c $(dir_SOURCES) efcentering.c empty.c extface.c \
-	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
-	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) memfile_simple.c merge_block.c \
-	misc.c $(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c \
-	mmadjacency.c multi_file.c multi_test.c multispec.c \
-	namescheme.c $(newsami_SOURCES) obj.c onehex.c oneprism.c \
-	onepyramid.c onetet.c partial_io.c pdbtst.c point.c \
+	dbversion.c degen_hex.c $(dir_SOURCES) efcentering.c empty.c \
+	extface.c $(am__grab_SOURCES_DIST) group_test.c ioperf.c \
+	json.c largefile.c $(listtypes_SOURCES) majorder.c \
+	mat3d_3across.c $(am__matf77_SOURCES_DIST) memfile_simple.c \
+	merge_block.c misc.c $(am__mk_nasf_h5_SOURCES_DIST) \
+	mk_nasf_pdb.c mmadjacency.c multi_file.c multi_test.c \
+	multispec.c namescheme.c $(newsami_SOURCES) obj.c onehex.c \
+	oneprism.c onepyramid.c onetet.c partial_io.c pdbtst.c point.c \
 	$(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(am__qmeshmat2df77_SOURCES_DIST) $(quad_SOURCES) \
 	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
@@ -1233,8 +1241,8 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	csg rocket mmadjacency largefile dbversion namescheme \
 	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
 	mat3d_3across merge_block test_mat_compression memfile_simple \
-	empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS) \
-	$(BCASTOPEN) $(am__append_4) $(am__append_7)
+	empty majorder realloc_obj_and_opts degen_hex $(PDBTESTS) \
+	$(JSONTESTS) $(BCASTOPEN) $(am__append_4) $(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_main.c
@@ -1273,6 +1281,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arbpoly_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_array_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_degen_hex_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_extface_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_multi_test_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_partial_io_SOURCES = dummy.cxx
@@ -1496,6 +1505,10 @@ curvef77$(EXEEXT): $(curvef77_OBJECTS) $(curvef77_DEPENDENCIES) $(EXTRA_curvef77
 dbversion$(EXEEXT): $(dbversion_OBJECTS) $(dbversion_DEPENDENCIES) $(EXTRA_dbversion_DEPENDENCIES) 
 	@rm -f dbversion$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(dbversion_OBJECTS) $(dbversion_LDADD) $(LIBS)
+
+degen_hex$(EXEEXT): $(degen_hex_OBJECTS) $(degen_hex_DEPENDENCIES) $(EXTRA_degen_hex_DEPENDENCIES) 
+	@rm -f degen_hex$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(degen_hex_OBJECTS) $(degen_hex_LDADD) $(LIBS)
 
 dir$(EXEEXT): $(dir_OBJECTS) $(dir_DEPENDENCIES) $(EXTRA_dir_DEPENDENCIES) 
 	@rm -f dir$(EXEEXT)
@@ -1742,6 +1755,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbversion.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/degen_hex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efcentering.Po@am__quote@
