@@ -87,14 +87,19 @@ extern int build_ucd_tri(DBfile *dbfile, char *name, int flags);
 int main(int argc, char *argv[])
 {
     
-    int            meshtypes[3], nmesh;
-    char          *meshnames[3], original_dir[128];
+    int            meshtypes[3] = {DB_QUAD_RECT,
+                                   DB_UCDMESH,
+                                   DB_UCDMESH},
+    char const    *meshnames[3] = {"/quad_dir/quadmesh",
+                                   "/ucd_dir/ucdmesh",
+                                   "/tri_dir/trimesh"};
+    int            nmesh = 3;
+    char          *original_dir[128];
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
     char          *filename = "dir.pdb";
     char          *filename2 = "dir2.pdb";
     int            i, driver = DB_PDB, driver2 = DB_PDB;
     int            show_all_errors = FALSE;
-    char          *objname = 0;
     int            ndirs = 0;
     int            ntocs = 0;
     int            compat = 0;
@@ -123,12 +128,8 @@ int main(int argc, char *argv[])
             compat = DB_COMPAT_OVER_PERF;
         } else if (!strcmp(argv[i], "perf-over-compat")) {
             compat = DB_PERF_OVER_COMPAT;
-	} else if (argv[i][0] != '\0') {
-            objname = strdup(argv[i]);
-#ifndef _WIN32
-#warning SEEMS LIKE HACK TO TEST SOMETHING
-#endif
-/*            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);*/
+	} else {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
     
@@ -179,28 +180,17 @@ int main(int argc, char *argv[])
 #endif
     DBMkSymlink(dbfile, "/quad_dir/quad_subdir1", "dirlink");
     DBMkSymlink(dbfile, "dir2.h5:/gorfo", "extlink");
-    build_quad(dbfile, "quadmesh");
 
-    meshtypes[0] = DB_QUAD_RECT;
-    meshnames[0] = "/quad_dir/quadmesh";
-    nmesh = 1;
+    build_quad(dbfile, "quadmesh");
 
     DBSetDir(dbfile, "/ucd_dir");
     build_ucd(dbfile, "ucdmesh");
 
-    meshtypes[1] = DB_UCDMESH;
-    meshnames[1] = "/ucd_dir/ucdmesh";
-    nmesh++;
-
     DBSetDir(dbfile, "/tri_dir");
     build_ucd_tri(dbfile, "trimesh", 0x0); /* make a smaller trimesh here */
 
-    meshtypes[2] = DB_UCDMESH;
-    meshnames[2] = "/tri_dir/trimesh";
-    nmesh++;
-
     DBSetDir(dbfile, original_dir);
-    DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames, meshtypes, NULL);
+    DBPutMultimesh(dbfile, "mmesh", nmesh, (DBCAS_t) meshnames, meshtypes, NULL);
 
     DBClose(dbfile);
 
@@ -259,12 +249,10 @@ int main(int argc, char *argv[])
         }
         for (i = 0; i < ntocs/2; i++)
         {
-            DBtoc *dbtoc;
-
             DBSetDir(dbfile, "/");
-            dbtoc = DBGetToc(dbfile);
+            DBGetToc(dbfile);
             DBSetDir(dbfile, "/testtoc");
-            dbtoc = DBGetToc(dbfile);
+            DBGetToc(dbfile);
         }
     }
 

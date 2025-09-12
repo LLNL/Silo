@@ -598,6 +598,7 @@ switch_parse(switches_t *switches, int argc, char *argv[],
             size_t      namelen = eq ? eq-argv[i] : strlen(argv[i]);
             char        name[1024];
 
+            namelen = (namelen < sizeof(name)) ? namelen : sizeof(name);
             strncpy(name, argv[i], namelen);
             name[namelen] = '\0';
             option = eq ? eq+1 : NULL;
