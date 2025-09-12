@@ -349,7 +349,7 @@ main(int argc, char *argv[])
 #if 0
     shapecnt[0] += Add24DegenTetsInPlaceOfHex2();
 #else
-    shapecnt[0] += Add6DegenTetsInPlaceOfHex2();
+    shapecnt[0] += Add5DegenTetsInPlaceOfHex2();
 #endif
 
     /* Add the final normal hex */
