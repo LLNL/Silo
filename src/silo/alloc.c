@@ -462,12 +462,14 @@ DBFreeMultimesh(DBmultimesh *msh)
     if (msh->meshnames_alloc)
     {
         FREE(msh->meshnames_alloc);
+        FREE(msh->meshnames);
     }
     else if (msh->meshnames)
     {
         for (i = 0; i < msh->nblocks; i++) {
             FREE(msh->meshnames[i]);
         }
+        FREE(msh->meshnames);
     }
 
     if (msh->groupnames)
@@ -483,7 +485,6 @@ DBFreeMultimesh(DBmultimesh *msh)
     FREE(msh->zonecounts);
     FREE(msh->has_external_zones);
     FREE(msh->meshids);
-    FREE(msh->meshnames);
     FREE(msh->meshtypes);
     FREE(msh->dirids);
     FREE(msh->mrgtree_name);
@@ -574,12 +575,14 @@ DBFreeMultivar (DBmultivar *mv)
      if (mv->varnames_alloc)
      {
          FREE(mv->varnames_alloc);
+         FREE(mv->varnames);
      }
      else if (mv->varnames)
      {
          for (i = 0; i < mv->nvars; i++) {
               FREE(mv->varnames[i]);
          }
+         FREE(mv->varnames);
      }
 
      if (mv->region_pnames)
@@ -589,7 +592,6 @@ DBFreeMultivar (DBmultivar *mv)
          FREE(mv->region_pnames);
      }
 
-     FREE(mv->varnames);
      FREE(mv->vartypes);
      FREE(mv->mmesh_name);
      FREE(mv->extents);
@@ -641,14 +643,15 @@ DBFreeMultimat (DBmultimat *mat)
      if (mat->matnames_alloc)
      {
          FREE(mat->matnames_alloc);
+         FREE(mat->matnames);
      }
      else if (mat->matnames)
      {
          for (i = 0; i < mat->nmats; i++) {
               FREE(mat->matnames[i]);
          }
+         FREE(mat->matnames);
      }
-     FREE(mat->matnames);
      if (mat->material_names)
      {
          for (i = 0; i < mat->nmatnos; i++)
@@ -735,14 +738,15 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
      if (spec->specnames_alloc)
      {
          FREE(spec->specnames_alloc);
+         FREE(spec->specnames);
      }
      else if (spec->specnames)
      {
          for (i = 0; i < spec->nspec; i++) {
               FREE(spec->specnames[i]);
          }
+         FREE(spec->specnames);
      }
-     FREE(spec->specnames);
 
      FREE(spec->nmatspec);
      FREE(spec->file_ns);

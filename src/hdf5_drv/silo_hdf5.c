@@ -183,9 +183,13 @@ be used for advertising or product endorsement purposes.
 
 */
 
-/* For Lindstrom compression libs */
-#define DB_HDF5_HZIP_ID (H5Z_FILTER_RESERVED+1)
-#define DB_HDF5_FPZIP_ID (H5Z_FILTER_RESERVED+2)
+/* For Lindstrom compression libs, hzip and fpzip.
+   These IDS were reserved by The HDF Group 11/22/2024.
+   Previously they had been computed offsets from H5Z_FILTER_RESERVED.
+   fpzip also has a reserved ID of 32014 for an implementation from NCAR,
+   https://github.com/NCAR/fpzip_plugin */
+#define DB_HDF5_HZIP_ID 257
+#define DB_HDF5_FPZIP_ID 258
 #ifdef HAVE_HZIP
 #include "hzip.h"
 #ifdef HAVE_LIBZ
@@ -223,7 +227,6 @@ extern void zfp_init_zfp();
 #define BASEDUP(S)       ((S)&&*(S)?db_FullName2BaseName(S):NULL)
 #define ALIGN(ADDR,N)   (((ADDR)+(N)-1)&~((N)-1))
 
-/* copies of equiv. symbols in H5LT library */
 #define db_hdf5_H5LT_FILE_IMAGE_OPEN_RW      0x0001
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_COPY    0x0002
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE 0x0004
@@ -255,19 +258,18 @@ PRIVATE herr_t image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *u
 PRIVATE void *udata_copy(void *udata);
 PRIVATE herr_t udata_free(void *udata);
 
-/* Data structure to pass application data to image file callbacks. */ 
+/* Data structure to pass application data to callbacks. */
 typedef struct {
-    void *app_image_ptr;	/* Pointer to application buffer */ 
-    size_t app_image_size;	/* Size of application buffer */
-    void *fapl_image_ptr;	/* Pointer to FAPL buffer */
-    size_t fapl_image_size;	/* Size of FAPL buffer */
-    int fapl_ref_count;		/* Reference counter for FAPL buffer */
-    void *vfd_image_ptr;	/* Pointer to VFD buffer */
-    size_t vfd_image_size;	/* Size of VFD buffer */
-    int vfd_ref_count;		/* Reference counter for VFD buffer */
-    unsigned flags;		/* Flags indicate how the file image will */
-                                /* be open */
-    int ref_count;		/* Reference counter on udata struct */
+    void    *app_image_ptr;   /* Pointer to application buffer */
+    size_t   app_image_size;  /* Size of application buffer */
+    void    *fapl_image_ptr;  /* Pointer to FAPL buffer */
+    size_t   fapl_image_size; /* Size of FAPL buffer */
+    int      fapl_ref_count;  /* Reference counter for FAPL buffer */
+    void    *vfd_image_ptr;   /* Pointer to VFD buffer */
+    size_t   vfd_image_size;  /* Size of VFD buffer */
+    int      vfd_ref_count;   /* Reference counter for VFD buffer */
+    unsigned flags;           /* Flags indicate how the file image will be open */
+    int ref_count;            /* Reference counter on udata struct */
 } db_hdf5_H5LT_file_image_ud_t;
 #endif
 
@@ -5959,6 +5961,30 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         return NULL;
     }
 
+#if HDF5_VERSION_GE(1,10,2)
+    if (DB_APPEND == (mode & 0x0000000F))
+    {
+        if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
+        {
+            if (H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)<0)
+            {
+                H5Fclose(fid);
+                db_perror(name, E_CALLFAIL, me);
+                return NULL;
+            }
+        }
+        else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
+        {
+            if (H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18)<0)
+            {
+                H5Fclose(fid);
+                db_perror(name, E_CALLFAIL, me);
+                return NULL;
+            }
+        }
+    }
+#endif
+
     H5Pclose(faprops);
 
     /* Create silo file struct */
@@ -6063,6 +6089,27 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     }
 
     H5Pclose(faprops);
+
+#if HDF5_VERSION_GE(1,10,2)
+    if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
+    {
+        if (H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)<0)
+        {
+            H5Fclose(fid);
+            db_perror(name, E_CALLFAIL, me);
+            return NULL;
+        }
+    }
+    else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
+    {
+        if (H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18)<0)
+        {
+            H5Fclose(fid);
+            db_perror(name, E_CALLFAIL, me);
+            return NULL;
+        }
+    }
+#endif
 
     /* Create silo file struct */
     if (NULL==(dbfile=(DBfile_hdf5 *)calloc(1, sizeof(DBfile_hdf5)))) {
@@ -7325,8 +7372,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 msize = ALIGN(msize, sizeof(double)) + nvals * sizeof(double);
                 fsize += (nvals * H5Tget_size(dbfile->T_double));
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
-                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
+                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
+                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
             } else if (obj->pdb_names[i][0]=='\'') {
                 /* variable has invalid name or we don't handle type */
                 db_perror(obj->pdb_names[i], E_INVALIDNAME, me);
@@ -7461,8 +7508,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 moffset += sizeof(double);
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                size_t len = strlen(obj->pdb_names[i]+4)-1;
-#ifndef _MSC_VER
+                size_t len = strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
+#ifndef _WIN32
 #warning COMPATABILITY ISSUE
 #endif
                 hid_t str_type;
@@ -7482,7 +7529,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 }
                 H5Tclose(str_type);
                 strncpy((char*)(object+moffset), obj->pdb_names[i]+4, len);
-                object[moffset+len-1] = '\0'; /*overwrite quote*/
+                object[moffset+len-1] = '\0'; /*overwrite trailing ' as '\0' */
                 moffset += len;
                 foffset += len;
             } else {
@@ -14887,6 +14934,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
 
         /* Create object and initialize meta data */
         if (NULL==(mm=DBAllocMultimatspecies(0))) return NULL;
+        mm->matname = OPTDUP(m.matname);
         mm->nspec = m.nspec;
         mm->ngroups = m.ngroups;
         mm->blockorigin = m.blockorigin;

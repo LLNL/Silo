@@ -55,6 +55,7 @@
 ###
 # config-site for STEPPENWOLF, a Windows system.
 ###
+message("steppenwolf.cmake being processed")
 
 ###
 # Helpers for TP lib location
