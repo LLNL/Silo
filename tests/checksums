@@ -113,7 +113,7 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 #
 minoffset=$(ls -l h5_check_files/multi_ucd3d.h5 | cut -d' ' -f5)
 skip=0
-while [ $offset -eq 0 -a $skip -lt 9 ]; do
+while [ $skip -lt 16 ]; do
     offset=`od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
     if [ -z "$offset" ]; then
         skip=$(expr $skip + 1)
