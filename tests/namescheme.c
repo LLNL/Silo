@@ -554,7 +554,14 @@ int main(int argc, char **argv)
             DBFreeNamescheme(bns);
 
             /* Just explicitly test an entry in a multimat */
-            TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+            if (driver == DB_PDB)
+            {
+                TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+            }
+            else
+            {
+                TEST_STR("ucd3d2.h5:/block73/mat1", mmat->matnames[73]);
+            }
 
             DBFreeMultimesh(mm_w_ns);
             DBFreeMultimesh(mm);

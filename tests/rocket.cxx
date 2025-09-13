@@ -770,7 +770,7 @@ WriteAllFormats(int argc, char **argv)
     map<string, func_and_handle_t> formatMap;
 
     // Accomodate all possible places autotools may wind up building the plugins
-    char *dirs[] = {".", "../..", ".libs", "../../.libs"};
+    char const *dirs[] = {".", "../..", ".libs", "../../.libs"};
     for (d = 0; d < sizeof(dirs)/sizeof(dirs[0]) && !foundOne; d++)
     {
         DIR *cwdir = opendir(dirs[d]);
