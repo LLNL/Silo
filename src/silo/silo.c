@@ -3275,7 +3275,7 @@ DBAddIntNComponent(DBobject *object, const char *compname, int n, int const *ii)
     int            i;
     char           tmp[256];
 
-    API_BEGIN("DBAddIntComponent", int, -1) {
+    API_BEGIN("DBAddIntNComponent", int, -1) {
         if (!object)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
@@ -3359,7 +3359,7 @@ DBAddFltNComponent(DBobject *object, const char *compname, int n, double const *
     int            i;
     char           tmp[256];
 
-    API_BEGIN("DBAddFltComponent", int, -1) {
+    API_BEGIN("DBAddFltNComponent", int, -1) {
         if (!object)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
@@ -3379,6 +3379,7 @@ DBAddFltNComponent(DBobject *object, const char *compname, int n, double const *
         {
             char tmp2[32];
             snprintf(tmp2, sizeof(tmp2), ",%g", ff[i]);
+            strcat(tmp, tmp2);
         }
         strcat(tmp, "'");
 
@@ -3428,7 +3429,7 @@ DBAddDblNComponent(DBobject *object, const char *compname, int n, double const *
     int            i;
     char           tmp[256];
 
-    API_BEGIN("DBAddDblComponent", int, -1) {
+    API_BEGIN("DBAddDblNComponent", int, -1) {
         if (!object)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
@@ -3448,6 +3449,7 @@ DBAddDblNComponent(DBobject *object, const char *compname, int n, double const *
         {
             char tmp2[64];
             snprintf(tmp2, sizeof(tmp2), ",%.30g", dd[i]);
+            strcat(tmp,tmp2);
         }
         strcat(tmp, "'");
 
