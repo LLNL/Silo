@@ -141,6 +141,7 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
+int Silo_version_4_11 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -2166,7 +2167,7 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
 PRIVATE int
 db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
 {
-    int retval = db_silo_stat_one_file(name, statbuf); 
+    int retval;
 
     /* check for case where we're opening a buffer as a file */
     if (opts_set_id > DB_FILE_OPTS_LAST)
@@ -2179,12 +2180,15 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
         {
             static int n = 0;
             statbuf->s.st_mode = 0x0;
-            statbuf->s.st_mode |= S_IREAD;
+            statbuf->s.st_mode |= S_IRUSR;
+            statbuf->s.st_mode |= S_IWUSR;
             statbuf->s.st_dev = (dev_t) n++;
             statbuf->s.st_ino = (ino_t) n++;
             return 0;
         }
     }
+ 
+    retval = db_silo_stat_one_file(name, statbuf); 
 
     if (opts_set_id == -1 ||
         opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT ||
@@ -6329,6 +6333,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
     char const *many_to_one_dir = 0;
     int N = 0;
     char const **srcPathNames = 0, **dstPathNames = 0;
+    int srcPathNamesAlloc = 0, dstPathNamesAlloc = 0;
     char srcStartCwg[1024], dstStartCwg[1024];
 
 #ifndef _WIN32
@@ -6385,7 +6390,6 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         /* Process varargs in two passes. Pass 1, count them. Pass 2
            allocate space and capture them. */
         int pass;
-
         for (pass = 0; pass < 2; pass++)
         {
             int n = 0;
@@ -6395,8 +6399,12 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
             if (pass == 1)
             {
                 srcPathNames = (char const **) malloc(N * sizeof(char const *));
+                srcPathNamesAlloc = 1;
                 if (src_dst_pairs)
+                {
                     dstPathNames = (char const **) malloc(N * sizeof(char const *));
+                    dstPathNamesAlloc = 1;
+                }
             }
             while ((arg = va_arg(ap, char const *)) != DB_EOA)
             {
@@ -6419,16 +6427,24 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
     }
 
-#ifndef _WIN32
-#warning FIX LEAKS WITH EARLY RETURN HERE
-#endif
-
     if (n_src_dir_triple && N == 0)
+    {
+        if (srcPathNamesAlloc) FREE(srcPathNames);
+        if (dstPathNamesAlloc) FREE(dstPathNames);
         return 0;
+    }
     if (!n_src_dir_triple && N < 2)
+    {
+        if (srcPathNamesAlloc) FREE(srcPathNames);
+        if (dstPathNamesAlloc) FREE(dstPathNames);
         return db_perror("src or dst unspecified", E_BADARGS, me);
+    }
     if (src_dst_pairs && N%2)
+    {
+        if (srcPathNamesAlloc) FREE(srcPathNames);
+        if (dstPathNamesAlloc) FREE(dstPathNames);
         return db_perror("non-even arg count for -2 option", E_BADARGS, me);
+    }
 
     /* target dir is at end of list of sources */
     if (!many_to_one_dir && !src_dst_pairs && !n_src_dst_triple && !n_src_dir_triple)
@@ -6441,6 +6457,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
     {
         int q;
         dstPathNames = (char const **) malloc(N * sizeof(char const *));
+        dstPathNamesAlloc = 1;
         for (q = 0; q < N; q++)
             dstPathNames[q] = many_to_one_dir; /* all point to same char* */
     }
@@ -6484,7 +6501,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
                 db_perror("Object copy failed", E_CALLFAIL, me);
                 goto endLoop;
             }
-            continue;
+            goto endLoop;
         }
 
         /* If we get this far into the loop body here, then src is a dir */
@@ -6543,6 +6560,9 @@ endLoop:
         FREE(srcObjAbsName);
         FREE(dstObjAbsName);
     }
+
+    if (srcPathNamesAlloc) FREE(srcPathNames);
+    if (dstPathNamesAlloc) FREE(dstPathNames);
 
     DBSetDir(srcFile, srcStartCwg);
     DBSetDir(dstFile, dstStartCwg);

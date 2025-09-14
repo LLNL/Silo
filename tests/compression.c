@@ -118,6 +118,7 @@ main(int argc, char *argv[])
     int            has_loss = 0;
     int            show_errors = DB_TOP;
     double         noise = 0.3;
+    int            compat = DB_COMPAT_OVER_PERF;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -174,6 +175,8 @@ main(int argc, char *argv[])
           printf("       readonly - checks an existing file (used for cross platform test)\n");
           printf("       DB_HDF5  - enable HDF5 driver, the default\n");
           return (0);
+       } else if (!strcmp(argv[i], "perf-over-compat")) {
+           compat = DB_PERF_OVER_COMPAT;
        } else if (!strcmp(argv[i], "show-all-errors")) {
           show_errors = DB_ALL_AND_DRVR;
        } else if (argv[i][0] != '\0') {
@@ -187,6 +190,7 @@ main(int argc, char *argv[])
     dval = (double*) malloc(ONE_MEG);
     drval = (double*) malloc(ONE_MEG);
 
+    DBSetCompatibilityMode(compat);
     DBShowErrors(show_errors, 0);
 
     if (!readonly)

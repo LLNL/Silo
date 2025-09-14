@@ -86,7 +86,7 @@ DIST_SUBDIRS = . config config-site \
 help: config/make.help
 	cat $(srcdir)/config/make.help
 
-dist-gzip-bsd: dist-gzip
+dist-xz-bsd: dist-xz
 	@if test -e $(PACKAGE)-$(VERSION); then \
 	    echo "A directory or file named $(PACKAGE)-$(VERSION) already exists" ;\
 	    echo "Please remove before proceeding" ;\
@@ -97,8 +97,8 @@ dist-gzip-bsd: dist-gzip
 	    echo "Please remove before proceeding" ;\
 	    exit 1 ;\
 	fi
-	rm -f $(PACKAGE)-$(VERSION)-bsd.tar.gz $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
-	gunzip < $(PACKAGE)-$(VERSION).tar.gz | tar xf -
+	rm -f $(PACKAGE)-$(VERSION)-bsd.tar.xz $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.xz
+	tar xf $(PACKAGE)-$(VERSION).tar.xz
 	cp -R $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/hzip
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/fpzip

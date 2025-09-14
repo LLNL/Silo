@@ -172,7 +172,7 @@ static mem_header	*_SC_latest_block ;
  */
 struct s_mem_descriptor {
    short 		ref_count;
-   int                  length;
+   long                 length;
 };
 
 union u_mem_header {

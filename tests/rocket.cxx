@@ -770,7 +770,7 @@ WriteAllFormats(int argc, char **argv)
     map<string, func_and_handle_t> formatMap;
 
     // Accomodate all possible places autotools may wind up building the plugins
-    char *dirs[] = {".", "../..", ".libs", "../../.libs"};
+    char const *dirs[] = {".", "../..", ".libs", "../../.libs"};
     for (d = 0; d < sizeof(dirs)/sizeof(dirs[0]) && !foundOne; d++)
     {
         DIR *cwdir = opendir(dirs[d]);
@@ -780,7 +780,7 @@ WriteAllFormats(int argc, char **argv)
         while ((dent = readdir(cwdir)))
         {
             string dname = string(dent->d_name);
-    
+
             if (dname.find("rocket_") == string::npos)
                 continue;
             if (dname.rfind(".so") == string::npos)
@@ -788,7 +788,7 @@ WriteAllFormats(int argc, char **argv)
     
             string fmtname = dname.substr(7,dname.size()-10);
             string pname = string(dirs[d])+"/"+dname;
-    
+
             void *dlhandle = dlopen(pname.c_str(), RTLD_LAZY);
             if (!dlhandle)
             {
@@ -806,9 +806,8 @@ WriteAllFormats(int argc, char **argv)
                 continue;
             }
     
-            if (!foundOne)
-                cout << "Using \"" << dirs[d] << "\" as plugin dir." << endl;
             foundOne = 1;
+            cout << "Using \"" << dirs[d] << "\" as plugin dir." << endl;
             formatMap[fmtname].func = writeFunc;
             formatMap[fmtname].dlhandle = dlhandle;
         }

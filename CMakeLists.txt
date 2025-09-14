@@ -112,9 +112,9 @@ file(MAKE_DIRECTORY ${silo_build_include_dir})
 # User options
 ###---------------------------------------------------------------------------
 
-option(SILO_ENABLE_SHARED "Build silo shared library." ON)
+option(SILO_ENABLE_SHARED  "Build silo shared library." ON)
 option(SILO_ENABLE_SILOCK "Enable building of silock" ON)
-option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
+option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt6)" OFF)
 option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
@@ -608,6 +608,9 @@ target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
 target_include_directories(silo PRIVATE ${silo_library_include_dirs})
 
+if(UNIX)
+    target_link_libraries(silo m)
+endif()
 
 # add list of public headers to be installed
 set(silo_headers
@@ -643,6 +646,9 @@ install(FILES ${silo_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    # since we change the ouputname from silo to siloh5 when building
+    # with HDF5, will use $<TARGET_LINKER_FILE:silo> in place of plain 'silo'
+    # when telling broswer and silex to link with silo
     set_target_properties(silo PROPERTIES OUTPUT_NAME siloh5)
     target_link_libraries(silo ${HDF5_C_LIBRARIES})
     target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})

@@ -125,7 +125,7 @@ int main ()
 void
 ReadFile (char *filename, char *name)
 {
-    int       i;
+    long      i;
     PDBfile   *file=NULL;
     Group     *group=NULL;
     char      str[256];
@@ -310,8 +310,25 @@ CreateFile (char *filename, char *name, char *type, int num,
         printf("Error writing array.\n");
         exit(EXIT_FAILURE);
     }
-
     SFREE(coord0);
+  
+  #if 0
+     /*
+     * Write a > 2G array.
+     */
+    coord0 = MAKE_N(float, 1L<<32);
+    for (i = 0; i < 1L<<32; i++) coord0[i] = coord0_data[i%20];
+    ind[0] = 0;
+    ind[1] = (1L<<32) - 1;
+    ind[2] = 1;
+    if (PD_write_alt(file, "big_coord0", "float", coord0, 1, ind) == 0)
+    {
+        printf("Error writing array.\n");
+        exit(EXIT_FAILURE);
+    }
+    SFREE(coord0);
+  #endif
+
 
     /*
      * Close the file.

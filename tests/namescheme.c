@@ -436,12 +436,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test using namescheme as a simple integer mapping */
-    ns = DBMakeNamescheme("|chemA_%04X|n%3");
-    TEST_GET_INDEX(DBGetName(ns, 0), 0, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns, 1), 0, 0, 1);
-    TEST_GET_INDEX(DBGetName(ns, 2), 0, 0, 2);
-    TEST_GET_INDEX(DBGetName(ns, 3), 0, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns, 4), 0, 0, 1);
+    ns = DBMakeNamescheme("|chemA_0x%04X|n");
+    TEST_GET_INDEX(DBGetName(ns,  1), 0, 0, 1);
+    TEST_GET_INDEX(DBGetName(ns, 50), 0, 0, 50);
+    TEST_GET_INDEX(DBGetName(ns, 37), 0, 0, 37);
     DBFreeNamescheme(ns);
 
     /* simple offset by -2 mapping */
@@ -491,8 +489,8 @@ int main(int argc, char **argv)
         DBSPrintf("block_%d,level_%04d", 505, 17),
         DBSPrintf("side_%s_%cx%g", "leader",'z',1.0/3));
     TEST_STR(teststr, "block_505,level_0017, side_leader_zx0.333333")
-    
-    /* Test case where fewer expressions that conversion specs */
+
+    /* Test case where fewer expressions than conversion specs */
     ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
     if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
 
@@ -554,7 +552,14 @@ int main(int argc, char **argv)
             DBFreeNamescheme(bns);
 
             /* Just explicitly test an entry in a multimat */
-            TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+            if (driver == DB_PDB)
+            {
+                TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+            }
+            else
+            {
+                TEST_STR("ucd3d2.h5:/block73/mat1", mmat->matnames[73]);
+            }
 
             DBFreeMultimesh(mm_w_ns);
             DBFreeMultimesh(mm);

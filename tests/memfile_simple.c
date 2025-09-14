@@ -179,7 +179,7 @@ main(int argc, char *argv[])
         return 1; 
 
     /* create a buffer for a new memory file we intend to copy into */
-    dstbuf = DBAssignbufinfo(malloc(srcbuf.size),srcbuf.size,0);
+    dstbuf = DBAssignbufinfo(calloc(srcbuf.size,1),srcbuf.size,0);
     ASSERT(dstbuf.buf,"");
 
     /* Open the "file" we read into a memory buffer above, and then copy
