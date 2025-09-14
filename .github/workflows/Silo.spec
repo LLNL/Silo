@@ -80,3 +80,4 @@ This package contains the development files of %{name}.
 %{_libdir}/cmake/%{name}/SiloTargets-release.cmake
 %{_libdir}/cmake/%{name}/SiloTargets.cmake
 %{_libdir}/libsiloh5.so.4
+%{_libdir}/libsiloh5.so
