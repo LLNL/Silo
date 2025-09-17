@@ -515,6 +515,44 @@ ct.
   Calling these methods will `NULL` out the `file_ns` and `block_ns` namescheme members and populate the list of block names (and types) members of the associated object.
   The resulting objects may be freed using the appropriate `DBFreeMultixxx()` method.
 
-  Alternatively, there is a [global library property](globals.md#dbsetevalnameschemes) which will cause the Silo library do these conversions automatically during read.
+  Alternatively, there is a [global library property](globals.md#dbsetevalnameschemes) which will cause the Silo library to do these conversions automatically during read.
+
+{{ EndFunc }}
+
+## `DBGenerateMBBlockName()`
+
+* **Summary:** Generate a single block name for a multi-block object using nameschemes
+
+* **C Signature:** 
+
+  ```
+  char *DBGenerateMBBlockName(int idx, DBnamescheme const *file_ns, DBnamescheme const *block_ns,
+      int empty_cnt, int const *empty_list);
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg Name | Description
+  :--- | :---
+  `idx` | Index of block for name to be generated
+  `file_ns` | The unix file system path part of the multi-block namescheme
+  `block_ns` | The Silo file path part of the multi-block namescheme
+  `empty_cnt` | The size of the empty domain list. Pass zero if none.
+  `empty_list` | The empty domain list. Pass 0 if none.
+
+* **Returned value:**
+
+  `None`
+
+* **Description:**
+
+  This function is used internally by Silo to evaluate the name of each block in a [multi-block object namescheme](utility.md#dbevalmultimeshnameschemes).
+  It is provided as public utility for callers who wish to handle nameschemes more efficiently and evaluate only the block names they need on demand.
 
 {{ EndFunc }}
