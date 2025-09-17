@@ -532,11 +532,11 @@ int main(int argc, char **argv)
             /* Test the utility function DBGenerateMBBlockName */
             if (driver == DB_PDB)
             {
-                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d1.pdb:/block17/mesh1");
+                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d0.pdb:/block17/mesh1");
             }
             else
             {
-                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d1.h5:/block17/mesh1");
+                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d0.h5:/block17/mesh1");
             }
 
             /* Get some multi-block objects from the root file while also
