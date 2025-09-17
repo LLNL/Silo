@@ -7286,11 +7286,11 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
  *--------------------------------------------------------------------*/
 PUBLIC char
 *DBGenerateMBBlockName(
-    int idx,               /* block index for name to be generated */
-    DBnamescheme *fileNS,  /* file path namescheme */
-    DBnamescheme *blockNS, /* block path namescheme */
-    int emptyCnt,          /* empty list size */
-    int const *emptyLst)   /* list of empty block numbers */
+    int idx,                     /* block index for name to be generated */
+    DBnamescheme const *fileNS,  /* file path namescheme */
+    DBnamescheme const *blockNS, /* block path namescheme */
+    int emptyCnt,                /* optional empty list size */
+    int const *emptyLst)         /* optional list of empty block numbers */
 {
     static char res[4096];
     int avail = (int) sizeof(res)-1;
