@@ -7271,12 +7271,12 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
 }
 
 /*----------------------------------------------------------------------
- *  Routine                                          GenerateMBBlockName
+ *  Routine                                        DBGenerateMBBlockName
  *
  *  Purpose: Use multiblock object block and file nameschemes and empty
  *  list information to generate a multiblock object block name for a 
  *  given block index. The result is returned in a static local variable
- *  and should be *IMMEDIATELY COPIED*.
+ *  and should be *USED IMMEDIATELY*.
  *
  *  This code was taken entirely from VisIt's Silo plugin.
  *
@@ -7284,8 +7284,8 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
  *
  *  Modifications
  *--------------------------------------------------------------------*/
-PRIVATE char
-*GenerateMBBlockName(
+PUBLIC char
+*DBGenerateMBBlockName(
     int idx,               /* block index for name to be generated */
     DBnamescheme *fileNS,  /* file path namescheme */
     DBnamescheme *blockNS, /* block path namescheme */
@@ -7371,7 +7371,7 @@ _dbEvalMultiblockNameschemes(
 
     for (int i = 0; i < nblocks; i++)
     {
-        (*block_names)[i] = strdup(GenerateMBBlockName(i, fileNS, blockNS, empty_cnt, empty_list));
+        (*block_names)[i] = strdup(DBGenerateMBBlockName(i, fileNS, blockNS, empty_cnt, empty_list));
         if (block_types)
             (*block_types)[i] = block_type;
     }
