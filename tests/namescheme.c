@@ -526,6 +526,19 @@ int main(int argc, char **argv)
             if (mm_w_ns->file_ns == 0 || mm_w_ns->block_ns == 0)
                 FAILED("selected root file candidate has no nameschemes.");
 
+            fns = DBMakeNamescheme(mm_w_ns->file_ns);
+            bns = DBMakeNamescheme(mm_w_ns->block_ns);
+
+            /* Test the utility function DBGenerateMBBlockName */
+            if (driver == DB_PDB)
+            {
+                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d0.pdb:/block17/mesh1");
+            }
+            else
+            {
+                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d0.h5:/block17/mesh1");
+            }
+
             /* Get some multi-block objects from the root file while also
                evaluating nameschemes */
             dbfile = DBOpen(rootFiles[i], DB_UNKNOWN, DB_READ);
@@ -542,8 +555,6 @@ int main(int argc, char **argv)
 
             /* Ok, now lets generate a Silo object block name from mm_w_ns and compare it
                to what we get for the same block in mm (where nameschemes were evaluated). */
-            fns = DBMakeNamescheme(mm_w_ns->file_ns);
-            bns = DBMakeNamescheme(mm_w_ns->block_ns);
             snprintf(teststr, sizeof(teststr), "%s:%s", DBGetName(fns,5), DBGetName(bns,5));
             TEST_STR(teststr, mm->meshnames[5]);
             snprintf(teststr, sizeof(teststr), "%s:%s", DBGetName(fns,73), DBGetName(bns,73));
