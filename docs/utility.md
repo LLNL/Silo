@@ -186,7 +186,7 @@ There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) objec
   Arg name | Description
   :---|:---
   `strList` | A semi-colon separated, single string. Note that this string is modified by the call. If the caller doesn't want this, it will have to make a copy before calling.
-  `n` | The expected number of individual strings in `strList`. Pass -1 here if you have no aprior knowledge of this number. Knowing the number saves an additional pass over `strList`.
+  `n` | The expected number of individual strings in `strList`. Pass -1 here if you have no apriori knowledge of this number. Knowing the number saves an additional pass over `strList`.
   `handleSlashSwap` | a boolean to indicate if slash characters should be swapped as per differences in windows/linux file systems.
   `This is specific to Silo's internal handling of strings used in multi-block objects. So, you should pass zero (0) here.` | skipFirstSemicolon
   `a boolean to indicate if the first semicolon in the string should be skipped.` | This is specific to Silo's internal usage for legacy compatibility. You should pass zero (0) here.
@@ -291,7 +291,7 @@ There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) objec
 
 * **Returned value:**
 
-  The joined path string or `NULL` if an error occured.
+  The joined path string or `NULL` if an error occurred.
   The caller should `free()` the string.
 
 * **Description:**
@@ -346,7 +346,7 @@ There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) objec
 * **Description:**
 
   Determines if `a` and `b` are the same or different based on an absolute or relative tolerances passed in.
-  Its easies to see how the function behaves by having a look at the actual code...
+  Its easiest to see how the function behaves by having a look at the actual code...
 
   ```{literalinclude} ../src/silo/silo.c
   :start-at: "int DBIsDifferentDouble("
@@ -425,8 +425,7 @@ There are also functions to compute a [`DBmaterial`](header.md#dbmaterial) objec
 
   Traverse a Silo [`DBmaterial`](header.md#dbmaterial) object and return a collection of *dense*, `DB_ZONECENTERED` volume fraction arrays, one array of volume fractions for each material.
   The order of the arrays in the returned `vfracs` is one-to-one with the order of the `matnos` member of the [`DBmaterial`](header.md#dbmaterial) object.
-  The order of zone-centered volume fractions in any given `vfracs[i]` array is one-to-one with `matlist` member of the [`DBmaterial`](header.md#dbmaterial) obje
-ct.
+  The order of zone-centered volume fractions in any given `vfracs[i]` array is one-to-one with `matlist` member of the [`DBmaterial`](header.md#dbmaterial) object.
 
   The representation is *dense* because there is a float (or double) for every zone and every material.
   Even when a zone is *clean* in a material, the representation stores a `1` for the associated `vfracs` entry and `0`'s for all other entries.
@@ -521,13 +520,13 @@ ct.
 
 ## `DBGenerateMBBlockName()`
 
-* **Summary:** Generate a single block name for a multi-block object using nameschemes
+* **Summary:** Generate a single block name for a multi-block object with nameschemes
 
 * **C Signature:** 
 
   ```
-  char *DBGenerateMBBlockName(int idx, DBnamescheme const *file_ns, DBnamescheme const *block_ns,
-      int empty_cnt, int const *empty_list);
+  char *DBGenerateMBBlockName(int idx, DBnamescheme const *file_ns,
+      DBnamescheme const *block_ns, int empty_cnt, int const *empty_list);
   ```
 
 * **Fortran Signature:**
@@ -540,15 +539,15 @@ ct.
 
   Arg Name | Description
   :--- | :---
-  `idx` | Index of block for name to be generated
-  `file_ns` | The unix file system path part of the multi-block namescheme
-  `block_ns` | The Silo file path part of the multi-block namescheme
+  `idx` | Index of block for name to be generated.
+  `file_ns` | The unix file system path part of the multi-block namescheme. Pass zero if none.
+  `block_ns` | The Silo file path part of the multi-block namescheme.
   `empty_cnt` | The size of the empty domain list. Pass zero if none.
   `empty_list` | The empty domain list. Pass 0 if none.
 
 * **Returned value:**
 
-  `None`
+  The result is returned in a static local `char *` variable and should be used **immediately**.
 
 * **Description:**
 
