@@ -120,7 +120,6 @@ option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
-option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
 
 include(CMakeDependentOption)
@@ -708,8 +707,9 @@ endif()
 #-----------------------------------------------------------------------------
 # TESTS
 #-----------------------------------------------------------------------------
-if(SILO_ENABLE_TESTS)
-    add_subdirectory(tests)
+include(CTest)            # defines BUILD_TESTING, calls enable_testing() if ON
+if (BUILD_TESTING)
+  add_subdirectory(tests)
 endif()
 
 
