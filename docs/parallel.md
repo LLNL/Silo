@@ -68,14 +68,14 @@ The functions described in this section of the manual include...
 
   The mesh blocks may be stored in different sub-directories within a Silo file and, optionally, even in different Silo files altogether.
   So, the `name` of each mesh block is specified using its full Silo path `name`.
-  The full Silo pathname is the form...
+  The full Silo path name is the form...
 
   ```
   [<silo-filename>:]<path-to-mesh>
   ```
 
   The existence of a colon (':') anywhere in meshnames[i] indicates that the ith mesh block `name` is specified using both the Silo filename and the path in the file.
-  All characters before the colon are the Silo file pathname within the file system on which the file(s) reside.
+  All characters before the colon are the Silo file path name within the file system on which the file(s) reside.
   Use whatever slash character ('\' for Windows or '/' for Unix) is appropriate for the underlying file system in this part of the string only.
   Silo will automatically handle changes in the slash character in this part of the string if this data is ever read on a different file system.
   All characters after the colon are the path of the object within the Silo file and must use only the '/' slash character.
@@ -109,12 +109,12 @@ The functions described in this section of the manual include...
   External array references may be used in the nameschemes.
   Any such array names found in the namescheme are assumed to be the names of simple, 1D, integer arrays written with a `DBWrite()` call and existing in the same directory as the multi-block object . Finally, keep in mind that in the nameschemes, blocks are numbered starting from zero.
 
-  If you are using the namescheme options and have `EMPTY` blocks, since the `meshnames` argument is `NULL`, you can use the `DBOPT_MB_EMPTY_COUNT|LIST` options to explicitly enumerate any empty blocks instead of having to incroporate them into your nameschemes.
+  If you are using the namescheme options and have `EMPTY` blocks, since the `meshnames` argument is `NULL`, you can use the `DBOPT_MB_EMPTY_COUNT|LIST` options to explicitly enumerate any empty blocks instead of having to incorporate them into your nameschemes.
 
-  Similarly, when the mesh consists of blocks of all the same type, you may pass `NULL` for the `meshtypes` argumnt and instead use the `DBOPT_MB_BLOCK_TYPE` option to specify a single, constant block type for all blocks.
+  Similarly, when the mesh consists of blocks of all the same type, you may pass `NULL` for the `meshtypes` argument and instead use the `DBOPT_MB_BLOCK_TYPE` option to specify a single, constant block type for all blocks.
   This option can result in important savings for large numbers of blocks.
 
-  Finally, note that what is described here for the mulitmesh object in the way of `name` for the individual blocks applies to all multi-block objects (e.g. `DBPutMultixxx`).
+  Finally, note that what is described here for the multimesh object in the way of `name` for the individual blocks applies to all multi-block objects (e.g. `DBPutMultixxx`).
 
   Notes:
 
@@ -150,8 +150,8 @@ The functions described in this section of the manual include...
   `DBOPT_GROUPINGS`|int *|Integer array of length specified by `DBOPT_GROUPINGS_SIZE` containing information on how different mesh blocks are organized into, possibly hierarchical, groups. See below for detailed discussion.|`NULL`
   `DBOPT_GROUPINGS_NAMES`|`char**`|Optional set of names to be associated with each group in the groupings array|`NULL`
 
-  There is a class of options for DBMulti- objects that is `VERY` IMPORTANT in helping to accelerate performance in down-stream post-processing tools.
-  We call these Down-stream Performance Options.
+  There is a class of options for multiblock objects that is *very important* in helping to accelerate performance in down-stream post-processing tools.
+  We call these Downstream Performance Options.
   In order of utility, these options are `DBOPT_EXTENTS`, `DBOPT_MIXLENS` and `DBOPT_MATLISTS` and `DBOPT_ZONECOUNTS`.
   Although these options are creating redundant data in the Silo database, the data is stored in a manner that is far more convenient to down-stream applications that read Silo databases.
   Therefore, the user is strongly encouraged to make use of these options.

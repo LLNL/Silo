@@ -264,7 +264,7 @@ Finally, Silo also supports the specification of expressions representing derive
   Otherwise, it is more convenient to use `DBPutPointvar1`.
 
   For tensor quantities, the question of ordering of tensor components arises.
-  For symmetric tensor's Silo uses the Voigt Notation ordering.
+  For symmetric tensors Silo uses the Voigt Notation ordering.
   In 2D, this is `T11`, `T22`, `T12`.
   In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
@@ -283,7 +283,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
   `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the path names of regions in the MRG tree for the associated mesh where the variable is defined. If there is no MRG tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
   `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
@@ -409,7 +409,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `dims` | Array of length `ndims` describing the dimensionality of the mesh. Each value in the `dims` array indicates the number of nodes contained in the mesh along that dimension. In order to specify a mesh with topological dimension lower than the geometric dimension, `ndims` should be the geometric dimension and the extra entries in the `dims` array provided here should be set to 1.
   `ndims` | Number of geometric dimensions. Typically geometric and topological dimensions agree. Read the description for dealing with situations where this is not the case.
   `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
-  `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Collinear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
+  `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Co-linear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
 
 * **Returned value:**
@@ -593,7 +593,7 @@ Finally, Silo also supports the specification of expressions representing derive
   This function is useful for writing vector and tensor fields, whereas the companion function, DBPutQuadvar1, is appropriate for writing scalar fields.
 
   For tensor quantities, the question of ordering of tensor components arises.
-  For symmetric tensor's Silo uses the Voigt Notation ordering.
+  For symmetric tensors Silo uses the Voigt Notation ordering.
   In 2D, this is `T11`, `T22`, `T12`.
   In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
@@ -621,7 +621,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the path names of regions in the MRG tree for the associated mesh where the variable is defined. If there is no MRG tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 {{ EndFunc }}
@@ -773,7 +773,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   While the name of the zonelist object, `zonel_name`, is **NOT** optional, the name of the facelist object, `facel_name`, is.
   See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or `DBCalcExternalFacelist2` for an automated way of computing a facelist object to be named in this call.
-  The reason Silo provides an optional facelist object name argument is to facilitate downstream postprocessors in producing a *initial* view of the object.
+  The reason Silo provides an optional facelist object name argument is to facilitate downstream post processors in producing a *initial* view of the object.
 
   The following table describes the options accepted by this function:
 
@@ -879,7 +879,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Returned value:**
 
-  Rreturns a pointer to a [`DBucdmesh`](./header.md#dbucdmesh) structure on success and `NULL` on failure.
+  Returns a pointer to a [`DBucdmesh`](./header.md#dbucdmesh) structure on success and `NULL` on failure.
 
 * **Description:**
 
@@ -933,7 +933,7 @@ Finally, Silo also supports the specification of expressions representing derive
   Use `DBPutZonelist2()` instead.
 
   The `DBPutZonelist` function writes a zonelist object into a Silo file.
-  The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
+  The `name` assigned to this object can in turn be used as the `zonel_name` parameter to the `DBPutUcdmesh` function.
 
   See [`DBPutZonelist2`](#dbputzonelist2) for a full description of the standard element types and the zonelist object.
 
@@ -987,7 +987,7 @@ Finally, Silo also supports the specification of expressions representing derive
 * **Description:**
 
   The `DBPutZonelist2` function writes a zonelist object into a Silo file.
-  The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
+  The `name` assigned to this object can in turn be used as the `zonel_name` parameter to the `DBPutUcdmesh` function.
 
   The allowed shape types are described in the following table:
 

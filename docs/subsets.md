@@ -203,7 +203,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   "materials"|Top-level region below which material decomposition information is defined. There can be multiple material decompositions, if so desired. Each such decomposition would be rooted at a region named "material_<name>" underneath the "materials" region node.
   "groupings"|Top-level region below which multi-block grouping information is defined. There can be multiple groupings, if so desired. Each such grouping would be rooted at a region named "grouping_<name>" underneath the "groupings" region node.
   "amr-levels"|Top-level region below which Adaptive Mesh Refinement level groupings are defined.
-  "amr-refinements"|Top-level region below which Adaptive Mesh Refinment refinement information is defined. This where the information indicating which blocks are refinements of other blocks is defined.
+  "amr-refinements"|Top-level region below which Adaptive Mesh Refinement refinement information is defined. This where the information indicating which blocks are refinements of other blocks is defined.
   "neighbors"|Top-level region below which multi-block adjacency information is defined.
 
   When a region is being defined in an MRG tree to be associated with a multi-block mesh, often the groupel type of the maps associated with the region are of type `DB_BLOCKCENT`.
@@ -676,7 +676,7 @@ The solution is to ensure the string has characters separating fields that are n
   `ncomps` | An integer specifying the number of variable components.
   `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass `NULL`(0) if no component names are to be specified.
   `nregns` | The number of regions this variable is being written for.
-  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==`NULL`, it is assumed that reg_pnames[i]=`NULL` for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
+  `reg_pnames` | Array of `nregns` pointers to strings representing the path names of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==`NULL`, it is assumed that reg_pnames[i]=`NULL` for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
   `data` | Array of `ncomps` pointers to variable `data`. The pointer, data[i] points to an array of `nregns` values of type datatype.
   `opts` | Additional options.
 
@@ -707,7 +707,7 @@ The solution is to ensure the string has characters separating fields that are n
 
   Variable Naming Convention|Meaning
   :---|:---
-  "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinment ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
+  "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinement ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
   "ijk-orientations"|An integer variable of 3 components defined on the individual blocks of a multi-block mesh defining the orientations of the individual blocks in a large, ijk indexing space (Ares convention)
   "<var>-extents"|A double precision variable defining the block-by-block extents of a multi-block variable. If <var>=="coords", then it defines the spatial extents of the mesh itself. Note, this convention obsoletes the `DBOPT_XXX_EXTENTS` options on DBPutMultivar/DBPutMultimesh calls.
 
