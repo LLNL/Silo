@@ -353,6 +353,12 @@ endif()
 
 set(SKIP_TEST_SOURCES
     add_amr_mrgtree.c
+    ioperf.c
+    ioperf_pdb.c
+    ioperf_silo.c
+    ioperf_hdf5.c
+    ioperf_sec2.c
+    ioperf_stdio.c
     json.c
     largefile_netcdf.c
     silo_overwrite_multi_example.c
