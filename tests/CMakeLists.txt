@@ -351,6 +351,14 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     file(GLOB F_TEST_SOURCES *.f*)
 endif()
 
+#
+# These are "skipped" in the main loop that adds tests for
+# one of several possible reasons...
+#
+#     * test is not working
+#     * source file is used within another test
+#     * necessary dependency logic not set up
+#
 set(SKIP_TEST_SOURCES
     add_amr_mrgtree.c
     ioperf.c
@@ -361,9 +369,25 @@ set(SKIP_TEST_SOURCES
     ioperf_stdio.c
     json.c
     largefile_netcdf.c
+    listtypes_main.c
     silo_overwrite_multi_example.c
     std.c
+    testlib.c
 )
+
+set(TESTLIB_SOURCES
+    dir.c
+    quad.c
+)
+
+add_library(testlib_obj OBJECT testlib.c)
+target_include_directories(testlib_obj PRIVATE
+  ${silo_build_include_dir} ${Silo_SOURCE_DIR}/src/silo)
+
+#add_library(listtypes_obj OBJECT listtypes.c)
+#target_include_directories(listtypes_obj PRIVATE
+#  ${silo_build_include_dir} ${Silo_SOURCE_DIR}/src/silo)
+#target_sources(listtypes_main PRIVATE $<TARGET_OBJECTS:listtypes_obj>)
 
 foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 
@@ -383,6 +407,10 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
     add_executable(${base} ${src})
     add_dependencies(${base} silo)
     target_compile_definitions(${base} PRIVATE PDB_LITE)
+
+    if(srcFile IN_LIST TESTLIB_SOURCES)
+        target_sources(${base} PRIVATE $<TARGET_OBJECTS:testlib_obj>)
+    endif()
 
     target_link_libraries(${base} $<TARGET_LINKER_FILE:silo>)
     if(UNIX)
@@ -428,6 +456,7 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 
 endforeach()
 
+target_sources(listtypes PRIVATE listtypes_main.c listtypes.c)
 
 IF(FALSE)
 add_test(NAME test1 COMMAND $<TARGET_FILE:${sat_NAME}>)
