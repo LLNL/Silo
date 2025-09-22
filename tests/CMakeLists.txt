@@ -265,20 +265,83 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     endforeach()
     silo_add_test(NAME arrayf90 SRC arrayf90.f90)
 endif()
-
 ENDIF(FALSE)
 
+set(SILO_TESTS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+IF(FALSE)
 set(C_TEST_SOURCES
-    twohex.c
     add_amr_mrgtree.c
     alltypes.c
     arbpoly.c
     arbpoly2d.c
     arbpoly3d.c
     array.c
+    twohex.c
+)
+ENDIF(FALSE)
+
+set(HDF5_ONLY_SOURCES
+    compression.c
+    grab.c
+    largefile.c
+    memfile_simple.c
+    onehex.c
+    partial_io.c
 )
 
-foreach(src IN LISTS C_TEST_SOURCES)
+set(PDB_ONLY_SOURCES
+    testpdb.c
+    pdbtst.c
+)
+
+#AT_SETUP(grab)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
+#AT_SETUP(onehex with split VFD)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,ignore)
+#AT_SETUP(onehex with custom fapl/fcpl)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex custom,,ignore,ignore)
+#AT_SETUP(partial_io with rect3d point query)
+#AT_CHECK(testall $STARGS,,ignore)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9],,ignore,ignore)
+#AT_SETUP(partial_io with ucd3d point query) 
+#AT_CHECK(testall $STARGS,,ignore)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574],,ignore,ignore)
+#AT_SETUP(compression gzip) 
+#
+#AT_SETUP(compression gzip)
+#AT_SETUP(compression szip)
+#AT_SETUP(compression fpzip)
+#AT_SETUP(compression lossy3)
+#AT_SETUP(compression minratio1000)
+#AT_SETUP(compression zfp)
+#AT_SETUP(testhzip)
+#AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)
+#AT_SETUP(checksums)
+#AT_CHECK(test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd`,,ignore,ignore)
+#AT_SETUP(xversion)
+#AT_CHECK(test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd`,,ignore,ignore)
+#AT_SETUP(largefile)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile,,ignore,ignore)
+#AT_SETUP(memfile_simple)
+#AT_CHECK(testall -small $STARGS,,ignore) 
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
+
+
+
+
+
+
+#
+# General case for most tests
+#
+file(GLOB C_TEST_SOURCES *.c)
+
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    file(GLOB F_TEST_SOURCES *.f*)
+endif()
+
+foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 
     cmake_path(GET src STEM base)
 
@@ -298,9 +361,31 @@ foreach(src IN LISTS C_TEST_SOURCES)
 
     set_target_properties(${base} PROPERTIES FOLDER testing/tests)
 
+    if(src IN_LIST F_TEST_SOURCES)
+      if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+        if (CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
+          target_compile_options(${base} PRIVATE
+            "$<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>"
+            )
+        endif()
+      endif()
+    endif()
+
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         target_link_libraries(${base} ${HDF5_C_LIBRARIES})
         target_include_directories(${base} PRIVATE ${HDF5_INCLUDE_DIRS})
+    endif()
+
+    if(src IN_LIST HDF5_ONLY_SOURCES)
+        add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
+        message(STATUS "adding ${base}-hdf5")
+        continue()
+    endif()
+
+    if(src IN_LIST PDB_ONLY_SOURCES)
+        add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
+        message(STATUS "adding ${base}")
+        continue()
     endif()
 
     add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
