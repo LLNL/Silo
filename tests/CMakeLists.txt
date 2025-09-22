@@ -341,9 +341,21 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     file(GLOB F_TEST_SOURCES *.f*)
 endif()
 
+set(SKIP_TEST_SOURCES
+    add_amr_mrgtree.c
+    std.c
+    silo_overwrite_multi_example.c
+)
+
 foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 
+    cmake_path(GET src FILENAME srcFile)
     cmake_path(GET src STEM base)
+
+    # ignore tests we're skipping
+    if(srcFile IN_LIST SKIP_TEST_SOURCES)
+        continue()
+    endif()
 
     add_executable(${base} ${src})
     add_dependencies(${base} silo)
@@ -376,13 +388,13 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
         target_include_directories(${base} PRIVATE ${HDF5_INCLUDE_DIRS})
     endif()
 
-    if(src IN_LIST HDF5_ONLY_SOURCES)
+    if(srcFile IN_LIST HDF5_ONLY_SOURCES)
         add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
         message(STATUS "adding ${base}-hdf5")
         continue()
     endif()
 
-    if(src IN_LIST PDB_ONLY_SOURCES)
+    if(srcFile IN_LIST PDB_ONLY_SOURCES)
         add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
         message(STATUS "adding ${base}")
         continue()
