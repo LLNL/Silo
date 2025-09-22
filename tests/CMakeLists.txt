@@ -295,6 +295,16 @@ set(PDB_ONLY_SOURCES
     pdbtst.c
 )
 
+set(PARALLEL_SOURCES
+    bcastopen.c
+    bcastopen_main.c
+    multi_file_memfile.c
+    pmpio_for_llrt.c
+    pmpio_hdf5_test.c
+    pmpio_silo_test_mesh.c
+    resample.c
+)
+
 #AT_SETUP(grab)
 #AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
 #AT_SETUP(onehex with split VFD)
@@ -343,8 +353,10 @@ endif()
 
 set(SKIP_TEST_SOURCES
     add_amr_mrgtree.c
-    std.c
+    json.c
+    largefile_netcdf.c
     silo_overwrite_multi_example.c
+    std.c
 )
 
 foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
@@ -354,6 +366,11 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 
     # ignore tests we're skipping
     if(srcFile IN_LIST SKIP_TEST_SOURCES)
+        continue()
+    endif()
+
+    # Skip any parallel tests if we don't have parallel enabled
+    if(NOT SILO_PARALLEL AND srcFile IN_LIST PARALLEL_SOURCES)
         continue()
     endif()
 
