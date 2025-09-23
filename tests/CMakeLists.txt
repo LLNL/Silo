@@ -286,13 +286,16 @@ set(HDF5_ONLY_SOURCES
     grab.c
     largefile.c
     memfile_simple.c
+    mk_nasf_h5.c
     onehex.c
     partial_io.c
+    testhdf5.c
 )
 
 set(PDB_ONLY_SOURCES
-    testpdb.c
+    mk_nasf_pdb.c
     pdbtst.c
+    testpdb.c
 )
 
 set(PARALLEL_SOURCES
@@ -356,11 +359,12 @@ endif()
 # one of several possible reasons...
 #
 #     * test is not working
-#     * source file is used within another test
-#     * necessary dependency logic not set up
+#     * source file is used only within another test
+#     * necessary dependency logic not set up yet
 #
 set(SKIP_TEST_SOURCES
     add_amr_mrgtree.c
+    cpz1plt.c
     ioperf.c
     ioperf_pdb.c
     ioperf_silo.c
