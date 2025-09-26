@@ -61,6 +61,8 @@ product endorsement purposes.
 #include <silo.h>
 #include <std.c>
 
+#include <config.h>
+
 #ifdef HAVE_HDF5_H
 #include <hdf5.h>
 #endif
