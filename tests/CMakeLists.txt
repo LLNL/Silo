@@ -358,7 +358,7 @@ endif()
 # These are "skipped" in the main loop that adds tests for
 # one of several possible reasons...
 #
-#     * test is not working
+#     * test the source file is for is not working
 #     * source file is used only within another test
 #     * necessary dependency logic not set up yet
 #
@@ -387,11 +387,6 @@ set(TESTLIB_SOURCES
 add_library(testlib_obj OBJECT testlib.c)
 target_include_directories(testlib_obj PRIVATE
   ${silo_build_include_dir} ${Silo_SOURCE_DIR}/src/silo)
-
-#add_library(listtypes_obj OBJECT listtypes.c)
-#target_include_directories(listtypes_obj PRIVATE
-#  ${silo_build_include_dir} ${Silo_SOURCE_DIR}/src/silo)
-#target_sources(listtypes_main PRIVATE $<TARGET_OBJECTS:listtypes_obj>)
 
 foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 
