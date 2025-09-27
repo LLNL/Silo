@@ -534,8 +534,8 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 
     if(SILO_ENABLE_FPZIP)
+        set(HAVE_FPZIP 1)
         list(APPEND SILO_COMPILE_DEFINES
-            HAVE_FPZIP
             FPZIP_FP=FPZIP_FP_SAFE)
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/fpzip/error.cpp
@@ -549,8 +549,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 
     if(SILO_ENABLE_HZIP)
-        list(APPEND SILO_COMPILE_DEFINES HAVE_HZIP)
-
+        set(HAVE_HZIP 1)
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/hzip/hzmdecoder.cpp
             ${Silo_SOURCE_DIR}/src/hzip/hzmencoder.cpp
@@ -568,7 +567,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
             ${Silo_SOURCE_DIR}/src/hzip)
     endif()
 
-    if(zlib_FOUND)
+    if(ZLIB_FOUND)
         list(APPEND silo_library_include_dirs ${ZLIB_INCLUDE_DIR})
     else()
         list(APPEND SILO_COMPILE_DEFINES WITHOUT_ZLIB)

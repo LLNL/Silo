@@ -269,28 +269,18 @@ ENDIF(FALSE)
 
 set(SILO_TESTS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-IF(FALSE)
-set(C_TEST_SOURCES
-    add_amr_mrgtree.c
-    alltypes.c
-    arbpoly.c
-    arbpoly2d.c
-    arbpoly3d.c
-    array.c
-    twohex.c
-)
-ENDIF(FALSE)
-
-set(HDF5_ONLY_SOURCES
-    compression.c
-    grab.c
-    largefile.c
-    memfile_simple.c
-    mk_nasf_h5.c
-    onehex.c
-    partial_io.c
-    testhdf5.c
-)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    set(HDF5_ONLY_SOURCES
+        compression.c
+        grab.c
+        largefile.c
+        memfile_simple.c
+        mk_nasf_h5.c
+        onehex.c
+        partial_io.c
+        testhdf5.c
+    )
+endif()
 
 set(PDB_ONLY_SOURCES
     mk_nasf_pdb.c
@@ -320,14 +310,6 @@ set(PARALLEL_SOURCES
 #AT_SETUP(partial_io with ucd3d point query) 
 #AT_CHECK(testall $STARGS,,ignore)
 #AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574],,ignore,ignore)
-#AT_SETUP(compression gzip) 
-#
-#AT_SETUP(compression gzip)
-#AT_SETUP(compression szip)
-#AT_SETUP(compression fpzip)
-#AT_SETUP(compression lossy3)
-#AT_SETUP(compression minratio1000)
-#AT_SETUP(compression zfp)
 #AT_SETUP(testhzip)
 #AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)
 #AT_SETUP(checksums)
@@ -470,11 +452,34 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
     endif()
 
     add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
-    add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+        add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
+    endif()
 
 endforeach()
 
 target_sources(listtypes PRIVATE listtypes_main.c listtypes.c)
+
+#
+# Basic (simple array) compression tests
+#
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    if(ZLIB_FOUND)
+        add_test(NAME compression-gzip COMMAND $<TARGET_FILE:compression> gzip)
+    endif()
+    if(HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
+        add_test(NAME compression-szip COMMAND $<TARGET_FILE:compression> szip)
+    endif()
+    if(SILO_ENABLE_FPZIP)
+        add_test(NAME compression-fpzip COMMAND $<TARGET_FILE:compression> fpzip)
+        add_test(NAME compression-lossy3 COMMAND $<TARGET_FILE:compression> lossy3)
+        add_test(NAME compression-minratio-good COMMAND $<TARGET_FILE:compression> minratio1000)
+        add_test(NAME compression-minratio-fail COMMAND $<TARGET_FILE:compression> minratio1001)
+    endif()
+    if(SILO_ENABLE_ZFP)
+        add_test(NAME compression-zfp COMMAND $<TARGET_FILE:compression> zfp)
+    endif()
+endif()
 
 IF(FALSE)
 add_test(NAME test1 COMMAND $<TARGET_FILE:${sat_NAME}>)
