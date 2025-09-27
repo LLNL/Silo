@@ -341,10 +341,6 @@ set(PARALLEL_SOURCES
 #AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
 
 
-
-
-
-
 #
 # General case for most tests
 #
@@ -377,6 +373,18 @@ set(SKIP_TEST_SOURCES
     silo_overwrite_multi_example.c
     std.c
     testlib.c
+)
+
+#
+# These are tests that require something other than simply running
+# the test exeutable such as...
+#
+#    * Specific data files need to be read as part of the test
+#    * Specific command-line arguments are needed to run the test
+#
+set(SPECIAL_TEST_SOURCES
+    merge_block.c
+    test_mat_compression.c
 )
 
 set(TESTLIB_SOURCES
@@ -438,6 +446,17 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
         target_include_directories(${base} PRIVATE ${HDF5_INCLUDE_DIRS})
     endif()
 
+    #
+    # Do not add default test cases for special tests. Those are
+    # handled with specific logic below
+    #
+    if(srcFile IN_LIST SPECIAL_TEST_SOURCES)
+        continue()
+    endif()
+
+    #
+    # Add default tests for both PDB and, if needed, HDF5 drivers
+    #
     if(srcFile IN_LIST HDF5_ONLY_SOURCES)
         add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
         message(STATUS "adding ${base}-hdf5")
