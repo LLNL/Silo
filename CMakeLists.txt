@@ -339,10 +339,6 @@ configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
 ###-----------------------------------------------------------------------------
 include(GNUInstallDirs)
 
-###-----------------------------------------------------------------------------
-# Create config.h from config.h.in
-###-----------------------------------------------------------------------------
-
 # define and populate CMAKE_INSTALL_*DIR variables
 include(GNUInstallDirs)
 
@@ -359,22 +355,6 @@ if(SILO_ENABLE_FORTRAN)
                             WORLD_READ)
     endif()
 endif()
-
-# set up some vars to be passed to config.h.in
-set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
-set(SILO_NAME "silo")
-set(SILO_TARNAME "silo")
-set(SILO_URL "https://silo.llnl.gov")
-
-# these are always defined
-set(HAVE_PDB_DRIVER 1)
-set(HAVE_NETCDF_DRIVER 1)
-set(HAVE_TAURUS_DRIVER 1)
-
-set(STDC_HEADERS 1)
-
-configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
-               ${silo_build_include_dir}/config.h)
 
 
 ###-----------------------------------------------------------------------------
@@ -711,6 +691,26 @@ include(CTest)            # defines BUILD_TESTING, calls enable_testing() if ON
 if (BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+###-----------------------------------------------------------------------------
+# Create config.h from config.h.in
+###-----------------------------------------------------------------------------
+
+# set up some vars to be passed to config.h.in
+set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
+set(SILO_NAME "silo")
+set(SILO_TARNAME "silo")
+set(SILO_URL "https://silo.llnl.gov")
+
+# these are always defined
+set(HAVE_PDB_DRIVER 1)
+set(HAVE_NETCDF_DRIVER 1)
+set(HAVE_TAURUS_DRIVER 1)
+
+set(STDC_HEADERS 1)
+
+configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
+               ${silo_build_include_dir}/config.h)
 
 
 #-----------------------------------------------------------------------------
