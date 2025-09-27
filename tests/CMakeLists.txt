@@ -462,22 +462,52 @@ target_sources(listtypes PRIVATE listtypes_main.c listtypes.c)
 
 #
 # Basic (simple array) compression tests
+# All tests here involve a pair of executions of the same test executable.
+# First, data is compressed during write. Then, data is uncompressed during read.
+# Because all tests write the same named file, we need to lock that resource.
 #
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    set(COMPRESSION_TESTS)
     if(ZLIB_FOUND)
         add_test(NAME compression-gzip COMMAND $<TARGET_FILE:compression> gzip)
+        add_test(NAME compression-gzip-read COMMAND $<TARGET_FILE:compression> readonly)
+        set_tests_properties(compression-gzip-read PROPERTIES DEPENDS "compression-gzip")
+        list(APPEND COMPRESSION_TESTS compression-gzip compression-gzip-read)
     endif()
     if(HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
         add_test(NAME compression-szip COMMAND $<TARGET_FILE:compression> szip)
+        add_test(NAME compression-szip-read COMMAND $<TARGET_FILE:compression> readonly)
+        set_tests_properties(compression-szip-read PROPERTIES DEPENDS "compression-szip")
+        list(APPEND COMPRESSION_TESTS compression-szip compression-szip-read)
     endif()
     if(SILO_ENABLE_FPZIP)
         add_test(NAME compression-fpzip COMMAND $<TARGET_FILE:compression> fpzip)
+        add_test(NAME compression-fpzip-read COMMAND $<TARGET_FILE:compression> readonly)
+        set_tests_properties(compression-fpzip-read PROPERTIES DEPENDS "compression-fpzip")
+        list(APPEND COMPRESSION_TESTS compression-fpzip compression-fpzip-read)
+
         add_test(NAME compression-lossy3 COMMAND $<TARGET_FILE:compression> lossy3)
+        add_test(NAME compression-lossy3-read COMMAND $<TARGET_FILE:compression> readonly)
+        set_tests_properties(compression-lossy3-read PROPERTIES DEPENDS "compression-lossy3")
+        list(APPEND COMPRESSION_TESTS compression-lossy3 compression-lossy3-read)
+
         add_test(NAME compression-minratio-good COMMAND $<TARGET_FILE:compression> minratio1000)
+        add_test(NAME compression-minratio-good-read COMMAND $<TARGET_FILE:compression> readonly)
+        set_tests_properties(compression-minratio-good-read PROPERTIES DEPENDS "compression-minratio-good")
+        list(APPEND COMPRESSION_TESTS compression-minratio-good compression-minratio-good-read)
+
         add_test(NAME compression-minratio-fail COMMAND $<TARGET_FILE:compression> minratio1001)
+        list(APPEND COMPRESSION_TESTS compression-minratio-fail)
     endif()
     if(SILO_ENABLE_ZFP)
         add_test(NAME compression-zfp COMMAND $<TARGET_FILE:compression> zfp)
+        add_test(NAME compression-zfp-read COMMAND $<TARGET_FILE:compression> readonly)
+        set_tests_properties(compression-zfp-read PROPERTIES DEPENDS "compression-zfp")
+        list(APPEND COMPRESSION_TESTS compression-zfp compression-zfp-read)
+    endif()
+    if(COMPRESSION_TESTS)
+        set_tests_properties(${COMPRESSION_TESTS} PROPERTIES RESOURCE_LOCK compression.h5)
+        set_tests_properties(${COMPRESSION_TESTS} PROPERTIES LABELS "Compression")
     endif()
 endif()
 
@@ -549,7 +579,6 @@ ENDIF(FALSE)
 # AT_CHECK(testall $STARGS,,ignore)
 # AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574],,ignore,ignore)
 #
-# AT_SETUP(compression gzip)
 # AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip,,ignore,ignore)
 # AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
 #
