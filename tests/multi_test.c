@@ -915,7 +915,7 @@ main(int argc, char *argv[])
     /*
      * Create the multi-block rectilinear 2d mesh.
      *
-     * testfush and testflushread functionality here is designed to test
+     * testflush and testflushread functionality here is designed to test
      * DBFlush and then re-reading the flushed but not closed file into
      * a new execv'd process.
      */

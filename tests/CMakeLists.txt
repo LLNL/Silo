@@ -511,14 +511,36 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 endif()
 
-IF(FALSE)
-add_test(NAME test1 COMMAND $<TARGET_FILE:${sat_NAME}>)
-set_tests_properties(test1 PROPERTIES LABELS "PDB;Basic")
-add_test(NAME test2 COMMAND $<TARGET_FILE:${sat_NAME}> DB_HDF5)
-set_tests_properties(test2 PROPERTIES LABELS "HDF5;Basic")
-add_test(NAME test3 COMMAND $<TARGET_FILE:${sat_NAME}> show-all-errors)
-set_tests_properties(test3 PROPERTIES LABELS "errors;Basic")
-ENDIF(FALSE)
+#
+# multi_test is a work-horse test that tests multi-block for 2 and 3 dimensions,
+# several different mesh types, materials, etc as well as a number of different
+# scenarios involving interrupted writes, early closes on a file, etc.
+#
+set(MULTI_TESTS)
+add_test(NAME multi_test-read COMMAND $<TARGET_FILE:multi_test> testread)
+add_test(NAME multi_test-badread COMMAND $<TARGET_FILE:multi_test> testbadread)
+add_test(NAME multi_test-earlyclose COMMAND $<TARGET_FILE:multi_test> earlyclose)
+list(APPEND MULTI_TESTS multi_test-read multi_test-badread multi_test-earlyclose)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME multi_test-read-hdf5 COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
+    add_test(NAME multi_test-badread-hdf5 COMMAND $<TARGET_FILE:multi_test> testbadread DB_HDF5)
+    add_test(NAME multi_test-earlyclose-hdf5 COMMAND $<TARGET_FILE:multi_test> earlyclose DB_HDF5)
+    add_test(NAME multi_test-flush COMMAND $<TARGET_FILE:multi_test> testflush DB_HDF5)
+    add_test(NAME multi_test-flush-read COMMAND $<TARGET_FILE:multi_test> testflushread DB_HDF5)
+    add_test(NAME multi_test-libver COMMAND $<TARGET_FILE:multi_test> libver DB_HDF5)
+    add_test(NAME multi_test-libver-read COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
+    list(APPEND MULTI_TESTS multi_test-read-hdf5 multi_test-badread-hdf5
+                            multi_test-earlyclose-hdf5
+                            multi_test-flush multi_test-flush-read
+                            multi_test-libver multi_test-libver-read)
+endif()
+if(MULTI_TESTS)
+    set_tests_properties(${MULTI_TESTS} PROPERTIES RESOURCE_LOCK 
+        "multi_curv2d.pdb;multi_curv3d.pdb;multi_point2d.pdb;multi_rect2d.pdb;multi_rect3d.pdb;multi_ucd3d.pdb;
+         multi_curv2d.h5;multi_curv3d.h5;multi_point2d.h5;multi_rect2d.h5;multi_rect3d.h5;multi_ucd3d.pdb")
+    set_tests_properties(${MULTI_TESTS} PROPERTIES LABELS "Multi")
+endif()
+
 
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
@@ -609,6 +631,8 @@ ENDIF(FALSE)
 # AT_SETUP(multi_file use-ns)
 # AT_CHECK($VALGRIND multi_file use-ns $STARGS,,ignore)
 # AT_CHECK($VALGRIND namescheme eval-ns $STARGS,,ignore)
+#
+
 
 
 
