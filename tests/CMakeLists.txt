@@ -516,31 +516,54 @@ endif()
 # several different mesh types, materials, etc as well as a number of different
 # scenarios involving interrupted writes, early closes on a file, etc.
 #
-set(MULTI_TESTS)
+set(MULTI_BLOCK_TESTS)
 add_test(NAME multi_test-read COMMAND $<TARGET_FILE:multi_test> testread)
+set_tests_properties(multi_test-read PROPERTIES DEPENDS "multi_test")
 add_test(NAME multi_test-badread COMMAND $<TARGET_FILE:multi_test> testbadread)
+set_tests_properties(multi_test-badread PROPERTIES DEPENDS "multi_test")
 add_test(NAME multi_test-earlyclose COMMAND $<TARGET_FILE:multi_test> earlyclose)
-list(APPEND MULTI_TESTS multi_test-read multi_test-badread multi_test-earlyclose)
+list(APPEND MULTI_BLOCK_TESTS multi_test multi_test-read multi_test-badread multi_test-earlyclose)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_test-read-hdf5 COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
+    set_tests_properties(multi_test-read-hdf5 PROPERTIES DEPENDS "multi_test-hdf5")
     add_test(NAME multi_test-badread-hdf5 COMMAND $<TARGET_FILE:multi_test> testbadread DB_HDF5)
+    set_tests_properties(multi_test-badread-hdf5 PROPERTIES DEPENDS "multi_test-hdf5")
     add_test(NAME multi_test-earlyclose-hdf5 COMMAND $<TARGET_FILE:multi_test> earlyclose DB_HDF5)
     add_test(NAME multi_test-flush COMMAND $<TARGET_FILE:multi_test> testflush DB_HDF5)
     add_test(NAME multi_test-flush-read COMMAND $<TARGET_FILE:multi_test> testflushread DB_HDF5)
+    set_tests_properties(multi_test-flush-read PROPERTIES DEPENDS "multi_test-flush")
     add_test(NAME multi_test-libver COMMAND $<TARGET_FILE:multi_test> libver DB_HDF5)
     add_test(NAME multi_test-libver-read COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
-    list(APPEND MULTI_TESTS multi_test-read-hdf5 multi_test-badread-hdf5
-                            multi_test-earlyclose-hdf5
-                            multi_test-flush multi_test-flush-read
-                            multi_test-libver multi_test-libver-read)
+    set_tests_properties(multi_test-libver-read PROPERTIES DEPENDS "multi_test-libver")
+    list(APPEND MULTI_BLOCK_TESTS multi_test-hdf5 multi_test-read-hdf5 multi_test-badread-hdf5
+        multi_test-earlyclose-hdf5 multi_test-flush multi_test-flush-read multi_test-libver multi_test-libver-read)
 endif()
-if(MULTI_TESTS)
-    set_tests_properties(${MULTI_TESTS} PROPERTIES RESOURCE_LOCK 
+if(MULTI_BLOCK_TESTS)
+    set_tests_properties(${MULTI_BLOCK_TESTS} PROPERTIES RESOURCE_LOCK 
         "multi_curv2d.pdb;multi_curv3d.pdb;multi_point2d.pdb;multi_rect2d.pdb;multi_rect3d.pdb;multi_ucd3d.pdb;
-         multi_curv2d.h5;multi_curv3d.h5;multi_point2d.h5;multi_rect2d.h5;multi_rect3d.h5;multi_ucd3d.pdb")
-    set_tests_properties(${MULTI_TESTS} PROPERTIES LABELS "Multi")
+         multi_curv2d.h5;multi_curv3d.h5;multi_point2d.h5;multi_rect2d.h5;multi_rect3d.h5;multi_ucd3d.h5")
+    set_tests_properties(${MULTI_BLOCK_TESTS} PROPERTIES LABELS "Multiblock")
 endif()
 
+#
+# The multi_file test tests storing Silo database across multiple files
+# using nameschemes or not, with some blocks empty or not and with blocks in subdirs or not.
+#
+set(MULTI_FILE_TESTS)
+add_test(NAME multi_file-usens COMMAND $<TARGET_FILE:multi_file> use-ns)
+add_test(NAME multi_file-usens-empties COMMAND $<TARGET_FILE:multi_file> use-ns empties)
+add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
+add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
+list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-usens-empties multi_file-multidir multi_file-multidir-usens)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME multi_file-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns DB_HDF5)
+    add_test(NAME multi_file-usens-empties-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns empties DB_HDF5)
+    add_test(NAME multi_file-multidir-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir DB_HDF5)
+    add_test(NAME multi_file-multidir-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir use-ns DB_HDF5)
+list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-usens-empties-hdf5 multi_file-multidir-hdf5 multi_file-multidir-usens-hdf5)
+endif()
+set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES RESOURCE_LOCK "multi_file_tests")
+set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "Multifile;Multiblock")
 
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
