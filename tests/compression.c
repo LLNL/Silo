@@ -160,6 +160,8 @@ main(int argc, char *argv[])
        } else if (!strcmp(argv[i], "lossy3")) {
           DBSetCompression("METHOD=FPZIP LOSS=3");
           has_loss = 1;
+       /* These test fail/fallback behavior. We target a compresion ratio
+          of 1000:1 and FAIL or FALLBACK if we can't hit...which we can't. */
        } else if (!strcmp(argv[i], "minratio1000")) {
           DBSetCompression("ERRMODE=FAIL MINRATIO=1000 METHOD=FPZIP");
        } else if (!strcmp(argv[i], "minratio1001")) {
