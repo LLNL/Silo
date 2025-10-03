@@ -52,6 +52,20 @@
 #
 ##############################################################################
 
+#
+# Notes on valgrind testing...
+#
+# cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF -DSILO_ENABLE_HDF5:BOOL=ON -DSILO_ENABLE_FPZIP:BOOL=ON -DBUILD_TESTING:BOOL=ON -DSILO_HDF5_DIR:PATH=/mnt/nvme/mark/silo/hdf5-1.14.4/build/my_install -DCMAKE_BUILD_TYPE:STRING=Debug -S .. -B memcheck-build 
+# cmake --build memcheck-build -j 8
+# ctest --build memcheck-build -T memcheck --output-on-failure
+# ls memcheck-build/
+# ctest --build memcheck-build -T memcheck --output-on-failure -L compression
+# ctest --build memcheck-build -T memcheck --output-on-failure -L Compression
+# ctest --build memcheck-build -T memcheck --output-on-failure -I 122,122
+# vi Testing/Temporary/MemoryChecker.122.log 
+# cat Testing/Temporary/MemoryChecker.*
+#
+
 ###-------------------------------------------------------------------------------------
 # Set the output dir for test executables
 ###-------------------------------------------------------------------------------------
@@ -304,12 +318,6 @@ set(PARALLEL_SOURCES
 #AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,ignore)
 #AT_SETUP(onehex with custom fapl/fcpl)
 #AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex custom,,ignore,ignore)
-#AT_SETUP(partial_io with rect3d point query)
-#AT_CHECK(testall $STARGS,,ignore)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9],,ignore,ignore)
-#AT_SETUP(partial_io with ucd3d point query) 
-#AT_CHECK(testall $STARGS,,ignore)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574],,ignore,ignore)
 #AT_SETUP(testhzip)
 #AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)
 #AT_SETUP(checksums)
@@ -511,7 +519,8 @@ endif()
 #
 # multi_test is a work-horse test that tests multi-block for 2 and 3 dimensions,
 # several different mesh types, materials, etc as well as a number of different
-# scenarios involving interrupted writes, early closes on a file, etc.
+# scenarios involving interrupted writes, early closes on a file, etc. It also
+# can test readback of what was written in a separate invokation.
 #
 set(MULTI_BLOCK_TESTS)
 add_test(NAME multi_test-read COMMAND $<TARGET_FILE:multi_test> testread)
@@ -532,6 +541,29 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_test-libver COMMAND $<TARGET_FILE:multi_test> libver DB_HDF5)
     add_test(NAME multi_test-libver-read COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
     set_tests_properties(multi_test-libver-read PROPERTIES DEPENDS "multi_test-libver")
+    if(SILO_ENABLE_HZIP)
+        add_test(NAME multi_test-hzip COMMAND $<TARGET_FILE:multi_test> hzip DB_HDF5)
+        add_test(NAME multi_test-hzip-read COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
+        set_tests_properties(multi_test-hzip-read PROPERTIES DEPENDS "multi_test-hzip")
+        list(APPEND MULTI_BLOCK_TESTS multi_test-hzip multi_test-hzip-read)
+
+        add_custom_target(testhzip ALL)
+
+        add_custom_command(TARGET testhzip POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/testhzip
+            ${silo_test_output_dir})
+
+        set(testhzip-script "${silo_test_output_dir}/testhzip")
+        set(testhzip-workdir "${CMAKE_CURRENT_BINARY_DIR}/testhzip.workdir")
+
+        find_program(bash_exe NAMES bash REQUIRED) 
+
+        add_test(NAME testhzip:diff
+            COMMAND ${CMAKE_COMMAND} -E env
+            "${testhzip-script}")
+
+    endif()
     list(APPEND MULTI_BLOCK_TESTS multi_test-hdf5 multi_test-read-hdf5 multi_test-badread-hdf5
         multi_test-earlyclose-hdf5 multi_test-flush multi_test-flush-read multi_test-libver multi_test-libver-read)
 endif()
@@ -545,24 +577,35 @@ endif()
 #
 # The multi_file test tests storing Silo database across multiple files
 # using nameschemes or not, with some blocks empty or not and with blocks in subdirs or not.
+# The multidir option for multi_file requires MPI.
 #
 set(MULTI_FILE_TESTS)
 add_test(NAME multi_file-usens COMMAND $<TARGET_FILE:multi_file> use-ns)
 add_test(NAME multi_file-usens-empties COMMAND $<TARGET_FILE:multi_file> use-ns empties)
-# multidir case requies MPI
 #add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
 #add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
 list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-usens-empties)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_file-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns DB_HDF5)
     add_test(NAME multi_file-usens-empties-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns empties DB_HDF5)
-# multidir case requies MPI
 #    add_test(NAME multi_file-multidir-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir DB_HDF5)
 #    add_test(NAME multi_file-multidir-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir use-ns DB_HDF5)
 list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-usens-empties-hdf5)
 endif()
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES RESOURCE_LOCK "multi_file_tests")
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "Multifile;Multiblock")
+
+#
+# Partial I/O tests...mainly for Silo functionality to tease a tiny bit of raw data efficiently
+# and quickly from large datasets.
+#
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME partial-io-setup COMMAND $<TARGET_FILE:testall> DB_HDF5)
+    add_test(NAME partial-io-rect3d COMMAND $<TARGET_FILE:partial_io> DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9])
+    set_tests_properties(partial-io-rect3d PROPERTIES DEPENDS "partial-io-setup")
+    add_test(NAME partial-io-ucd3d COMMAND $<TARGET_FILE:partial_io> DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574])
+    set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup")
+endif()
 
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
@@ -614,33 +657,6 @@ set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "Multifile;Multiblock
 # AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || onehex $STARGS,,ignore) # don't valgrind these intermediate parts
 # AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || multi_test $STARGS,,ignore) # don't valgrind these intermediate parts
 # AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,,ignore,ignore)
-#
-# AT_SETUP(partial_io with rect3d point query)
-# AT_CHECK(testall $STARGS,,ignore)
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9],,ignore,ignore)
-#
-# AT_SETUP(partial_io with ucd3d point query)
-# AT_CHECK(testall $STARGS,,ignore)
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574],,ignore,ignore)
-#
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip,,ignore,ignore)
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
-#
-# AT_SETUP(compression szip)
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip,,ignore,ignore)
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
-# 
-# AT_SETUP(compression fpzip)
-# AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip,,ignore,ignore)
-# AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compres
-#
-# AT_SETUP(compression lossy3)
-# AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3,,ignore,ignore)
-# AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,50,ignore,ignore)
-#
-# AT_SETUP(compression zfp)
-# AT_CHECK(test ! \( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression zfp,,ignore,ignore)
-# AT_CHECK(test ! \( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,50,ignore,ignore)
 #
 # AT_SETUP(memfile_simple)
 # AT_CHECK(testall -small $STARGS,,ignore)

@@ -77,7 +77,7 @@ set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
 ###-----------------------------------------------------------------------------
 
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Set to one of Debug, Release (default), RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
 ###-----------------------------------------------------------------------------
@@ -121,6 +121,8 @@ option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
+# Use CMake standard variables for these...
+option(BUILD_TESTING "Enable tests" OFF)
 
 include(CMakeDependentOption)
 
@@ -683,16 +685,25 @@ if(SILO_ENABLE_PYTHON_MODULE)
    add_subdirectory(tools/python)
 endif()
 
-#-----------------------------------------------------------------------------
-# TESTS
-#-----------------------------------------------------------------------------
-include(CTest)            # defines BUILD_TESTING, calls enable_testing() if ON
-if (BUILD_TESTING)
-  add_subdirectory(tests)
+###-----------------------------------------------------------------------------
+# Testing support
+###-----------------------------------------------------------------------------
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+    set(_debug_build_types Debug RelWithDebInfo)
+    if(CMAKE_BUILD_TYPE IN_LIST _debug_build_types)
+        find_program(MEMORYCHECK_COMMAND NAMES valgrind)
+        if (MEMORYCHECK_COMMAND)
+            set(MEMORYCHECK_COMMAND_OPTIONS
+                "--leak-check=full --track-origins=yes --error-exitcode=1")
+        endif()
+    endif()
 endif()
 
 ###-----------------------------------------------------------------------------
 # Create config.h from config.h.in
+# Put this near end so we capture any set(SOMEVAR 1) calls above.
 ###-----------------------------------------------------------------------------
 
 # set up some vars to be passed to config.h.in
