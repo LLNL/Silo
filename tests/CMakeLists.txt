@@ -548,20 +548,13 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         list(APPEND MULTI_BLOCK_TESTS multi_test-hzip multi_test-hzip-read)
 
         add_custom_target(testhzip ALL)
-
         add_custom_command(TARGET testhzip POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_CURRENT_SOURCE_DIR}/testhzip
             ${silo_test_output_dir})
-
-        set(testhzip-script "${silo_test_output_dir}/testhzip")
-        set(testhzip-workdir "${CMAKE_CURRENT_BINARY_DIR}/testhzip.workdir")
-
-        find_program(bash_exe NAMES bash REQUIRED) 
-
-        add_test(NAME testhzip:diff
+        add_test(NAME testhzip
             COMMAND ${CMAKE_COMMAND} -E env
-            "${testhzip-script}")
+            "${silo_test_output_dir}/testhzip")
 
     endif()
     list(APPEND MULTI_BLOCK_TESTS multi_test-hdf5 multi_test-read-hdf5 multi_test-badread-hdf5
@@ -607,6 +600,14 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup")
 endif()
 
+add_custom_target(testdtypes ALL)
+add_custom_command(TARGET testhzip POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/testdtypes
+    ${silo_test_output_dir})
+add_test(NAME testdtypes
+    COMMAND ${CMAKE_COMMAND} -E env
+    "${silo_test_output_dir}/testdtypes")
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
 

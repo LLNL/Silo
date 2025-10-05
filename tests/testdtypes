@@ -50,8 +50,6 @@
 # National  Security, LLC,  and shall  not  be used  for advertising  or
 # product endorsement purposes.
 
-result=0
-
 # -----------------------------------------------------------------------------
 # Test datatype handling with force single on and off 
 #
@@ -63,34 +61,56 @@ result=0
 #   Made it work for any HDF5 driver, not just DB_HDF5.
 # -----------------------------------------------------------------------------
 
-# Diddle the the directory because Autotest is not at all designed to handle
-# tests the way this one was written
-if test -n "$1"; then
-    topDir=$1
-    if test -e $topDir/../../multi_test; then
-        topDir=$1/../..
+# Determine directory of this script
+#
+# dirname -- "$0" gets the script’s directory even if this script is run via a
+#     relative path like ../../foo/bar/gorfo.sh.
+# The CDPATH= nulls that env. variable and prevents cd from printing anything
+#     if CDPATH is set in the environment.
+# pwd gives the absolute path after the cd has occurred. This all happens in
+#     a subshell so the cwd of the current script is unchanged.
+#
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+#
+# Ensure some specmix data is available
+#
+specmix_files=""
+for f in specmix_quad.pdb specmix_ucd.pdb specmix_quad.h5 specmix_ucd.h5; do
+    if [ -r "$f" ]; then
+        specmix_files="$specmix_files $f"
     fi
-else
-    topDir=.
-fi
+done
 
-smode="pdb"
-if test -n "$(echo $2 | grep DB_HDF5)"; then
-    smode="h5"
+#
+# Ensure we have Silo's 'browser' tool available
+#
+if [ ! -x $script_dir/../../bin/browser ]; then
+    echo "Silo's 'browser' tool is required and not found."
+    exit 1
 fi
+browser=$(command -v $script_dir/../../bin/browser)
 
-echo -e "driver\tfsmode\tmesh\tvartyp\tdattyp\tstatus"
-for fsmode in "-s 1" ""; do
-    for mt in "quad" "ucd"; do
+#
+# Loop over all files, variables and types with and without force single enabled
+#
+result=0
+#echo "driver\tfsmode\tfile\tvartyp\tdattyp\tstatus"
+for fsmode in "-s 1" "    "; do
+    for file in $specmix_files; do
+        mt=$(echo $file | cut -d'_' -f2 | cut -d'.' -f1)
+        dr=$(echo $file | cut -d'_' -f2 | cut -d'.' -f2)
+        if [ "${file#*.h5} != "$file ]; then
+            driver=" h5"
+        fi
         for v in "n" "z"; do
             for d in "c" "s" "i" "l" "L" "d"; do
-                diffs=$($topDir/../tools/browser/browser -q ${fsmode} -e "diff f${v}var ${d}${v}var" specmix_$mt.$smode | grep -v 'different data sizes' | grep -v 'byte data' | grep vals | head)
+                diffs=$($browser -q ${fsmode} -e "diff f${v}var ${d}${v}var" $file | grep -v 'different data sizes' | grep -v 'byte data' | grep vals | head)
                 if test -n "$diffs"; then
                     result=1
-                    break 4
-                    echo -e "${smode}\t${fsmode}\t${mt}\t${v}\t${d}\tFAILED"
-                else
-                    echo -e "${smode}\t${fsmode}\t${mt}\t${v}\t${d}\tPASSED"
+#                    echo "${dr}\t${fsmode}\t${mt}\t${v}\t${d}\tFAILED"
+#                else
+#                    echo "${dr}\t${fsmode}\t${mt}\t${v}\t${d}\tPASSED"
                 fi
             done
         done
