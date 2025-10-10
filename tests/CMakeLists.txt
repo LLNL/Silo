@@ -601,13 +601,44 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 add_custom_target(testdtypes ALL)
-add_custom_command(TARGET testhzip POST_BUILD
+add_custom_command(TARGET testdtypes POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/testdtypes
     ${silo_test_output_dir})
 add_test(NAME testdtypes
     COMMAND ${CMAKE_COMMAND} -E env
     "${silo_test_output_dir}/testdtypes")
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME testdtypes-hdf5
+        COMMAND ${CMAKE_COMMAND} -E env
+        "${silo_test_output_dir}/testdtypes" DB_HDF5)
+endif()
+
+add_custom_target(testsilock ALL)
+add_custom_command(TARGET testsilock POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/testsilock
+    ${silo_test_output_dir})
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME testsilock-hdf5
+        COMMAND ${CMAKE_COMMAND} -E env
+        "${silo_test_output_dir}/testsilock" DB_HDF5)
+else()
+    add_test(NAME testsilock
+        COMMAND ${CMAKE_COMMAND} -E env
+        "${silo_test_output_dir}/testsilock")
+endif()
+
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_custom_target(checksums ALL)
+    add_custom_command(TARGET checksums POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/checksums
+        ${silo_test_output_dir})
+    add_test(NAME checksums
+        COMMAND ${CMAKE_COMMAND} -E env
+        "${silo_test_output_dir}/checksums")
+endif()
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
 
