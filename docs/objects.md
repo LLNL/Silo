@@ -995,15 +995,24 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Type|Description
   :---|:---
-  `DB_ZONETYPE_BEAM`|A line segment
-  `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon
-  `DB_ZONETYPE_TRIANGLE`|A triangle
-  `DB_ZONETYPE_QUAD`|A quadrilateral
-  `DB_ZONETYPE_POLYHEDRON`|A polyhedron with nodes enumerated to form faces and faces are enumerated to form a polyhedron
-  `DB_ZONETYPE_TET`|A tetrahedron
-  `DB_ZONETYPE_PYRAMID`|A pyramid
-  `DB_ZONETYPE_PRISM`|A prism
-  `DB_ZONETYPE_HEX`|A hexahedron
+  `DB_ZONETYPE_POINT`|A point (0 topological dimensions)
+  `DB_ZONETYPE_BEAM`|A line (1 topological dimensions)
+  `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon (2 topological dimensions)
+  `DB_ZONETYPE_TRIANGLE`|A triangle (2 topological dimensions)
+  `DB_ZONETYPE_QUAD`|A quadrilateral (2 topological dimensions)
+  `DB_ZONETYPE_POLYHEDRON`|A polyhedron where nodes are enumerated to form faces and faces are enumerated to form a polyhedron (3 topological dimensions)
+  `DB_ZONETYPE_TET`|A tetrahedron (3 topological dimensions)
+  `DB_ZONETYPE_PYRAMID`|A pyramid (3 topological dimensions)
+  `DB_ZONETYPE_PRISM`|A prism (3 topological dimensions)
+  `DB_ZONETYPE_HEX`|A hexahedron (3 topological dimensions)
+  `DB_ZONETYPE_CHULL`|A bunch of points whose convex hull forms the element (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_BEAM`|A quadratic line (1 topological dimension)
+  `DB_ZONETYPE_QUAD_TRIANGLE`|A quadratic triangle (2 topological dimensions)
+  `DB_ZONETYPE_QUAD_QUAD`|A quadratic quadrilateral (2 topological dimensions)
+  `DB_ZONETYPE_QUAD_TET`|A quadratic tetrahedron (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_PYRAMID`|A quadratic pyramid (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_PRISM`|A quadratic prism (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_HEX`|A quadratic hex (3 topological dimensions)
 
   Notes:
 
@@ -1015,6 +1024,16 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
   `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
   `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
+
+  For most `DB_ZONETYPE_XXX` constants, the *shapesize* can be inferred from the type.
+  For example, `DB_ZONETYPE_TRIANGLE` has a shapsize of 3 and `DB_ZONETYPE_QUAD_TET` has a shapesize of 10.
+  For some `DB_ZONETYPE_XXX` constants, the *shapesize* is arbitrary.
+  This includes `DB_ZONETYPE_POLYGON`, `DB_ZONETYPE_POLYHEDRON` and `DB_ZONETYPE_CHULL`.
+  When defining a zonelist object using these *arbitrary* sized types, the caller has two choices.
+  One is to collect together in contiguous segments, all entries of a given size.
+  In this approach, the `shapecnt[]` entry for the segment will hold the *number* of zones of the given size and the `shapesize[]` entry will hold its the constant size of all of the associated zones.
+  Alternatively, the caller can choose NOT to gather similarly sized entries together.
+  In this case, `shapecnt[]` entries for every zone will be 1 and the `shapesize[]` entries will hold their respective sizes.
 
   **Standard Silo element types:**
 
