@@ -120,6 +120,7 @@ option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
+option(SILO_ENABLE_INSTALL_LITE_HEADERS "Enable installation of PDB Lite headers" OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
 # Use CMake standard variables for these...
 option(BUILD_TESTING "Enable tests" OFF)
@@ -447,7 +448,7 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/taurus/taurus.c
     ${Silo_SOURCE_DIR}/src/unknown/silo_unknown.c)
 
-if(SILO_ENABLE_FORTRAN)
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_f.c)
 endif()
 
@@ -593,18 +594,25 @@ if(UNIX)
 endif()
 
 # add list of public headers to be installed
-set(silo_headers
-    ${silo_build_include_dir}/lite_pdb.h
-    ${silo_build_include_dir}/lite_score.h
-    ${silo_build_include_dir}/pdform.h
+set(silo_public_headers
     ${silo_build_include_dir}/silo.h
-    ${Silo_SOURCE_DIR}/src/silo/silo.inc
-    ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc
     ${Silo_SOURCE_DIR}/src/silo/silo_exports.h
     ${Silo_SOURCE_DIR}/src/silo/pmpio.h)
 
+if(SILO_ENABLE_INSTALL_LITE_HEADERES)
+    list(APPEND silo_public_headers
+        ${silo_build_include_dir}/lite_pdb.h
+        ${silo_build_include_dir}/lite_score.h)
+endif()
+
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    list(APPEND silo_public_headers
+        ${Silo_SOURCE_DIR}/src/silo/silo.inc
+        ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc)
+endif()
+
 if(WIN32)
-    list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
+    list(APPEND silo_public_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
     # Also install silodiff.bat into bin
     install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION ${CMAKE_INSTALL_BINDIR}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -619,11 +627,16 @@ if(WIN32)
     endif()
 endif()
 
-install(FILES ${silo_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(FILES ${silo_public_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
 
+# Symlink old style silo_f77.inc
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink silo.inc silo_f77.inc
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})")
+endif()
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     # since we change the ouputname from silo to siloh5 when building
