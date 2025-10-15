@@ -991,8 +991,6 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The allowed shape types are described in the following table:
 
-  **Optlist options:**
-
   Type|Description
   :---|:---
   `DB_ZONETYPE_POINT`|A point (0 topological dimensions)
@@ -1014,7 +1012,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DB_ZONETYPE_QUAD_PRISM`|A quadratic prism (3 topological dimensions)
   `DB_ZONETYPE_QUAD_HEX`|A quadratic hex (3 topological dimensions)
 
-  Notes:
+  **Optlist options:**
 
   The following table describes the options accepted by this function:
 
@@ -1025,15 +1023,17 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
   `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
+  Notes:
+
   For most `DB_ZONETYPE_XXX` constants, the *shapesize* can be inferred from the type.
   For example, `DB_ZONETYPE_TRIANGLE` has a shapsize of 3 and `DB_ZONETYPE_QUAD_TET` has a shapesize of 10.
   For some `DB_ZONETYPE_XXX` constants, the *shapesize* is arbitrary.
   This includes `DB_ZONETYPE_POLYGON`, `DB_ZONETYPE_POLYHEDRON` and `DB_ZONETYPE_CHULL`.
   When defining a zonelist object using these *arbitrary* sized types, the caller has two choices.
   One is to collect together in contiguous segments, all entries of a given size.
-  In this approach, the `shapecnt[]` entry for the segment will hold the *number* of zones of the given size and the `shapesize[]` entry will hold its the constant size of all of the associated zones.
+  In this approach, the `shapecnt[]` entry for the segment will hold the *number* of zones of the given size and the `shapesize[]` entry will hold the constant size of all of the associated zones in the zonelist segment.
   Alternatively, the caller can choose NOT to gather similarly sized entries together.
-  In this case, `shapecnt[]` entries for every zone will be 1 and the `shapesize[]` entries will hold their respective sizes.
+  In this case, `shapecnt[]` entries for every such zone will be 1 and the `shapesize[]` entries will hold their respective sizes.
 
   **Standard Silo element types:**
 
