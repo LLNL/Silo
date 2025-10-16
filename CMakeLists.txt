@@ -342,9 +342,6 @@ configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
 ###-----------------------------------------------------------------------------
 include(GNUInstallDirs)
 
-# define and populate CMAKE_INSTALL_*DIR variables
-include(GNUInstallDirs)
-
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
     include(FortranCInterface)
