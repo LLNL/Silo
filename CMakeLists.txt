@@ -596,7 +596,7 @@ set(silo_public_headers
     ${Silo_SOURCE_DIR}/src/silo/silo_exports.h
     ${Silo_SOURCE_DIR}/src/silo/pmpio.h)
 
-if(SILO_ENABLE_INSTALL_LITE_HEADERES)
+if(SILO_ENABLE_INSTALL_LITE_HEADERS)
     list(APPEND silo_public_headers
         ${silo_build_include_dir}/lite_pdb.h
         ${silo_build_include_dir}/lite_score.h)

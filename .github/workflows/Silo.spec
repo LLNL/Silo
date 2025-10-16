@@ -73,7 +73,6 @@ This package contains the development files of %{name}.
 %{_includedir}/silo.inc
 %{_includedir}/silo_FC.h
 %{_includedir}/silo_exports.h
-%{_includedir}/silo_f77.inc
 %{_includedir}/silo_f9x.inc
 %{_includedir}/pmpio.h
 %{_libdir}/cmake/%{name}/SiloConfig.cmake
