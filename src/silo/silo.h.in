@@ -1037,6 +1037,7 @@ typedef struct DBmultimatspecies_ {
 #define DB_ZONETYPE_PYRAMID     35
 #define DB_ZONETYPE_PRISM       36
 #define DB_ZONETYPE_HEX         38
+#define DB_ZONETYPE_CONVEX_HULL	40
 
 /* Definitions for quadratic elements */
 #define DB_ZONETYPE_QUAD_BEAM      11

@@ -60,31 +60,41 @@
 #
 # -----------------------------------------------------------------------------
 
-# Diddle the the directory because Autotest is not at all designed to handle
-# tests the way this one was written
-if test -n "$1"; then
-    topDir=$1
-    if test -e $topDir/../../multi_test; then
-        topDir=$1/../..
-    fi
-else
-    topDir=.
+# Determine directory of this script
+#
+# dirname -- "$0" gets the script’s directory even if this script is run via a
+#     relative path like ../../foo/bar/gorfo.sh.
+# The CDPATH= nulls that env. variable and prevents cd from printing anything
+#     if CDPATH is set in the environment.
+# pwd gives the absolute path after the cd has occurred. This all happens in
+#     a subshell so the cwd of the current script is unchanged.
+#
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+#
+# Ensure the multi_test executable is available
+#
+if [ ! -x $script_dir/multi_test ]; then
+    echo "Silo's 'multi_test' test executable is required and not found."
+    exit 1
 fi
+multi_test=$(command -v $script_dir/multi_test)
+
+#
+# Ensure we have Silo's 'browser' tool available
+#
+if [ ! -x $script_dir/../../bin/browser ]; then
+    echo "Silo's 'browser' tool is required and not found."
+    exit 1
+fi
+browser=$(command -v $script_dir/../../bin/browser)
 
 #
 # Create data with checksums (only on HDF5 driver) and save files
 #
-$topDir/multi_test DB_HDF5 check 1>/dev/null 2>&1
 rm -rf h5_check_files
 mkdir h5_check_files
-mv *.h5 h5_check_files/.
-ls
-ls h5_check_files
-
-#
-# Create data without checksums
-#
-$topDir/multi_test DB_HDF5 1>/dev/null 2>&1
+(cd h5_check_files; $multi_test DB_HDF5 check 1>/dev/null 2>&1)
 
 #
 # Determine the offset of an hdf5 dataset in the silo file.
@@ -114,28 +124,28 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 minoffset=$(ls -l h5_check_files/multi_ucd3d.h5 | cut -d' ' -f5)
 skip=0
 while [ $skip -lt 16 ]; do
-    offset=`od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
+    offset=$(od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1)
     if [ -z "$offset" ]; then
         skip=$(expr $skip + 1)
         continue
     fi
-    offset=`echo $offset | cut -d' ' -f1 | sed 's/^0*//'`
+    offset=$(echo $offset | cut -d' ' -f1 | sed 's/^0*//')
     if [ $offset -lt $minoffset ]; then
         minoffset=$offset
     fi
     skip=$(expr $skip + 1)
 done
-size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
+size=$(ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5)
 
 #
 # Corrupt a checksumed file by splicing together the first
-# part of the original file with the 4 integer zeros (zeros.dat)
+# part of the original file with the 4 integer (4 byte) zeros
 # and the last part of the file (minus the part we've zeroed)
 #
 rm -f multi_ucd3d_corrupt.h5
 head -c $minoffset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
-cat $topDir/zeros.dat >> multi_ucd3d_corrupt.h5
-leftover=`expr $size - $minoffset - 16`
+dd if=/dev/zero bs=16 count=1 >> multi_ucd3d_corrupt.h5 2>/dev/null
+leftover=$(expr $size - $minoffset - 16)
 tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 
 #
@@ -143,8 +153,8 @@ tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 # we just see the zero'd data we expect.
 #
 result=0
-brOut=`$topDir/../tools/browser/browser -q -e 'block2/fl1.nodelist[523:528]' multi_ucd3d_corrupt.h5`
-if test -z "`echo $brOut | grep '{299, 0, 0, 0, 0, 179}'`"; then
+brOut=$($browser -q -e 'block2/fl1.nodelist[523:528]' multi_ucd3d_corrupt.h5)
+if test -z "$(echo $brOut | grep '{299, 0, 0, 0, 0, 179}')"; then
     result=1
 fi
 
@@ -152,8 +162,8 @@ fi
 # Now, run browser with checksumming turned on and make sure we
 # detect a checksumming error.
 #
-brOut=`$topDir/../tools/browser/browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1`
-if test -z "`echo $brOut | grep 'Checksum failure'`"; then
+brOut=$($browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1)
+if test -z "$(echo $brOut | grep 'Checksum failure')"; then
     result=1
 fi
 

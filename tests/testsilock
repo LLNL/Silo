@@ -50,8 +50,6 @@
 # National  Security, LLC,  and shall  not  be used  for advertising  or
 # product endorsement purposes.
 
-result=0
-
 # -----------------------------------------------------------------------------
 # Test silock nan/inf checker. 
 #
@@ -64,24 +62,53 @@ result=0
 #   Fix redirection to use sh syntax rather than csh syntax.
 # -----------------------------------------------------------------------------
 
-# Diddle the the directory because Autotest is not at all designed to handle
-# tests the way this one was written
-if test -n "$1"; then
-    topDir=$1
-    if test -e $topDir/../../multi_test; then
-        topDir=$1/../..
+#
+# Determine directory of this script
+#
+# dirname -- "$0" gets the script’s directory even if this script is run via a
+#     relative path like ../../foo/bar/gorfo.sh.
+# The CDPATH= nulls that env. variable and prevents cd from printing anything
+#     if CDPATH is set in the environment.
+# pwd gives the absolute path after the cd has occurred. This all happens in
+#     a subshell so the cwd of the current script is unchanged.
+#
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+#
+# Ensure the onehex test executable is available
+#
+if [ ! -x $script_dir/onehex ]; then
+    echo "Silo's 'onehex' test executable is required and not found."
+    exit 1
+fi
+onehex=$(command -v $script_dir/onehex)
+
+#
+# Ensure we have Silo's 'silock' tool available
+#
+if [ ! -x $script_dir/../../bin/silock ]; then
+    if [ ! -x $script_dir/../tools/silock/silock ]; then
+        if [ ! -x $script_dir/../../../tools/silock/silock ]; then
+            echo "Silo's 'silock' tool is required and not found."
+            exit 1
+        else
+            silock=$(command -v $script_dir/../../../tools/silock/silock)
+        fi
+    else
+        silock=$(command -v $script_dir/../tools/silock/silock)
     fi
 else
-    topDir=.
+    silock=$(command -v $script_dir/../../bin/silock)
 fi
 
-for driver in DB_PDB "$2"; do
+result=0
+for driver in DB_PDB "$1"; do
     for fparams in "nan 0" "inf 7"; do
         fpissue=$(echo $fparams | cut -d' ' -f1)
         index=$(echo $fparams | cut -d' ' -f2)
-        $topDir/onehex "$driver" $fpissue 1>/dev/null 2>&1
-        foundIt=$($topDir/../tools/silock/silock onehex.silo | grep "has .* issue at index ${index}$")
-        if test -z "$foundIt"; then
+        $onehex "$driver" $fpissue 1>/dev/null 2>&1
+        foundIt=$($silock onehex.silo 2>/dev/null | grep "has .* issue at index ${index}$")
+        if [ -z "$foundIt" ]; then
             result=1
             break 2
         fi

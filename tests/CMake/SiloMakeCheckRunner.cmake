@@ -54,6 +54,61 @@
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
+# Usage:
+#   print_test_result(<name> <args> <result> [<col_start>])
+# Example:
+#   print_test_result("mesh_check" "-i foo.exo -m quick" "PASS" 60)
+#
+# Notes:
+# - <col_start> is the 1-based character where the RESULT should start.
+# - Long left columns are ellipsized to fit just before <col_start>.
+function(print_test_result name args result)
+  # Default column start if not provided
+  set(col_start 60)
+  if (ARGC GREATER 3)
+    set(col_start "${ARGV3}")
+  endif()
+
+  # Compose the left column text (test name + args)
+  if (args)
+    set(left "${name} ${args}")
+  else()
+    set(left "${name}")
+  endif()
+
+  # How many visible chars are allowed for the left column?
+  # Reserve 0 or more spaces so that result begins at col_start.
+  # Columns are 1-based; string lengths are counts of characters.
+  math(EXPR max_left "(${col_start} - 1)")  # characters before result starts
+  string(LENGTH "${left}" left_len)
+
+  if (left_len GREATER_EQUAL max_left)
+    # Need to truncate and add "..." if there's room
+    if (max_left GREATER 3)
+      math(EXPR keep "(${max_left} - 3)")
+      string(SUBSTRING "${left}" 0 ${keep} left_cut)
+      set(left "${left_cut}...")
+      set(pad "")
+    else()
+      # Column start is too early to even place "..."
+      # Just hard-cut to max_left and no padding.
+      string(SUBSTRING "${left}" 0 ${max_left} left)
+      set(pad "")
+    endif()
+  else()
+    # Pad with spaces up to max_left
+    math(EXPR need "(${max_left} - ${left_len})")
+    string(REPEAT " " ${need} pad)
+  endif()
+
+  # Compose the final line
+  set(line "${left}${pad}${result}")
+
+  # Print with STATUS so it looks like normal build/test chatter.
+  message(STATUS "${line}")
+endfunction()
+
+
 # Executes a test and prints failure/success.
 # May need more args as other tests (fortran, python, special, json) are added
 function(silo_add_make_check_runner)
@@ -72,7 +127,7 @@ function(silo_add_make_check_runner)
         message(WARNING "silo_add_make_check_runner: NAME argument is required.")
         return()
     endif()
-    set(test_cmd ${samcr_NAME})
+    set(test_cmd ./${samcr_NAME})
     if("ARGS" IN_LIST samcr_KEYWORDS_MISSING_VALUES)
         message(WARNING "silo_add_make_check_runner: ARGS argument provided without a value.")
         return()
@@ -89,10 +144,17 @@ function(silo_add_make_check_runner)
                         OUTPUT_QUIET
                         ERROR_QUIET
                         RESULT_VARIABLE check_RESULTS)
+    # Make ANSI escape sequences
+    string(ASCII 27 ESC)              # ESC character
+    set(RESET "${ESC}[0m")
+    set(RED   "${ESC}[31m")
+    set(GREEN "${ESC}[32m")
+    set(YELLOW "${ESC}[33m")
+    set(BLUE "${ESC}[34m")
     if(check_RESULTS EQUAL 0)
-        message("${samcr_NAME} ${test_args} \t\t\t\t okay")
+        print_test_result("${samcr_NAME}" "${test_args}" "${GREEN}PASS${RESET}" 60)
     else()
-        message("${samcr_NAME} ${test_args} \t\t\t\t fail")
+        print_test_result("${samcr_NAME}" "${test_args}" "${RED}FAIL${RESET}" 60)
     endif()
 endfunction()
 

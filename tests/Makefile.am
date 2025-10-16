@@ -62,7 +62,6 @@
 
 EXTRA_DIST= \
  package.m4 \
- pdbcmp.csh \
  testsuite.at \
  testsuite \
  pmpio_hdf5_test.c \
@@ -87,7 +86,6 @@ EXTRA_DIST= \
  bcastopen.c \
  bcastopen_main.c \
  memfile_simple.c \
- zeros.dat \
  testhdf5.c \
  $(check_SCRIPTS) \
  $(check_DATA)
@@ -115,8 +113,7 @@ check_SCRIPTS= \
 check_DATA= \
  cp_data \
  xvers_data.tar.xz \
- pion0244.silo \
- zeros.dat
+ pion0244.silo
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te

@@ -49,6 +49,7 @@ This package contains the development files of %{name}.
   -DSILO_ENABLE_JSON=OFF \
   -DSILO_ENABLE_PYTHON_MODULE=OFF \
   -DSILO_ENABLE_TESTS=ON \
+  -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
   -DSILO_BUILD_FOR_BSD_LICENSE=ON \
   %{nil}
 %cmake_build
@@ -68,7 +69,6 @@ This package contains the development files of %{name}.
 %{_bindir}/silofile
 %{_includedir}/lite_pdb.h
 %{_includedir}/lite_score.h
-%{_includedir}/pdform.h
 %{_includedir}/silo.h
 %{_includedir}/silo.inc
 %{_includedir}/silo_FC.h

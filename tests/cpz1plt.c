@@ -113,6 +113,10 @@ main(int argc, char **argv)
       * Open the old file.
       */
      dbfile1 = DBOpen ("z1plt.silo", DB_UNKNOWN, DB_READ);
+     if (dbfile1 == 0)
+         dbfile1 = DBOpen ("../../z1plt.silo", DB_UNKNOWN, DB_READ);
+     if (dbfile1 == 0)
+         dbfile1 = DBOpen ("./bin/z1plt.silo", DB_UNKNOWN, DB_READ);
      if (dbfile1 == NULL)
      {
          fprintf(stderr, "Missing input file \"z1plt\", cannot continue.\n");

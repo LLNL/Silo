@@ -77,7 +77,7 @@ set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
 ###-----------------------------------------------------------------------------
 
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Set to one of Debug, Release (default), RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
 ###-----------------------------------------------------------------------------
@@ -120,8 +120,10 @@ option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
-option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
+option(SILO_ENABLE_INSTALL_LITE_HEADERS "Enable installation of PDB Lite headers" OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
+# Use CMake standard variables for these...
+option(BUILD_TESTING "Enable tests" OFF)
 
 include(CMakeDependentOption)
 
@@ -340,13 +342,6 @@ configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
 ###-----------------------------------------------------------------------------
 include(GNUInstallDirs)
 
-###-----------------------------------------------------------------------------
-# Create config.h from config.h.in
-###-----------------------------------------------------------------------------
-
-# define and populate CMAKE_INSTALL_*DIR variables
-include(GNUInstallDirs)
-
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
     include(FortranCInterface)
@@ -360,22 +355,6 @@ if(SILO_ENABLE_FORTRAN)
                             WORLD_READ)
     endif()
 endif()
-
-# set up some vars to be passed to config.h.in
-set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
-set(SILO_NAME "silo")
-set(SILO_TARNAME "silo")
-set(SILO_URL "https://silo.llnl.gov")
-
-# these are always defined
-set(HAVE_PDB_DRIVER 1)
-set(HAVE_NETCDF_DRIVER 1)
-set(HAVE_TAURUS_DRIVER 1)
-
-set(STDC_HEADERS 1)
-
-configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
-               ${silo_build_include_dir}/config.h)
 
 
 ###-----------------------------------------------------------------------------
@@ -466,7 +445,7 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/taurus/taurus.c
     ${Silo_SOURCE_DIR}/src/unknown/silo_unknown.c)
 
-if(SILO_ENABLE_FORTRAN)
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_f.c)
 endif()
 
@@ -555,8 +534,8 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 
     if(SILO_ENABLE_FPZIP)
+        set(HAVE_FPZIP 1)
         list(APPEND SILO_COMPILE_DEFINES
-            HAVE_FPZIP
             FPZIP_FP=FPZIP_FP_SAFE)
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/fpzip/error.cpp
@@ -570,8 +549,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 
     if(SILO_ENABLE_HZIP)
-        list(APPEND SILO_COMPILE_DEFINES HAVE_HZIP)
-
+        set(HAVE_HZIP 1)
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/hzip/hzmdecoder.cpp
             ${Silo_SOURCE_DIR}/src/hzip/hzmencoder.cpp
@@ -589,7 +567,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
             ${Silo_SOURCE_DIR}/src/hzip)
     endif()
 
-    if(zlib_FOUND)
+    if(ZLIB_FOUND)
         list(APPEND silo_library_include_dirs ${ZLIB_INCLUDE_DIR})
     else()
         list(APPEND SILO_COMPILE_DEFINES WITHOUT_ZLIB)
@@ -613,18 +591,25 @@ if(UNIX)
 endif()
 
 # add list of public headers to be installed
-set(silo_headers
-    ${silo_build_include_dir}/lite_pdb.h
-    ${silo_build_include_dir}/lite_score.h
-    ${silo_build_include_dir}/pdform.h
+set(silo_public_headers
     ${silo_build_include_dir}/silo.h
-    ${Silo_SOURCE_DIR}/src/silo/silo.inc
-    ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc
     ${Silo_SOURCE_DIR}/src/silo/silo_exports.h
     ${Silo_SOURCE_DIR}/src/silo/pmpio.h)
 
+if(SILO_ENABLE_INSTALL_LITE_HEADERS)
+    list(APPEND silo_public_headers
+        ${silo_build_include_dir}/lite_pdb.h
+        ${silo_build_include_dir}/lite_score.h)
+endif()
+
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    list(APPEND silo_public_headers
+        ${Silo_SOURCE_DIR}/src/silo/silo.inc
+        ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc)
+endif()
+
 if(WIN32)
-    list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
+    list(APPEND silo_public_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
     # Also install silodiff.bat into bin
     install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION ${CMAKE_INSTALL_BINDIR}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -639,11 +624,16 @@ if(WIN32)
     endif()
 endif()
 
-install(FILES ${silo_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(FILES ${silo_public_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
 
+# Symlink old style silo_f77.inc
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink silo.inc silo_f77.inc
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})")
+endif()
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     # since we change the ouputname from silo to siloh5 when building
@@ -705,12 +695,42 @@ if(SILO_ENABLE_PYTHON_MODULE)
    add_subdirectory(tools/python)
 endif()
 
-#-----------------------------------------------------------------------------
-# TESTS
-#-----------------------------------------------------------------------------
-if(SILO_ENABLE_TESTS)
+###-----------------------------------------------------------------------------
+# Testing support
+###-----------------------------------------------------------------------------
+include(CTest)
+if(BUILD_TESTING)
     add_subdirectory(tests)
+    set(_debug_build_types Debug RelWithDebInfo)
+    if(CMAKE_BUILD_TYPE IN_LIST _debug_build_types)
+        find_program(MEMORYCHECK_COMMAND NAMES valgrind)
+        if (MEMORYCHECK_COMMAND)
+            set(MEMORYCHECK_COMMAND_OPTIONS
+                "--leak-check=full --track-origins=yes --error-exitcode=1")
+        endif()
+    endif()
 endif()
+
+###-----------------------------------------------------------------------------
+# Create config.h from config.h.in
+# Put this near end so we capture any set(SOMEVAR 1) calls above.
+###-----------------------------------------------------------------------------
+
+# set up some vars to be passed to config.h.in
+set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
+set(SILO_NAME "silo")
+set(SILO_TARNAME "silo")
+set(SILO_URL "https://silo.llnl.gov")
+
+# these are always defined
+set(HAVE_PDB_DRIVER 1)
+set(HAVE_NETCDF_DRIVER 1)
+set(HAVE_TAURUS_DRIVER 1)
+
+set(STDC_HEADERS 1)
+
+configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
+               ${silo_build_include_dir}/config.h)
 
 
 #-----------------------------------------------------------------------------
