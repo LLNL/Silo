@@ -86,10 +86,19 @@ done
 # Ensure we have Silo's 'browser' tool available
 #
 if [ ! -x $script_dir/../../bin/browser ]; then
-    echo "Silo's 'browser' tool is required and not found."
-    exit 1
+    if [ ! -x $script_dir/../tools/browser/browser ]; then
+        if [ ! -x $script_dir/../../../tools/browser/browser ]; then
+            echo "Silo's 'browser' tool is required and not found."
+            exit 1
+        else
+            browser=$(command -v $script_dir/../../../tools/browser/browser)
+        fi
+    else
+        browser=$(command -v $script_dir/../tools/browser/browser)
+    fi
+else
+    browser=$(command -v $script_dir/../../bin/browser)
 fi
-browser=$(command -v $script_dir/../../bin/browser)
 
 #
 # Loop over all files, variables and types with and without force single enabled

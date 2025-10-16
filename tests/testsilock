@@ -87,10 +87,19 @@ onehex=$(command -v $script_dir/onehex)
 # Ensure we have Silo's 'silock' tool available
 #
 if [ ! -x $script_dir/../../bin/silock ]; then
-    echo "Silo's 'silock' tool is required and not found."
-    exit 1
+    if [ ! -x $script_dir/../tools/silock/silock ]; then
+        if [ ! -x $script_dir/../../../tools/silock/silock ]; then
+            echo "Silo's 'silock' tool is required and not found."
+            exit 1
+        else
+            silock=$(command -v $script_dir/../../../tools/silock/silock)
+        fi
+    else
+        silock=$(command -v $script_dir/../tools/silock/silock)
+    fi
+else
+    silock=$(command -v $script_dir/../../bin/silock)
 fi
-silock=$(command -v $script_dir/../../bin/silock)
 
 result=0
 for driver in DB_PDB "$1"; do
