@@ -771,7 +771,7 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
 #endif
 
         *status = DBPutMaterial(dbfile, nm, mnm, *nmat, matnos, matlist, dims, *ndims,
-                      FPTR(mix_zone), FPTR(mix_mat), FPTR(mix_zone), FPTR(mix_vf),
+                      FPTR(mix_next), FPTR(mix_mat), FPTR(mix_zone), FPTR(mix_vf),
                       *mixlen, *datatype, optlist);
 
         FREE(nm);
