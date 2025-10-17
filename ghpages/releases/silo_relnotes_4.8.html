@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>silo_relnotes_4.8.html</title>
+</head>
+<body>
+<h2> </h2>
+<h1 style="text-align: center;">Announcing the release of version 4.8
+of the Silo Library</h1>
+<h2>This is the first, official BSD Licensed release of the Silo
+Library!</h2>
+<h2>Organization of information in this announcement</h2>
+<ol>
+  <li>Bugs fixed in this release.</li>
+  <li>Performance-oriented features in this release.</li>
+  <li>Other new features in this release.</li>
+  <li>Important information regarding BSD vs. Legacy Licensed release
+tarballs.</li>
+</ol>
+<h3>1. Bugs fixed in this release</h3>
+<ul>
+  <li>A bug where the Force Single behavior of the HDF5 driver was
+resulting in all objects' arrays being converted to float but then
+neglecting to set the associated 'datatype' member to DB_FLOAT was
+corrected.</li>
+  <li>A few cases where Silo was erroneously leaving HDF5 objects open
+in a file, thereby causing the file itself to be left open in HDF5 even
+after DBClose was called have been corrected.</li>
+  <li>Some problems building Silo on windows with newer compilers and
+with various configurations have been corrected. Thanks to Kathleen
+Bonnell for these fixes as well as porting a number of code updates to
+Windows and for laborious testing on Windows.<br>
+  </li>
+  <li>The silofile utility was re-written to NOT use magic file numbers
+as that proved to be unreliable. Now the tool is much more robust at
+identifying silo files as well as their underlying format (PDB or HDF5).</li>
+  <li>A bug swapping the slash character in the filename part of
+multi-block object block names when moving files between windows and
+Linux was fixed. Thanks to Al Nichols for reporting the and the fix.<br>
+  </li>
+  <li>Leaks of optional species names and colors were corrected.</li>
+</ul>
+<h3>2. Performance-oriented features in this release</h3>
+<ul>
+  <li>To take advantage of some of the performance improvements described here,
+      HDF5 Version 1.8.4 or newer is required.</li>
+  <li>A number of options for using various Virtual File Drivers (VFDs)
+that
+come pre-packaged with the HDF5 library were added to Silo. The
+interface to controlling these VFDs was enhanced. See documentation on
+DBRegisterFileOptionsSet() in the Silo 4.8 user's manual for more
+information. See <a href="https://wci-dev.llnl.gov/codes/silo/media/pdf/llnl_pres_428015.pdf">Overview of Silo block-based VFD</a>
+and <a href="https://wci-dev.llnl.gov/codes/silo/media/pdf/llnl_pres_428059.pdf">Scaling Studies of Silo block-based VFD</a> for some details.<br>
+  </li>
+  <li>There is a new, Silo-specific VFD designed specifically for
+BlueGene (e.g. BG/P and BG/Q) systems called the Silo block-based VFD.
+Use of this VFD is essential for adequate performance on BG/P systems.
+Thanks to Mike Collette and Richard Hedges for performing scaling
+studies to help identify performance issues on BG/P. Read more about
+this VFD and its options as well as a number of other VFDs and their
+options in the Silo 4.8 User's manual.</li>
+  <li>Silo can now optionally link with and use PDB Proper in <a
+ href="https://wci.llnl.gov/codes/pact/">PACT</a> using the
+--with-pdb-proper=<code>path-to-pact-libs</code> and 'DB_PDBP' for the
+'type' argument in DBCreate/DBOopen calls. Thanks to Marty Marinak for
+testing and Stewart Brown for guidance in implementing this feature.
+This feature may be particularly important to codes using PDB driver on
+BlueGene systems (e.g. BG/P) because the PDB Proper in <a
+ href="https://wci.llnl.gov/codes/pact/">PACT</a> has undergone
+substantial performance tuning for those systems.</li>
+<li>A new I/O performance benchmarking tool, ioperf, was
+added
+to Silo tests. This tool can be useful in comparing performance of the
+Poor Man's Parallel I/O strategy with any I/O library including sec2,
+stdio, PDB, HDF5, Silo as well as any others a user might wish to write
+plugins to test.<br>
+  </li>
+  <li>A new function, DBSortObjectsByOffset() was added that given a
+list of object names an application wishes to read from a Silo file,
+will return the order in which the named objects appear in the file.
+This is useful in optimizing read operations from the file by
+potentially minimizing the frequency/number of seeks as well as
+improving efficiency of read-ahead.</li>
+  <li>New options for using nameschemes instead of explicit lists of
+names of blocks for multi-block objects were added. These options can
+profoundly reduce the total size of multi-block objects as well as the
+root files into which they are written as well as the I/O time to read
+and write them.<br>
+  </li>
+  <li>A performance issue where HDF5 driver was constantly writing and
+re-writing <span style="font-family: monospace;">cycle</span>,<span
+ style="font-family: monospace;"> time</span> and <span
+ style="font-family: monospace;">dtime</span> for every DBPutXXX
+operation was
+corrected.</li>
+  <li>A new friendly names option was added such that
+HDF5 datasets are in fact written as their friendly
+named variant in the current working directory instead of writing them
+in the magic <span style="font-family: monospace;">/.silo</span>
+directory with the friendly names being links to them. This may be 
+important for scalability as the number of objects in the<span
+ style="font-family: monospace;"> /.silo</span> directory can otherwise
+grow quite large causing possible performance issues for HDF5 to handle the
+related metadata.</li>
+</ul>
+<h3>3. Other new features in this release</h3>
+<ul>
+  <li>Note that Silo Version 4.8 is NOT link-time, backward compatible
+with any previously released version. You will need to re-compile all code that includes
+the Silo header file, silo.h.</li>
+  <li>Silo is now officially released with a BSD Open source license.
+Thanks to Eric Brugger for reviewing the approximately 150,000 lines of
+code as well as the LLNL IM Team for completing the review and release
+process.<br>
+  </li>
+  <li>There is a new, public, redmine bug tracker for Silo; <a
+ href="https://visitbugs.ornl.gov">https://visitbugs.ornl.gov</a>.
+Thanks to Sean Ahern and Oak Ridge National Labs for hosting it and
+thanks to Cyrus Harrison for setting it up. Before users can submit
+requests there, you will be required to register and create an account.
+But, that is a one-time operation. If you are already registered for
+the VisIt tracker, then you can get the Silo tracker automatically.</li>
+  <li>A significant reduction in compiler symbol table global namespace
+clutter has been eliminated from Silo reducing possibility of symbol
+collision when linking large applications.</li>
+  <li>A new error reporting level was added, DB_ALL_AND_DRVR. This
+level of error reporting is the same as DB_ALL except that it also
+includes any additional error reporting from the underlying driver.</li>
+  <li>Support for arrays of strings of variable length was added to a
+number of functions in the Fortran interface that accept arrays of
+strings. Thanks to Olivier Cessenat for this patch.</li>
+  <li>DBPUTQV which accepts a multi-component quadvar was added to the
+Fortran interface. Thanks to Olivier Cessenat for this implementation.</li>
+  <li>A restriction on the number of components of a multi-component
+ucdvar or quadvar was relaxed so that now, for example, DBPutUcdvar can
+write a variable with 100 sub-variables.</li>
+  <li>DBnamescheme objects now support references to external arrays of
+string value.</li>
+  <li>DBErrFunc was deprecated. Use DBErrFuncname now. Also, a new method,
+      DBErrfunc was added to return the function pointer for the error
+      function set in the last most-recent DBShowErrors() call.</li>
+  <li>A new function, DBErrlvl, was added to return the error reporting level
+set in the last, most-recent DBShowErrors() call.</li>
+  <li>The test suite was enhanced substantially to run test on a variety of
+      HDF5 virtual file drivers and library settings.</li>
+  <li>Functions for catenating an array of strings into a single, semi-colon
+separated string and the reverse operation were added to the public API. See
+DBStringArrayToStringList and DBStringListToStringArray. These functions used
+to be solely internal to Silo but have proven to be useful for Silo applications
+needing to read and write arbitrary collections of strings.</li>
+   <li>A new function, DBSetUnknownDriverPriorities was added to control the
+behavior of the unknown (e.g. DB_UNKNOWN) driver when opening files of unspecified
+low-level format type. Previously, the Silo library had a hard-coded sequence of
+drivers it would try to open a file using DB_UNKNOWN driver type. Now, that sequence
+can be specified by the Silo application.</li>
+</ul>
+<h3>4. Important information regarding BSD vs. Legacy Licenses</h3>
+<ul>
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.<br>   All rights reserved. This work was produced at Lawrence Livermore<br>   National Laboratory under Contract No. DE-AC52-07NA27344 with the<br>   DOE.<br><br>                             DISCLAIMER<br><br>   This work was prepared as an account of work sponsored by an<br>   agency of the United States Government. Neither the United States<br>   Government nor the University of California nor any of their<br>   employees, makes any warranty, express or implied, or assumes any<br>   liability or responsibility for the accuracy, completeness, or<br>   usefulness of any information, apparatus, product, or process<br>   disclosed, or represents that its use would not infringe privately-<br>   owned rights. Reference herein to any specific commercial products,<br>   process, or service by trade name, trademark, manufacturer or<br>   otherwise does not necessarily constitute or imply its endorsement,<br>   recommendation, or favoring by the United States Government or the<br>   University of California. The views and opinions of authors<br>   expressed herein do not necessarily state or reflect those of the<br>   United States Government or the University of California, and shall<br>   not be used for advertising or product endorsement purposes.<br><br>                   NOTIFICATION OF COMMERCIAL USE<br><br>   Commercialization of this  product is prohibited without notifying<br>   the Department of Energy (DOE) or Lawrence Livermore National<br>   Laboratory (LLNL).<br>   ----------------------------------------------------------------<br><br>The BSD Open Source release  distributions do not contain the Hzip and<br>FPzip compression libraries while the legacy release distributions do.<br>This  means any objects  within a  Silo file  containing data  that is<br>compressed with Hzip  or FPzip from a legacy  distribution will not be<br>readable  in a BSD  distribution. Since  compression features  must be<br>explicitly turned on by a  Silo application, this impact can be easily<br>mitigating by  ensuring that Hzip and FPzip compression are  used only<br>for objects within Silo files not intended to be read by BSD releases.<br><br>For more  information on availability  of Hzip and  FPzip compression,<br>contact the developer, Peter Lindstrom, lindstrom2@llnl.gov.<br></pre>
+</ul>
+<br>
+<br>
+</body>
+</html>

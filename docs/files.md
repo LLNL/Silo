@@ -13,8 +13,8 @@ These directory hierarchies are analogous to the Unix file system.
 Directories serve to divide the name space of a Silo file so the user can organize content within a Silo file in a way that is natural to the application.
 
 Note that the organization of objects into directories within a Silo file may have direct implications for how these collections of objects are presented to users by post-processing tools.
-For example, except for directories used to store multi-block objects (See [Multi-Block Objects Parallel I/O](./parallel.md#multi-block-objects-and-parallel-i-o)), VisIt will use directories in a Silo file to create submenus within its Graphical User Interface (GUI).
-If VisIt opens a Silo file with two directories, "foo" and "bar", and there are various meshes and variables in each of these directories, then many of VisIt's GUI menus will contain submenus named "foo" and "bar" where the objects found in those directories will be placed in the GUI.
+For example, except for directories used to store multi-block objects (See [Multi-Block Objects Parallel I/O](./parallel.md#multi-block-objects-and-parallel-i-o)), VisIt will use directories in a Silo file to create sub-menus within its Graphical User Interface (GUI).
+If VisIt opens a Silo file with two directories, "foo" and "bar", and there are various meshes and variables in each of these directories, then many of VisIt's GUI menus will contain sub-menus named "foo" and "bar" where the objects found in those directories will be placed in the GUI.
 
 Silo also supports the concept of *grabbing* the low-level driver.
 For example, if Silo is using the HDF5 driver, an application can obtain the actual HDF5 file id and then use the native HDF5 API with that file id.
@@ -76,15 +76,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   `DBOPT_H5_`...|Type|Meaning|Default
   :---|:---|:---|:---
-  `VFD`|`int`|Specifies which Virtual File Driver (VFD) the HDF5 library should use. Set the integer value for this option to one of the following values. `DB_H5VFD_DEFAULT`, (use HDF5 default driver) `DB_H5VFD_SEC2` (use HDF5 sec2 driver) `DB_H5VFD_STDIO`, (use HDF5 stdio driver) `DB_H5VFD_CORE`, (use HDF5 core driver) `DB_H5VFD_LOG`, (use HDF5 log river) `DB_H5VFD_SPLIT`, (use HDF5 split driver) `DB_H5VFD_DIRECT`, (use HDF5 direct i/o driver) `DB_H5VFD_FAMILY`, (use HDF5 family driver) `DB_H5VFD_MPIO`, (use HDF5 mpi-io driver) `DB_H5VFD_MPIP`, (use HDF5 mpi posix driver) `DB_H5VFD_SILO`, (use `SILO` BG/Q driver) `DB_H5VFD_FIC` (use `SILO` file in core driver). Many of the reamining options described in this table apply to only certain of the above VFDs.|
+  `VFD`|`int`|Specifies which Virtual File Driver (VFD) the HDF5 library should use. Set the integer value for this option to one of the following values. `DB_H5VFD_DEFAULT`, (use HDF5 default driver) `DB_H5VFD_SEC2` (use HDF5 sec2 driver) `DB_H5VFD_STDIO`, (use HDF5 stdio driver) `DB_H5VFD_CORE`, (use HDF5 core driver) `DB_H5VFD_LOG`, (use HDF5 log river) `DB_H5VFD_SPLIT`, (use HDF5 split driver) `DB_H5VFD_DIRECT`, (use HDF5 direct i/o driver) `DB_H5VFD_FAMILY`, (use HDF5 family driver) `DB_H5VFD_MPIO`, (use HDF5 mpi-io driver) `DB_H5VFD_MPIP`, (use HDF5 mpi posix driver) `DB_H5VFD_SILO`, (use `SILO` BG/Q driver) `DB_H5VFD_FIC` (use `SILO` file in core driver). Many of the remaining options described in this table apply to only certain of the above VFDs.|
   `RAW_FILE_OPTS`|`int`|Applies only for the split VFD. Specifies a file options set to use for the raw data file. May be any value returned from a call to DBRegisterFileOptionsSet() or can be any one of the following pre-defined file options sets... `DB_FILE_OPTS_H5_DEFAULT_`... DEFAULT, SEC2, STDIO, CORE, LOG, SPLIT, DIRECT, FAMILY, MPIO, MPIP, `SILO`. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split|
   `RAW_EXTENSION`|`char*`|Applies only for the split VFD. Specifies the file extension/naming convention for raw data file. If the string contains a '%s' printf-like conversion specifier, that will be replaced with the name of the file passed in the DBCreate/DBOpen call. If the string does **not** contain a '%s' printf-like conversion specifier, it is treated as an 'extension' which is appended to the name of the file passed in DBCreate/DBopen call. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split|"-raw"
   `META_FILE_OPTS`|`int`|Same as `DBOPT_H5_RAW_FILE_OPTS`, above, except for meta data file. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split.|
   `META_EXTENSION`||Same as `DBOPT_H5_RAW_EXTENSION` above, except for meta data file. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split.|""
   `CORE_ALLOC_INC`|`int`|Applies only for core VFD. Specifies allocation increment. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_core.|(1<<20)
   `CORE_NO_BACK_STORE`|`int`|Applies only for core VFD. Specifies whether or not to store the file on close. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_core.|FALSE
-  `LOG_NAME`|`char*`|Applies only for the log VFD. This is primarily a debugging feature. Specifies name of the file to which loggin data shall be stored. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_log.|"log.out"
-  `LOG_BUF_SIZE`|`int`|Applies only for the log VFD. This is primarily a debugging feature. Specifies size of the buffer to which byte-for-byte HDF5 data type information is written. See HDF5 refrence manual for H5Pset_fapl_log.|0
+  `LOG_NAME`|`char*`|Applies only for the log VFD. This is primarily a debugging feature. Specifies name of the file to which logging data shall be stored. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_log.|"log.out"
+  `LOG_BUF_SIZE`|`int`|Applies only for the log VFD. This is primarily a debugging feature. Specifies size of the buffer to which byte-for-byte HDF5 data type information is written. See HDF5 reference manual for H5Pset_fapl_log.|0
   `META_BLOCK_SIZE`|`int`|Applies the the HDF5 library as a whole (e.g. globally). Specifies the size of memory allocations the library should use when allocating meta data. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_meta_block_size.|0
   `SMALL_RAW_SIZE`|`int`|Applies to the HDF5 library as a whole (e.g. globally). Specifies a threshold below which allocations for raw data are aggregated into larger blocks within HDF5. This can improve I/O performance by reducing number of small I/O requests. Note, however, that with a block-oriented VFD such as the Silo specific VFD, this parameter must be set to be consistent with block size of the VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_small_data_block_size.|0
   `ALIGN_MIN`|`int`|Applies to the HDF5 library as a whole. Specified a size threshold above which all datasets are aligned in the file using the value specified in `ALIGN_VAL`. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_alignment.|0
@@ -101,12 +101,12 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   `CACHE_POLICY`||HDF5 raw data chunk cache parameters. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_cache.|
   `FAM_SIZE`|`int`|Size option for family VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_family. The family `VFD` is useful for handling files that would otherwise be larger than 2Gigabytes on file systems that support a maximum file size of 2Gigabytes.|
   `FAM_FILE_OPTS`|`int`|VFD options for each file in family VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_family. The family VFD is useful for handling files that would otherwise be larger than 2Gigabytes on file systems that support a maximum file size of 2Gigabytes.|
-  `USER_DRIVER_ID`|`int`|Specify some user-defined VFD. Permtis application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
-  `USER_DRIVER_INFO`||Specify user-defined VFD information struct. Permtis application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
+  `USER_DRIVER_ID`|`int`|Specify some user-defined VFD. Permits application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
+  `USER_DRIVER_INFO`||Specify user-defined VFD information struct. Permits application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
   `SILO_BLOCK_SIZE`|`int`|Block size option for Silo VFD. All I/O requests to/from disk will occur in blocks of this size.|(1<<16)
   `SILO_BLOCK_COUNT`|`int`|Block count option for Silo VFD. This is the maximum number of blocks the Silo VFD will maintain in memory at any one time.|32
   `SILO_LOG_STATS`|`int`|Flag to indicate if Silo VFD should gather I/O performance statistics. This is primarily for debugging and performance tuning of the Silo VFD.|0
-  `SILO_USE_DIRECT`|`int`|Flag to indicate if Silo VFD should attempt to use direct I/O. Tells the Silo VFD to use direct I/O where it can. Note, if it cannot, this option will be siliently ignored.|0
+  `SILO_USE_DIRECT`|`int`|Flag to indicate if Silo VFD should attempt to use direct I/O. Tells the Silo VFD to use direct I/O where it can. Note, if it cannot, this option will be silently ignored.|0
   `FIC_BUF`|`void*`|The buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
   `FIC_SIZE`|`int`|Size of the buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
 
@@ -132,7 +132,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Arg name | Description
   :---|:---
-  `opts_set_id` | The identifer (obtained from a previous call to DBRegisterFileOptionsSet()) of a file options set to unregister.
+  `opts_set_id` | The identifier (obtained from a previous call to DBRegisterFileOptionsSet()) of a file options set to unregister.
 
 * **Returned value:**
 
@@ -198,12 +198,12 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Returned value:**
 
-  The previous unknown driver prioritizatin as a `-1` terminated array of integer values.
+  The previous unknown driver prioritization as a `-1` terminated array of integer values.
   The caller should **NOT** free the returned value.
 
 * **Description:**
 
-  When opening files with `DB_UNKNOWN` driver, Silo iterates over drivers, trying each until it successfuly opens a file.
+  When opening files with `DB_UNKNOWN` driver, Silo iterates over drivers, trying each until it successfully opens a file.
 
   This call can be used to affect the order in which driver ids are attempted and can improve behavior and performance for opening files using `DB_UNKNOWN` driver.
 
@@ -229,7 +229,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  Returns a `-1` terminated list of integer driver ids indicating the prioritzation of drivers used by the `DB_UNKNOWN` driver.
+  Returns a `-1` terminated list of integer driver ids indicating the prioritization of drivers used by the `DB_UNKNOWN` driver.
   The caller should **NOT** free the returned value.
 
 {{ EndFunc }}
@@ -268,7 +268,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   DBCreate returns a `DBfile` pointer on success and `NULL` on failure.
   If the `pathname` argument contains a *path* components (e.g. `foo/bar/baz/file.silo`), note that `DBCreate` creates only the file part of the path.
-  The containing directories (folders) must already exist and be writeable.
+  The containing directories (folders) must already exist and be writable.
 
 * **Description:**
 
@@ -297,8 +297,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
     That is `create`, `open`, `read`, `write`, `close`.
     This is a VFD that comes pre-packaged with the HDF5 library.
     It does little to no optimization of I/O requests.
-    For example, two I/O requests that abutt in file address space wind up being issued through the section 2 I/O routines as independent requests.
-    This can be disasterous for high latency file systems such as might be available on BlueGene class systems.
+    For example, two I/O requests that abut in file address space wind up being issued through the section 2 I/O routines as independent requests.
+    This can be disastrous for high latency file systems such as might be available on BlueGene class systems.
 
   `DB_HDF5_STDIO`
   : Uses the Standard I/O system interface defined in Section 3 of the Unix manual.
@@ -319,13 +319,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
     Conceptually, this VFD behaves more or less like a ramdisk.
     This is a VFD that comes pre-packaged with the HDF5 library.
     I/O performance is optimal in the sense that only a single I/O request for the entire file is issued to the underlying file system.
-    However, this optimality comes at the expense of memory.
+    However, this optimization comes at the expense of memory.
     The entire file must be capable of residing in memory.
     In addition, releases of HDF5 library prior to 1.8.2 support the core VFD only when creating a new file and not when open an existing file.
     Two parameters govern behavior of the core VFD.
-    The *allocation increment* specifies the amount of memory the core VFD allocates, each time it needs to increase the buffer size to accomodate the (possibly growing) file.
+    The *allocation increment* specifies the amount of memory the core VFD allocates, each time it needs to increase the buffer size to accommodate the (possibly growing) file.
     The *backing store* indicates whether the buffer should be saved to disk (if it has been changed) upon close.
-    By default, using `DB_HDF5_CORE` as the driver type results in an allocation incriment of 1 Megabyte and a backing store option of TRUE, meaning it will store the file to disk upon close.
+    By default, using `DB_HDF5_CORE` as the driver type results in an allocation increment of 1 Megabyte and a backing store option of TRUE, meaning it will store the file to disk upon close.
     To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
 
   `DB_HDF5_SPLIT`
@@ -336,7 +336,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
     This is a VFD that comes pre-packaged with the HDF5 library.
     It results in two files being produced; one for the raw data and one for the meta data.
     The reason this can be a benefit is that tiny bits of metadata intermingling with large raw data operations can degrade performance overall.
-    Separating the datastreams can have a profound impact on performance at the expense of two files being produced.
+    Separating the data streams can have a profound impact on performance at the expense of two files being produced.
     Four parameters govern the behavior of the split VFD.
     These are the VFD and filename extension for the raw and meta data, respectively.
     By default, using `DB_HDF5_SPLIT` as the driver type results in Silo using sec2 and `"-raw"` as the VFD and filename extension for raw data and core (default params) and `""` (empty string) as the VFD and extension for meta data.
@@ -353,15 +353,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   `DB_HDF5_LOG`
   : While doing the I/O for HDF5 data, also collects detailed information regarding VFD calls issued by the HDF5 library.
-    The logging VFD writes detailed information regarding VFD operations to a logfile.
+    The logging VFD writes detailed information regarding VFD operations to a log file.
     This is a VFD that comes pre-packaged with the HDF5 library.
     However, the logging VFD is a different code base than any other VFD that comes pre-packaged with HDF5.
     So, while the logging information it produces is representative of the VFD calls made by HDF5 library to the VFD interface, it is **not** representative of the actual I/O requests made by the sec2 or stdio or other VFDs.
     Behavior of the logging VFD is governed by 3 parameters; the name of the file to which log information is written, a set of flags which are or'd together to specify the types of operations and information logged and, optionally, a buffer (which must be at least as large as the actual file being written) which serves to map the kind of HDF5 data (there are about 8 different kinds) stores at each byte in the file.
-    By default, using `DB_HDF5_LOG` as the driver type results in Silo using a logfile name of "silo_hdf5_log.out", flags of `H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC` and a `NULL` buffer for the mapping information.
+    By default, using `DB_HDF5_LOG` as the driver type results in Silo using a log file name of "silo_hdf5_log.out", flags of `H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC` and a `NULL` buffer for the mapping information.
     To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
 
-    Users interested in this VFD should consult HDF5's reference manual for the meaning of the flags as well as how to interepret logging VFD output.
+    Users interested in this VFD should consult HDF5's reference manual for the meaning of the flags as well as how to interpret logging VFD output.
 
   `DB_HDF5_DIRECT`
   : On systems that support the `O_DIRECT` flag in section 2 `create`/`open` calls, this VFD will use direct I/O.
@@ -373,13 +373,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
     That generally means that posix_memalign should be used to allocate any buffers you use to hold raw data passed in calls to the Silo library.
     The block size indicates the underlying file system block size and the copy buffer size gives the HDF5 library some additional flexibility in dealing with unaligned requests.
     Few systems support the `O_DIRECT` flag and so this VFD is not often available in practice.
-    However, when it is, using `DB_HDF5_DIRECT` as the driver type results in Silo using an alignment of 4 kilobytes (2{sup}`12`), an alignment equal to the block size and a copy buffer size equal to `256` times the blocksize.
+    However, when it is, using `DB_HDF5_DIRECT` as the driver type results in Silo using an alignment of 4 kilobytes (2{sup}`12`), an alignment equal to the block size and a copy buffer size equal to `256` times the block size.
 
   `DB_HDF5_SILO`
-  : This is a custom VFD designed specifically to address some of the performance shortcommings of VFDs that come pre-packaged with the HDF5 library.
+  : This is a custom VFD designed specifically to address some of the performance shortcomings of VFDs that come pre-packaged with the HDF5 library.
     The silo VFD is a very, very simple, block-based VFD.
     It decomposes the file into blocks, keeps some number of blocks in memory at any one time and issues I/O requests *only* in whole blocks using section 2 I/O routines.
-    In addition, it sets up some parameters that control HDF5 library's allocation of meta data and raw data such that each block winds up consisting primirily of either raw or meta data but not both.
+    In addition, it sets up some parameters that control HDF5 library's allocation of meta data and raw data such that each block winds up consisting primarily of either raw or meta data but not both.
     It also disables meta data caching in HDF5 to reduce memory consumption of the HDF5 library to the bare minimum as there is no need for HDF5 to maintain cached metadata if it resides in blocks kept in memory in the VFD.
     This is a suitable VFD for most scientific computing applications that are dumping either post-processing or restart files as applications that do that tend to open the file, write a bunch of stuff from start to finish and close it or read a bunch of stuff from start to finish and close it.
     Two parameters govern the behavior of the silo VFD; the block size and the block count.
@@ -438,17 +438,17 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBOpen` function opens an existing Silo file.
   If the file `type` passed here is `DB_UNKNOWN`, Silo will attempt to guess at the file `type` by iterating through the known types attempting to open the file with each driver until it succeeds.
   This iteration may incur a small performance penalty.
-  In addition, use of `DB_UNKNOWN` can have other undesireable behavior described below.
+  In addition, use of `DB_UNKNOWN` can have other undesirable behavior described below.
   So, if at all possible, it is best to open using a specific `type`.
-  See [`DBGetDriverTypeFromPath`](#dbgetdrivertypefrompath)() for a function that uses cheap heuristics to determine the driver `type` given a candiate filename.
+  See [`DBGetDriverTypeFromPath`](#dbgetdrivertypefrompath)() for a function that uses cheap heuristics to determine the driver `type` given a candidate filename.
 
   When writing general purpose code to read Silo files and you cannot know for certain ahead of time what the correct driver to use is, there are a few options.
 
-  First, you can iterate over the available driver ids, calling `DBOpen()` using each one until one of them succeds.
+  First, you can iterate over the available driver ids, calling `DBOpen()` using each one until one of them succeeds.
   But, that is exactly what the `DB_UNKNOWN` driver does so there is no need for a Silo client to have to write that code.
   In addition, if you have a specific preference of order of drivers, you can use `DBSetUnknownDriverPriorities()` to specify that ordering.
 
-  Undesireable behavior with `DB_UNKNOWN` can occur when the specified file can be successfully opened using multiple available drivers and/or file options sets and it succceds with one or one using options the caller neither expected or intended and/or which offers poorer performance.
+  Undesirable behavior with `DB_UNKNOWN` can occur when the specified file can be successfully opened using multiple available drivers and/or file options sets and it succeeds with one or one using options the caller neither expected or intended and/or which offers poorer performance.
   See [`DBSetUnknownDriverPriorities`](#dbsetunknowndriverpriorities) for a way to specify the order of drivers tried by the `DB_UNKNOWN` driver.
 
   Indeed, in order to use a specific VFD (see [`DBCreate`](#dbcreate)) in HDF5, it is necessary to pass the specific `DB_HDF5_XXX` argument in this call or to set the unknown driver priorities such that whatever specific HDF5 VFD(s) are desired are tried first before falling back to other, perhaps less desirable ones.
@@ -770,19 +770,20 @@ These are all documented in the [Global Library Behavior](globals.md) section.
   Arg name | Description
   :---|:---
   `DBfile` | Database file pointer.
-  `nobjs` | Number of object names in obj_names.
-  `ordering` | Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
+  `nobjs` | Number of object names in `obj_names`.
+  `obj_names` | The list of object names to order.
+  `ordering` | Returned integer array of relative order of seek offset in the file of each object. For example, if `ordering[i]==k`, that means the object whose name is `obj_names[i]` occurs kth when the objects are ordered according to offset at which they exist in the file.
 
 * **Returned value:**
 
-  0 on succes; -1 on failure.
+  0 on success; -1 on failure.
   The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.8 or later.
 
 * **Description:**
 
   The intention of this function is to permit applications reading Silo files to order their reads in such a way that objects are read in the order in which they occur in the file.
-  This can have a postive impact on I/O performance, particularly using a block-oriented VFD such as the Silo VFD as it can reduce and/or eliminate unnecessary block pre-emption.
-  The degree to which `ordering` reads effects performance is not yet known.
+  This can have a positive impact on I/O performance, particularly using a block-oriented VFD such as the Silo VFD as it can reduce and/or eliminate unnecessary block preemption.
+  That said, the degree to which ordering reads in this way effects performance is not known.
 
 {{ EndFunc }}
 
@@ -987,9 +988,9 @@ These are all documented in the [Global Library Behavior](globals.md) section.
   :---|:---
   `nobjs` | The number of objects to be copied (e.g. number of strings in srcObjList)
   `srcDb` | The Silo database to be used as the source of the copies
-  `srcObjList` | An array of nobj strings of the (path) names of objects to be copied. See description for interpretation of relative path names.
+  `srcObjList` | An array of `nobjs` strings of the (path) names of objects to be copied. See description for interpretation of relative path names.
   `dstDB` | The Silo database to be used as the destination of the copies.
-  `dstObjList` | [Optional] An optional array of nobj strings of the (path) names where the objects are to be copied in dstDb. If any entry in `dstObjList` is `NULL` or is a string of zero length, this indicates that object in the dstDb will have the same (path) name as the corresponding object (path) name given in `srcObjList`. If the entire `dstObjList` is `NULL`, then this is true for all objects. See description for interpretation of relative (path) names.
+  `dstObjList` | [Optional] An optional array of `nobjs` strings of the (path) names where the objects are to be copied in `dstDb`. If any entry in `dstObjList` is `NULL` or is a string of zero length, this indicates that object in the `dstDb` will have the same (path) name as the corresponding object (path) name given in `srcObjList`. If the entire `dstObjList` is `NULL`, then this is true for all objects. See description for interpretation of relative (path) names.
 
 * **Returned value:**
 
@@ -1000,9 +1001,7 @@ These are all documented in the [Global Library Behavior](globals.md) section.
   Note that this function is available only if both Silo databases are from the HDF5 driver and only if the Silo library has been compiled with HDF5 version 1.8 or later.
   This is because the implementation exploits functionality available only in versions of HDF5 1.8 and later.
 
-  Directories required in the destination database to satisfy the path names given in the
-
-  dstObjList are created as necessary.
+  Directories required in the destination database to satisfy the path names given in the `dstObjList` are created as necessary.
   There is no need for the caller to pre-create any directories in the destination database.
 
   Relative path names in the `srcObjList` are interpreted relative to the source database's current working directory.
@@ -1130,10 +1129,10 @@ These are all documented in the [Global Library Behavior](globals.md) section.
   **Other rules:**
 
     * If any `src` is a dir, then the operation is an error without `-R/-r` option.
-    * If cooresponding `dst` exists and is a dir, `src` is copied *into* (e.g. becomes a child of) `dst`.
-    * If cooresponding `dst` exists and is **not** a dir (e.g. is just a normal Silo object), then it is an error if src is not also the same kind of Silo object.
+    * If corresponding `dst` exists and is a dir, `src` is copied *into* (e.g. becomes a child of) `dst`.
+    * If corresponding `dst` exists and is **not** a dir (e.g. is just a normal Silo object), then it is an error if src is not also the same kind of Silo object.
      The copy overwrites (destructively) `dst`.
-     However, if the file space `dst` object occupies is smaller than that needed to copy `src`, behavior is indeterminate but may will result in the `dst` file (not just the `dst` object) being corrupted.
+     However, if the file space `dst` object occupies is smaller than that needed to copy `src`, behavior is indeterminate but will almost certainly result in the `dst` file (not just the `dst` object) being corrupted.
 
   If none of the preceding numeric arguments are specified, then the varags list of args is treated as (default) where the last is a pre-existing destination directory and all the others are the paths of source objects to be copied into that directory.
 
@@ -1265,7 +1264,7 @@ These are all documented in the [Global Library Behavior](globals.md) section.
 
 ## `DBGetDriverTypeFromPath()`
 
-* **Summary:** Guess the driver type used by a file with the given pathname
+* **Summary:** Guess the driver type used by a file with the given path name
 
 * **C Signature:**
 
@@ -1297,7 +1296,7 @@ These are all documented in the [Global Library Behavior](globals.md) section.
   If it is a PDB file, it cannot distinguish between a file generated by `DB_PDB` driver and `DB_PDBP` (PDB Proper) driver.
   It will always return `DB_PDB` for a PDB file.
 
-  If the file is an HDF5, the function is currently not implemented to distiniguish between various HDF5 VFDs the file may have been generated with.
+  If the file is an HDF5, the function is currently not implemented to distinguish between various HDF5 VFDs the file may have been generated with.
   It will always return `DB_HDF5` for an HDF5 file.
 
   Note, this function will determine only whether the underlying file is a PDB or HDF5 file.

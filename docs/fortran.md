@@ -3,7 +3,7 @@
 The functions described in this section are either unique to the Fortran interface or facilitate the mixing of C/C++ and Fortran within a single application interacting with a Silo file.
 Note that when Silo was originally written, the vision was that only visualization/post-processing tools would ever attempt to read the contents of Silo files.
 Therefore, the Fortran interface has never included all the companion functions to read objects.
-That said, it is possible to write simple fortran callable wrappers to the C functions much like the write interface already implemented.
+That said, it is possible to write simple Fortran callable wrappers to the C functions much like the write interface already implemented.
 Have a look in the source file silo_f.c for examples.
 
 {{ EndFunc }}
@@ -246,7 +246,7 @@ Have a look in the source file silo_f.c for examples.
   `dbid` | The identifier for the Silo database to write the object to.
   `name` | The `name` to be assigned to the object in the file.
   `lname` | The length of the `name` argument.
-  `object_id` | The identifier for the facelist object, obtained via dbcalcfl.
+  `object_id` | The identifier for the facelist object, obtained via `dbcalcfl`.
   `status` | Return value indicating success or failure of the operation; 0 on success, -1 on failure.
 
 * **Returned value:**

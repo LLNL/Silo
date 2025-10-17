@@ -8,7 +8,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 Some behaviors have both *file* level and *global* variants.
 For example, see [`DBSetAllowOverwrites()`](#dbsetallowoverwrites) and [`DBSetAllowOverwritesFile()`](#dbsetallowoverwritesfile).
 
-When a file is *opened or *created*, it *inherents* whatever the library's *global* settings are.
+When a file is *opened or *created*, it *inherits* whatever the library's *global* settings are.
 However, a file's settings can be adjusted independently from the library's global settings by calling the equivalent `DBSetXxxFile()` methods.
 
 {{ EndFunc }}
@@ -225,7 +225,7 @@ However, a file's settings can be adjusted independently from the library's glob
 
   This is a convenience function for Silo applications to check whether a given variable name they wish to use will be considered valid by Silo.
 
-  The only valid characters that can appear in a Silo variable name are all alphanumerics (e.g. `[a-zA-Z0-9]`) and the underscore (e.g. `'_'`).
+  The only valid characters that can appear in a Silo variable name are all alphanumeric characters (e.g. `[a-zA-Z0-9]`) and the underscore (e.g. `'_'`).
   If a candidate variable name contains any characters other than these, that variable name is considered invalid.
   If that variable name is ever used in a call to create an object in a Silo file, the call will fail with error `E_INVALIDNAME`.
 
@@ -1197,7 +1197,6 @@ Longer than normal component strings can result in creating objects in Silo file
 
   Arg&nbsp;name | Description
   :---|:---
-  `dbfile` | The file for which HDF5 friendly names property should be set
   `mode` | Mode to indicate how Silo library should behave for subsequent object creation operations. Pass either `DB_COMPAT_OVER_PERF` or `DB_PERF_OVER_COMPAT`. The default is `DB_COMPAT_OVER_PERF`. See description below for further details.
 
 * **Returned value:**
@@ -1212,15 +1211,16 @@ Longer than normal component strings can result in creating objects in Silo file
   However, doing this may come at the cost of some lost performance.
   Better performance may be possible by using newer versions of Silo (or an underlying driver library such as HDF5) but the resulting data may not be readable by older versions of Silo (or older versions of an underlying driver library such as HDF5).
 
-  Silo's compatibility mode is designed to enable producers and consumers to control the tradeoff between compatibility and performance.
+  Silo's compatibility mode is designed to enable producers and consumers to control the trade off between compatibility and performance.
   The compatibility mode can be set globally for the entire library with `DBSetCompatibilityMode()`.
   Alternatively, it can also be set for an individual Silo file when it is OR'd into the `mode` arg in the [`DBCreate`](files.md#dbcreate) or [`DBOpen`](files.md#dbopen) calls.
   When it is OR'd into the `mode` arg, that setting takes precedent over the global setting.
+  There is no `DBSetCompatibilityModeFile()` because that requires having an already open file for which compatibility features would have had to have already been chosen.
 
   When `DB_COMPAT_OVER_PERF` is set (which is also the default), it means that when there is a choice in the way the Silo library behaves, compatibility will be prioritized over performance.
-  In this mode, the Silo library endeavours to create data readable by the oldest version of Silo still likely in use (4.10) and/or the oldest version of the HDF5 library Silo is likely to be using (1.8).
+  In this mode, the Silo library endeavors to create data readable by the oldest version of Silo still likely in use (4.10) and/or the oldest version of the HDF5 library Silo is likely to be using (1.8).
 
-  Compatability applies to *entire* files.
+  Compatibility applies to *entire* files.
   A file written with `DB_PERF_OVER_COMPAT` from a newer Silo and/or HDF5 library may be unreadable by an application using an older Silo and/or HDF5 library.
 
   :::{tip}
@@ -1230,7 +1230,7 @@ Longer than normal component strings can result in creating objects in Silo file
   :::
 
   When performance considerations need to take precedence, callers are free to set the compatibility mode to `DB_PERF_OVER_COMPAT` which favors performance over compatibility.
-  However, all stakeholders should be made aware that the Silo file may not be readable by applications using older verions of Silo (or older versions of an underlying driver library such as HDF5).
+  However, all stakeholders should be made aware that the Silo file may not be readable by applications using older versions of Silo (or older versions of an underlying driver library such as HDF5).
 
   :::{danger}
   When `DB_PERF_OVER_COMPAT` is in effect (either for an individual file or for the whole library), files written may not be readable by all downstream consumers.
@@ -1245,7 +1245,7 @@ Longer than normal component strings can result in creating objects in Silo file
   Nameschemes were introduced in such a way that data producers using nameschemes produced files downstream consumers could no longer read correctly without modification.
   This is a bad outcome.
   This is especially true when an alternative would have been to have `DBGetMultiXxx()` methods (the methods that read multi-block objects) expand any nameschemes into the equivalent explicit lists of names thereby obeying the terms of the original, older `DBGetMultiXxx()` interface.
-  Concievably, this is something that is possible to handle if `DB_COMPAT_OVER_PERF` is OR'd with `DB_READ` in a [`DBOpen`](files.md#dbopen) call.
+  Conceivably, this is something that is possible to handle if `DB_COMPAT_OVER_PERF` is OR'd with `DB_READ` in a [`DBOpen`](files.md#dbopen) call.
   Compatibility mode flags are not currently supported for `DB_READ` opens.
 
   Nameschemes represent a backward compatibility issue that is restricted to *some* objects (e.g. multi-block objects) in a Silo file.
@@ -1254,7 +1254,7 @@ Longer than normal component strings can result in creating objects in Silo file
   In some cases, a data producer can select a virtual file driver (often driven by I/O performance considerations) which can be handled by a data consumer only if the consumer had been previously set up to handle it.
   Any workflow involving a Silo data consumer that was not set up to handle that virtual file driver would not be able to even open the file.
 
-  The above examples underscore a commonly encountered compatibility tradeoff in persistent storage libraries like Silo.
+  The above examples underscore a commonly encountered compatibility trade off in persistent storage libraries like Silo.
   Compatibility (whether downstream consumers can read the data) is often pitted against performance.
   Best performance often requires data producers to utilize features of libraries that may break backward compatibility meaning downstream consumers using older versions of Silo (or older versions of the underlying driver library such as HDF5) may not be able to read the data without modification.
 
@@ -1289,7 +1289,9 @@ Longer than normal component strings can result in creating objects in Silo file
 
 * **Arguments:**
 
-  `None`
+  Arg&nbsp;name | Description
+  :---|:---
+  `dbfile` | The file for which compatibility mode settings for a specific file are desired.
 
 * **Returned value:**
 
@@ -1299,3 +1301,90 @@ Longer than normal component strings can result in creating objects in Silo file
 
   Because compatibility mode can be set differently for a file than for the library globally, two methods are provided to
   retrieve it's value.
+
+{{ EndFunc }}
+
+## `DBSetEvalNameschemes()`
+## `DBSetEvalNameschemesFile()`
+
+* **Summary:** Force library to evaluate nameschemes when getting multi-block objects
+
+* **C Signature:**
+
+  ```
+  int DBSetEvalNameschemes(int eval)
+  int DBSetEvalNameschemesFile(DBfile *dbfile, int eval)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg&nbsp;name | Description
+  :---|:---
+  `dbfile` | The file for which nameschemes should be evaluated during `DBGetMultixxx()` calls.
+  `eval` | Flag to indicate desired namescheme evaluation state. A value of zero disables this feature. A value of non-zero enables it.
+
+* **Returned value:**
+
+  Previous setting for `eval`.
+
+* **Description:**
+
+  When the number of blocks in a multi-block object gets large (say > 10,000), it can wind up taking a lot of memory space and taking a long time to write and read.
+  For example, a multi-block object with 50,000 blocks where each block has a file path consisting of 100 characters and a Silo object path of another 100 characters, the list of block names is 10 million characters or 10 mega bytes!
+  Typically, however, all the block names are very similar and easily computable using an sprintf-style name generation scheme.
+
+  [Nameschemes](subsets.md#dbmakenamescheme) where introduced as an optimization for this.
+  In a `DBmultimesh` object, for example, that uses nameschemes, the `meshnames` member is `NULL`.
+  A Silo data consumer that is not prepared for this can wind up `SEGV`'ing when attempting to reference block names.
+
+  The `DBSetEvalNameschemes()` methods allow a consumer to force the Silo library to *evaluate* nameschemes whenever multi-block objects involving them are read.
+  This means that when multi-block objects are read and they involve nameschemes, the Silo library will produce what would have been the contents of the list of block names member of a the object and the `file_ns` and `block_ns` members will be `NULL`'d out. 
+  This allows consumers to make a one-line change to their code and continue operating as they have before without having to deal with nameschemes.
+  Alternatively, consumers can use [individual multi-block object conversion functions](utility.md#dbevalmultimeshnameschemes) directly themselves.
+
+  :::{danger}
+  The downside is that forcing the Silo library to evaluate nameschemes when reading multi-block objects involving nameschemes will be slower and will require potentially substantially more memory.
+  So, this feature should be used with care.
+  :::
+
+  There is no question that introducing [nameschemes](subsets.md#dbmakenamescheme) to Silo created a backward compatibility issue which, in retrospect, could have been easily resolved by introducing this feature along with them and having it on by default.
+
+{{ EndFunc }}
+
+## `DBGetEvalNameschemes()`
+## `DBGetEvalNameschemesFile()`
+
+* **Summary:** Get namescheme evaluation state
+
+* **C Signature:**
+
+  ```
+  int DBGetEvalNameschemes()
+  int DBGetEvalNameschemesFile(DBfile *dbfile)
+  ```
+
+* **Fortran Signature:**
+
+  ```
+  None
+  ```
+
+* **Arguments:**
+
+  Arg&nbsp;name | Description
+  :---|:---
+  `dbfile` | The file for which the namescheme evaluation state for a specific file is desired.
+
+* **Returned value:**
+
+  The current namescheme evaluation state of the library or file.
+
+* **Description:**
+
+{{ EndFunc }}

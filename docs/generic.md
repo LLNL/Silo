@@ -387,7 +387,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Description:**
 
-  Sometimes, the lengh of a variable in a file may be different from its length in memory.
+  Sometimes, the length of a variable in a file may be different from its length in memory.
   This is especially true if type conversion is performed on the variable when it is being read or when compression is applied.
   This function returns the number of bytes the variable takes up in the file.
 
@@ -665,7 +665,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   In releases of the Silo library prior to 4.10, if a `DBobject` ever had more components added to it than the `maxcomps` it was created with, an error would be generated and the operation to add a component would fail.
   However, starting in version 4.10, the `maxcomps` argument is used only for the initial object creation.
-  If a caller attempts to add more than this number of components to an object, Silo will simply re-allocate the object to accomodate the additional components.
+  If a caller attempts to add more than this number of components to an object, Silo will simply re-allocate the object to accommodate the additional components.
 
   Data producers may use this method to either modify an existing Silo object type or create an empty, new user-defined object using the type `DB_USERDEF`.
   Modified Silo objects will be recognized by Silo as long as they are not modified in ways that remove *essential* data members.
@@ -734,12 +734,12 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Returned value:**
 
-  Zero on succes; -1 on failure
+  Zero on success; -1 on failure
 
 * **Description:**
 
   `DBChangeObject` writes a new `DBobject` object to a file, replacing the object in the `file` with the same name.
-  Changing (e.g. overwriting) existing objects in Silo files is frought with peril.
+  Changing (e.g. overwriting) existing objects in Silo files is fraught with peril.
   See [`DBSetAllowOverwrites`](globals.md#dbsetallowoverwrites) for more information.
 
 {{ EndFunc }}

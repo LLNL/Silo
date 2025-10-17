@@ -208,7 +208,7 @@ When the optlist is used in a Silo call such as `DBPutUcdmesh()`, it will result
 * **Description:**
 
   This function can be used to query the contents of an `optlist`.
-  If the given `optlist` has an option of the given optid, then this function will return the pointer associated with the given `optid`.
+  If the given `optlist` has an option of the given `optid`, then this function will return the pointer associated with the given `optid`.
   Otherwise, it will return `NULL` indicating the `optlist` does not contain an option with the given `optid`.
 
 {{ EndFunc }}

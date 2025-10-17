@@ -1,8 +1,6 @@
 title: Silo
 
-description: >
-  An API for reading and writing a wide diversity of binary, scientific data to be easily shared and exchanged.
-  Silo is prominently used by the VisIt visualization tool.
+description: File-based scientific data exchange and software interoperability
 
 theme: minima
 
@@ -23,3 +21,10 @@ readme_index:
   enabled:          true
   remove_originals: false
   with_frontmatter: true
+
+header_pages:
+  - ghpages/releases/releases.md
+  - ghpages/examples/examples.md
+  - ghpages/help.md
+  - ghpages/documentation.md
+  - ghpages/more.md

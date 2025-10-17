@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>silo_relnotes_4.9.1.html</title>
+</head>
+<body>
+<h1>Announcing the Release of Version 4.9.1 of the Silo Library</h1>
+<h2>March 19, 2013</h2>
+                                          
+<ul>
+<li>Version 4.9.1 <b>is</b> link-time compatible with 4.9.</li>
+<li>The VisIt plugin in VisIt 2.6.2 to be released shortly, includes bugfixes related to nameschemes.</li>
+<li>In some cases, passing a 'make check' requires adding 'LIBS=-lstdc++' to the make command line (e.g., 'make check LIBS=-lstdc++'.</li>
+<li>The rocket test will fail during 'make check' on OSX. I've yet to learn how to handle dlopen and shared libs there. For similar reasons, Silo's python module has yet to be tested on a OSX.</li>
+</ul>
+
+<h3>2. Bugs fixed in this release</h3>
+<ul>
+<li>Relative paths to external array references in nameschemes were fixed.</li>
+<li>A bug where poorly defined namescheme strings could cause segmentation violations was fixed.</li>
+<li>Argument checking for empty objects was relaxed significantly to make it easier for existing clients to push them.</li>
+</ul>

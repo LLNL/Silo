@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>silo_relnotes_4.7.1.html</title>
+</head>
+<body>
+<h3>Announcing the release of version 4.7.2 of the Silo Library</h3>
+
+<h3>1. New features added in this release</h3>
+<ul>
+  <li>Support for DB_LONG_LONG datatype was added.</li>
+  <li>A new relative differencing option was added to silodiff/browser.
+Thanks to John Wohlbier for specifying the algorithm.</li>
+  <li>Species now support names and colors just as materials do.</li>
+  <li>All Silo structs are now non-anonymous.</li>
+  <li>All silo variables now support characterization as <span
+ style="font-style: italic;">conserved</span> quantities.</li>
+  <li>All silo variables now support characterization as <span
+ style="font-style: italic;">extensive</span> quantities.</li>
+  <li>Browser can now display the contents of the HDF5 driver's (magic)
+'/.silo' directory.</li>
+  <li>Hard links are now supported by the friendly HDF5 names feature.</li>
+  <li>FPZIP and HZIP support is now included for Windows platforms.</li>
+  <li>silodiff now warns of possible mismatch with browser path.</li>
+  <li>silodiff/browser now supports diff'ing values of different primitive type.</li>
+</ul>
+
+<h3>Critical bugs fixed in this release</h3>
+<ul>
+  <li>DB_LONG_LONG is no longer mapped to DB_LONG on platforms where<br>
+sizeof(long)==sizeof(long long).</li>
+  <li>The problem where centering for Quadvars was always being treated
+as node<br>
+centered was corrected.</li>
+  <li>A UMR in handling of arrays of strings in multi-block objects was
+corrected.</li>
+</ul>
+
+<h3>Other bugs fixed in this release<br>
+</h3>
+<ul>
+  <li>Diffing data of different type in browser is now commutative.</li>
+  <li>Default formats for printing long and long long data in base 8/16
+were corrected.</li>
+  <li>Missing diffing parameters for long long type were added.</li>
+  <li>Some leaks and a memory error were corrected in a couple of tests.</li>
+  <li>Overlap of src/dst in a strcpy in PDB was fixed.</li>
+  <li>Problems writing edge- and face-centered quadvars and ucdvars were fixed.</li>
+  <li>silock now works for data produced on HDF5 driver.</li>
+  <li>silodiff corrrectly sets $lowlevel variable so that HDF5 file
+differences cannot be missed.</li>
+  <li>browser now displays mixvals for ucdvars.</li>
+  <li>libsilo.a|so no longer has dependence on libreadline.</li>
+  <li>Fortran interface now correctly compiles for Windows.</li>
+  <li>A double-free memory error causing silex to crash was fixed.</li>
+  <li>A missing pmpio.h include file dependency was added.</li>
+  <li>Browser now outputs version of Silo library it is linked with.</li>
+  <li>A problem where once compression features were enabled, they
+could never be disabled was corrected.</li>
+  <li>Multi-part, multi-block objects written on Windows but read on
+Linux and vice-versa now correctly handle the difference in slash character for filesystem
+pathnames.</li>
+  <li>A problem where silo.h and config.h were being included in source
+distribution tarballs in spite of fact that these files are generated from their .in
+equivalents was corrected.</li>
+  <li>A bug in DBInqFile where it would return true for any PDB file,
+even a PDB file NOT produced by Silo
+was corrected. It now returns true ONLY if it finds tell-tale signs
+there are Silo objects in the file and false otherwise.</li>
+  <li>DBCLOSE Fortran wrapper was corrected to set closed dbid to -1.</li>
+  <li>Silo's magic file was corrected so that '!' character in PDB
+moniker is not inadvertently treated as the not-equal operator.</li>
+</ul>
+
+<h3>3. Details regarding long long support</h3>
+Silo supports a new DBdatatype enum, DB_LONG_LONG.<br>
+<br>
+
+Both the PDB and HDF5 drivers were enhanced to support long long datatype.
+To the extent possible, the lite version of PDB built-in to Silo was modified
+to match how PDB proper handles long long support. pdbview should display
+Silo's long long data correctly. However, be aware that fundamental aspects
+of the lite version of PDB built-in to Silo were changed to support long long.<br>
+<br>
+
+On systems where sizeof(long long)==sizeof(long), the DB_LONG_LONG enum resolves
+to DB_LONG.<br>
+<br>
+
+Data written on a system where sizeof(long long)>sizeof(long) and
+later read on a system where sizeof(long long)==sizeof(long) will work on the
+HDF5 driver if the values in the long long input can be cast to long without
+loss of precision. Behavior on the PDB driver in this case is yet to be determined.<br>
+<br>
+
+When diffing both the left and right operands of long long type, browser uses the
+same difference algorithm it has always used but adjusted to support the full
+integral precision of long long data. In all other cases (and has always been the
+case), browser casts values to double and computes their differences as double
+values.<br>
+<h3>4. Details regarding new browser relative difference algorithm. </h3>
+Thanks to John Wohlbier for specifying a new relative differencing algorithm for
+browser. It
+is controlled by the -x EPS, --epsilon=EPS command line arguments and $diff_*_eps
+variables.
+<br>
+<br>
+
+Two numbers, A and B, are different if |A-B|/(|A|+|B|+EPS)>RTOL where EPS is the
+epsilon parameter and RTOL is the relative difference threshold.
+<br>
+<br>
+
+For EPS=0, the algorithm is similar (but not identical) to normal relative differencing.
+But for EPS=1, it behaves in such a way as to shift between this alternate relative differencing
+for large numbers and absolute differencing for numbers near zero. Default is -1 (e.g. turned off).
+<br>
+<br>
+
+By default, EPS is set to -1 so it is disabled. However, setting it to any positive value
+enables this alterantive differencing algorithm.
+<br>
+<br>
+
+</body>
+</html>

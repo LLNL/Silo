@@ -1,0 +1,20 @@
+<AMRDecomp meshName="amr_mesh" numDims="3" numLevels="3" numPatches="3" >
+    <Level level="0" numPatches="1" ratios="1 1 1" >
+        0 
+    </Level>
+    <Level level="1" numPatches="1" ratios="2 2 2" >
+        1 
+    </Level>
+    <Level level="2" numPatches="1" ratios="2 2 2" >
+        2 
+    </Level>
+    <Patch iDx="0" vId="1" level="0" rank="8.000000" numChildren="1" logSize="15 10 10" logExtents="0 14 0 9 0 9" spatExtents="0.000000 30.000000 0.000000 20.000000 0.000000 20.000000" >
+        1 
+    </Patch>
+    <Patch iDx="1" vId="2" level="1" rank="1.000000" numChildren="1" logSize="12 12 12" logExtents="0 11 0 11 0 11" spatExtents="0.000000 12.000000 0.000000 12.000000 0.000000 12.000000" >
+        2 
+    </Patch>
+    <Patch iDx="2" vId="3" level="2" rank="0.125000" numChildren="0" logSize="18 18 18" logExtents="2 19 2 19 2 19" spatExtents="1.000000 10.000000 1.000000 10.000000 1.000000 10.000000" >
+        
+    </Patch>
+</AMRDecomp>

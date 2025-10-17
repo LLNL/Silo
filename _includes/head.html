@@ -1,0 +1,13 @@
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- seo -%}
+  <!-- LLNL Digital Analytics Program (DAP) Compliance -->
+  <script src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOE&amp;subagency=LLNL&amp;sdor=fda.gov&amp;dclink=true"language="javascript" id="_fed_an_ua_tag"></script>
+  <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
+  {%- feed_meta -%}
+  {%- if jekyll.environment == 'production' and site.google_analytics -%}
+    {%- include google-analytics.html -%}
+  {%- endif -%}
+</head>
