@@ -10,7 +10,8 @@ Source0:        https://github.com/LLNL/Silo/archive/%{version}/%{name}-%{versio
 BuildRequires:  gcc-c++
 BuildRequires:  cmake >= 3.12
 BuildRequires:  hdf5-devel 
-BuildRequires:  perl 
+BuildRequires:  qt6-qtbase-devel
+BuildRequires:  python3-devel
 
 %global silo_desc \
 Silo is a C/Fortran API for reading and writing a wide variety of \
@@ -40,14 +41,15 @@ This package contains the development files of %{name}.
 
 %build
 %cmake \
+  -DBUILD_TESTING=ON \
   -DSILO_ENABLE_SHARED=ON \
   -DSILO_ENABLE_SILOCK=ON \
-  -DSILO_ENABLE_SILEX=OFF \
+  -DSILO_ENABLE_SILEX=ON \
   -DSILO_ENABLE_BROWSER=ON \
   -DSILO_ENABLE_FORTRAN=ON \
   -DSILO_ENABLE_HDF5=ON \
-  -DSILO_ENABLE_JSON=OFF \
-  -DSILO_ENABLE_PYTHON_MODULE=OFF \
+  -DSILO_ENABLE_JSON=OM \
+  -DSILO_ENABLE_PYTHON_MODULE=ON \
   -DSILO_ENABLE_TESTS=ON \
   -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
   -DSILO_BUILD_FOR_BSD_LICENSE=ON \
@@ -67,6 +69,8 @@ This package contains the development files of %{name}.
 %{_bindir}/silock
 %{_bindir}/silodiff
 %{_bindir}/silofile
+%{_bindir}/silex
+%{_bindir}/s2ex.py
 %{_includedir}/lite_pdb.h
 %{_includedir}/lite_score.h
 %{_includedir}/silo.h
