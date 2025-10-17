@@ -444,8 +444,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
-  `DBOPT_HI_OFFSET`|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
-  `DBOPT_LO_OFFSET`|int *|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
+  `DBOPT_HI_OFFSET`|`int*`|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
+  `DBOPT_LO_OFFSET`|`int*`|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
   `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
   `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
   `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
@@ -459,7 +459,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
   `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_BASEINDEX`|int[3]|Indicate the indices of the mesh within its group.|0,0,0
+  `DBOPT_BASEINDEX`|`int[3]`|Indicate the indices of the mesh within its group.|0,0,0
   `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
   `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each node`NULL`
   `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each zone`NULL`

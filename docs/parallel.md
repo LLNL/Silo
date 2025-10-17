@@ -129,9 +129,9 @@ The functions described in this section of the manual include...
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
   `DBOPT_EXTENTS_SIZE`|`int`|Number of values in each extent tuple|0
-  `DBOPT_EXTENTS`a|double*|Pointer to an array of length `nmesh` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple for the mesh coordinates (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
-  `DBOPT_ZONECOUNTS`a|int*|Pointer to an array of length `nmesh` indicating the number of zones in each block.|`NULL`
-  `DBOPT_HAS_EXTERNAL_ZONES`a|int*|Pointer to an array of length `nmesh` indicating for each block whether that block has zones external to the whole multi-mesh object. A non-zero value at index i indicates block i has external zones. A value of 0 (zero) indicates it does not.|`NULL`
+  `DBOPT_EXTENTS`|`double*`|Pointer to an array of length `nmesh` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple for the mesh coordinates (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
+  `DBOPT_ZONECOUNTS`|`int*`|Pointer to an array of length `nmesh` indicating the number of zones in each block.|`NULL`
+  `DBOPT_HAS_EXTERNAL_ZONES`|`int*`|Pointer to an array of length `nmesh` indicating for each block whether that block has zones external to the whole multi-mesh object. A non-zero value at index i indicates block i has external zones. A value of 0 (zero) indicates it does not.|`NULL`
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this multimesh.|`NULL`
   `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time.|0
@@ -140,14 +140,14 @@ The functions described in this section of the manual include...
   `DBOPT_MB_BLOCK_TYPE`|`int`|Constant block type for all blocks|(not specified)
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no `meshnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no `meshnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   The options specified below have been deprecated. Use Mesh Region Group (MRG) trees instead.|||
   `DBOPT_GROUPORIGIN`|`int`|The origin of the group numbers.|1
   `DBOPT_NGROUPS`|`int`|The total number of groups in this multimesh object.|0
-  `DBOPT_ADJACENCY_NAME`a|`char*`|Name of a multi-mesh, nodal adjacency object written with a call to adj.|`NULL`
+  `DBOPT_ADJACENCY_NAME`|`char*`|Name of a multi-mesh, nodal adjacency object written with a call to adj.|`NULL`
   `DBOPT_GROUPINGS_SIZE`|`int`|Number of integer entries in the associated groupings array|0
-  `DBOPT_GROUPINGS`|int *|Integer array of length specified by `DBOPT_GROUPINGS_SIZE` containing information on how different mesh blocks are organized into, possibly hierarchical, groups. See below for detailed discussion.|`NULL`
+  `DBOPT_GROUPINGS`|`int*`|Integer array of length specified by `DBOPT_GROUPINGS_SIZE` containing information on how different mesh blocks are organized into, possibly hierarchical, groups. See below for detailed discussion.|`NULL`
   `DBOPT_GROUPINGS_NAMES`|`char**`|Optional set of names to be associated with each group in the groupings array|`NULL`
 
   There is a class of options for multiblock objects that is *very important* in helping to accelerate performance in down-stream post-processing tools.
@@ -384,7 +384,7 @@ The functions described in this section of the manual include...
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   `DBOPT_EXTENTS_SIZE`|`int`|Number of values in each extent tuple|0
-  `DBOPT_EXTENTS`a|double*|Pointer to an array of length `nvar` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
+  `DBOPT_EXTENTS`|`double*`|Pointer to an array of length `nvar` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
   `DBOPT_MMESH_NAME`|`char*`|Name of the multimesh this variable is associated with. Note, this option is very important as down-stream post processing tools are otherwise required to guess as to the mesh a given variable is associated with. Sometimes, the tools can guess wrong.|`NULL`
   `DBOPT_TENSOR_RANK`|`int`|Specify the variable type; one of either `DB_VARTYPE_SCALAR`, `DB_VARTYPE_VECTOR` `DB_VARTYPE_TENSOR`, `DB_VARTYPE_SYMTENSOR`,<br>`DB_VARTYPE_ARRAY`<br>`DB_VARTYPE_LABEL`|DB_VARTYPE_SCALAR
   `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](subsets.md#dbopt-region-pnames).|`NULL`
@@ -393,7 +393,7 @@ The functions described in this section of the manual include...
   `DBOPT_MB_BLOCK_TYPE`|`int`|Constant block type for all blocks|(not specified)
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no `varnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no `varnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
   The options below have been deprecated. Use MRG trees instead.|||
@@ -497,21 +497,21 @@ The functions described in this section of the manual include...
   :---|:---|:---|:---
   `DBOPT_BLOCKORIGIN`|`int`|The origin of the block numbers.|1
   `DBOPT_NMATNOS`|`int`|Number of material numbers stored in the `DBOPT_MATNOS` option.|0
-  `DBOPT_MATNOS`|int *|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material numbers used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
+  `DBOPT_MATNOS`|`int*`|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material numbers used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
   `DBOPT_MATNAMES`|`char**`|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material names used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
   `DBOPT_MATCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each material. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
-  `DBOPT_MIXLENS`|int*|Array of `nmat` ints which are the values of the mixlen arguments in each of the individual block's material objects.|
-  `DBOPT_MATCOUNTS`a|int*|Array of `nmat` counts indicating the number of materials actually in each block. |`NULL`
-  `DBOPT_MATLISTS`a|int*|Array of material numbers in each block. Length is the sum of values in `DBOPT_MATCOUNTS`. `DBOPT_MATCOUNTS` must be set for this option to work correctly.|`NULL`
+  `DBOPT_MIXLENS`|`int*`|Array of `nmat` ints which are the values of the mixlen arguments in each of the individual block's material objects.|
+  `DBOPT_MATCOUNTS`|`int*`|Array of `nmat` counts indicating the number of materials actually in each block. |`NULL`
+  `DBOPT_MATLISTS`|`int*`|Array of material numbers in each block. Length is the sum of values in `DBOPT_MATCOUNTS`. `DBOPT_MATCOUNTS` must be set for this option to work correctly.|`NULL`
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   `DBOPT_ALLOWMAT0`|`int`|If set to non-zero, indicates that a zero entry in the matlist array is actually not a valid material number but is instead being used to indicate an 'unused' zone. |0
   `DBOPT_MMESH_NAME`|`char*`|Name of the multimesh this material is associated with. Note, this option is very important as down-stream post processing tools are otherwise required to guess as to the mesh a given material is associated with. Sometimes, the tools can guess wrong.|`NULL`
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   The options below have been deprecated. Use MRG trees instead.|||
   `DBOPT_GROUPORIGIN`|`int`|The origin of the group numbers.|1
@@ -606,7 +606,7 @@ The functions described in this section of the manual include...
   `DBOPT_BLOCKORIGIN`|`int`|The origin of the block numbers.|1
   `DBOPT_MATNAME`|`char*`|Character string defining the `name` of the multi-block material with which this object is associated.|`NULL`
   `DBOPT_NMAT`|`int`|The number of materials in the associated material object.|0
-  `DBOPT_NMATSPEC`|int *|Array of length `DBOPT_NMAT` containing the number of material species associated with each material. `DBOPT_NMAT` must be set for this to work correctly.|`NULL`
+  `DBOPT_NMATSPEC`|`int*`|Array of length `DBOPT_NMAT` containing the number of material species associated with each material. `DBOPT_NMAT` must be set for this to work correctly.|`NULL`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
@@ -615,7 +615,7 @@ The functions described in this section of the manual include...
   `DBOPT_SPECCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. `DBOPT_NMATSPEC` must be set for this to work correctly. The length of this array is the sum of the values in the argument to the `DBOPT_NMATSPEC` option.|`NULL`
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   The options below have been deprecated. Use MRG trees instead.|||
   `DBOPT_GROUPORIGIN`|`int`|The origin of the group numbers.|1
