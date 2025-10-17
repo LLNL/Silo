@@ -10,7 +10,7 @@ Source0:        https://github.com/LLNL/Silo/archive/%{version}/%{name}-%{versio
 BuildRequires:  gcc-c++
 BuildRequires:  cmake >= 3.12
 BuildRequires:  hdf5-devel 
-BuildRequires:  perl 
+BuildRequires:  qt6-qtbase-devel
 
 %global silo_desc \
 Silo is a C/Fortran API for reading and writing a wide variety of \
