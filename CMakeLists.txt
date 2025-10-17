@@ -61,6 +61,15 @@ file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/SILO_VERSION SILO_VERSION)
 # Strip suffix
 string(REGEX REPLACE "-.*" "" SILO_VERSION "${SILO_VERSION}")
 
+###
+# Set shell path separator char
+###
+if (WIN32)
+    set(_sh_path_sep ";")
+else()
+    set(_sh_path_sep ":")
+endif()
+
 ###-----------------------------------------------------------------------------
 # project command will automatically create cmake vars for major, minor,
 # patch and tweak from passed VERSION
@@ -700,7 +709,6 @@ endif()
 ###-----------------------------------------------------------------------------
 include(CTest)
 if(BUILD_TESTING)
-    add_subdirectory(tests)
     set(_debug_build_types Debug RelWithDebInfo)
     if(CMAKE_BUILD_TYPE IN_LIST _debug_build_types)
         find_program(MEMORYCHECK_COMMAND NAMES valgrind)
@@ -709,6 +717,14 @@ if(BUILD_TESTING)
                 "--leak-check=full --track-origins=yes --error-exitcode=1")
         endif()
     endif()
+
+    # Using h5stat as test case, determine directory holding HDF5 tools
+    find_program(_h5stat_exe NAMES h5stat
+        HINTS ${HDF5_ROOT} ${HDF5_DIR} ${SILO_HDF5_DIR}
+        PATH_SUFFIXES bin ../bin Tools/bin)
+    get_filename_component(_h5stat_dir "${_h5stat_exe}" DIRECTORY)
+    set(_sh_path "${_h5stat_dir}${_sh_path_sep}$ENV{PATH}")
+    add_subdirectory(tests)
 endif()
 
 ###-----------------------------------------------------------------------------

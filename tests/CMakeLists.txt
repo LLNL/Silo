@@ -79,9 +79,11 @@ if(WIN32)
     ##
     set(silo_test_output_dir ${Silo_BINARY_DIR}/all_tests/)
     file(MAKE_DIRECTORY ${silo_test_output_dir})
+    set(_path_sep ";")
 else()
     # runtime output dir is bin, so append bin to current binary dir
     set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin)
+    set(_path_sep ":")
 endif()
 
 ###-------------------------------------------------------------------------------------
@@ -554,6 +556,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
             ${silo_test_output_dir})
         add_test(NAME testhzip
             COMMAND ${CMAKE_COMMAND} -E env
+            PATH=${_sh_path}
             "${silo_test_output_dir}/testhzip")
 
     endif()
