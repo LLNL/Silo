@@ -51,7 +51,7 @@ The functions described in this section of the manual include...
   `dbfile` | Database file pointer.
   `name` | Name of the multi-block mesh object.
   `nmesh` | Number of meshes pieces (blocks) in this multi-block object.
-  `meshnames` | Array of length `nmesh` containing pointers to the names of each of the mesh blocks written with a `DBPutXxxmesh()` call. See below for description of how to populate `meshnames` when the pieces are in different files as well as `DBOPT_MB_FILE|BLOCK_NS` options to use a printf-style namescheme for large `nmesh`  in lieu of explicitly enumerating them here.
+  `meshnames` | Array of length `nmesh` containing pointers to the names of each of the mesh blocks written with a `DBPutXxxmesh()` call. See below for description of how to populate `meshnames` when the pieces are in different files as well as `DBOPT_MB_FILE_NS` and `DBOPT_MB_BLOCK_NS` options to use a printf-style namescheme for large `nmesh`  in lieu of explicitly enumerating them here.
   `meshtypes` | Array of length `nmesh` containing the type of each mesh block such as `DB_QUAD_RECT`, `DB_QUAD_CURV`, `DB_UCDMESH`, `DB_POINTMESH`, and `DB_CSGMESH`. Be sure to see description, below, for `DBOPT_MB_BLOCK_TYPE` option to use single, constant value when all pieces are the same type.
   `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
