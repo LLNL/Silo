@@ -2,7 +2,7 @@
 
 ## Overview
 
-Silo is a library which implements an application programing interface (API) designed for reading and writing a wide variety of scientific data to binary, files.
+Silo is a library which implements an application programming interface (API) designed for reading and writing a wide variety of scientific data to binary, files.
 The files Silo produces and the data within them can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
 
 Consequently, the Silo API facilitates the development of general purpose tools for processing scientific data.
@@ -13,7 +13,7 @@ In addition, Silo supports a wide variety of other useful objects and metadata t
 Although the Silo library is a serial library, key features enable it to be applied effectively in scalable, parallel applications using the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
 
 Architecturally, the library is divided into two main pieces; an upper-level application programming interface (API) and a lower-level I/O implementation called a *driver*.
-Silo supports multiple I/O drivers, the two most common of which are the HDF5 (Hierarchical Data Format 5) and [PDB](https://code.google.com/archive/p/pactnew/source/default/source?page=50) (Portable DataBase, an API and binary database file format developed at LLNL by Stewart Brown and not to be confused with Protien Database also abbreviated as PDB) drivers.
+Silo supports multiple I/O drivers, the two most common of which are the HDF5 (Hierarchical Data Format 5) and [PDB](https://code.google.com/archive/p/pactnew/source/default/source?page=50) (Portable DataBase, an API and binary database file format developed at LLNL by Stewart Brown and not to be confused with Protein Database also abbreviated as PDB) drivers.
 However, the reader should take care not to infer from this that Silo can read *any* HDF5 or PDB file.
 It cannot.
 For the most part, Silo is able to read only files that it has also written.
@@ -143,7 +143,7 @@ Material
 Material Species
 : A decomposition of a material into different concentrations of pure, atomic table elements.
   For example, *common yellow brass* is, nominally, a mixture of Copper (Cu) and Zinc (Zn) while *tool steel* is composed primarily of Iron (Fe) but mixed with some Carbon (C) and a variety of other elements.
-  In certain computational science scenarios, detailed knowledge of the concentration of the constutient atomic elements comprising each material is needed.
+  In certain computational science scenarios, detailed knowledge of the concentration of the constituent atomic elements comprising each material is needed.
 
 Block
 : A *block* defines one coherent, contiguous piece (or fragment) of a larger mesh that has been decomposed into pieces typically for parallel processing but also potentially for other purposes such as streaming analysis, etc.
@@ -226,9 +226,9 @@ Quadvar
 Ucdmesh
 : An unstructured cell data (UCD) mesh.
   This is a mesh where the elements are only ever explicitly defined via enumeration of nodal connectivities.
-  This includes the dimension, connectivity, and coordinate data, but typically also includes the mesh's coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
+  This includes the dimension, connectivity, and coordinate data, but typically also includes the mesh's coordinate system, labeling and unit information, minimum and maximum extents, and a list of face indices.
 
-  Any quad mesh can be respresented as a UCD mesh.
+  Any quad mesh can be represented as a UCD mesh.
   However, the reverse is not true.
 
   A quad mesh offers certain storage efficiencies (for the coordinate data) over UCD meshes.
@@ -250,7 +250,7 @@ Pointmesh
 
 Csgmesh
 : A constructive solid geometry (CSG) mesh.
-  This is a mesh where the elements are defined by set expressions (e.g. unions, intersections and differences) involving a handful of primitive shapes (e.g. sphers, cylinders, cones, etc.)
+  This is a mesh where the elements are defined by set expressions (e.g. unions, intersections and differences) involving a handful of primitive shapes (e.g. spheres, cylinders, cones, etc.)
 
 Csgvar
 : A variable defined on a CSG mesh (always piecewise-constant or zone centered).
@@ -285,7 +285,7 @@ Material species
   They are used when a given material (i.e. air) may be made up of other materials (i.e. oxygen, nitrogen) in differing amounts.
 
 Mesh Region Grouping (MRG) tree
-: Generalized mechanism used to define arbitray subsets of a mesh.
+: Generalized mechanism used to define arbitrary subsets of a mesh.
   MRG trees define how zones in the mesh may be grouped into parts, materials, boundary conditions, nodesets or facesets, etc.
 
 Groupel Map
@@ -319,7 +319,7 @@ Curve
 ### Other Silo Objects
 
 In addition to the objects listed in the previous section which are tailored to the job of representing computational data from scientific computing applications.
-Silo supports a number of other objects useful to scientific comput-ing applications.
+Silo supports a number of other objects useful to scientific computing applications.
 Some of the more useful ones are briefly summarized here.
 
 Compound Array
@@ -393,7 +393,7 @@ integer function dbaddregiona(tree_id, nregn, regn_names, lregn_names,
 
 #### About Fortran's `l<strname>` arguments
 
-Wherever the C interface accepts a `char*`, the fortran interface accepts two arguments; the `character*` argument followed by an integer argument indicating the string's length.
+Wherever the C interface accepts a `char*`, the Fortran interface accepts two arguments; the `character*` argument followed by an integer argument indicating the string's length.
 In the function specifications, it will always be identified with an ell (`l`) in front of the name of the `character*` argument that comes before it.
 In the example above, this rule is evident in the `maps_name` and `lmaps_name` arguments.
 
@@ -407,7 +407,7 @@ By default, N=32, but the value for N can be changed, as needed by the `dbset2ds
 
 Wherever the C interface accepts a pointer to an abstract Silo object, like the Silo database file handle (`DBfile *`) or, as in the example above, a `DBmrgtree*`, the Fortran interface accepts an equivalent *pointer id*.
 A *pointer id* really an integer index into an internally maintained table of pointers to Silo's objects.
-In the above example, this rule is evident in the `tree_id` aand `optlist_id` arguments.
+In the above example, this rule is evident in the `tree_id` and `optlist_id` arguments.
 
 #### About Fortran's `data_ids` arguments
 
@@ -415,7 +415,7 @@ Wherever the C interface accepts an array of `void*` (e.g. a `void**` argument),
 The Fortran application may use the `dbmkptr()` function to a create the pointer ids to populate this array.
 The above example does not demonstrate this rule.
 
-#### ABout Fortran's `status` arguments
+#### About Fortran's `status` arguments
 
 Wherever the C interface returns integer error information in the return value of the function, the Fortran interface accepts an extra integer argument named `status` as the last argument in the list.
 The above example demonstrates this rule.
@@ -430,7 +430,7 @@ Nevertheless, it (as well as the tools that use it like VisIt) has several featu
 However, using Silo effectively in parallel does require an application to store its data to multiple Silo files typically depending on the number of concurrent I/O channels the application has available at the time of Silo file creation.
 
 The two features that enable Silo to be used effectively in parallel are its ability to create separate namespaces (directories) within a single file and the fact that a multi-block object can span multiple Silo files.
-With these features, aparallel application can easily divide its processors into N groups and write a separate Silo file for each group.
+With these features, a parallel application can easily divide its processors into N groups and write a separate Silo file for each group.
 
 Within a group, each processor in the group writes to its own directory within the Silo file.
 One and only one processor has write access to the group's Silo file at any one time.

@@ -51,7 +51,7 @@ The functions described in this section of the manual include...
   `dbfile` | Database file pointer.
   `name` | Name of the multi-block mesh object.
   `nmesh` | Number of meshes pieces (blocks) in this multi-block object.
-  `meshnames` | Array of length `nmesh` containing pointers to the names of each of the mesh blocks written with a `DBPutXxxmesh()` call. See below for description of how to populate `meshnames` when the pieces are in different files as well as `DBOPT_MB_FILE|BLOCK_NS` options to use a printf-style namescheme for large `nmesh`  in lieu of explicitly enumerating them here.
+  `meshnames` | Array of length `nmesh` containing pointers to the names of each of the mesh blocks written with a `DBPutXxxmesh()` call. See below for description of how to populate `meshnames` when the pieces are in different files as well as `DBOPT_MB_FILE_NS` and `DBOPT_MB_BLOCK_NS` options to use a printf-style namescheme for large `nmesh`  in lieu of explicitly enumerating them here.
   `meshtypes` | Array of length `nmesh` containing the type of each mesh block such as `DB_QUAD_RECT`, `DB_QUAD_CURV`, `DB_UCDMESH`, `DB_POINTMESH`, and `DB_CSGMESH`. Be sure to see description, below, for `DBOPT_MB_BLOCK_TYPE` option to use single, constant value when all pieces are the same type.
   `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
@@ -68,12 +68,14 @@ The functions described in this section of the manual include...
 
   The mesh blocks may be stored in different sub-directories within a Silo file and, optionally, even in different Silo files altogether.
   So, the `name` of each mesh block is specified using its full Silo path `name`.
-  The full Silo pathname is the form...
+  The full Silo path name is the form...
 
+  ```
   [<silo-filename>:]<path-to-mesh>
+  ```
 
   The existence of a colon (':') anywhere in meshnames[i] indicates that the ith mesh block `name` is specified using both the Silo filename and the path in the file.
-  All characters before the colon are the Silo file pathname within the file system on which the file(s) reside.
+  All characters before the colon are the Silo file path name within the file system on which the file(s) reside.
   Use whatever slash character ('\' for Windows or '/' for Unix) is appropriate for the underlying file system in this part of the string only.
   Silo will automatically handle changes in the slash character in this part of the string if this data is ever read on a different file system.
   All characters after the colon are the path of the object within the Silo file and must use only the '/' slash character.
@@ -107,12 +109,12 @@ The functions described in this section of the manual include...
   External array references may be used in the nameschemes.
   Any such array names found in the namescheme are assumed to be the names of simple, 1D, integer arrays written with a `DBWrite()` call and existing in the same directory as the multi-block object . Finally, keep in mind that in the nameschemes, blocks are numbered starting from zero.
 
-  If you are using the namescheme options and have `EMPTY` blocks, since the `meshnames` argument is `NULL`, you can use the `DBOPT_MB_EMPTY_COUNT|LIST` options to explicitly enumerate any empty blocks instead of having to incroporate them into your nameschemes.
+  If you are using the namescheme options and have `EMPTY` blocks, since the `meshnames` argument is `NULL`, you can use the `DBOPT_MB_EMPTY_COUNT|LIST` options to explicitly enumerate any empty blocks instead of having to incorporate them into your nameschemes.
 
-  Similarly, when the mesh consists of blocks of all the same type, you may pass `NULL` for the `meshtypes` argumnt and instead use the `DBOPT_MB_BLOCK_TYPE` option to specify a single, constant block type for all blocks.
+  Similarly, when the mesh consists of blocks of all the same type, you may pass `NULL` for the `meshtypes` argument and instead use the `DBOPT_MB_BLOCK_TYPE` option to specify a single, constant block type for all blocks.
   This option can result in important savings for large numbers of blocks.
 
-  Finally, note that what is described here for the mulitmesh object in the way of `name` for the individual blocks applies to all multi-block objects (e.g. `DBPutMultixxx`).
+  Finally, note that what is described here for the multimesh object in the way of `name` for the individual blocks applies to all multi-block objects (e.g. `DBPutMultixxx`).
 
   Notes:
 
@@ -127,9 +129,9 @@ The functions described in this section of the manual include...
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
   `DBOPT_EXTENTS_SIZE`|`int`|Number of values in each extent tuple|0
-  `DBOPT_EXTENTS`a|double*|Pointer to an array of length `nmesh` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple for the mesh coordinates (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
-  `DBOPT_ZONECOUNTS`a|int*|Pointer to an array of length `nmesh` indicating the number of zones in each block.|`NULL`
-  `DBOPT_HAS_EXTERNAL_ZONES`a|int*|Pointer to an array of length `nmesh` indicating for each block whether that block has zones external to the whole multi-mesh object. A non-zero value at index i indicates block i has external zones. A value of 0 (zero) indicates it does not.|`NULL`
+  `DBOPT_EXTENTS`|`double*`|Pointer to an array of length `nmesh` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple for the mesh coordinates (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
+  `DBOPT_ZONECOUNTS`|`int*`|Pointer to an array of length `nmesh` indicating the number of zones in each block.|`NULL`
+  `DBOPT_HAS_EXTERNAL_ZONES`|`int*`|Pointer to an array of length `nmesh` indicating for each block whether that block has zones external to the whole multi-mesh object. A non-zero value at index i indicates block i has external zones. A value of 0 (zero) indicates it does not.|`NULL`
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this multimesh.|`NULL`
   `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time.|0
@@ -138,18 +140,18 @@ The functions described in this section of the manual include...
   `DBOPT_MB_BLOCK_TYPE`|`int`|Constant block type for all blocks|(not specified)
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no `meshnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no `meshnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   The options specified below have been deprecated. Use Mesh Region Group (MRG) trees instead.|||
   `DBOPT_GROUPORIGIN`|`int`|The origin of the group numbers.|1
   `DBOPT_NGROUPS`|`int`|The total number of groups in this multimesh object.|0
-  `DBOPT_ADJACENCY_NAME`a|`char*`|Name of a multi-mesh, nodal adjacency object written with a call to adj.|`NULL`
+  `DBOPT_ADJACENCY_NAME`|`char*`|Name of a multi-mesh, nodal adjacency object written with a call to adj.|`NULL`
   `DBOPT_GROUPINGS_SIZE`|`int`|Number of integer entries in the associated groupings array|0
-  `DBOPT_GROUPINGS`|int *|Integer array of length specified by `DBOPT_GROUPINGS_SIZE` containing information on how different mesh blocks are organized into, possibly hierarchical, groups. See below for detailed discussion.|`NULL`
+  `DBOPT_GROUPINGS`|`int*`|Integer array of length specified by `DBOPT_GROUPINGS_SIZE` containing information on how different mesh blocks are organized into, possibly hierarchical, groups. See below for detailed discussion.|`NULL`
   `DBOPT_GROUPINGS_NAMES`|`char**`|Optional set of names to be associated with each group in the groupings array|`NULL`
 
-  There is a class of options for DBMulti- objects that is `VERY` IMPORTANT in helping to accelerate performance in down-stream post-processing tools.
-  We call these Down-stream Performance Options.
+  There is a class of options for multiblock objects that is *very important* in helping to accelerate performance in down-stream post-processing tools.
+  We call these Downstream Performance Options.
   In order of utility, these options are `DBOPT_EXTENTS`, `DBOPT_MIXLENS` and `DBOPT_MATLISTS` and `DBOPT_ZONECOUNTS`.
   Although these options are creating redundant data in the Silo database, the data is stored in a manner that is far more convenient to down-stream applications that read Silo databases.
   Therefore, the user is strongly encouraged to make use of these options.
@@ -238,18 +240,18 @@ The functions described in this section of the manual include...
   `name` | Name of the multi-mesh adjacency object.
   `nmesh` | The number of mesh pieces in the corresponding multi-mesh object. This value must be identical in repeated calls to `DBPutMultimeshadj`.
   `mesh_types` | Integer array of length `nmesh` indicating the type of each mesh in the corresponding multi-mesh object. This array must be identical to that which is passed in the `DBPutMultimesh` call and in repeated calls to `DBPutMultimeshadj`.
-  `nneighbors` | Integer array of length `nmesh` indicating the number of `neighbors` for each mesh piece. This array must be identical in repeated calls to `DBPutMultimeshadj`.  In the argument descriptions to follow, let . That is, let  be the sum of the first k entries in the `nneighbors` array.
-  `neighbors` | Array of  integers enumerating for each mesh piece all other mesh pieces that neighbor it. Entries from index  to index  enumerate the `neighbors` of mesh piece k. This array must be identical in repeated calls to `DBPutMultimeshadj`.
-  `back` | Array of  integers enumerating for each mesh piece, the local index of that mesh piece in each of its `neighbors` lists of `neighbors`. Entries from index  to index  enumerate the local indices of mesh piece k in each of the `neighbors` of mesh piece k. This argument may be `NULL`. In any case, this array must be identical in repeated calls to `DBPutMultimeshadj`.
-  `nnodes` | Array of  integers indicating for each mesh piece, the number of nodes that it shares with each of its `neighbors`. Entries from index  to index  indicate the number of nodes that mesh piece k shares with each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
-  `nodelists` | Array of  pointers to arrays of integers. Entries from index  to index  enumerate the nodes that mesh piece k shares with each of its `neighbors`. The contents of a specific nodelist array depend on the types of meshes that are neighboring each other (See description below). nodelists[m] may be `NULL` even if nnodes[m] is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nnodes` is `NULL`.
-  `nzones` | Array of  integers indicating for each mesh piece, the number of zones that are adjacent with each of its `neighbors`. Entries from index  to index  indicate the number of zones that mesh piece k has adjacent to each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
-  `zonelists` | Array of  pointers to arrays of integers. Entries from index  to index  enumerate the zones that mesh piece k has adjacent with each of its `neighbors`. The contents of a specific zonelist array depend on the types of meshes that are neighboring each other (See description below). zonelists[m] may be `NULL` even if nzones[m] is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nzones` is `NULL`.
+  `nneighbors` | Integer array of length `nmesh` indicating the number of `neighbors` for each mesh piece. This array must be identical in repeated calls to `DBPutMultimeshadj`.  In the argument descriptions to follow, let $S_k = \sum_{i=1}^k \text{nneighbors}[i]$, which sums the first `k` elements from the `nneighbors` array.
+  `neighbors` | Array of $S_{\text{nmesh}}$ integers enumerating for each mesh piece all other mesh pieces that neighbor it. Entries from index $S_k$ to index $S_{k+1}-1$ enumerate the `neighbors` of mesh piece `k`. This array must be identical in repeated calls to `DBPutMultimeshadj`.
+  `back` | Array of $S_{\text{nmesh}}$ integers enumerating for each mesh piece, the local index of that mesh piece in each of its `neighbors` lists of `neighbors`. Entries from index $S_k$ to index $S_{k+1}-1$ enumerate the local indices of mesh piece `k` in each of the `neighbors` of mesh piece `k`. This argument may be `NULL`. In any case, this array must be identical in repeated calls to `DBPutMultimeshadj`.
+  `nnodes` | Array of $S_{\text{nmesh}}$ integers indicating for each mesh piece, the number of nodes that it shares with each of its `neighbors`. Entries from index $S_k$ to index $S_{k+1}-1$ indicate the number of nodes that mesh piece k shares with each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
+  `nodelists` | Array of $S_{\text{nmesh}}$ pointers to arrays of integers. Entries from index $S_k$ to index $S_{k+1}-1$ enumerate the nodes that mesh piece `k` shares with each of its `neighbors`. The contents of a specific nodelist array depend on the types of meshes that are neighboring each other (See description below). `nodelists[m]` may be `NULL` even if `nnodes[m]` is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nnodes` is `NULL`.
+  `nzones` | Array of $S_{\text{nmesh}}$ integers indicating for each mesh piece, the number of zones that are adjacent with each of its `neighbors`. Entries from index $S_k$ to index $S_{k+1}-1$ indicate the number of zones that mesh piece `k` has adjacent to each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
+  `zonelists` | Array of $S_{\text{nmesh}}$ pointers to arrays of integers. Entries from index $S_k$ to index $S_{k+1}-1$ enumerate the zones that mesh piece `k` has adjacent with each of its `neighbors`. The contents of a specific zonelist array depend on the types of meshes that are neighboring each other (See description below). `zonelists[m]` may be `NULL` even if `nzones[m]` is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nzones` is `NULL`.
   `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
 * **Description:**
 
-  **Note: This object suffers from scalability issues above about 10{sup}`5` blocks.**
+  **Note: This object suffers from scalability issues above about 10{sup}5 blocks.**
 
   **The functionality this object provides is now more efficiently and conveniently handled via Mesh Region Grouping (MRG) trees.**
   Users are encouraged to use MRG trees as an alternative to `DBPutMultimeshadj()`.
@@ -382,7 +384,7 @@ The functions described in this section of the manual include...
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   `DBOPT_EXTENTS_SIZE`|`int`|Number of values in each extent tuple|0
-  `DBOPT_EXTENTS`a|double*|Pointer to an array of length `nvar` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
+  `DBOPT_EXTENTS`|`double*`|Pointer to an array of length `nvar` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|`NULL`
   `DBOPT_MMESH_NAME`|`char*`|Name of the multimesh this variable is associated with. Note, this option is very important as down-stream post processing tools are otherwise required to guess as to the mesh a given variable is associated with. Sometimes, the tools can guess wrong.|`NULL`
   `DBOPT_TENSOR_RANK`|`int`|Specify the variable type; one of either `DB_VARTYPE_SCALAR`, `DB_VARTYPE_VECTOR` `DB_VARTYPE_TENSOR`, `DB_VARTYPE_SYMTENSOR`,<br>`DB_VARTYPE_ARRAY`<br>`DB_VARTYPE_LABEL`|DB_VARTYPE_SCALAR
   `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](subsets.md#dbopt-region-pnames).|`NULL`
@@ -391,7 +393,7 @@ The functions described in this section of the manual include...
   `DBOPT_MB_BLOCK_TYPE`|`int`|Constant block type for all blocks|(not specified)
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no `varnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no `varnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
   The options below have been deprecated. Use MRG trees instead.|||
@@ -495,21 +497,21 @@ The functions described in this section of the manual include...
   :---|:---|:---|:---
   `DBOPT_BLOCKORIGIN`|`int`|The origin of the block numbers.|1
   `DBOPT_NMATNOS`|`int`|Number of material numbers stored in the `DBOPT_MATNOS` option.|0
-  `DBOPT_MATNOS`|int *|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material numbers used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
+  `DBOPT_MATNOS`|`int*`|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material numbers used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
   `DBOPT_MATNAMES`|`char**`|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material names used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
   `DBOPT_MATCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each material. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. `DBOPT_NMATNOS` must be set for this to work correctly.|`NULL`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
-  `DBOPT_MIXLENS`|int*|Array of `nmat` ints which are the values of the mixlen arguments in each of the individual block's material objects.|
-  `DBOPT_MATCOUNTS`a|int*|Array of `nmat` counts indicating the number of materials actually in each block. |`NULL`
-  `DBOPT_MATLISTS`a|int*|Array of material numbers in each block. Length is the sum of values in `DBOPT_MATCOUNTS`. `DBOPT_MATCOUNTS` must be set for this option to work correctly.|`NULL`
+  `DBOPT_MIXLENS`|`int*`|Array of `nmat` ints which are the values of the mixlen arguments in each of the individual block's material objects.|
+  `DBOPT_MATCOUNTS`|`int*`|Array of `nmat` counts indicating the number of materials actually in each block. |`NULL`
+  `DBOPT_MATLISTS`|`int*`|Array of material numbers in each block. Length is the sum of values in `DBOPT_MATCOUNTS`. `DBOPT_MATCOUNTS` must be set for this option to work correctly.|`NULL`
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   `DBOPT_ALLOWMAT0`|`int`|If set to non-zero, indicates that a zero entry in the matlist array is actually not a valid material number but is instead being used to indicate an 'unused' zone. |0
   `DBOPT_MMESH_NAME`|`char*`|Name of the multimesh this material is associated with. Note, this option is very important as down-stream post processing tools are otherwise required to guess as to the mesh a given material is associated with. Sometimes, the tools can guess wrong.|`NULL`
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   The options below have been deprecated. Use MRG trees instead.|||
   `DBOPT_GROUPORIGIN`|`int`|The origin of the group numbers.|1
@@ -604,7 +606,7 @@ The functions described in this section of the manual include...
   `DBOPT_BLOCKORIGIN`|`int`|The origin of the block numbers.|1
   `DBOPT_MATNAME`|`char*`|Character string defining the `name` of the multi-block material with which this object is associated.|`NULL`
   `DBOPT_NMAT`|`int`|The number of materials in the associated material object.|0
-  `DBOPT_NMATSPEC`|int *|Array of length `DBOPT_NMAT` containing the number of material species associated with each material. `DBOPT_NMAT` must be set for this to work correctly.|`NULL`
+  `DBOPT_NMATSPEC`|`int*`|Array of length `DBOPT_NMAT` containing the number of material species associated with each material. `DBOPT_NMAT` must be set for this to work correctly.|`NULL`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
@@ -613,7 +615,7 @@ The functions described in this section of the manual include...
   `DBOPT_SPECCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. `DBOPT_NMATSPEC` must be set for this to work correctly. The length of this array is the sum of the values in the argument to the `DBOPT_NMATSPEC` option.|`NULL`
   `DBOPT_MB_FILE_NS`|`char*`|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|`NULL`
   `DBOPT_MB_BLOCK_NS`|`char*`|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|`NULL`
-  `DBOPT_MB_EMPTY_LIST`|int*|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
+  `DBOPT_MB_EMPTY_LIST`|`int*`|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|`NULL`
   `DBOPT_MB_EMPTY_COUNT`|`int`|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
   The options below have been deprecated. Use MRG trees instead.|||
   `DBOPT_GROUPORIGIN`|`int`|The origin of the group numbers.|1

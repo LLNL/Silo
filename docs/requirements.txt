@@ -74,3 +74,4 @@ urllib3==2.2.2
     # via requests
 zipp==3.19.1
     # via importlib-metadata
+sphinx-rtd-theme==2.0.0

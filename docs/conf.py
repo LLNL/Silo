@@ -47,8 +47,15 @@ myst_substitutions = {
   "EndFunc": "<hr class=\"docutils\" />"+"<br>"*40
 }
 
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+#
+try:
+    html_theme
+except:
+    html_theme = "sphinx_rtd_theme"
+
 html_static_path = ['_static']
-html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     # Toc options
     'navigation_depth': 4

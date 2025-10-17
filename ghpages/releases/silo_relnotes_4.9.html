@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>silo_relnotes_4.9.html</title>
+</head>
+<body>
+
+<h1 style="text-align: center;">Announcing the release of version 4.9 of the Silo Library</h1>
+
+<h2>Organization of information in this announcement</h2>
+<ol>
+  <li>Important information regarding this release.</li>
+  <li>Bugs fixed in this release.</li>
+  <li>Robustness features in this release.</li>
+  <li>New features in this release.</li>
+  <li>Documentation of new features.</li>
+</ol>
+
+<h3>1. Important information regarding this release.</h3>
+<ul>
+<li>Version 4.9 is <b>NOT</b> link-time compatible with any previous version. You will need to re-compile and re-link your applications.</li>
+<li>Unfortunately, there was no time to update the documentation prior
+ to this release. Please refer to section 5 of these 
+release notes for key documentation information regarding PDB Lite, 
+Namescheme and Empty Object support.</li>
+<li>The VisIt plugin in VisIt 2.6.1 to be released shortly, 
+includes enhancements for new namescheme constructor and empty objects.</li>
+<li>In some cases, passing a 'make check' requires adding 'LIBS=-lstdc++' to the make command line (e.g. 'make check LIBS=-lstdc++'.</li>
+<li>The rocket test will fail during 'make check' on OSX. I've yet to learn how to handle dlopen and shared libs there. For similar reasons, Silo's python module has yet to be tested on a OSX.</li>
+</ul>
+
+<h3>2. Bugs fixed in this release</h3>
+<ul>
+  <li>Added patch from Olivier Cessenat for DBSetCompression in Fortran API. Thanks Olivier.</li>
+  <li>Fixed minor bug with guihide info for defvars.</li>
+  <li>Fixed some leaks in DBFreeXXX methods.</li>
+  <li>Fixed order of shuffle filter used in HDF5 compression pipelines for floating point data.</li>
+  <li>Fixed a leak in HDF5 resources that would cause out of memory 
+conditions for very large number of file opens and closes (tens of 
+thousands). Thanks to Matt O'Brien for test case.</li>
+  <li>Made reltol_eps diff algorithm mutually exclusive to abs||rel diff algorithms.</li>
+  <li>Added patches from Neil Hodge to Fortran intercace for DBADDREGION and DBPUTGRPLMAP for null maps and segment_fracs. Thanks Neil.</li>
+  <li>Fixed invalid formatting of silo.inc file and fixed mkinc tool that produces it. Thanks to Olivier Cessenat.</li>
+  <li>Qt autoconf logic was updated to most current. Typically, something like <pre>--with-Qt-dir=<path-to-qt-top-level-dir> --with-Qt-lib=QtGui</pre> is required.</li>
+  <li>Extensive test for variety of arbitrary polyhedra methods were added.</li>
+  <li>A performance bug in DBSetDir()/DBGetDir() methods was fixed. 
+Thanks to Brian McCandless for reporting the bug and providing the fix.</li>
+  <li>Return of static local variable from DBGetName was replaced with a circular buffer.</li>
+  <li>DBtoc data member names were changed to all obey same 
+pluralization rules. If you have code that examines the members of the 
+DBtoc structure, be sure to review silo.h file for corrected names.</li>
+  <li>A fortran test for csg meshes was added, csgmesh_f.f. Thanks to Robert Salko.</li>
+  <li>Added the ability to specify driver via CL arguments to Fortran tests.</li>
+  <li>Some bourne shell based unit tests were adjusted to work on OSX.</li>
+</ul>
+
+<h3>3. Robustness features in this release</h3>
+<ul>
+  <li>The Klocwork static analyzer was applied to address a number of 
+possible memory faults and leaks. Thanks to Bill Oliver for helping with
+ this effort.</li>
+  <li>Used gcc mudflap stack memory analyzer to address possible memory faults and leaks.</li>
+  <li>The <a href="http://safecode.cs.illinois.edu/">SAFECode</a> stack memory analyzer was used to address several memory faults and leaks.</li>
+  <li>Testing and tools functionality was substantially improved on 
+Windows. Thanks to Kathleen Biagas for doing this. This included getting
+ browser tool to build/run on Windows, get 64 bit Windows builds 
+working, getting Fortran interface on Windows working and updating to Visual Studio 2010.</li>
+  <li>The test multi_test.c was enhanced substantially to test readback of data it writes and compare it.</li>
+  <li>The testxvers test was fixed to run properly and filter irrelevant diffs.</li>
+  <li>A test was added to specifically test the PDB Lite interface and lite_pdb.h and lite_score.h header files.</li>
+</ul>
+
+<h3>4. New features in this release</h3>
+<ul>
+  <li>The python module was enhanced substantially to read Silo object 
+structures as Python dictionaries as well as write Python dictionaries 
+as Silo objects. See examples in the tests directory.</li>
+  <li>PDB Lite was enhanced to address time and space performance issues
+ for files with large numbers (hundreds of thousands) of indirections.</li>
+  <li>Support for Visual Studio 2010 was added.</li>
+  <li>New extensive example in the use of mrgtrees and subsetting (rocket.C) was added.</li>
+  <li>DBMakeNamescheme was enhanced to automatically find and open any external arrays referenced in the namescheme.</li>
+  <li>Empty objects are now supported. An empty object is a silo object 
+but with no data; a mesh with no nodes or zones or a material object
+ with no materials. This is part of enabling Silo to scale to exascale.</li>
+</ul>
+
+<h3>5. Documentation of new features</h3>
+
+<h4>PDB Lite</h4>
+<ul>
+  <li>PDB Lite (which has always sort of been a hidden library within 
+Silo) header files (lite_pdb.h and lite_score.h) can now be optionally 
+generated and installed. Use the --enable-install-lite-headers 
+configuration option to enable this feature.</li>
+  <li>The PDB Lite header files, lite_pdb.h and lite_score.h can be used
+ in place of pdb.h and score.h for existing PDB code provided the code 
+uses only those features available in the PDB Lite version of the 
+library.</li>
+  <li>Options were added to lite_PD_open/lite_PD_create to control the 
+size of the hash table used to manage PDB Lite's symbol table. An 's', 
+'m', 'l', 'x' appearing in the mode string to 
+lite_PD_open/lite_PD_create will use a small (521), medium (5231), large
+ (52121) or extra-large (521021) symbol table. An 'i' appearing in the 
+mode string will force PDB Lite to ignore indirection objects when 
+loading the symbol table. For files containing large numbers (hundreds 
+of thousands) of indirection objects, such as might be seen for certain
+equation of state databases, a good setting for the mode string of "rxi" (r-read, 
+x-extra large hash table, i-ignore putting indirection objects in the 
+symbol table.).</li>
+<li>For examples in the Silo release tarball, see tests/testpdb.c and tests/pdbtst.c</li>
+<li>On Windows, the build is set up for using PDB Lite only.  Perl is now required to generate the PDB Lite header files.  Please ensure perl is in your path, or modify Visual Studio settings to add its path to the 'executable directories'.</li>
+</ul>
+
+<h4>Namescheme Construction</h4>
+<ul>
+  <li>DBMakeNamescheme() was enhanced to also automatically find and 
+bind externally referenced arrays to the constructed and returned 
+DBnamescheme object. The proper syntax to call DBMakeNamescheme() is 
+exemplified in the code snipit below....
+<pre>DBfile *dbfile;
+DBmultimesh *mm = DBGetMultimesh(dbfile, "foo");
+DBnamesheme *ns = DBMakeNamescheme(mm-&gt;file_ns, 0, dbfile);
+for (i = 0; i &lt; mm-&gt;nblock; i++)
+    DBGetName(ns, i);
+</pre>
+Note the additional "0, dbfile" arguments to DBMakeNamescheme(). The 
+externally referenced arrays named in the namescheme string (first 
+argument to DBMakeNamescheme), must be in the current working directory 
+(cwd) of the dbfile that is passed as the 3rd argument. The "0, dbfile" 
+arguments are optional and if you are sure you are dealing with a 
+namescheme that does not utilize externally referenced arrays, you can 
+choose not to pass them.</li>
+<li>For examples in the Silo release tarball, see tests/namescheme.c.</li>
+</ul>
+
+<h4>Empty Objects in place of "EMPTY" block name keyword</h4>
+<ul>
+  <li>The "EMPTY" block name keyword convention used to identify blocks 
+in multi-block objects that are not present in the database cannot be 
+made to work scalably.</li>
+  <li>Silo was enhanced to allow writers to write <em>empty</em> objects
+ to the file. An empty object is something like a mesh without any 
+coordinate arrays and zero nodes and zones or a variable without any 
+data arrays. Ordinarily, Silo would indicate that writing such an object
+ is an error. A new method was added to Silo to turn off error checking 
+that would ordinarily prevent empty objects from being written; 
+DBSet/GetAllowEmptyObjects(). By default, Silo does not permit empty 
+objects and a writer wishing to produce them must call 
+DBSetAllowEmptyObjects(1) to allow them. Empty objects will be permitted
+ to be written to files until the caller calls 
+DBSetAllowEmptyObjects(0).</li>
+<pre>DBSetAllowEmptyObjects(1);
+DBPutQuadmesh(dbfile, "empty_quadmesh", 0,0,0,0,DB_DOUBLE,DB_COLLINEAR,0);
+DBPutQuadvar1(dbfile, "qv1", "empty_quadmesh", 0,0,0,0,0,DB_DOUBLE,DB_ZONECENT,0);
+</pre>
+<li>Note that although the caller may pass zero for most arguments, the 
+caller must sill pass valid library values (but nonetheless irrelevant) for 
+certain other arguments like datatype, centering, coordtype, etc.</li>
+<li>For examples in the Silo release tarball, see tests/empty.c.</li>
+</ul>
+
+<h4>DBOPT_MB_REPR_BLOCK_IDX option for namescheme'd multi-block objects with empty blocks</h4>
+<ul>
+<li>For namescheme'd multi-block objects, there is no explicit indication of which blocks in the object are <em>empty</em> and which are not.</li>
+<li>Part of VisIt's process to open a Silo file requires reading metadata from a non-empty block of a multi-block object.</li>
+<li>In truth, the real problem in this process is the Silo library in 
+that key metadata is sort of distributed between multi-block and 
+individual block objects.</li>
+<li>However, correcting this issue involves a larger enhancement to Silo than practical for this release.</li>
+<li>The solution for multi-block objects with nameschemes is that the 
+writer must indicate the index of some non-empty block (any non-empty 
+block will do) in the multi-block object that can serve as <em>representative</em>.
+ That is handled via the DBOPT_MB_REPR_BLOCK_IDX option on the 
+multi-block object. See examples in Silo release tarball; 
+test/multi_file.c</li>
+</ul>
+</body></html>
