@@ -78,6 +78,7 @@ if(WIN32)
 else()
   set(mod_dest ${CMAKE_INSTALL_LIBDIR})
 endif()
+set(SILO_INSTALL_PYTHONDIR ${mod_dest} CACHE PATH "Install destination of Silo python module (Silo.so)")
 
 set_target_properties(SiloPy PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/${mod_dest}
@@ -89,7 +90,7 @@ target_include_directories(SiloPy PRIVATE
      ${Silo_SOURCE_DIR}/src/silo
      ${silo_build_include_dir})
 
-install(TARGETS SiloPy DESTINATION ${mod_dest} EXPORT ${silo_targets_name}
+install(TARGETS SiloPy DESTINATION ${SILO_INSTALL_PYTHONDIR} EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
