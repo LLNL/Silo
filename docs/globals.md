@@ -8,7 +8,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 Some behaviors have both *file* level and *global* variants.
 For example, see [`DBSetAllowOverwrites()`](#dbsetallowoverwrites) and [`DBSetAllowOverwritesFile()`](#dbsetallowoverwritesfile).
 
-When a file is *opened or *created*, it *inherits* whatever the library's *global* settings are.
+When a file is *opened* or *created*, it *inherits* whatever the library's *global* settings are.
 However, a file's settings can be adjusted independently from the library's global settings by calling the equivalent `DBSetXxxFile()` methods.
 
 {{ EndFunc }}
@@ -1339,12 +1339,12 @@ Longer than normal component strings can result in creating objects in Silo file
   For example, a multi-block object with 50,000 blocks where each block has a file path consisting of 100 characters and a Silo object path of another 100 characters, the list of block names is 10 million characters or 10 mega bytes!
   Typically, however, all the block names are very similar and easily computable using an sprintf-style name generation scheme.
 
-  [Nameschemes](subsets.md#dbmakenamescheme) where introduced as an optimization for this.
+  [Nameschemes](subsets.md#dbmakenamescheme) were introduced as an optimization for this.
   In a `DBmultimesh` object, for example, that uses nameschemes, the `meshnames` member is `NULL`.
   A Silo data consumer that is not prepared for this can wind up `SEGV`'ing when attempting to reference block names.
 
   The `DBSetEvalNameschemes()` methods allow a consumer to force the Silo library to *evaluate* nameschemes whenever multi-block objects involving them are read.
-  This means that when multi-block objects are read and they involve nameschemes, the Silo library will produce what would have been the contents of the list of block names member of a the object and the `file_ns` and `block_ns` members will be `NULL`'d out. 
+  This means that when multi-block objects are read and they involve nameschemes, the Silo library will produce what would have been the contents of the list of block names member of the object and the `file_ns` and `block_ns` members will be `NULL`'d out. 
   This allows consumers to make a one-line change to their code and continue operating as they have before without having to deal with nameschemes.
   Alternatively, consumers can use [individual multi-block object conversion functions](utility.md#dbevalmultimeshnameschemes) directly themselves.
 
@@ -1353,7 +1353,7 @@ Longer than normal component strings can result in creating objects in Silo file
   So, this feature should be used with care.
   :::
 
-  There is no question that introducing [nameschemes](subsets.md#dbmakenamescheme) to Silo created a backward compatibility issue which, in retrospect, could have been easily resolved by introducing this feature along with them and having it on by default.
+  There is no question that introducing [nameschemes](subsets.md#dbmakenamescheme) to Silo created a backward compatibility issue which, in retrospect, could have been easily resolved by introducing this feature and having it on by default.
 
 {{ EndFunc }}
 
