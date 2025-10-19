@@ -203,7 +203,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
   "materials"|Top-level region below which material decomposition information is defined. There can be multiple material decompositions, if so desired. Each such decomposition would be rooted at a region named "material_<name>" underneath the "materials" region node.
   "groupings"|Top-level region below which multi-block grouping information is defined. There can be multiple groupings, if so desired. Each such grouping would be rooted at a region named "grouping_<name>" underneath the "groupings" region node.
   "amr-levels"|Top-level region below which Adaptive Mesh Refinement level groupings are defined.
-  "amr-refinements"|Top-level region below which Adaptive Mesh Refinment refinement information is defined. This where the information indicating which blocks are refinements of other blocks is defined.
+  "amr-refinements"|Top-level region below which Adaptive Mesh Refinement refinement information is defined. This where the information indicating which blocks are refinements of other blocks is defined.
   "neighbors"|Top-level region below which multi-block adjacency information is defined.
 
   When a region is being defined in an MRG tree to be associated with a multi-block mesh, often the groupel type of the maps associated with the region are of type `DB_BLOCKCENT`.
@@ -475,8 +475,10 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
   The first character of `ns_str` is treated as the *delimiter character definition*.
   Wherever this delimiter character appears (except as the first character), this will indicate the end of one substring within `ns_str` and the beginning of a next substring.
-  The delimiter character cannot be any of the characters used in the expression language (see below) for defining expressions to generate names of a namescheme.
-  The delimiter character divides `ns_str` into one or more substrings.
+  The delimiter character cannot be any of the characters used in the expression language (see below).
+  The delimiter character divides `ns_str` into substrings.
+  For constant valued nameschemes, there is no need to divide the namescheme string into substrings.
+  So, the delimiter character is not necessary and if found to be present will be ignored.
 
   The first substring of `ns_strs` (that is the characters from position 1 to the first delimiter character after its definition at index 0) will contain the complete printf-style format string the namescheme will generate.
   The remaining substrings will contain simple expressions, one for each conversion specifier found in the format substring, which when evaluated will be used as the corresponding argument in an sprintf call to generate the actual name, when and if needed, on demand.
@@ -497,6 +499,11 @@ For this reason, where a specific application of MRG trees is desired (to repres
   Except for singly quoted strings which evaluate to a literal string suitable for output via a %s type conversion specifier, and $-type external array references which evaluate to an external string, all other expressions are treated as evaluating to integer values suitable for any of the integer conversion specifiers (%[ouxXdi]) which may be used in the format substring.
 
   Here are some examples...
+
+  `/mesh1`
+  : There is no delimiter character because the namescheme is constant valued, `/mesh1`.
+    That is, there are no `%` characters appearing in the the first (only) substring of `ns_str`.
+    This could be the *block* path part (see `DBOPT_MB_BLOCK_NS` option of [`DBPutMultimesh()`](./parallel.md#dbputmultimesh)) of a namescheme where each block is at the same path but in a *different* Silo file.
 
   `"|slide_%s|(n%2)?'leader':'follower':"`
   : The delimiter character is `|`.
@@ -590,7 +597,7 @@ For this reason, where a specific application of MRG trees is desired (to repres
 * **C Signature:**
 
   ```
-  long long DBGetIndex(char const *dbns_name_str, int field, int base)
+  long long DBGetIndex(char const *dbns_name_str, int field, int min_width, int base)
   ```
 
 * **Fortran Signature:**
@@ -605,7 +612,8 @@ For this reason, where a specific application of MRG trees is desired (to repres
   :---|:---
   `dbns_name_str` | An arbitrary string but most commonly with one or more substring *fields* consisting entirely of digits (in an arbitrary base numbering system) representing different *fields* generated from various conversion specifiers in a namescheme.
   `field` | Of the various substrings of digits, numbered starting at zero from left to right in `dbns_name_str`, this argument selects which of the digit substrings is to be processed
-  `base` | The numeric base to use to interpret the digit substring field passed to [`strtoll()`](https://man7.org/linux/man-pages/man3/strtoll.3p.html). Passing 0 (to let `strtoll` automatically determine base) is ok but potentially risky.
+  `min_width` | Minimum field width. Any indices found but smaller than this field width will be ignored.
+  `base` | The numeric base to use to interpret the digit substring field passed to [`strtoll()`](https://man7.org/linux/man-pages/man3/strtoll.3p.html). The C language GNU extension using `0b` leading a binary number is supported. Passing 0 (to let `strtoll` automatically determine base) is supported but potentially risky.
   
 * **Returned value:**
 
@@ -615,16 +623,17 @@ For this reason, where a specific application of MRG trees is desired (to repres
 
 Nameschemes often generate names of the form `foo_0050.0210.silo`.
 Sometimes, it is useful to obtain the decimal values of the numbered fields in such a string.
-Calling `DBGetIndex("foo_0050.0210.silo", 0, 10)` will retrieve the first digit field, "0050", and convert it to a decimal number using a number base of 10.
-Calling `DBGetIndex("foo_0050.0210.silo", 1, 10)` will retrieve the second digit field, "0210", and convert it to a decimal number using a number base of 10.
+Calling `DBGetIndex("foo_0090.0210.silo", 0, 4, 10)` will retrieve the first digit field, "0090", and convert it to a decimal number of `90` using a number base of 10.
+Calling `DBGetIndex("foo_0050.0210.silo", 1, 4, 10)` will retrieve the second digit field, "0210", and convert it to a decimal number of `210` using a number base of 10.
 
-Passing a base of 0 is allowed but may also result in unintended outcomes.
-In the example string, `foo_0050.0210.silo`, calling `DBGetIndex("foo_0050.0210.silo", 0, 0)` will return 40, not 50.
-This is because a leading 0 is interpreted as an octal number.
+Passing a base of 0 is supported.
+This informs `DBGetIndex()`, like [`strtoll()`](https://man7.org/linux/man-pages/man3/strtoll.3p.html), to *infer* the base from the way the number is formatted in the string.
+However, this may also result in unintended outcomes.
+In the example string, `foo_0090.0210.silo`, calling `DBGetIndex("foo_0090.0210.silo", 0, 4, 0)` will fail because `0090` will be treated as a base-8 (octal) number and `9` is not a valid octal digit.
+Calling `DBGetIndex("foo_0090.0210.silo", 1, 4, 0)` will return `136` which is `210` (base 8).
 
 In the string `block_030x021.silo` (which could have the interpretation of a block at 2D index [30,21] in a 2D arrangement of blocks), the `0x021` will be interpreted as a digit field in hexadecimal format which may not have been the intention.
 The solution is to ensure the string has characters separating fields that are not also interpreted as part of an integer constant in the C programming language.
-
 
 {{ EndFunc }}
 
@@ -667,7 +676,7 @@ The solution is to ensure the string has characters separating fields that are n
   `ncomps` | An integer specifying the number of variable components.
   `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass `NULL`(0) if no component names are to be specified.
   `nregns` | The number of regions this variable is being written for.
-  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==`NULL`, it is assumed that reg_pnames[i]=`NULL` for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
+  `reg_pnames` | Array of `nregns` pointers to strings representing the path names of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==`NULL`, it is assumed that reg_pnames[i]=`NULL` for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the MRG tree that is the parent of all the regions for which attributes are being written.
   `data` | Array of `ncomps` pointers to variable `data`. The pointer, data[i] points to an array of `nregns` values of type datatype.
   `opts` | Additional options.
 
@@ -698,7 +707,7 @@ The solution is to ensure the string has characters separating fields that are n
 
   Variable Naming Convention|Meaning
   :---|:---
-  "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinment ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
+  "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinement ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
   "ijk-orientations"|An integer variable of 3 components defined on the individual blocks of a multi-block mesh defining the orientations of the individual blocks in a large, ijk indexing space (Ares convention)
   "<var>-extents"|A double precision variable defining the block-by-block extents of a multi-block variable. If <var>=="coords", then it defines the spatial extents of the mesh itself. Note, this convention obsoletes the `DBOPT_XXX_EXTENTS` options on DBPutMultivar/DBPutMultimesh calls.
 

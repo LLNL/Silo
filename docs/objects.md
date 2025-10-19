@@ -264,7 +264,7 @@ Finally, Silo also supports the specification of expressions representing derive
   Otherwise, it is more convenient to use `DBPutPointvar1`.
 
   For tensor quantities, the question of ordering of tensor components arises.
-  For symmetric tensor's Silo uses the Voigt Notation ordering.
+  For symmetric tensors Silo uses the Voigt Notation ordering.
   In 2D, this is `T11`, `T22`, `T12`.
   In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
@@ -283,7 +283,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
   `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the path names of regions in the MRG tree for the associated mesh where the variable is defined. If there is no MRG tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
   `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
@@ -409,7 +409,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `dims` | Array of length `ndims` describing the dimensionality of the mesh. Each value in the `dims` array indicates the number of nodes contained in the mesh along that dimension. In order to specify a mesh with topological dimension lower than the geometric dimension, `ndims` should be the geometric dimension and the extra entries in the `dims` array provided here should be set to 1.
   `ndims` | Number of geometric dimensions. Typically geometric and topological dimensions agree. Read the description for dealing with situations where this is not the case.
   `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
-  `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Collinear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
+  `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Co-linear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
 
 * **Returned value:**
@@ -445,8 +445,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
-  `DBOPT_HI_OFFSET`|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
-  `DBOPT_LO_OFFSET`|int *|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
+  `DBOPT_HI_OFFSET`|`int*`|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
+  `DBOPT_LO_OFFSET`|`int*`|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
   `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
   `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
   `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
@@ -460,7 +460,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
   `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_BASEINDEX`|int[3]|Indicate the indices of the mesh within its group.|0,0,0
+  `DBOPT_BASEINDEX`|`int[3]`|Indicate the indices of the mesh within its group.|0,0,0
   `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
   `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each node`NULL`
   `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each zone`NULL`
@@ -594,7 +594,7 @@ Finally, Silo also supports the specification of expressions representing derive
   This function is useful for writing vector and tensor fields, whereas the companion function, DBPutQuadvar1, is appropriate for writing scalar fields.
 
   For tensor quantities, the question of ordering of tensor components arises.
-  For symmetric tensor's Silo uses the Voigt Notation ordering.
+  For symmetric tensors Silo uses the Voigt Notation ordering.
   In 2D, this is `T11`, `T22`, `T12`.
   In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
@@ -622,7 +622,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the path names of regions in the MRG tree for the associated mesh where the variable is defined. If there is no MRG tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 {{ EndFunc }}
@@ -754,8 +754,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `coords` | Array of length `ndims` containing pointers to the coordinate arrays.
   `nnodes` | Number of nodes in this UCD mesh.
   `nzones` | Number of zones in this UCD mesh.
-  `zonel_name` | Name of the zonelist structure associated with this variable [written with DBPutZonelist]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be `NULL`. If a polyhedral-zonelist is to be associated with the mesh, do not pass the `name` of the polyhedral-zonelist here. Instead, use the `DBOPT_PHZONELIST` option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for `DBPutPHZonelist`.
-  `facel_name` | Name of the facelist structure associated with this variable [written with DBPutFacelist]. If no association is to be made, this value should be `NULL`.
+  `zonel_name` | Name of the zonelist structure associated with this variable [written with `DBPutZonelist`]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be `NULL`. If a polyhedral-zonelist is to be associated with the mesh, do not pass the `name` of the polyhedral-zonelist here. Instead, use the `DBOPT_PHZONELIST` option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for `DBPutPHZonelist`.
+  `facel_name` | Name of an *external* facelist structure associated with this mesh [written with `DBPutFacelist`]. If no association is to be made, this value should be `NULL`.
   `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
@@ -768,80 +768,13 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBPutUcdmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a UCD mesh object in the Silo file.
 
   A Silo UCD mesh object contains all necessary information for describing a mesh.
-  This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear.) In addition, other information is useful and is therefore included (time and cycle of mesh, plus coordinate system type).
+  This includes the coordinate arrays, the spatial dimension of the mesh (1,2,3,...) and the name(s) of the zonelist object(s) to be associated with the mesh.
+  In addition, other information is useful and is therefore included (time and cycle of mesh, plus coordinate system type).
+  See [`DBPutZonelist2`](#dbputzonelist2) for a description of the standard element types.
 
-  A Silo UCD mesh may be composed of either zoo-type elements or arbitrary, polyhedral elements or a mixture of both zoo-type and arbitrary, polyhedral elements.
-  The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist`.
-  When there are only zoo-type elements in the mesh, this is the only zonelist information associated with the mesh.
-  However, the caller can optionally specify the `name` of an arbitrary, polyhedral zonelist written with a call to `DBPutPHZonelist` using the `DBOPT_PHZONELIST` option.
-  If the mesh consists solely of arbitrary, polyhedral elements, the only zonelist associated with the mesh will be the one written with the call to `DBPutPHZonelist`.
-
-  When a mesh is composed of both zoo-type elements and polyhedral elements, it is assumed that all the zoo-type elements come first in the mesh followed by all the polyhedral elements.
-  This has implications for any `DBPutUcdvar` calls made on such a mesh.
-  For zone-centered data, the variable array should be organized so that values corresponding to zoo-type zones come first followed by values corresponding to polyhedral zones.
-  Also, since both the zoo-type zonelist and the polyhedral zonelist support hi- and lo- offsets for ghost zones, the ghost-zones of a mesh may consist of zoo-type or polyhedral zones or a mixture of both.
-
-  Notes:
-
-  See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or "DBCalcExternalFacelist2" on page 2-230 for an automated way of computing the facelist needed for this call.
-
-  ```{figure} ./images/ucdmesh.gif
-  :name: ucdmesh-example
-  :align: "center"
-  :alt: "Example usage of UCD zonelist and external facelist variables."
-
-  Example usage of UCD zonelist and external facelist variables.
-  ```
-
-  The order in which nodes are defined in the zonelist is important, especially for 3D cells.
-  Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
-  The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
-
-  ```{figure} ./images/ucdzoo.gif
-  :name: ucdzoo
-  :align: "center"
-  :alt: "Node, edge and face ordering for zoo-type UCD zone shapes."
-
-  Node, edge and face ordering for zoo-type UCD zone shapes.
-  ```
-
-  Given the node ordering in the left-most column, there is indeed an algorithm for determining the other orderings for each cell type.
-
-  For edges, each edge is identified by a pair of integer indices; the first being the "tail" of an arrow oriented along the edge and the second being the "head" with the smaller node index always placed first (at the tail).
-  Next, the ordering of edges is akin to a lexicographic ordering of these pairs of integers.
-  This means that we start with the lowest node number of a cell shape, zero, and find all edges with node zero as one of the points on the edge.
-  Each such edge will have zero as its tail.
-  Since they all start with node 0 as the tail, we order these edges from smallest to largest "head" node.
-  Then we go to the next lowest node number on the cell that has edges that have yet to have been placed in the ordering.
-  We find all the edges from that node (that have not already been placed in the ordering) from smallest to largest "head" node.
-  We continue this process until all the edges on the cell have been placed in the ordering.
-
-  For faces, a similar algorithm is used.
-  Starting with the lowest numbered node on a face, we enumerate the nodes over a face using the right hand rule for the normal to the face pointing away from the innards of the cell.
-  When one places the thumb of the right hand in the direction of this normal, the direction of the fingers curling around it identify the direction we go to identify the nodes of the face.
-  Just as for edges, we start identifying faces for the lowest numbered node of the cell (0).
-  We find all faces that share this node.
-  Of these, the face that enumerates the next lowest node number as we traverse the nodes using the right hand rule, is placed first in the ordering.
-  Then, the face that has the next lowest node number and so on.
-
-  An example using arbitrary polyhedrons for some zones is illustrated, below.
-  The nodes of a `DB_ZONETYPE_POLYHEDRON` are specified in the following fashion: First specify the number of faces in the polyhedron.
-  Then, for each face, specify the number of nodes in the face followed by the nodes that make up the face.
-  The nodes should be ordered such that they are numbered in a counter-clockwise fashion when viewed from the outside (e.g. right-hand rules yields an outward facing normal).
-  For a fully arbitrarily connected mesh, see `DBPutPHZonelist()`.
-  In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
-  So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
-
-  ```{figure} ./images/ucdmesh_warbzone.gif
-  :name: ucdmesh-warbzone
-  align: "center"
-  alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
-
-  Example usage of UCD zonelist combining a hex and 2 polyhedra.
-  ```
-
-  This example is intended to illustrate the representation of arbitrary polyhedra.
-  So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a 'normal' zonelist, they are expressed using arbitrary connectivity here.
+  While the name of the zonelist object, `zonel_name`, is **NOT** optional, the name of the facelist object, `facel_name`, is.
+  See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or `DBCalcExternalFacelist2` for an automated way of computing a facelist object to be named in this call.
+  The reason Silo provides an optional facelist object name argument is to facilitate downstream post processors in producing a *initial* view of the object.
 
   The following table describes the options accepted by this function:
 
@@ -947,7 +880,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Returned value:**
 
-  Rreturns a pointer to a [`DBucdmesh`](./header.md#dbucdmesh) structure on success and `NULL` on failure.
+  Returns a pointer to a [`DBucdmesh`](./header.md#dbucdmesh) structure on success and `NULL` on failure.
 
 * **Description:**
 
@@ -1001,9 +934,9 @@ Finally, Silo also supports the specification of expressions representing derive
   Use `DBPutZonelist2()` instead.
 
   The `DBPutZonelist` function writes a zonelist object into a Silo file.
-  The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
+  The `name` assigned to this object can in turn be used as the `zonel_name` parameter to the `DBPutUcdmesh` function.
 
-  See [`DBPutUcdmesh`](#dbputucdmesh) for a full description of the zonelist data structures.
+  See [`DBPutZonelist2`](#dbputzonelist2) for a full description of the standard element types and the zonelist object.
 
 {{ EndFunc }}
 
@@ -1055,25 +988,32 @@ Finally, Silo also supports the specification of expressions representing derive
 * **Description:**
 
   The `DBPutZonelist2` function writes a zonelist object into a Silo file.
-  The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
+  The `name` assigned to this object can in turn be used as the `zonel_name` parameter to the `DBPutUcdmesh` function.
 
   The allowed shape types are described in the following table:
 
-  **Optlist options:**
-
   Type|Description
   :---|:---
-  `DB_ZONETYPE_BEAM`|A line segment
-  `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon
-  `DB_ZONETYPE_TRIANGLE`|A triangle
-  `DB_ZONETYPE_QUAD`|A quadrilateral
-  `DB_ZONETYPE_POLYHEDRON`|A polyhedron with nodes enumerated to form faces and faces are enumerated to form a polyhedron
-  `DB_ZONETYPE_TET`|A tetrahedron
-  `DB_ZONETYPE_PYRAMID`|A pyramid
-  `DB_ZONETYPE_PRISM`|A prism
-  `DB_ZONETYPE_HEX`|A hexahedron
+  `DB_ZONETYPE_POINT`|A point (0 topological dimensions)
+  `DB_ZONETYPE_BEAM`|A line (1 topological dimensions)
+  `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon (2 topological dimensions)
+  `DB_ZONETYPE_TRIANGLE`|A triangle (2 topological dimensions)
+  `DB_ZONETYPE_QUAD`|A quadrilateral (2 topological dimensions)
+  `DB_ZONETYPE_POLYHEDRON`|A polyhedron where nodes are enumerated to form faces and faces are enumerated to form a polyhedron (3 topological dimensions)
+  `DB_ZONETYPE_TET`|A tetrahedron (3 topological dimensions)
+  `DB_ZONETYPE_PYRAMID`|A pyramid (3 topological dimensions)
+  `DB_ZONETYPE_PRISM`|A prism (3 topological dimensions)
+  `DB_ZONETYPE_HEX`|A hexahedron (3 topological dimensions)
+  `DB_ZONETYPE_CHULL`|A bunch of points whose convex hull forms the element (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_BEAM`|A quadratic line (1 topological dimension)
+  `DB_ZONETYPE_QUAD_TRIANGLE`|A quadratic triangle (2 topological dimensions)
+  `DB_ZONETYPE_QUAD_QUAD`|A quadratic quadrilateral (2 topological dimensions)
+  `DB_ZONETYPE_QUAD_TET`|A quadratic tetrahedron (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_PYRAMID`|A quadratic pyramid (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_PRISM`|A quadratic prism (3 topological dimensions)
+  `DB_ZONETYPE_QUAD_HEX`|A quadratic hex (3 topological dimensions)
 
-  Notes:
+  **Optlist options:**
 
   The following table describes the options accepted by this function:
 
@@ -1084,7 +1024,137 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
   `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
-  For a description of how the nodes for the allowed shapes are enumerated, see [`DBPutUcdmesh`](#dbputucdmesh).
+  Notes:
+
+  For most `DB_ZONETYPE_XXX` constants, the *shapesize* can be inferred from the type.
+  For example, `DB_ZONETYPE_TRIANGLE` has a shapsize of 3 and `DB_ZONETYPE_QUAD_TET` has a shapesize of 10.
+  For some `DB_ZONETYPE_XXX` constants, the *shapesize* is arbitrary.
+  This includes `DB_ZONETYPE_POLYGON`, `DB_ZONETYPE_POLYHEDRON` and `DB_ZONETYPE_CHULL`.
+  When defining a zonelist object using these *arbitrary* sized types, the caller has two choices.
+  One is to collect together in contiguous segments, all entries of a given size.
+  In this approach, the `shapecnt[]` entry for the segment will hold the *number* of zones of the given size and the `shapesize[]` entry will hold the constant size of all of the associated zones in the zonelist segment.
+  Alternatively, the caller can choose NOT to gather similarly sized entries together.
+  In this case, `shapecnt[]` entries for every such zone will be 1 and the `shapesize[]` entries will hold their respective sizes.
+
+  **Standard Silo element types:**
+
+  The order in which nodes are defined in the zonelist is important, especially for 3D cells.
+  Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
+  The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
+
+  ```{figure} ./images/hex_node_orders.png
+  :name: Silo standard hex
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard hex."
+
+  Node, edge and face ordering for Silo standard hex.
+  ```
+
+  ```{figure} ./images/wedge_node_orders.png
+  :name: Silo standard wedge/prism
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard wedge/prism."
+
+  Node, edge and face ordering for Silo standard wedge/prism.
+  ```
+
+  ```{figure} ./images/pyramid_node_orders.png
+  :name: Silo standard pyramid
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard pyramid."
+
+  Node, edge and face ordering for Silo standard pyramid.
+  ```
+
+  ```{figure} ./images/tet_node_orders.png
+  :name: Silo standard tetrahedron
+  :align: "center"
+  :alt: "Node, edge and face ordering for Silo standard tet."
+
+  Node, edge and face ordering for Silo standard tet.
+  ```
+
+  Given the node ordering in the Silo standard hexahedron, there is indeed an algorithm for determining the other orderings for the other shapes.
+
+  For edges, each edge is identified by a pair of integer indices; the first being the "tail" of an arrow oriented along the edge and the second being the "head" with the smaller node index always placed first (at the tail).
+  Next, the ordering of edges is akin to a lexicographic ordering of these pairs of integers.
+  This means that we start with the lowest node number of a cell shape, zero, and find all edges with node zero as one of the points on the edge.
+  Each such edge will have zero as its tail.
+  Since they all start with node 0 as the tail, we order these edges from smallest to largest "head" node.
+  Then we go to the next lowest node number on the cell that has edges that have yet to have been placed in the ordering.
+  We find all the edges from that node (that have not already been placed in the ordering) from smallest to largest "head" node.
+  We continue this process until all the edges on the cell have been placed in the ordering.
+
+  For faces, a similar algorithm is used.
+  Starting with the lowest numbered node on a face, we enumerate the nodes over a face using the right hand rule for the normal to the face pointing away from the innards of the cell.
+  When one places the thumb of the right hand in the direction of this normal, the direction of the fingers curling around it identify the direction we go to identify the nodes of the face.
+  Just as for edges, we start identifying faces for the lowest numbered node of the cell (0).
+  We find all faces that share this node.
+  Of these, the face that enumerates the next lowest node number as we traverse the nodes using the right hand rule, is placed first in the ordering.
+  Then, the face that has the next lowest node number and so on.
+
+  **Conventions for other standard shapes as degenerate hexahedra:**
+
+  Finally, among the commonly used finite element shapes, hexahedra are frequently the only supported element type in many applications, particularly engineering applications.
+  Sometimes, for developers of these applications it is easiest to support other element types such as tetrahedra, pyramids and/or prism/wedges, by simply handling them as degenerate hexahedra.
+  This means that among the 8 nodes (e.g. corer points) of a hexahedron, some points are duplicated to pinch off or collapse an edge or face of a hexahedron to create the desired alternative shapes.
+
+  For degenerate hexahedra in Silo, creating these shapes as degenerate hexs in Silo is done following the pattern of collapsing two or more of the highest number nodes into a single node to produce the required shape.
+  Form each edge by starting with lowest numbered node at tail and next highest numbered node on an incident edge as head.
+  Repeat for all edges incident to this starting node.
+  Then move to the next highest numbered node involving a new edge and repeat for all edges incident to that node.
+  Form each face starting always with lowest numbered node in a face and working around it to the next highest numbered node on the face right-hand rule, outward normal order.
+  Repeat for all faces incident to this starting node.
+  Then, move to the next highest numbered node involving a new face and repeat for all faces incident to that node.
+
+  **Global orderings of edges and faces:**
+
+  For global traversals and orderings of all edges or faces in a mesh, the local orderings are repeated for each zone in the mesh starting with the first zone in the associated zonelist and, of course, skipping edges and faces encountered in later zones that are already accounted for by having been visited through an earlier zone in the traversal.
+
+  **Example of zonelist data:**
+
+  ```{figure} ./images/ucdmesh.gif
+  :name: ucdmesh-example
+  :align: "center"
+  :alt: "Example usage of UCD zonelist and external facelist variables."
+
+  Example usage of UCD zonelist and external facelist variables.
+  ```
+
+  **Arbitrary polyhedral zonelists:**
+
+  There are two ways of handling arbitrary polyehdral zones.
+  One of these, the old way, is to encode arbitrary polyhedral zones directly into a standard zonelist using the `DB_ZONETYPE_POLYHEDRON`. 
+  The other is to use a fully arbitrarily connected zonelist object via the [`DBPutPHZonelist()`](#dbputphzonelist) call.
+
+  An example using arbitrary polyhedrons for some zones is illustrated, below.
+  The nodes of a `DB_ZONETYPE_POLYHEDRON` are specified in the following fashion: First specify the number of faces in the polyhedron.
+  Then, for each face, specify the number of nodes in the face followed by the nodes that make up the face.
+  The nodes should be ordered such that they are numbered in a counter-clockwise fashion when viewed from the outside (e.g. right-hand rules yields an outward facing normal).
+  For a fully arbitrarily connected mesh, see `DBPutPHZonelist()`.
+  In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
+  So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
+
+  ```{figure} ./images/ucdmesh_warbzone.gif
+  :name: ucdmesh-warbzone
+  :align: "center"
+  :alt: "Example usage of UCD zonelist combining a hex and 2 polyhedra."
+
+  Example usage of UCD zonelist combining a hex and 2 polyhedra.
+  ```
+
+  This example is intended to illustrate the representation of arbitrary polyhedra.
+  So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a *standard* zonelist, they are expressed using arbitrary connectivity here for demonstration purposes.
+
+  The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist2`.
+  When there are only zoo-type elements in the mesh, this is the only zonelist information associated with the mesh.
+  However, the caller can optionally specify the `name` of an arbitrary, polyhedral zonelist written with a call to `DBPutPHZonelist` using the `DBOPT_PHZONELIST` option.
+  If the mesh consists solely of arbitrary, polyhedral elements, the only zonelist associated with the mesh will be the one written with the call to `DBPutPHZonelist`.
+
+  When a mesh is composed of both zoo-type elements and polyhedral elements, it is assumed that all the zoo-type elements come first in the mesh followed by all the polyhedral elements.
+  This has implications for any `DBPutUcdvar` calls made on such a mesh.
+  For zone-centered data, the variable array should be organized so that values corresponding to zoo-type zones come first followed by values corresponding to polyhedral zones.
+  Also, since both the zoo-type zonelist and the polyhedral zonelist support hi- and lo- offsets for ghost zones, the ghost-zones of a mesh may consist of zoo-type or polyhedral zones or a mixture of both.
 
 {{ EndFunc }}
 
@@ -1150,11 +1220,11 @@ Finally, Silo also supports the specification of expressions representing derive
   In the example code below, the list of nodes for a given face begin with the node nearest its corresponding letter.
 
   For toplogically 2D meshes, two different approaches are possible for creating a polyhedral zonelist.
-  One is to simple have a single list of "faces" representing the polygons of the 2D mesh.
+  One is to have a single list of "faces" representing the polygons of the 2D mesh.
   The other is to create an explicit list of "edges" and then define each polygon in terms of the edges it comprises.
   Either is appropriate.
 
-  ```C
+  ```
   #define NNODES 12
   #define NFACES 11
   #define NZONES 2
@@ -1186,9 +1256,13 @@ Finally, Silo also supports the specification of expressions representing derive
   int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
   ```
 
-  1[](./images/ucd_hex_outward_normals.gif)
+  ```{figure} ./images/ucd_hex_outward_normals.gif
+  :name: normals-example
+  :align: "center"
+  :alt: "Example of a polyhedral zonelist representation for two hexahedral elements"
 
-  Figure 0-4: Example of a polyhedral zonelist representation for two hexahedral elements.
+  Example of a polyhedral zonelist representation for two hexahedral elements
+  ```
 
 {{ EndFunc }}
 
