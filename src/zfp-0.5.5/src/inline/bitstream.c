@@ -107,7 +107,7 @@ The following assumptions and restrictions apply:
 #include <stdlib.h>
 
 #ifndef inline_
-  #define inline_ static
+  #define inline_
 #else
   #define no_bsns
 #endif

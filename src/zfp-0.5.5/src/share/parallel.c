@@ -40,12 +40,12 @@ compress_init_par(zfp_stream* stream, const zfp_field* field, uint chunks, uint 
     default:
       return NULL;
   }
-  size = zfp_stream_maximum_size(stream, &f);
+  size = zfpns.zfp_stream_maximum_size(stream, &f);
 
   /* avoid copies in fixed-rate mode when each bitstream is word aligned */
   copy |= stream->minbits != stream->maxbits;
-  copy |= (stream->maxbits % stream_word_bits) != 0;
-  copy |= (stream_wtell(stream->stream) % stream_word_bits) != 0;
+  copy |= (stream->maxbits % bsns.stream_word_bits) != 0;
+  copy |= (stream_wtell(stream->stream) % bsns.stream_word_bits) != 0;
 
   /* set up buffer for each thread to compress to */
   bs = (bitstream**)malloc(chunks * sizeof(bitstream*));
@@ -76,7 +76,7 @@ compress_init_par(zfp_stream* stream, const zfp_field* field, uint chunks, uint 
 static void
 compress_finish_par(zfp_stream* stream, bitstream** src, uint chunks)
 {
-  bitstream* dst = zfp_stream_bit_stream(stream);
+  bitstream* dst = zfpns.zfp_stream_bit_stream(stream);
   int copy = (stream_data(dst) != stream_data(*src));
   size_t offset = stream_wtell(dst);
   uint i;
