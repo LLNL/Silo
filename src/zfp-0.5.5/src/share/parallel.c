@@ -18,7 +18,7 @@ compress_init_par(zfp_stream* stream, const zfp_field* field, uint chunks, uint 
 
   /* determine maximum size buffer needed per thread */
   zfp_field f = *field;
-  switch (zfp_field_dimensionality(field)) {
+  switch (zfpns.zfp_field_dimensionality(field)) {
     case 1:
       f.nx = 4 * (blocks + chunks - 1) / chunks;
       break;
