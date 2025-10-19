@@ -9,16 +9,17 @@ the build dir. Modify CMAKE_INSTALL_PREFIX if you wish to change this.
 
 Silo CMake vars that control aspects of the build:
 
-SILO_ENABLE_SHARED          Build silo shared library.               DEFAULT : ON
-SILO_ENABLE_SILOCK          Enable building of silock                DEFAULT : ON
-SILO_ENABLE_SILEX           Enable building of silex (requires Qt5)  DEFAULT : OFF
-SILO_ENABLE_BROWSER         Enable building of browser               DEFAULT : ON
-SILO_ENABLE_FORTRAN         Enable Fortran interface to Silo         DEFAULT : ON
-SILO_ENABLE_HDF5            Enable hdf5 support                      DEFAULT : ON 
-SILO_ENABLE_JSON            Enable experimental json features        DEFAULT : OFF
-SILO_ENABLE_PYTHON_MODULE   Enable python module                     DEFAULT : OFF
-SILO_ENABLE_TESTS           Enable building of tests.                DEFAULT : OFF
-SILO_BUILD_FOR_BSD_LICENSE  Build BSD licensed version of Silo       DEFAULT : ON
+SILO_ENABLE_SHARED               Build silo shared library.               DEFAULT : ON
+SILO_ENABLE_SILOCK               Enable building of silock                DEFAULT : ON
+SILO_ENABLE_SILEX                Enable building of silex (requires Qt5)  DEFAULT : OFF
+SILO_ENABLE_BROWSER              Enable building of browser               DEFAULT : ON
+SILO_ENABLE_FORTRAN              Enable Fortran interface to Silo         DEFAULT : ON
+SILO_ENABLE_HDF5                 Enable hdf5 support                      DEFAULT : ON
+SILO_ENABLE_JSON                 Enable experimental json features        DEFAULT : OFF
+SILO_ENABLE_PYTHON_MODULE        Enable python module                     DEFAULT : OFF
+SILO_ENABLE_TESTS                Enable building of tests.                DEFAULT : OFF
+SILO_ENABLE_INSTALL_LITE_HEADERS Install PDB/Score Lite Headers	          DEFAULT : OFF
+SILO_BUILD_FOR_BSD_LICENSE       Build BSD licensed version of Silo       DEFAULT : ON
 
 This is enabled when SILO_ENABLE_HDF5 is ON:
 
