@@ -120,7 +120,7 @@ if(WIN32)
     endif()
 
     # python
-    if(SILO_ENABLE_PYTHON_MODULE)
+    if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
       if(PYTHON_DLL)
             add_custom_command(TARGET copy_test_deps POST_BUILD
                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -151,7 +151,13 @@ add_custom_command(TARGET copy_test_data POST_BUILD
     ${CMAKE_CURRENT_SOURCE_DIR}/z1plt.silo
     ${silo_test_output_dir})
 
-if(SILO_ENABLE_PYTHON_MODULE)
+message(STATUS "SHOULD THIS BE COPY_TEST_SCRIPTS")
+add_custom_command(TARGET copy_test_data POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/silo_sh_utils.sh
+    ${silo_test_output_dir})
+
+if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
     # also need the python test files
     add_custom_command(TARGET copy_test_data POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -164,6 +170,14 @@ if(SILO_ENABLE_PYTHON_MODULE)
     add_custom_command(TARGET copy_test_data POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/test_error.py
+        ${silo_test_output_dir})
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/onehex.py
+        ${silo_test_output_dir})
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/testonehex
         ${silo_test_output_dir})
 endif()
 
@@ -349,6 +363,7 @@ set(SKIP_TEST_SOURCES
     ioperf_hdf5.c
     ioperf_sec2.c
     ioperf_stdio.c
+    json.c
     largefile_netcdf.c
     listtypes_main.c
     silo_overwrite_multi_example.c
@@ -679,6 +694,15 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME checksums
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/checksums")
+endif()
+
+#
+# Python tests
+#
+# tests/onehex.py  tests/test_error.py  tests/test_read.py  tests/test_write.py
+if(Python_EXECUTABLE)
+
+
 endif()
 
 
