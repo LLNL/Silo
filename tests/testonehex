@@ -74,6 +74,13 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 . $script_dir/silo_sh_utils.sh
 
 #
+# In uses of find_file, below, the multiple paths tested are due to the fact
+# that this code needs to work, for a short period of time, for both Autotools
+# and CMake/CTest. The first path tested is for CMake/CTest build and the
+# others are for Autotools
+#
+
+#
 # Ensure we have Silo's python module
 #
 silo_pyso=$(find_file -r lib/Silo.so tools/python/Silo.so tools/python/.libs/Silo.so)
@@ -86,7 +93,7 @@ browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/bro
 #
 # Ensure we have onehex.py python script
 #
-onehexpy=$(find_file -r tests/bin/onehex.py onehex.py ../../onehex.py)
+onehexpy=$(find_file -r tests/bin/onehex.py tests/onehex.py)
 
 #
 # Ensure we have the python interpreter in PATH
