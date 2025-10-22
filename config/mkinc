@@ -396,7 +396,7 @@ foreach $var (@temparray) {
             }
         } else {
             if ($opt_f90) {
-	        $value .= '_4' if ($value =~ /^[\+\-\d]+$/) ;
+	            $value .= '_4' if ($value =~ /^[\+\-\d]+$/) ;
                 $ftype = 'integer(kind=4)';
             } else {
                 $ftype = 'integer*4';
@@ -416,7 +416,7 @@ foreach $var (@temparray) {
                     printf '     & ' . $2 . "\n";
                     # evaluating the rhs value leads to short line
                     last ;
-		} else {
+		        } else {
                     $curline = substr($line, $off, $off+64);
                     if ($off == 0) {
                         printf "$curline\n";
