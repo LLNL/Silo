@@ -231,7 +231,7 @@ $user = $ENV{USER};
 print <<"EOF";
 ${ccmt}cccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 ${ccmt} 
-${ccmt}      $title include file for Fortan applications.
+${ccmt}      $title include file for Fortran applications.
 ${ccmt} 
 ${ccmt}  Programmer:   $user $date
 ${ccmt} 
@@ -272,7 +272,7 @@ foreach $var (sort @functions) {
     }
 
     if ($opt_f90) {
-        $line = "      integer, external :: $var";
+        $line = "      integer(kind=4), external :: $var";
     } else {
         $line = "      EXTERNAL  " . uc($var);
     }
@@ -284,7 +284,7 @@ if (not $opt_f90) {
     print "\n";
     $line = "";
     foreach $var (sort @functions) {
-        print "      INTEGER  " . uc($var) . "\n";
+        print "      INTEGER*4  " . uc($var) . "\n";
     }
 }
 
@@ -302,7 +302,7 @@ if (not $opt_f90) {
         if ($value =~ /\./) {
             print "      DOUBLE PRECISION " . uc($name) . "\n";
         } else {
-            print "      INTEGER  " . uc($name) . "\n";
+            print "      INTEGER*4  " . uc($name) . "\n";
         }
     }
 
@@ -389,9 +389,18 @@ foreach $var (@temparray) {
             $ftype = 'character (len=' . $fstrlen . ')'
         }
         elsif ($value =~ /\./) {
-            $ftype = 'real (kind=8)';
+            if ($opt_f90) {
+                $ftype = 'real (kind=8)';
+            } else {
+                $ftype = 'real*8';
+            }
         } else {
-            $ftype = 'integer';
+            if ($opt_f90) {
+	        $value .= '_4' if ($value =~ /^[\+\-\d]+$/) ;
+                $ftype = 'integer(kind=4)';
+            } else {
+                $ftype = 'integer*4';
+            }
         }
         $line = sprintf("      %s, parameter :: %s = %s", $ftype, $name, $value);
     } else {
@@ -402,13 +411,20 @@ foreach $var (@temparray) {
         local $off=0;
         while ($off < length($line)) {
             if ($opt_f90) {
-                $curline = substr($line, $off, $off+64);
-                if ($off == 0) {
-                    printf "$curline\n";
-                } else {
-                    printf '     &' . $curline . "\n";
+                if ($line =~ /(.*\:\:)(.*)/) {
+                    printf "$1" . " " x (72-length($1)) . "&\n";
+                    printf '     & ' . $2 . "\n";
+                    # evaluating the rhs value leads to short line
+                    last ;
+		} else {
+                    $curline = substr($line, $off, $off+64);
+                    if ($off == 0) {
+                        printf "$curline\n";
+                    } else {
+                        printf '     &' . $curline . "\n";
+                    }
+                    $off += 64;
                 }
-                $off += 64;
             } else {
                 $curline = substr($line, $off, $off+64) . '&';
                 if ($off == 0) {
