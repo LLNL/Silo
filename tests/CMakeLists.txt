@@ -313,7 +313,6 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         largefile.c
         memfile_simple.c
         mk_nasf_h5.c
-        onehex.c
         partial_io.c
         readstuff.c
         testhdf5.c
@@ -537,6 +536,11 @@ endif()
 # Because all tests write the same named file, we need to lock that resource.
 #
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME onehex-split COMMAND $<TARGET_FILE:onehex> split)
+    add_test(NAME onehex-custom COMMAND $<TARGET_FILE:onehex> custom)
+    set_tests_properties(onehex;onehex-hdf5;onehex-split;onehex-custom PROPERTIES
+        RESOURCE_LOCK onehex.silo
+        LABELS "hdf5")
     set(COMPRESSION_TESTS "compression-hdf5")
     if(ZLIB_FOUND)
         add_test(NAME compression-gzip COMMAND $<TARGET_FILE:compression> gzip)
