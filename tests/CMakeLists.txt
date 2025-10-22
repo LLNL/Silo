@@ -340,6 +340,7 @@ set(PARALLEL_SOURCES
 # General case for most tests
 #
 file(GLOB C_TEST_SOURCES *.c)
+file(GLOB CXX_TEST_SOURCES *.cxx)
 
 if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     file(GLOB F_TEST_SOURCES *.f*)
@@ -366,6 +367,8 @@ set(SKIP_TEST_SOURCES
     json.c
     largefile_netcdf.c
     listtypes_main.c
+    rocket_silo.cxx
+    rocket_vtk.cxx
     silo_overwrite_multi_example.c
     std.c
     testlib.c
@@ -380,6 +383,7 @@ set(SKIP_TEST_SOURCES
 #
 set(SPECIAL_TEST_SOURCES
     merge_block.c
+    rocket_silo.cxx
     test_mat_compression.c
 )
 
@@ -388,11 +392,25 @@ set(TESTLIB_SOURCES
     quad.c
 )
 
+add_library(rocket_silo MODULE rocket_silo.cxx)
+add_dependencies(rocket_silo silo)
+target_link_libraries(rocket_silo $<TARGET_LINKER_FILE:silo>)
+target_link_libraries(rocket_silo dl m)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    target_link_libraries(rocket_silo ${HDF5_C_LIBRARIES})
+    target_include_directories(rocket_silo PRIVATE ${HDF5_INCLUDE_DIRS})
+endif()
+target_include_directories(rocket_silo PRIVATE
+        ${silo_build_include_dir}
+        ${Silo_SOURCE_DIR}/src/silo
+        ${SILO_TESTS_SOURCE_DIR})
+set_target_properties(rocket_silo PROPERTIES PREFIX "")
+
 add_library(testlib_obj OBJECT testlib.c)
 target_include_directories(testlib_obj PRIVATE
   ${silo_build_include_dir} ${Silo_SOURCE_DIR}/src/silo)
 
-foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
+foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
 
     cmake_path(GET src FILENAME srcFile)
     cmake_path(GET src STEM base)
@@ -485,6 +503,10 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
 endforeach()
 
 message(STATUS "FIX TEST PROPERTIES OVERRIDES")
+
+
+add_dependencies(rocket rocket_silo)
+set_target_properties(rocket PROPERTIES ENABLE_EXPORTS ON)
 
 target_sources(listtypes PRIVATE listtypes_main.c listtypes.c)
 set_tests_properties(listtypes PROPERTIES DEPENDS ucd REQUIRED_FILES ucd.pdb)

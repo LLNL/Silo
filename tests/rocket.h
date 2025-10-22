@@ -88,7 +88,9 @@ extern const float cX;
 extern float layerXVals[];
 extern const int layerNNodes;
 extern float layerYVals[];
-extern std::vector<float> xvals_g, yvals_g, zvals_g;
+extern std::vector<float> xvals_g;
+extern std::vector<float> yvals_g;
+extern std::vector<float> zvals_g;
 
 extern int layerNodelist[];
 extern const int layerNZones;
@@ -98,8 +100,8 @@ extern std::vector<int> nodelist_g, nodecnts_g, nodestarts_g;
 // Material names and numbers
 // 
 extern int matnos[];
-extern char *matNames[];
-extern char *matColors[];
+extern char const *matNames[];
+extern char const *matColors[];
 extern std::map<std::string, int> matMap;
 extern std::vector<int> matlist_g;
 
