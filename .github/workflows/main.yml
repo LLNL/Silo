@@ -79,9 +79,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: silo-test-artifacts
-        path:
-          - build/tests/testsuite.dir.tar.xz
-          - cmake_build/tests/ctest.tar.xz
+        path: |
+          build/tests/testsuite.dir.tar.xz
+          cmake_build/tests/ctest.tar.xz
         if-no-files-found: error
         retention-days: 14
 
