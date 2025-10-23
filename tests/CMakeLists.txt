@@ -591,6 +591,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME testall-small-hdf5 COMMAND $<TARGET_FILE:testall> -small DB_HDF5)
     set_tests_properties(TestReadMask-hdf5 PROPERTIES DEPENDS "testall-small-hdf5;point-hdf5;extface-hdf5"
         REQUIRED_FILES "rect2d.h5;point2d.h5;globe.h5")
+    set_tests_properties(memfile_simple-hdf5 PROPERTIES DEPENDS "testall-small-hdf5" REQUIRED_FILES "rect2d.h5")
     set_tests_properties(TestReadMask-hdf5 PROPERTIES LABELS "hdf5")
 endif()
 
@@ -760,9 +761,6 @@ endif()
 # AT_CHECK(testall -small $STARGS,,ignore)
 # AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
 #
-# AT_SETUP(force single)
-# AT_CHECK(specmix $STARGS,,ignore)
-# AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
 
 
 
