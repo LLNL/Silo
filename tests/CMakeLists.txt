@@ -79,11 +79,9 @@ if(WIN32)
     ##
     set(silo_test_output_dir ${Silo_BINARY_DIR}/all_tests/)
     file(MAKE_DIRECTORY ${silo_test_output_dir})
-    set(_path_sep ";")
 else()
     # runtime output dir is bin, so append bin to current binary dir
     set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin)
-    set(_path_sep ":")
 endif()
 
 ###-------------------------------------------------------------------------------------
@@ -725,12 +723,26 @@ endif()
 #
 # Python tests
 #
-# tests/onehex.py  tests/test_error.py  tests/test_read.py  tests/test_write.py
-if(Python_EXECUTABLE)
+if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
+    add_test(NAME test-write-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_write.py")
+    set_tests_properties(test-write-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
 
+    add_test(NAME test-read-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_read.py")
+    add_test(NAME multi-test-hdf-friendly COMMAND $<TARGET_FILE:multi_test> hdf-friendly DB_HDF5)
+    set_tests_properties(multi-test-hdf-friendly PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(test-read-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
+    set_tests_properties(test-read-py PROPERTIES DEPENDS multi-test-hdf-friendly)
+    set_tests_properties(test-read-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
 
+    add_test(NAME test-error-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_error.py")
+    set_tests_properties(test-error-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(test-error-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
+
+    add_test(NAME testonehex COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
+    set_tests_properties(testonehex PROPERTIES DEPENDS onehex)
+    add_test(NAME testonehex-hdf5 COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
+    set_tests_properties(testonehex-hdf5 PROPERTIES DEPENDS onehex-hdf5)
 endif()
-
 
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json

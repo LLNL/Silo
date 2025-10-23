@@ -65,9 +65,9 @@ string(REGEX REPLACE "-.*" "" SILO_VERSION "${SILO_VERSION}")
 # Set shell path separator char
 ###
 if (WIN32)
-    set(_sh_path_sep ";")
+    set(_envvar_path_sep ";")
 else()
-    set(_sh_path_sep ":")
+    set(_envvar_path_sep ":")
 endif()
 
 ###-----------------------------------------------------------------------------
@@ -723,7 +723,7 @@ if(BUILD_TESTING)
         HINTS ${HDF5_ROOT} ${HDF5_DIR} ${SILO_HDF5_DIR}
         PATH_SUFFIXES bin ../bin Tools/bin)
     get_filename_component(_h5stat_dir "${_h5stat_exe}" DIRECTORY)
-    set(_sh_path "${_h5stat_dir}${_sh_path_sep}$ENV{PATH}")
+    set(_sh_path "${_h5stat_dir}${_envvar_path_sep}$ENV{PATH}")
     add_subdirectory(tests)
 endif()
 
