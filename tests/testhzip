@@ -64,8 +64,8 @@
 #   can happen for toy datasets.
 # -----------------------------------------------------------------------------
 #
-# Determine directory of this script
-# 
+# Find dir where this script lives and source the shell utils script there.
+#
 # dirname -- "$0" gets the script’s directory even if this script is run via a
 #     relative path like ../../foo/bar/gorfo.sh.
 # The CDPATH= nulls that env. variable and prevents cd from printing anything
@@ -74,24 +74,17 @@
 #     a subshell so the cwd of the current script is unchanged.
 #
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. $script_dir/silo_sh_utils.sh
 
 #
 # Ensure the multi_test executable is available
 #
-if [ ! -x $script_dir/multi_test ]; then
-    echo "Silo's 'multi_test' test executable is required and not found."
-    exit 1
-fi
-multi_test=$(command -v $script_dir/multi_test)
+multi_test=$(find_file -x tests/bin/multi_test tests/multi_test ./multi_test ../../multi_test)
 
 #
 # Ensure we have Silo's 'browser' tool available
 #
-if [ ! -x $script_dir/../../bin/browser ]; then
-    echo "Silo's 'browser' tool is required and not found."
-    exit 1
-fi
-browser=$(command -v $script_dir/../../bin/browser)
+browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser ../tools/browser/browser ../../../tools/browser/browser)
 
 #
 # Ensure we have HDF5's 'h5stat' tool in PATH
