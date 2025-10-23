@@ -97,6 +97,7 @@ include_HEADERS = \
 # copy all scripts in one rule
 check_SCRIPTS= \
  cp_scripts \
+ silo_sh_utils.sh \
  checksums \
  testhzip \
  testxvers \

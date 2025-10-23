@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
@@ -50,78 +50,33 @@
 # National  Security, LLC,  and shall  not  be used  for advertising  or
 # product endorsement purposes.
 
-# -----------------------------------------------------------------------------
-# Test writing silo objects via python file format compatibility of HDF5
-#
-# This test works only onehex executable has run and created onehex.silo
-#
-# Programmer: Mark C. Miller
-# Creation:   July 21, 2008
-#
-# -----------------------------------------------------------------------------
+walk_up_to_top_of_build() {
 
-#
-# Find dir where this script lives and source the shell utils script there.
-#
-# dirname -- "$0" gets the script’s directory even if this script is run via a
-#     relative path like ../../foo/bar/gorfo.sh.
-# The CDPATH= nulls that env. variable and prevents cd from printing anything
-#     if CDPATH is set in the environment.
-# pwd gives the absolute path after the cd has occurred. This all happens in
-#     a subshell so the cwd of the current script is unchanged.
-#
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-. $script_dir/silo_sh_utils.sh
+    #
+    # Walk up dir-tree looking for CMakeCache.txt or config.log
+    #
+    cwd=$(pwd)
+    while [ ! -r CMakeCache.txt ] && [ ! -r config.log ] && [ "$(pwd)" != "/" ] ; do
+        cd ..
+    done
+    if [ ! -r CMakeCache.txt ] && [ ! -r config.log ]; then
+        echo "Unable to find 'CMakeCache.txt' or 'config.log' in any dir parent"
+        exit 3
+    fi
+    pwd
+    cd $cwd
+}
 
-#
-# In uses of find_file, below, the multiple paths tested are due to the fact
-# that this code needs to work, for a short period of time, for both Autotools
-# and CMake/CTest. The first path tested is for CMake/CTest build and the
-# others are for Autotools
-#
-
-#
-# Ensure we have Silo's python module
-#
-silo_pyso=$(find_file -r lib/Silo.so tools/python/Silo.so tools/python/.libs/Silo.so)
-
-# 
-# Ensure we have Silo's 'browser' tool available
-# 
-browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser)
-
-#
-# Ensure we have onehex.py python script
-#
-onehexpy=$(find_file -r tests/bin/onehex.py tests/onehex.py)
-
-#
-# Ensure we have the python interpreter in PATH
-#
-pycmd=$(command -v python3)
-if [ -z "$pycmd" ]; then
-    pycmd=$(command -v python)
-fi
-if [ -z "$pycmd" ]; then
-    pycmd=$(command -v python2)
-fi
-if [ -z "$pycmd" ]; then
-    echo "Unable to find python command in path"
-    exit 5
-fi
-
-#
-# Use python module to create data with no special features 
-#
-env PYTHONPATH=$(dirname $silo_pyso) $pycmd $onehexpy 1>/dev/null 2>&1
-
-#
-# Now, run browser and make sure we don't get any errors in the diff
-#
-result=0
-$browser -R 0.00001 -q -e diff onehex.silo onehexpy.silo 1>testonehex.out 2>&1
-if test `grep -v 'appears only in' testonehex.out | wc -l | tr -s ' ' | cut -d' ' -f2` -gt 5; then
-    result=1
-fi
-
-exit $result 
+find_file() {
+    top=$(walk_up_to_top_of_build)
+    flag=$1 
+    shift
+    for f in $*; do
+        if [ $flag $top/$f ]; then
+            echo $top/$f
+            return
+        fi
+    done
+    echo "Unable to find any of '$*'"
+    exit 4
+}

@@ -79,11 +79,9 @@ if(WIN32)
     ##
     set(silo_test_output_dir ${Silo_BINARY_DIR}/all_tests/)
     file(MAKE_DIRECTORY ${silo_test_output_dir})
-    set(_path_sep ";")
 else()
     # runtime output dir is bin, so append bin to current binary dir
     set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin)
-    set(_path_sep ":")
 endif()
 
 ###-------------------------------------------------------------------------------------
@@ -120,7 +118,7 @@ if(WIN32)
     endif()
 
     # python
-    if(SILO_ENABLE_PYTHON_MODULE)
+    if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
       if(PYTHON_DLL)
             add_custom_command(TARGET copy_test_deps POST_BUILD
                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -151,7 +149,13 @@ add_custom_command(TARGET copy_test_data POST_BUILD
     ${CMAKE_CURRENT_SOURCE_DIR}/z1plt.silo
     ${silo_test_output_dir})
 
-if(SILO_ENABLE_PYTHON_MODULE)
+message(STATUS "SHOULD THIS BE COPY_TEST_SCRIPTS")
+add_custom_command(TARGET copy_test_data POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/silo_sh_utils.sh
+    ${silo_test_output_dir})
+
+if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
     # also need the python test files
     add_custom_command(TARGET copy_test_data POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -164,6 +168,14 @@ if(SILO_ENABLE_PYTHON_MODULE)
     add_custom_command(TARGET copy_test_data POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/test_error.py
+        ${silo_test_output_dir})
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/onehex.py
+        ${silo_test_output_dir})
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/testonehex
         ${silo_test_output_dir})
 endif()
 
@@ -283,6 +295,13 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
 endif()
 ENDIF(FALSE)
 
+
+
+
+
+
+
+
 set(SILO_TESTS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
@@ -292,8 +311,8 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         largefile.c
         memfile_simple.c
         mk_nasf_h5.c
-        onehex.c
         partial_io.c
+        readstuff.c
         testhdf5.c
     )
 endif()
@@ -314,29 +333,11 @@ set(PARALLEL_SOURCES
     resample.c
 )
 
-#AT_SETUP(grab)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
-#AT_SETUP(onehex with split VFD)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,ignore)
-#AT_SETUP(onehex with custom fapl/fcpl)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex custom,,ignore,ignore)
-#AT_SETUP(testhzip)
-#AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)
-#AT_SETUP(checksums)
-#AT_CHECK(test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd`,,ignore,ignore)
-#AT_SETUP(xversion)
-#AT_CHECK(test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd`,,ignore,ignore)
-#AT_SETUP(largefile)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile,,ignore,ignore)
-#AT_SETUP(memfile_simple)
-#AT_CHECK(testall -small $STARGS,,ignore) 
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
-
-
 #
 # General case for most tests
 #
 file(GLOB C_TEST_SOURCES *.c)
+file(GLOB CXX_TEST_SOURCES *.cxx)
 
 if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     file(GLOB F_TEST_SOURCES *.f*)
@@ -344,11 +345,12 @@ endif()
 
 #
 # These are "skipped" in the main loop that adds tests for
-# one of several possible reasons...
+# for any source files found via globing for one of several
+# possible reasons...
 #
-#     * test the source file is for is not working
-#     * source file is used only within another test
-#     * necessary dependency logic not set up yet
+#     * Associated test is not working
+#     * Source file is used only within other tests
+#     * Special dependency logic is required
 #
 set(SKIP_TEST_SOURCES
     add_amr_mrgtree.c
@@ -362,6 +364,8 @@ set(SKIP_TEST_SOURCES
     json.c
     largefile_netcdf.c
     listtypes_main.c
+    rocket_silo.cxx
+    rocket_vtk.cxx
     silo_overwrite_multi_example.c
     std.c
     testlib.c
@@ -376,6 +380,7 @@ set(SKIP_TEST_SOURCES
 #
 set(SPECIAL_TEST_SOURCES
     merge_block.c
+    rocket_silo.cxx
     test_mat_compression.c
 )
 
@@ -384,11 +389,25 @@ set(TESTLIB_SOURCES
     quad.c
 )
 
+add_library(rocket_silo MODULE rocket_silo.cxx)
+add_dependencies(rocket_silo silo)
+target_link_libraries(rocket_silo $<TARGET_LINKER_FILE:silo>)
+target_link_libraries(rocket_silo dl m)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    target_link_libraries(rocket_silo ${HDF5_C_LIBRARIES})
+    target_include_directories(rocket_silo PRIVATE ${HDF5_INCLUDE_DIRS})
+endif()
+target_include_directories(rocket_silo PRIVATE
+        ${silo_build_include_dir}
+        ${Silo_SOURCE_DIR}/src/silo
+        ${SILO_TESTS_SOURCE_DIR})
+set_target_properties(rocket_silo PROPERTIES PREFIX "")
+
 add_library(testlib_obj OBJECT testlib.c)
 target_include_directories(testlib_obj PRIVATE
   ${silo_build_include_dir} ${Silo_SOURCE_DIR}/src/silo)
 
-foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
+foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
 
     cmake_path(GET src FILENAME srcFile)
     cmake_path(GET src STEM base)
@@ -447,28 +466,66 @@ foreach(src IN LISTS C_TEST_SOURCES F_TEST_SOURCES)
     endif()
 
     #
-    # Add default tests for both PDB and, if needed, HDF5 drivers
+    # Add default tests for both PDB or HDF5 or BOTH 
     #
     if(srcFile IN_LIST HDF5_ONLY_SOURCES)
-        add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
-        message(STATUS "adding ${base}-hdf5")
-        continue()
-    endif()
-
-    if(srcFile IN_LIST PDB_ONLY_SOURCES)
+        add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
+        set_tests_properties(${base}-hdf5 PROPERTIES LABELS "hdf5")
+        if(src IN_LIST F_TEST_SOURCES)
+            set_tests_properties(${base}-hdf5 PROPERTIES LABELS "fortran")
+        endif()
+    elseif(srcFile IN_LIST PDB_ONLY_SOURCES)
         add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
-        message(STATUS "adding ${base}")
-        continue()
+        set_tests_properties(${base} PROPERTIES LABELS "pdb")
+        if(src IN_LIST F_TEST_SOURCES)
+            set_tests_properties(${base} PROPERTIES LABELS "fortran")
+        endif()
+    else()
+        add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
+        set_tests_properties(${base} PROPERTIES LABELS "pdb")
+        if(src IN_LIST F_TEST_SOURCES)
+            set_tests_properties(${base} PROPERTIES LABELS "fortran")
+        endif()
+        if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+            add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
+            set_tests_properties(${base}-hdf5 PROPERTIES DEPENDS ${base})
+            set_tests_properties(${base}-hdf5 PROPERTIES LABELS "hdf5")
+            if(src IN_LIST F_TEST_SOURCES)
+                set_tests_properties(${base}-hdf5 PROPERTIES LABELS "fortran")
+            endif()
+        endif()
     endif()
 
-    add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
-    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-        add_test(NAME "${base}-hdf5" COMMAND $<TARGET_FILE:${base}> DB_HDF5)
-    endif()
 
 endforeach()
 
+message(STATUS "FIX TEST PROPERTIES OVERRIDES")
+
+
+add_dependencies(rocket rocket_silo)
+set_target_properties(rocket PROPERTIES ENABLE_EXPORTS ON)
+
 target_sources(listtypes PRIVATE listtypes_main.c listtypes.c)
+set_tests_properties(listtypes PROPERTIES DEPENDS ucd REQUIRED_FILES ucd.pdb)
+set_tests_properties(listtypes PROPERTIES LABELS "pdb")
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    set_tests_properties(listtypes-hdf5 PROPERTIES DEPENDS ucd-hdf5 REQUIRED_FILES ucd.h5)
+    set_tests_properties(listtypes-hdf5 PROPERTIES LABELS "hdf5")
+endif()
+
+if(SILO_ENABLE_JSON)
+    set_tests_properties(json PROPERTIES DEPENDS onehex REQUIRED_FILES onehex.silo)
+    set_tests_properties(json PROPERTIES DEPENDS multi_test REQUIRED_FILES onehex.silo)
+    set_tests_properties(json PROPERTIES LABELS "pdb")
+    set_tests_properties(json PROPERTIES LABELS "json")
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+        set_tests_properties(json-hdf5 PROPERTIES DEPENDS onehex-hdf5 REQUIRED_FILES onehex.silo)
+        set_tests_properties(json-hdf5 PROPERTIES LABELS "hdf5")
+        set_tests_properties(json-hdf5 PROPERTIES LABELS "json")
+    endif()
+    message(STATUS "FIX RESOURCE LOCK LIST")
+    set_tests_properties(json;json-hdf5 PROPERTIES RESOURCE_LOCK onehex.silo)
+endif()
 
 #
 # Basic (simple array) compression tests
@@ -477,7 +534,12 @@ target_sources(listtypes PRIVATE listtypes_main.c listtypes.c)
 # Because all tests write the same named file, we need to lock that resource.
 #
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    set(COMPRESSION_TESTS)
+    add_test(NAME onehex-split COMMAND $<TARGET_FILE:onehex> split)
+    add_test(NAME onehex-custom COMMAND $<TARGET_FILE:onehex> custom)
+    set_tests_properties(onehex;onehex-hdf5;onehex-split;onehex-custom PROPERTIES
+        RESOURCE_LOCK onehex.silo
+        LABELS "hdf5")
+    set(COMPRESSION_TESTS "compression-hdf5")
     if(ZLIB_FOUND)
         add_test(NAME compression-gzip COMMAND $<TARGET_FILE:compression> gzip)
         add_test(NAME compression-gzip-read COMMAND $<TARGET_FILE:compression> readonly)
@@ -514,8 +576,23 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
     if(COMPRESSION_TESTS)
         set_tests_properties(${COMPRESSION_TESTS} PROPERTIES RESOURCE_LOCK compression.h5)
-        set_tests_properties(${COMPRESSION_TESTS} PROPERTIES LABELS "Compression")
+        set_tests_properties(${COMPRESSION_TESTS} PROPERTIES LABELS "compression")
     endif()
+endif()
+
+#
+# TestReadMask has a number of dependencies
+#
+add_test(NAME testall-small COMMAND $<TARGET_FILE:testall> -small)
+set_tests_properties(TestReadMask PROPERTIES DEPENDS "testall-small;point;extface"
+    REQUIRED_FILES "rect2d.pdb;point2d.pdb;globe.pdb")
+set_tests_properties(TestReadMask PROPERTIES LABELS "pdb")
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    add_test(NAME testall-small-hdf5 COMMAND $<TARGET_FILE:testall> -small DB_HDF5)
+    set_tests_properties(TestReadMask-hdf5 PROPERTIES DEPENDS "testall-small-hdf5;point-hdf5;extface-hdf5"
+        REQUIRED_FILES "rect2d.h5;point2d.h5;globe.h5")
+    set_tests_properties(memfile_simple-hdf5 PROPERTIES DEPENDS "testall-small-hdf5" REQUIRED_FILES "rect2d.h5")
+    set_tests_properties(TestReadMask-hdf5 PROPERTIES LABELS "hdf5")
 endif()
 
 #
@@ -532,6 +609,7 @@ set_tests_properties(multi_test-badread PROPERTIES DEPENDS "multi_test")
 add_test(NAME multi_test-earlyclose COMMAND $<TARGET_FILE:multi_test> earlyclose)
 list(APPEND MULTI_BLOCK_TESTS multi_test multi_test-read multi_test-badread multi_test-earlyclose)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    set_tests_properties(readstuff-hdf5 PROPERTIES DEPENDS "multi_test-hdf5")
     add_test(NAME multi_test-read-hdf5 COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
     set_tests_properties(multi_test-read-hdf5 PROPERTIES DEPENDS "multi_test-hdf5")
     add_test(NAME multi_test-badread-hdf5 COMMAND $<TARGET_FILE:multi_test> testbadread DB_HDF5)
@@ -567,7 +645,7 @@ if(MULTI_BLOCK_TESTS)
     set_tests_properties(${MULTI_BLOCK_TESTS} PROPERTIES RESOURCE_LOCK 
         "multi_curv2d.pdb;multi_curv3d.pdb;multi_point2d.pdb;multi_rect2d.pdb;multi_rect3d.pdb;multi_ucd3d.pdb;
          multi_curv2d.h5;multi_curv3d.h5;multi_point2d.h5;multi_rect2d.h5;multi_rect3d.h5;multi_ucd3d.h5")
-    set_tests_properties(${MULTI_BLOCK_TESTS} PROPERTIES LABELS "Multiblock")
+    set_tests_properties(${MULTI_BLOCK_TESTS} PROPERTIES LABELS "multi")
 endif()
 
 #
@@ -577,19 +655,23 @@ endif()
 #
 set(MULTI_FILE_TESTS)
 add_test(NAME multi_file-usens COMMAND $<TARGET_FILE:multi_file> use-ns)
+add_test(NAME multi_file-evalns COMMAND $<TARGET_FILE:multi_file> eval-ns)
+set_tests_properties(multi_file-evalns PROPERTIES DEPENDS multi_file-usens)
 add_test(NAME multi_file-usens-empties COMMAND $<TARGET_FILE:multi_file> use-ns empties)
-#add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
-#add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
-list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-usens-empties)
+add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
+add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
+list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-evalns multi_file-usens-empties multi_file-multidir multi_file-multidir-usens)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_file-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns DB_HDF5)
+    add_test(NAME multi_file-evalns-hdf5 COMMAND $<TARGET_FILE:multi_file> eval-ns DB_HDF5)
+    set_tests_properties(multi_file-evalns-hdf5 PROPERTIES DEPENDS multi_file-usens-hdf5)
     add_test(NAME multi_file-usens-empties-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns empties DB_HDF5)
-#    add_test(NAME multi_file-multidir-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir DB_HDF5)
-#    add_test(NAME multi_file-multidir-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir use-ns DB_HDF5)
-list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-usens-empties-hdf5)
+    add_test(NAME multi_file-multidir-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir DB_HDF5)
+    add_test(NAME multi_file-multidir-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir use-ns DB_HDF5)
+list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-evalns-hdf5 multi_file-usens-empties-hdf5 multi_file-multidir-hdf5 multi_file-multidir-usens-hdf5)
 endif()
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES RESOURCE_LOCK "multi_file_tests")
-set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "Multifile;Multiblock")
+set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "multi")
 
 #
 # Partial I/O tests...mainly for Silo functionality to tease a tiny bit of raw data efficiently
@@ -611,10 +693,12 @@ add_custom_command(TARGET testdtypes POST_BUILD
 add_test(NAME testdtypes
     COMMAND ${CMAKE_COMMAND} -E env
     "${silo_test_output_dir}/testdtypes")
+set_tests_properties(testdtypes PROPERTIES DEPENDS specmix)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME testdtypes-hdf5
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/testdtypes" DB_HDF5)
+    set_tests_properties(testdtypes PROPERTIES DEPENDS specmix-hdf5)
 endif()
 
 add_custom_target(testsilock ALL)
@@ -643,67 +727,39 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         "${silo_test_output_dir}/checksums")
 endif()
 
+#
+# Python tests
+#
+if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
+    add_test(NAME test-write-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_write.py")
+    set_tests_properties(test-write-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
+
+    add_test(NAME multi_file-reset COMMAND $<TARGET_FILE:multi_test>)
+    add_test(NAME multi_file-hdf-friendly COMMAND $<TARGET_FILE:multi_test> hdf-friendly DB_HDF5)
+    add_test(NAME test-read-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_read.py")
+    set_tests_properties(multi_file-reset PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(multi_file-hdf-friendly PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(test-read-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
+    set_tests_properties(test-read-py PROPERTIES DEPENDS multi_file-hdf-friendly)
+    set_tests_properties(test-read-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
+
+    add_test(NAME test-error-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_error.py")
+    set_tests_properties(test-error-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(test-error-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
+
+    add_test(NAME testonehex COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
+    set_tests_properties(testonehex PROPERTIES DEPENDS onehex)
+    add_test(NAME testonehex-hdf5 COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
+    set_tests_properties(testonehex-hdf5 PROPERTIES DEPENDS onehex-hdf5)
+endif()
+
+
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
 
-# test dependencies...
-#
-# AT_SETUP(TestReadMask) # needs files generated by other execs 
-# AT_CHECK(extface $STARGS,,ignore) # don't valgrind these intermediate parts
-# AT_CHECK(point $STARGS,,ignore) 
-# AT_CHECK(testall -small $STARGS,,ignore)
-# AT_CHECK($VALGRIND TestReadMask $STARGS,,ignore)
-#
-# AT_SETUP(multi_test testflushread)
-# AT_CHECK($VALGRIND multi_test testflush $STARGS,,ignore)
-# AT_CHECK($VALGRIND multi_test testflushread $STARGS,,ignore)
-#
-# AT_SETUP(listtypes)
-# AT_CHECK($VALGRIND ucd $STARGS,,ignore)
-# AT_CHECK(test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5,,ignore,ignore)
-#
-# AT_SETUP(readstuff) # needs data file from multi_test
-# AT_CHECK(multi_test $STARGS,,ignore) # don't valgrind these intermediate parts
-# AT_CHECK($VALGRIND readstuff $STARGS,ignore,ignore)
-#
-# AT_SETUP(read)
-# AT_CHECK(multi_test $STARGS hdf-friendly,,ignore) # generate data for python tests
-# AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_read.py,,ignore,ignore)
-#
-# AT_SETUP(write)
-# AT_DATA(expout,[toc=nvar = 15
-# var_names = (_fileinfo, _silolibinfo, t1, t10, t11, t12, t13, t14, t2, t3, t4, t5, t6, t7, t8)
-# ndir = 1
-# dir_names = (a)
-
-# t2='hello'
-# t6=1.20,10.20
-# a/t8='x2'
-# t9=x3
-# /t5=1.20,10.20
-# ])
-# AT_CHECK(sami $STARGS,,ignore,ignore)
-# AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_write.py,,expout,ignore)
-#
-# AT_SETUP(error handling)
-# AT_CHECK(multi_test $STARGS hdf-friendly,,ignore) # generate data for python tests
-# AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_error.py,,ignore,ignore)
-#
-# AT_SETUP(json)
-# AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || onehex $STARGS,,ignore) # don't valgrind these intermediate parts
-# AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || multi_test $STARGS,,ignore) # don't valgrind these intermediate parts
-# AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,,ignore,ignore)
 #
 # AT_SETUP(memfile_simple)
 # AT_CHECK(testall -small $STARGS,,ignore)
 # AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
-#
-# AT_SETUP(force single)
-# AT_CHECK(specmix $STARGS,,ignore)
-# AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
-#
-# AT_SETUP(multi_file use-ns)
-# AT_CHECK($VALGRIND multi_file use-ns $STARGS,,ignore)
-# AT_CHECK($VALGRIND namescheme eval-ns $STARGS,,ignore)
 #
 
 

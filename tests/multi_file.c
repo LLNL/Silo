@@ -125,6 +125,22 @@ int  build_multi(char *, int, char *, int, int, int, int);
 
 void build_block_ucd3d(char *, int, char *, int, int, int);
 
+static void mymkdir(char const *dir)
+{
+    int st;
+#if !defined(_WIN32)
+    st = mkdir(dir,S_IRWXU|S_IRWXG|S_IRWXU);
+#else
+    st = _mkdir(dir);
+#endif
+    if (st < 0)
+    {
+        fprintf(stderr, "Unable to mkdir(\"%s\")\n",dir);
+        return;
+    }
+    fprintf(stdout, "\tMade directory \"%s\"\n",dir);
+}
+
 /***********************************************************************
  *
  * Purpose:
@@ -829,43 +845,27 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
     if (multidir && !comm_rank)
     {
-        int st;
-        unlink("multi_file.dir/000/ucd3d0.pdb");
-        unlink("multi_file.dir/000/ucd3d0.h5");
-        rmdir("multi_file.dir/000");
-        unlink("multi_file.dir/001/ucd3d1.pdb");
-        unlink("multi_file.dir/001/ucd3d1.h5");
-        rmdir("multi_file.dir/001");
-        unlink("multi_file.dir/002/ucd3d2.pdb");
-        unlink("multi_file.dir/002/ucd3d2.h5");
-        rmdir("multi_file.dir/002");
-        unlink("multi_file.dir/003/ucd3d3.pdb");
-        unlink("multi_file.dir/003/ucd3d3.h5");
-        rmdir("multi_file.dir/003");
-        unlink("multi_file.dir/004/ucd3d4.pdb");
-        unlink("multi_file.dir/004/ucd3d4.h5");
-        rmdir("multi_file.dir/004");
-        unlink("multi_file.dir/005/ucd3d5.pdb");
-        unlink("multi_file.dir/005/ucd3d5.h5");
-        rmdir("multi_file.dir/005");
-        unlink("multi_file.dir/006/ucd3d6.pdb");
-        unlink("multi_file.dir/006/ucd3d6.h5");
-        rmdir("multi_file.dir/006");
-        unlink("multi_file.dir/007/ucd3d7.pdb");
-        unlink("multi_file.dir/007/ucd3d7.h5");
-        rmdir("multi_file.dir/007");
-        rmdir("multi_file.dir");
-#if !defined(_WIN32)
-        st = mkdir("multi_file.dir",S_IRWXU|S_IRWXG|S_IRWXU);
-#else
-        st = _mkdir("multi_file.dir");
-#endif
-        if (st < 0)
+        /* blow away everything that is already there first */
+        for (i = 0; i < nfiles; i++)
         {
-            fprintf(stderr, "Unable to mkdir(\"multi_file.dir\")\n");
-            return;
+            char tmp[128];
+            snprintf(tmp, sizeof(tmp), "multi_file.dir/%03d/ucd3d%d.pdb", i, i);
+            unlink(tmp);
+            snprintf(tmp, sizeof(tmp), "multi_file.dir/%03d/ucd3d%d.h5", i, i);
+            unlink(tmp);
+            snprintf(tmp, sizeof(tmp), "multi_file.dir/%03d", i);
+            rmdir(tmp);
         }
-        fprintf(stdout, "\tMade directory multi_file.dir\n");
+        rmdir("multi_file.dir");
+
+        /* Now, rebuild the output dirs */
+        mymkdir("multi_file.dir");
+        for (i = 0; i < nfiles; i++)
+        {
+            char tmp[128];
+            snprintf(tmp, sizeof(tmp), "multi_file.dir/%03d", i);
+            mymkdir(tmp);
+        }
     }
 
     /* 
@@ -915,24 +915,6 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         {
             if (empties && block == empty_blocks[eb])
                 eb++;
-
-            if (multidir && !comm_rank)
-            {
-                int st;
-                char dname[60];
-                sprintf(dname, "multi_file.dir/%03d", filenum);
-#if !defined(_WIN32)
-                st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
-#else
-                st = _mkdir(dname);
-#endif
-                if (st < 0)
-                {
-                    fprintf(stderr, "Unable to make directory \"%s\"\n", dname);
-                    return;
-                }
-                fprintf(stdout, "\tMade directory %s\n", dname);
-            }
 
             continue;
         }

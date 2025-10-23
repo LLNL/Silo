@@ -51,16 +51,6 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-
-/* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
-   in this file uses version 1.6 of the HDF5 API. This is harmless for
-   versions of HDF5 before 1.8 and ensures correct compilation with
-   version 1.8 and thereafter. When, and if, the HDF5 code in this file
-   is explicitly upgraded to the 1.8 API, this symbol should be removed. */
-#if 0
-#define H5_USE_16_API
-#endif
-
 #include <hdf5.h>
 
 #include <errno.h>
@@ -16795,11 +16785,26 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
             iop[i].offset = HADDR_MAX;
         else
         {
-            hid_t dsid;
-            if ((dsid=H5Dopen(dbfile->cwg, names[i], H5P_DEFAULT))<0 ||
-                (iop[i].offset=H5Dget_offset(dsid))==HADDR_UNDEF ||
-                H5Dclose(dsid)<0)
+            hid_t objid;
+ 	    H5O_info2_t oinfo;
+            char *objtokstr = 0;
+            unsigned long long offset;
+
+            if (H5Oget_info_by_name3(dbfile->cwg, names[i], &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+            {
                 iop[i].offset = HADDR_MAX;
+                continue;
+            }
+            objid = H5Oopen(dbfile->cwg, names[i], H5P_DEFAULT);
+            H5Otoken_to_str(objid, &oinfo.token, &objtokstr);
+            if (objtokstr)
+            {
+                errno = 0;
+                offset = strtoull(objtokstr, 0, 0);
+                iop[i].offset = errno ? HADDR_MAX : (haddr_t) offset;
+                free(objtokstr);
+            }
+            H5Oclose(objid);
         }
     }
 
