@@ -654,16 +654,20 @@ endif()
 #
 set(MULTI_FILE_TESTS)
 add_test(NAME multi_file-usens COMMAND $<TARGET_FILE:multi_file> use-ns)
+add_test(NAME multi_file-evalns COMMAND $<TARGET_FILE:multi_file> eval-ns)
+set_tests_properties(multi_file-evalns PROPERTIES DEPENDS multi_file-usens)
 add_test(NAME multi_file-usens-empties COMMAND $<TARGET_FILE:multi_file> use-ns empties)
-#add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
-#add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
-list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-usens-empties)
+add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
+add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
+list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-evalns multi_file-usens-empties multi_file-multidir multi_file-multidir-usens)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_file-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns DB_HDF5)
+    add_test(NAME multi_file-evalns-hdf5 COMMAND $<TARGET_FILE:multi_file> eval-ns DB_HDF5)
+    set_tests_properties(multi_file-evalns-hdf5 PROPERTIES DEPENDS multi_file-usens-hdf5)
     add_test(NAME multi_file-usens-empties-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns empties DB_HDF5)
     add_test(NAME multi_file-multidir-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir DB_HDF5)
     add_test(NAME multi_file-multidir-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir use-ns DB_HDF5)
-list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-usens-empties-hdf5)
+list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-evalns-hdf5 multi_file-usens-empties-hdf5 multi_file-multidir-hdf5 multi_file-multidir-usens-hdf5)
 endif()
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES RESOURCE_LOCK "multi_file_tests")
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "multi")
@@ -688,10 +692,12 @@ add_custom_command(TARGET testdtypes POST_BUILD
 add_test(NAME testdtypes
     COMMAND ${CMAKE_COMMAND} -E env
     "${silo_test_output_dir}/testdtypes")
+set_tests_properties(testdtypes PROPERTIES DEPENDS specmix)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME testdtypes-hdf5
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/testdtypes" DB_HDF5)
+    set_tests_properties(testdtypes PROPERTIES DEPENDS specmix-hdf5)
 endif()
 
 add_custom_target(testsilock ALL)
@@ -727,11 +733,13 @@ if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
     add_test(NAME test-write-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_write.py")
     set_tests_properties(test-write-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
 
+    add_test(NAME multi_file-reset COMMAND $<TARGET_FILE:multi_test>)
+    add_test(NAME multi_file-hdf-friendly COMMAND $<TARGET_FILE:multi_test> hdf-friendly DB_HDF5)
     add_test(NAME test-read-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_read.py")
-    add_test(NAME multi-test-hdf-friendly COMMAND $<TARGET_FILE:multi_test> hdf-friendly DB_HDF5)
-    set_tests_properties(multi-test-hdf-friendly PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(multi_file-reset PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(multi_file-hdf-friendly PROPERTIES RESOURCE_LOCK "multi_file_tests")
     set_tests_properties(test-read-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:silo>${_envvar_path_sep}$ENV{PYTHONPATH}")
-    set_tests_properties(test-read-py PROPERTIES DEPENDS multi-test-hdf-friendly)
+    set_tests_properties(test-read-py PROPERTIES DEPENDS multi_file-hdf-friendly)
     set_tests_properties(test-read-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
 
     add_test(NAME test-error-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_error.py")
@@ -747,28 +755,6 @@ endif()
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
 
-# AT_SETUP(read)
-# AT_CHECK(multi_test $STARGS hdf-friendly,,ignore) # generate data for python tests
-# AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_read.py,,ignore,ignore)
-#
-# AT_SETUP(write)
-# AT_DATA(expout,[toc=nvar = 15
-# var_names = (_fileinfo, _silolibinfo, t1, t10, t11, t12, t13, t14, t2, t3, t4, t5, t6, t7, t8)
-# ndir = 1
-# dir_names = (a)
-
-# t2='hello'
-# t6=1.20,10.20
-# a/t8='x2'
-# t9=x3
-# /t5=1.20,10.20
-# ])
-# AT_CHECK(sami $STARGS,,ignore,ignore)
-# AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_write.py,,expout,ignore)
-#
-# AT_SETUP(error handling)
-# AT_CHECK(multi_test $STARGS hdf-friendly,,ignore) # generate data for python tests
-# AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_error.py,,ignore,ignore)
 #
 # AT_SETUP(memfile_simple)
 # AT_CHECK(testall -small $STARGS,,ignore)
@@ -777,11 +763,6 @@ endif()
 # AT_SETUP(force single)
 # AT_CHECK(specmix $STARGS,,ignore)
 # AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
-#
-# AT_SETUP(multi_file use-ns)
-# AT_CHECK($VALGRIND multi_file use-ns $STARGS,,ignore)
-# AT_CHECK($VALGRIND namescheme eval-ns $STARGS,,ignore)
-#
 
 
 
