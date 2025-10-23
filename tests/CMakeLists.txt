@@ -53,6 +53,43 @@
 ##############################################################################
 
 #
+# The CMake/CTest logic here is pretty ugly due to lack of familiarity with
+# CMake/CTest prior to implementing this. Cleanup and re-organization is
+# desparately needed. That aside, the basic structure/design is the following.
+#
+#   The main goal is to handle most cases by simply adding new C, Fortran or
+#   C++ test code here without requiring any changes to CMakeLists.txt. This
+#   works because a list of tests is gathered using a file glob. Then, this
+#   list is iterated defining tests and associated compilation logic for
+#   each. Two tests are created, one for the PDB driver and, when enabled,
+#   one for the HDF5 driver. This is the simple and common case. Each test
+#   involves a single source file which is compiled to produce the test.
+#
+#   Things get more complicated for these cases...
+#
+#       * A test needs special command-line arguments
+#       * A test is run many different ways producing the same file(s)
+#       * A test requires the data produced by another
+#       * A test involves a shell or python script
+#       * A test works only on HDF5 or only on PDB driver
+#       * A test involves multiple source files 
+#
+#   Making this more complicated still, many tests get defined only when
+#   certain options are enabled.
+#
+#   The C_TEST_SOURCES, CXX_TEST_SOURCES and F_TEST_SOURCES are the main
+#   file globbed list of C, C++ and Fortran source files. There are some
+#   companion lists...
+#
+#       HDF5_ONLY_SOURCES - for source files that work only on HDF5
+#       PDB_ONLY_SOURCES - for source files that work only on PDB
+#       PARALLEL_SOURCES - for tests that require MPI
+#       SKIP_TEST_SOURCES - source files skipped from main loop for
+#           one of a variety of reasons
+#       SPECIAL_TEST_SOURCES - the key difference between this list and
+#           SKIP list is that SPECIAL source files still get compiled.
+#
+#
 # Notes on valgrind testing...
 #
 # cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF -DSILO_ENABLE_HDF5:BOOL=ON -DSILO_ENABLE_FPZIP:BOOL=ON -DBUILD_TESTING:BOOL=ON -DSILO_HDF5_DIR:PATH=/mnt/nvme/mark/silo/hdf5-1.14.4/build/my_install -DCMAKE_BUILD_TYPE:STRING=Debug -S .. -B memcheck-build 
@@ -178,129 +215,6 @@ if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/testonehex
         ${silo_test_output_dir})
 endif()
-
-###-----------------------------------------------------------------------------------------
-# Create test targets
-#
-# silo_add_test function
-#    Adds an executable in standard CMake fashion with includes, link dependencies, etc.
-#
-###-----------------------------------------------------------------------------------------
-
-IF(FALSE)
-include(${SILO_TESTS_SOURCE_DIR}/CMake/SiloTestFunctions.cmake)
-
-
-silo_add_test(NAME testall SRC testall.c)
-silo_add_test(NAME alltypes SRC alltypes.c)
-silo_add_test(NAME arbpoly SRC arbpoly.c)
-silo_add_test(NAME arbpoly2d SRC arbpoly2d.c)
-silo_add_test(NAME arbpoly3d SRC arbpoly3d.c)
-silo_add_test(NAME array SRC array.c)
-silo_add_test(NAME compression SRC compression.c)
-silo_add_test(NAME cpz1plt SRC cpz1plt.c)
-silo_add_test(NAME csg SRC csg.c)
-# change the executable name for the 'dir' test since it is also a sys command
-silo_add_test(NAME sdir SRC dir.c testlib.c)
-silo_add_test(NAME degen_hex SRC degen_hex.c)
-silo_add_test(NAME efcentering SRC efcentering.c)
-silo_add_test(NAME empty SRC empty.c)
-silo_add_test(NAME extface SRC extface.c)
-silo_add_test(NAME grab SRC grab.c)
-silo_add_test(NAME group_test SRC group_test.c)
-silo_add_test(NAME hyper_accruate_lineout_test SRC hyper_accruate_lineout_test.c)
-silo_add_test(NAME hyper_accruate_lineout_test2 SRC hyper_accruate_lineout_test2.C LANG CXX)
-silo_add_test(NAME largefile SRC largefile.c)
-silo_add_test(NAME lineout_test SRC lineout_test.C LANG CXX)
-silo_add_test(NAME lineout_test_hyper_accurate SRC lineout_test_hyper_accurate.C LANG CXX)
-silo_add_test(NAME listtypes SRC listtypes.c listtypes_main.c)
-silo_add_test(NAME majorder SRC majorder.c)
-silo_add_test(NAME mat3d_3across SRC mat3d_3across.c)
-silo_add_test(NAME misc SRC misc.c)
-if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    silo_add_test(NAME mk_nasf_hf5 SRC mk_nasf_h5.c)
-endif()
-silo_add_test(NAME mk_nasf_pdb SRC mk_nasf_pdb.c)
-silo_add_test(NAME mmadjacency SRC mmadjacency.c)
-if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    silo_add_test(NAME multi_file SRC multi_file.c)
-endif()
-silo_add_test(NAME multi_test SRC multi_test.c)
-silo_add_test(NAME multispec SRC multispec.c)
-silo_add_test(NAME newsami SRC newsami.cxx)
-silo_add_test(NAME namescheme SRC namescheme.c)
-silo_add_test(NAME obj SRC obj.c)
-silo_add_test(NAME onehex SRC onehex.c)
-silo_add_test(NAME oneprism SRC oneprism.c)
-silo_add_test(NAME onepyramid SRC onepyramid.c)
-silo_add_test(NAME onetet SRC onetet.c)
-silo_add_test(NAME partial_io SRC partial_io.c)
-silo_add_test(NAME point SRC point.c)
-silo_add_test(NAME polyzl SRC polyzl.c)
-silo_add_test(NAME quad SRC quad.c testlib.c)
-silo_add_test(NAME readstuff SRC readstuff.c)
-silo_add_test(NAME realloc_obj_and_opts SRC realloc_obj_and_opts.c)
-silo_add_test(NAME sami SRC sami.c)
-silo_add_test(NAME simple SRC simple.c)
-silo_add_test(NAME spec SRC spec.c)
-silo_add_test(NAME specmix SRC specmix.c)
-silo_add_test(NAME subhex SRC subhex.c)
-silo_add_test(NAME test_mat_compression SRC test_mat_compression.c)
-silo_add_test(NAME testfs SRC testfs.c)
-silo_add_test(NAME testpdb SRC testpdb.c)
-silo_add_test(NAME TestReadMask SRC TestReadMask.c)
-silo_add_test(NAME twohex SRC twohex.c)
-silo_add_test(NAME ucd SRC ucd.c)
-silo_add_test(NAME ucd1d SRC ucd1d.c)
-silo_add_test(NAME ucdsamp3 SRC ucdsamp3.c)
-silo_add_test(NAME dbversion SRC dbversion.c)
-silo_add_test(NAME wave SRC wave.c)
-
-# these currently don't compile on Windows
-if(NOT WIN32)
-    silo_add_test(NAME ioperf SRC ioperf.c)
-    silo_add_test(NAME memfile_simple SRC memfile_simple.c)
-    silo_add_test(NAME pdbtst SRC pdbtst.c)
-    target_include_directories(pdbtst PRIVATE ${Silo_SOURCE_DIR}/src/pdb ${Silo_SOURCE_DIR}/src/score)
-    silo_add_test(NAME rocket SRC rocket.cxx)
-    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-        silo_add_test(NAME testhdf5 SRC testhdf5.c)
-    endif()
-endif()
-
-if(SILO_ENABLE_JSON)
-    #silo_add_test(NAME json SRC json.c)
-endif()
-
-if(SILO_PARALLEL)
-    silo_add_test(NAME pmpio_for_llrt SRC pmpio_for_llrt.c)
-    silo_add_test(NAME pmpio_hdf5_test SRC pmpio_hdf5_test.c)
-    silo_add_test(NAME pmpio_silo_test_mesh SRC pmpio_silo_test_mesh.c)
-    silo_add_test(NAME resample SRC resample.c)
-endif()
-
-
-if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
-    foreach(f arrayf77 csgmesh curvef77 matf77 pointf77 qmeshmat2df77 quadf77 testallf77 ucdf77)
-        silo_add_test(NAME ${f} SRC ${f}.f)
-        if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-          if (CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
-            target_compile_options(${f} PRIVATE
-              "$<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>"
-              )
-          endif()
-        endif()
-    endforeach()
-    silo_add_test(NAME arrayf90 SRC arrayf90.f90)
-endif()
-ENDIF(FALSE)
-
-
-
-
-
-
-
 
 set(SILO_TESTS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -755,32 +669,6 @@ endif()
 
 
 # Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
-
-#
-# AT_SETUP(memfile_simple)
-# AT_CHECK(testall -small $STARGS,,ignore)
-# AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ###-----------------------------------------------------------------------------------------
 # Create check target that calls SiloMakeCheckRunner.
