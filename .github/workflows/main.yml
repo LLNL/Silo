@@ -23,7 +23,7 @@ jobs:
         tar -xf hdf5/HDF5-1.14.4.3-Linux.tar.gz --strip-components=4 -C hdf5-1.14.4-3
         rm -rf hdf5
 
-    - name: Build Silo
+    - name: Build Silo Autotools
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         mkdir build
@@ -31,37 +31,72 @@ jobs:
         env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
         make -j 8 install
 
-    - name: Build Tests
+    - name: Build Silo CMake
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        mkdir cmake_build
+        cd cmake_build
+        cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
+              -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF \
+              -DSILO_ENABLE_HDF5:BOOL=ON \
+              -DSILO_ENABLE_FPZIP:BOOL=ON \
+              -DBUILD_TESTING:BOOL=ON \
+              -DSILO_HDF5_DIR:PATH= `pwd`/../hdf5-1.14.4-3 \
+              -DSILO_ENABLE_SILOCK:BOOL=ON \
+              -DCMAKE_BUILD_TYPE:STRING=Release \
+              -DSILO_ENABLE_PYTHON_MODULE:BOOL=ON \
+              -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
+              ..
+        make -j 8 install
+
+    - name: Build Tests Autotools
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build/tests
         make -j 8 tests
 
-    - name: Check Silo
-      id: makecheck
+    - name: Check Silo Autotools
+      id: makecheck-autotools
       continue-on-error: true
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
         make -j 8 check
 
-    - name: Package artifact
-      id: pack
-      if: ${{ steps.makecheck.outcome == 'failure' }}
+    - name: Check Silo CTest
+      id: makecheck-cmake
+      continue-on-error: true
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        cd cmake_build
+        ctest --output-log ctest.log
+
+    - name: Package Artifact Autotools
+      id: pack-autotools
+      if: ${{ steps.makecheck-autotools.outcome == 'failure' }}
       run: |
         cd build/tests
         tar -cJf testsuite.dir.tar.xz testsuite.dir testsuite.log
 
-    - name: Upload artifact
-      if: ${{ steps.makecheck.outcome == 'failure' }}
+    - name: Package Artifact CMake
+      id: pack-cmake
+      if: ${{ steps.makecheck-cmake.outcome == 'failure' }}
+      run: |
+        cd cmake_build/tests
+        tar -cJf ctest.tar.xz Testing/Temporary ctest.log
+
+    - name: Upload artifacts
+      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' }}
       uses: actions/upload-artifact@v4
       with:
-        name: testsuite.dir.tar.xz
-        path: build/tests/testsuite.dir.tar.xz
+        name: silo-test-artifacts
+        path: |
+          build/tests/testsuite.dir.tar.xz
+          cmake_build/tests/ctest.tar.xz
         if-no-files-found: error
         retention-days: 14
 
     # Re-signal the failure so the job ends red.
     - name: Fail job if make check failed
-      if: ${{ steps.makecheck.outcome == 'failure' }}
+      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' }}
       run: exit 1
