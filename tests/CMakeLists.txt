@@ -275,7 +275,7 @@ set(SKIP_TEST_SOURCES
     ioperf_hdf5.c
     ioperf_sec2.c
     ioperf_stdio.c
-    json.c
+    $<$<BOOL:${SILO_ENABLE_JSON}>::json.c>
     largefile_netcdf.c
     listtypes_main.c
     rocket_silo.cxx

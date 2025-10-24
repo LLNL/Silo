@@ -458,12 +458,6 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_f.c)
 endif()
 
-if(SILO_ENABLE_JSON)
-# Does the json source need to be untarred and compiled?
-# Or is a call to find_package(json ...) require?
-#    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
-endif()
-
 set(silo_library_include_dirs
     ${silo_build_include_dir}
     ${Silo_SOURCE_DIR}/src/debug
@@ -651,6 +645,12 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_target_properties(silo PROPERTIES OUTPUT_NAME siloh5)
     target_link_libraries(silo ${HDF5_C_LIBRARIES})
     target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})
+endif()
+
+if(SILO_ENABLE_JSON)
+    find_package(json-c REQUIRED)
+    target_sources(silo PRIVATE ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
+    target_link_libraries(silo json-c::json-c)
 endif()
 
 # setting up for installing Silo CMake config files
