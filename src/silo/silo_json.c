@@ -62,9 +62,6 @@ be used for advertising or product endorsement purposes.
 #include <silo_private.h>
 
 #include <silo_json.h>
-#include <json/json.h>
-#include <json/json_object_private.h>
-#include <json/printbuf.h>
 
 #define EXTPTR_HDRSTR "\":{\"ptr\":\"0x"
 

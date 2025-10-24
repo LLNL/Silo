@@ -54,7 +54,7 @@ be used for advertising or product endorsement purposes.
 #ifndef SILO_JSON_H
 #define SILO_JSON_H
 
-#include <json/json.h>
+#include <json-c/json.h>
 
 #include <silo_exports.h>
 
