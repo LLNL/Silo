@@ -65,7 +65,7 @@ This package contains the development files of %{name}.
 #TODO fix parallel testing
 %global testargs --exclude-regex '\(checksums\|foo\)' --parallel 1
 %ctest %{?testargs}
-cat tests/testonehex.out
+cat redhat-linux-build/tests/testonehex.out
 
 %files devel
 %doc README.md
