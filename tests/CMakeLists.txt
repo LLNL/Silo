@@ -64,18 +64,19 @@
 #   each. Two tests are created, one for the PDB driver and, when enabled,
 #   one for the HDF5 driver. This is the simple and common case. Each test
 #   involves a single source file which is compiled to produce the test.
+#   The test is run two ways, one on PDB driver and one on HDF5 driver.
+#   Sometimes both runs touch the same file name so HDF5 tests set set
+#   to DEPEND on PDB tests when both are active.
 #
 #   Things get more complicated for these cases...
 #
+#       * A test works only on HDF5 or only on PDB driver
+#       * A test is defined only for certain options
 #       * A test needs special command-line arguments
 #       * A test is run many different ways producing the same file(s)
 #       * A test requires the data produced by another
 #       * A test involves a shell or python script
-#       * A test works only on HDF5 or only on PDB driver
 #       * A test involves multiple source files 
-#
-#   Making this more complicated still, many tests get defined only when
-#   certain options are enabled.
 #
 #   The C_TEST_SOURCES, CXX_TEST_SOURCES and F_TEST_SOURCES are the main
 #   file globbed list of C, C++ and Fortran source files. There are some
@@ -88,7 +89,6 @@
 #           one of a variety of reasons
 #       SPECIAL_TEST_SOURCES - the key difference between this list and
 #           SKIP list is that SPECIAL source files still get compiled.
-#
 #
 # Notes on valgrind testing...
 #
