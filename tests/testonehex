@@ -83,7 +83,7 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 #
 # Ensure we have Silo's python module
 #
-silo_pyso=$(find_file -r lib/Silo.so tools/python/Silo.so tools/python/.libs/Silo.so)
+silo_pyso=$(find_file -r lib{,64}/Silo.so tools/python/Silo.so tools/python/.libs/Silo.so)
 
 # 
 # Ensure we have Silo's 'browser' tool available
