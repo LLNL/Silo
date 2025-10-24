@@ -599,6 +599,13 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5")
 endif()
 
+if(SILO_ENABLE_FORTRAN)
+    set_tests_properties(arrayf77 PROPERTIES RESOURCE_LOCK "arrayf77.silo")
+    set_tests_properties(arrayf77-hdf5 PROPERTIES RESOURCE_LOCK "arrayf77.silo")
+    set_tests_properties(arrayf90 PROPERTIES RESOURCE_LOCK "arrayf77.silo")
+    set_tests_properties(arrayf90-hdf5 PROPERTIES RESOURCE_LOCK "arrayf77.silo")
+endif()
+
 add_custom_target(testdtypes ALL)
 add_custom_command(TARGET testdtypes POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
