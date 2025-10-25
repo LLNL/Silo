@@ -148,8 +148,8 @@ tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 # we just see the zero'd data we expect.
 #
 result=0
-brOut=$($browser -q -e 'block2/fl1.nodelist[523:528]' multi_ucd3d_corrupt.h5)
-if test -z "$(echo $brOut | grep '{299, 0, 0, 0, 0, 179}')"; then
+brOut=$($browser --proper-exit-code -q -e 'block2/fl1.nodelist[523:528]' multi_ucd3d_corrupt.h5)
+if [ $? -ne 0 ] || [ -z "$(echo $brOut | grep '{299, 0, 0, 0, 0, 179}')" ]; then
     result=1
 fi
 
@@ -157,8 +157,8 @@ fi
 # Now, run browser with checksumming turned on and make sure we
 # detect a checksumming error.
 #
-brOut=$($browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1)
-if test -z "$(echo $brOut | grep 'Checksum failure')"; then
+brOut=$($browser --proper-exit-code -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1)
+if [ $? -ne 0 ] || [ -z "$(echo $brOut | grep 'Checksum failure')" ]; then
     result=1
 fi
 

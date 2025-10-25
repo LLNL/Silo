@@ -642,6 +642,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME checksums
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/checksums")
+    set_tests_properties(multi_test-hdf5 PROPERTIES DEPENDS checksums)
 endif()
 
 #

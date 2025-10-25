@@ -85,7 +85,7 @@ multi_test=$(find_file -x tests/bin/multi_test tests/multi_test ./multi_test ../
 #
 # Ensure we have Silo's 'browser' tool available
 #
-browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser ../tools/browser/browser ../../../tools/browser/browser)
+browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser)
 [ $? -eq 0 ] || exit 1
 
 #
