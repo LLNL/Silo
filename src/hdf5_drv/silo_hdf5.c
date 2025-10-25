@@ -2008,6 +2008,7 @@ silo_walk_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     /* Note that error code can be overwritten by later strstr
        comparisons. Where both checksum and compression errors
        occur, we declare it a compression error. */
+printf("err_desc->desc = \"%s\"\n", err_desc->desc);
     if (strstr(err_desc->desc, "letcher32") != 0)
         *silo_error_code_p = E_CHECKSUM;
     if (strstr(err_desc->desc, "zip") != 0)
