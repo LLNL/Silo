@@ -615,19 +615,22 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(testdtypes PROPERTIES DEPENDS specmix-hdf5)
 endif()
 
-add_custom_target(testsilock ALL)
-add_custom_command(TARGET testsilock POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_SOURCE_DIR}/testsilock
-    ${silo_test_output_dir})
-if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    add_test(NAME testsilock-hdf5
-        COMMAND ${CMAKE_COMMAND} -E env
-        "${silo_test_output_dir}/testsilock" DB_HDF5)
-else()
+if(SILO_ENABLE_SILOCK)
+    add_custom_target(testsilock ALL)
+    add_custom_command(TARGET testsilock POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/testsilock
+        ${silo_test_output_dir})
     add_test(NAME testsilock
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/testsilock")
+    set_tests_properties(onehex PROPERTIES DEPENDS testsilock)
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+        add_test(NAME testsilock-hdf5
+            COMMAND ${CMAKE_COMMAND} -E env
+            "${silo_test_output_dir}/testsilock" DB_HDF5)
+        set_tests_properties(onehex-hdf5 PROPERTIES DEPENDS testsilock-hdf5)
+    endif()
 endif()
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
