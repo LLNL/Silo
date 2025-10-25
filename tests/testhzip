@@ -80,11 +80,13 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # Ensure the multi_test executable is available
 #
 multi_test=$(find_file -x tests/bin/multi_test tests/multi_test ./multi_test ../../multi_test)
+[ $? -eq 0 ] || exit 1
 
 #
 # Ensure we have Silo's 'browser' tool available
 #
 browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser ../tools/browser/browser ../../../tools/browser/browser)
+[ $? -eq 0 ] || exit 1
 
 #
 # Ensure we have HDF5's 'h5stat' tool in PATH
@@ -107,6 +109,7 @@ mv multi_*d.h5 h5_hzip_files/.
 # Create data without compression 
 #
 $multi_test DB_HDF5 1>/dev/null 2>&1
+[ $? -eq 0 ] || exit 1
 
 #
 # Now, run browser and make sure we don't get any errors in the diff
@@ -123,8 +126,8 @@ for df in multi_*.h5; do
     fi
     # do a diff on the files and confirm contents match
     rm -f testhzip.out
-    $browser -q -e diff $df h5_hzip_files/$df 1>testhzip.out 2>&1
-    if [ -s testhzip.out ]; then
+    $browser --proper-exit-code -q -e diff $df h5_hzip_files/$df 1>testhzip.out 2>&1
+    if [ $? -ne 0 ] || [ -s testhzip.out ]; then
         result=1
         break
     fi

@@ -76,11 +76,13 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # Ensure the multi_test executable is available
 #
 multi_test=$(find_file -x tests/bin/multi_test tests/multi_test ./multi_test ../../multi_test)
+[ $? -eq 0 ] || exit 1
 
 #
 # Ensure we have Silo's 'browser' tool available
 #
 browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser ../tools/browser/browser ../../../tools/browser/browser)
+[ $? -eq 0 ] || exit 1
 
 #
 # Create data with checksums (only on HDF5 driver) and save files
