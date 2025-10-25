@@ -218,6 +218,7 @@ out_section(out_t *f)
 void
 out_error (const char *mesg, obj_t obj) {
 
+   browserErrno = 1;
    if (!ErrorDisable) {
       out_reset (OUT_STDERR);
       out_push (OUT_STDERR, "***ERROR***");
@@ -255,6 +256,7 @@ out_errorn (const char *fmt, ...) {
    char         buf[4096];
    va_list      ap;
 
+   browserErrno = 1;
    if (!ErrorDisable) {
       va_start (ap, fmt);
       vsprintf (buf, fmt, ap);

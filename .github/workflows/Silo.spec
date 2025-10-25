@@ -61,10 +61,7 @@ This package contains the development files of %{name}.
 %cmake_install
 
 %check
-#TODO fix checksums and testonehex tests
-#TODO fix parallel testing
-%global testargs --exclude-regex '\(checksums\|testonehex\)' --parallel 1
-%ctest %{?testargs}
+%ctest
 
 %files devel
 %doc README.md

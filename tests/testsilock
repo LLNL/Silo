@@ -61,9 +61,8 @@
 #   Mark C. Miller, Thu Apr 29 15:56:33 PDT 2010
 #   Fix redirection to use sh syntax rather than csh syntax.
 # -----------------------------------------------------------------------------
-
 #
-# Determine directory of this script
+# Find dir where this script lives and source the shell utils script there.
 #
 # dirname -- "$0" gets the script’s directory even if this script is run via a
 #     relative path like ../../foo/bar/gorfo.sh.
@@ -73,33 +72,19 @@
 #     a subshell so the cwd of the current script is unchanged.
 #
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. $script_dir/silo_sh_utils.sh
 
 #
 # Ensure the onehex test executable is available
 #
-if [ ! -x $script_dir/onehex ]; then
-    echo "Silo's 'onehex' test executable is required and not found."
-    exit 1
-fi
-onehex=$(command -v $script_dir/onehex)
+onehex=$(find_file -x tests/onehex tests/bin/onehex)
+[ $? -eq 0 ] || exit 1
 
-#
+# 
 # Ensure we have Silo's 'silock' tool available
-#
-if [ ! -x $script_dir/../../bin/silock ]; then
-    if [ ! -x $script_dir/../tools/silock/silock ]; then
-        if [ ! -x $script_dir/../../../tools/silock/silock ]; then
-            echo "Silo's 'silock' tool is required and not found."
-            exit 1
-        else
-            silock=$(command -v $script_dir/../../../tools/silock/silock)
-        fi
-    else
-        silock=$(command -v $script_dir/../tools/silock/silock)
-    fi
-else
-    silock=$(command -v $script_dir/../../bin/silock)
-fi
+# 
+silock=$(find_file -x bin/silock tools/silock/silock tools/silock/.libs/silock)
+[ $? -eq 0 ] || exit 1
 
 result=0
 for driver in DB_PDB "$1"; do

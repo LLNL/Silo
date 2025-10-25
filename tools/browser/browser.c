@@ -136,6 +136,7 @@ char    HistoryFile[1024];      /*command history file name             */
 size_t  Trapped_FPE;            /*how many SIGFPE's were raised?        */
 size_t  Trapped_WINCH;          /*how many SIGWINCH's were raised?      */
 switches_t *Switches=NULL;      /*command-line switches                 */
+int     browserErrno=0;         /*Set to 1 if out_error() ever called   */
 
 char    *ObjTypeName[BROWSER_NOBJTYPES] = {
    "curve", "multimesh", "multivar", "multimat", "multispecies", "qmesh", 
@@ -1059,7 +1060,10 @@ process_switches(switches_t *switches, int pass)
     if ((sw=switch_find(switches, "--checksums")) && sw->seen) {
         sym_bi_set("checksums", "1", NULL, NULL);
     }
-    
+
+    if ((sw=switch_find(switches, "--proper-exit-code")) && sw->seen) {
+        sym_bi_set("properec", "1", NULL, NULL);
+    }
 }
 
 /*---------------------------------------------------------------------------
@@ -1478,6 +1482,12 @@ main(int argc, char *argv[])
                "(default 0), which causes the browser to perform checksums, "
                "when available in the database, during read.\n");
 
+    switch_add(sws, NULL, "--proper-exit-code", "b=1",        NULL);
+    switch_doc(NULL,
+               "This option sets the internal variable `$properec' to 1 "
+               "(default 0), which causes the browser to exit with non-zero, "
+               "value if an error is thrown at any point during a run.\n");
+
     /* We can get away with using process_sw_exclude here to process hdf5 vfd
      * options because that routine winds up stuffing the results into the
      * list identifed in switch_info */
@@ -1626,7 +1636,11 @@ main(int argc, char *argv[])
         }
         input_stack = lex_close(input_stack);
     }
-    if (eval_list.nused) exit(0);
+    if (eval_list.nused) {
+        if (sym_bi_true("properec"))
+            exit(browserErrno);
+        exit(0);
+    }
 
 #if !defined(HAVE_READLINE_READLINE_H) || !defined(HAVE_LIBREADLINE)
     out_info("Command-line editing is disabled (no readline library).");
@@ -1667,5 +1681,8 @@ main(int argc, char *argv[])
     }
 
     lex_close(input_stack);
+
+    if (sym_bi_true("properec"))
+        return(browserErrno);
     return 0;
 }

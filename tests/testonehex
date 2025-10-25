@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
@@ -83,17 +83,20 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 #
 # Ensure we have Silo's python module
 #
-silo_pyso=$(find_file -r lib{,64}/Silo.so tools/python/Silo.so tools/python/.libs/Silo.so)
+silo_pyso=$(find_file -r lib/Silo.so lib64/Silo.so tools/python/Silo.so tools/python/.libs/Silo.so)
+[ $? -eq 0 ] || exit 1
 
 # 
 # Ensure we have Silo's 'browser' tool available
 # 
 browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser)
+[ $? -eq 0 ] || exit 1
 
 #
 # Ensure we have onehex.py python script
 #
 onehexpy=$(find_file -r tests/bin/onehex.py tests/onehex.py)
+[ $? -eq 0 ] || exit 1
 
 #
 # Ensure we have the python interpreter in PATH
@@ -119,8 +122,8 @@ env PYTHONPATH=$(dirname $silo_pyso) $pycmd $onehexpy 1>/dev/null 2>&1
 # Now, run browser and make sure we don't get any errors in the diff
 #
 result=0
-$browser -R 0.00001 -q -e diff onehex.silo onehexpy.silo 1>testonehex.out 2>&1
-if test `grep -v 'appears only in' testonehex.out | wc -l | tr -s ' ' | cut -d' ' -f2` -gt 5; then
+$browser --proper-exit-code -R 0.00001 -q -e diff onehex.silo onehexpy.silo 1>testonehex.out 2>&1
+if [ $? -ne 0 ] || [ `grep -v 'appears only in' testonehex.out | grep '=' | wc -l | tr -s ' ' | cut -d' ' -f2` -gt 5 ]; then
     result=1
 fi
 

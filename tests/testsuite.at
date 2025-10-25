@@ -262,6 +262,7 @@ AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.l
 AT_CLEANUP
 AT_SETUP(write objects)
 AT_KEYWORDS(python)
+AT_CHECK(onehex $STARGS,,ignore) # don't valgrind these intermediate parts
 AT_CHECK(test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`,,ignore,ignore)
 AT_CLEANUP
 
@@ -397,7 +398,7 @@ AT_CLEANUP
 AT_SETUP(force single)
 AT_KEYWORDS(conversions)
 AT_CHECK(specmix $STARGS,,ignore)
-AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
+AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(multi_file)
 AT_KEYWORDS(large)
