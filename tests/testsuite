@@ -668,41 +668,41 @@ at_help_all="1;testsuite.at:63;dbversion;;
 50;testsuite.at:242;write;python;
 51;testsuite.at:258;error handling;python;
 52;testsuite.at:263;write objects;python;
-53;testsuite.at:269;json;json;
-54;testsuite.at:277;testpdb;;
-55;testsuite.at:280;pdbtst;;
-56;testsuite.at:285;grab;;
-57;testsuite.at:288;onehex with split VFD;;
-58;testsuite.at:291;onehex with custom fapl/fcpl;;
-59;testsuite.at:294;partial_io with rect3d point query;;
-60;testsuite.at:298;partial_io with ucd3d point query;;
-61;testsuite.at:302;compression gzip;compression;
-62;testsuite.at:307;compression szip;compression;
-63;testsuite.at:312;compression fpzip;compression;
-64;testsuite.at:317;compression lossy3;compression;
-65;testsuite.at:322;compression minratio1000;compression;
-66;testsuite.at:326;compression zfp;compression;
-67;testsuite.at:331;testhzip;compression;
-68;testsuite.at:335;checksums;;
-69;testsuite.at:338;xversion;;
-70;testsuite.at:341;largefile;large;
-71;testsuite.at:345;memfile_simple;;
-72;testsuite.at:351;arrayf77;fortran;
-73;testsuite.at:355;arrayf90;fortran;
-74;testsuite.at:359;curvef77;fortran;
-75;testsuite.at:363;matf77;fortran;
-76;testsuite.at:367;pointf77;fortran;
-77;testsuite.at:371;quadf77;fortran;
-78;testsuite.at:375;testallf77;fortran;
-79;testsuite.at:379;ucdf77;fortran;
-80;testsuite.at:383;csgmesh;fortran;
-81;testsuite.at:387;qmeshmat2df77;fortran;
-82;testsuite.at:393;silock;tools;
-83;testsuite.at:397;force single;conversions;
-84;testsuite.at:402;multi_file;large;
-85;testsuite.at:406;multi_file use-ns;large;
-86;testsuite.at:411;testall -medium;large;
-87;testsuite.at:415;testall -large;large;
+53;testsuite.at:270;json;json;
+54;testsuite.at:278;testpdb;;
+55;testsuite.at:281;pdbtst;;
+56;testsuite.at:286;grab;;
+57;testsuite.at:289;onehex with split VFD;;
+58;testsuite.at:292;onehex with custom fapl/fcpl;;
+59;testsuite.at:295;partial_io with rect3d point query;;
+60;testsuite.at:299;partial_io with ucd3d point query;;
+61;testsuite.at:303;compression gzip;compression;
+62;testsuite.at:308;compression szip;compression;
+63;testsuite.at:313;compression fpzip;compression;
+64;testsuite.at:318;compression lossy3;compression;
+65;testsuite.at:323;compression minratio1000;compression;
+66;testsuite.at:327;compression zfp;compression;
+67;testsuite.at:332;testhzip;compression;
+68;testsuite.at:336;checksums;;
+69;testsuite.at:339;xversion;;
+70;testsuite.at:342;largefile;large;
+71;testsuite.at:346;memfile_simple;;
+72;testsuite.at:352;arrayf77;fortran;
+73;testsuite.at:356;arrayf90;fortran;
+74;testsuite.at:360;curvef77;fortran;
+75;testsuite.at:364;matf77;fortran;
+76;testsuite.at:368;pointf77;fortran;
+77;testsuite.at:372;quadf77;fortran;
+78;testsuite.at:376;testallf77;fortran;
+79;testsuite.at:380;ucdf77;fortran;
+80;testsuite.at:384;csgmesh;fortran;
+81;testsuite.at:388;qmeshmat2df77;fortran;
+82;testsuite.at:394;silock;tools;
+83;testsuite.at:398;force single;conversions;
+84;testsuite.at:403;multi_file;large;
+85;testsuite.at:407;multi_file use-ns;large;
+86;testsuite.at:412;testall -medium;large;
+87;testsuite.at:416;testall -large;large;
 "
 # List of the all the test groups.
 at_groups_all=`printf "%s\n" "$at_help_all" | sed 's/;.*//'`
@@ -1083,19 +1083,19 @@ at_banner_text_1="Non-driver-specific"
 # Banner 2. testsuite.at:236
 # Category starts at test group 49.
 at_banner_text_2="pythonmodule"
-# Banner 3. testsuite.at:268
+# Banner 3. testsuite.at:269
 # Category starts at test group 53.
 at_banner_text_3="JSON (experimental)"
-# Banner 4. testsuite.at:276
+# Banner 4. testsuite.at:277
 # Category starts at test group 54.
 at_banner_text_4="PDB Lite"
-# Banner 5. testsuite.at:284
+# Banner 5. testsuite.at:285
 # Category starts at test group 56.
 at_banner_text_5="HDF5 Driver Specific"
-# Banner 6. testsuite.at:350
+# Banner 6. testsuite.at:351
 # Category starts at test group 72.
 at_banner_text_6="Fortran"
-# Banner 7. testsuite.at:392
+# Banner 7. testsuite.at:393
 # Category starts at test group 82.
 at_banner_text_7="Special"
 
@@ -3593,15 +3593,28 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:265: test -z \"\$PYTHON\" -o -z \"\$BROWSER\" && exit 77 || \$VALGRIND testonehex \`pwd\`"
-at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:265"
+printf "%s\n" "$at_srcdir/testsuite.at:265: onehex \$STARGS"
+at_fn_check_prepare_dynamic "onehex $STARGS" "testsuite.at:265"
+( $at_check_trace; onehex $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:265"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+ # don't valgrind these intermediate parts
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:266: test -z \"\$PYTHON\" -o -z \"\$BROWSER\" && exit 77 || \$VALGRIND testonehex \`pwd\`"
+at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:266"
 ( $at_check_trace; test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:265"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:266"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3611,7 +3624,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_52
 #AT_START_53
-at_fn_group_banner 53 'testsuite.at:269' \
+at_fn_group_banner 53 'testsuite.at:270' \
   "json" "                                           " 3
 at_xfail=no
 (
@@ -3620,22 +3633,9 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:271: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || onehex \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || onehex $STARGS" "testsuite.at:271"
+printf "%s\n" "$at_srcdir/testsuite.at:272: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || onehex \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || onehex $STARGS" "testsuite.at:272"
 ( $at_check_trace; test ! \( -e ./json -o -e ../../json \) && exit 77 || onehex $STARGS
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:271"
-$at_failed && at_fn_log_failure
-$at_traceon; }
- # don't valgrind these intermediate parts
-{ set +x
-printf "%s\n" "$at_srcdir/testsuite.at:272: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || multi_test \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || multi_test $STARGS" "testsuite.at:272"
-( $at_check_trace; test ! \( -e ./json -o -e ../../json \) && exit 77 || multi_test $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3646,15 +3646,28 @@ $at_failed && at_fn_log_failure
 $at_traceon; }
  # don't valgrind these intermediate parts
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:273: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || \$VALGRIND json \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || $VALGRIND json $STARGS" "testsuite.at:273"
+printf "%s\n" "$at_srcdir/testsuite.at:273: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || multi_test \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || multi_test $STARGS" "testsuite.at:273"
+( $at_check_trace; test ! \( -e ./json -o -e ../../json \) && exit 77 || multi_test $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:273"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+ # don't valgrind these intermediate parts
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:274: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || \$VALGRIND json \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || $VALGRIND json $STARGS" "testsuite.at:274"
 ( $at_check_trace; test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:273"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:274"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3664,7 +3677,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_53
 #AT_START_54
-at_fn_group_banner 54 'testsuite.at:277' \
+at_fn_group_banner 54 'testsuite.at:278' \
   "testpdb" "                                        " 4
 at_xfail=no
 (
@@ -3672,15 +3685,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:278: test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND testpdb"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"$STARGS\" = DB_HDF5 && exit 77 || $VALGRIND testpdb" "testsuite.at:278"
+printf "%s\n" "$at_srcdir/testsuite.at:279: test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND testpdb"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"$STARGS\" = DB_HDF5 && exit 77 || $VALGRIND testpdb" "testsuite.at:279"
 ( $at_check_trace; test ! \( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \) -o "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_skip $at_status "$at_srcdir/testsuite.at:278"
+at_fn_check_skip $at_status "$at_srcdir/testsuite.at:279"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3690,7 +3703,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_54
 #AT_START_55
-at_fn_group_banner 55 'testsuite.at:280' \
+at_fn_group_banner 55 'testsuite.at:281' \
   "pdbtst" "                                         " 4
 at_xfail=no
 (
@@ -3698,15 +3711,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:281: test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND pdbtst"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"$STARGS\" = DB_HDF5 && exit 77 || $VALGRIND pdbtst" "testsuite.at:281"
+printf "%s\n" "$at_srcdir/testsuite.at:282: test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND pdbtst"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \\) -o \"$STARGS\" = DB_HDF5 && exit 77 || $VALGRIND pdbtst" "testsuite.at:282"
 ( $at_check_trace; test ! \( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \) -o "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND pdbtst
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_skip $at_status "$at_srcdir/testsuite.at:281"
+at_fn_check_skip $at_status "$at_srcdir/testsuite.at:282"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3716,7 +3729,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_55
 #AT_START_56
-at_fn_group_banner 56 'testsuite.at:285' \
+at_fn_group_banner 56 'testsuite.at:286' \
   "grab" "                                           " 5
 at_xfail=no
 (
@@ -3724,15 +3737,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:286: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND grab"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND grab" "testsuite.at:286"
+printf "%s\n" "$at_srcdir/testsuite.at:287: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND grab"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND grab" "testsuite.at:287"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:286"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:287"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3742,7 +3755,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_56
 #AT_START_57
-at_fn_group_banner 57 'testsuite.at:288' \
+at_fn_group_banner 57 'testsuite.at:289' \
   "onehex with split VFD" "                          " 5
 at_xfail=no
 (
@@ -3750,15 +3763,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:289: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND onehex split"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND onehex split" "testsuite.at:289"
+printf "%s\n" "$at_srcdir/testsuite.at:290: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND onehex split"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND onehex split" "testsuite.at:290"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:289"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:290"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3768,7 +3781,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_57
 #AT_START_58
-at_fn_group_banner 58 'testsuite.at:291' \
+at_fn_group_banner 58 'testsuite.at:292' \
   "onehex with custom fapl/fcpl" "                   " 5
 at_xfail=no
 (
@@ -3776,15 +3789,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:292: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND onehex custom"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND onehex custom" "testsuite.at:292"
+printf "%s\n" "$at_srcdir/testsuite.at:293: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND onehex custom"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND onehex custom" "testsuite.at:293"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex custom
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:292"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:293"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3794,7 +3807,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_58
 #AT_START_59
-at_fn_group_banner 59 'testsuite.at:294' \
+at_fn_group_banner 59 'testsuite.at:295' \
   "partial_io with rect3d point query" "             " 5
 at_xfail=no
 (
@@ -3802,28 +3815,28 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:295: testall \$STARGS"
-at_fn_check_prepare_dynamic "testall $STARGS" "testsuite.at:295"
+printf "%s\n" "$at_srcdir/testsuite.at:296: testall \$STARGS"
+at_fn_check_prepare_dynamic "testall $STARGS" "testsuite.at:296"
 ( $at_check_trace; testall $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:295"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:296"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:296: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9" "testsuite.at:296"
+printf "%s\n" "$at_srcdir/testsuite.at:297: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9" "testsuite.at:297"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:296"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:297"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3833,7 +3846,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_59
 #AT_START_60
-at_fn_group_banner 60 'testsuite.at:298' \
+at_fn_group_banner 60 'testsuite.at:299' \
   "partial_io with ucd3d point query" "              " 5
 at_xfail=no
 (
@@ -3841,28 +3854,28 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:299: testall \$STARGS"
-at_fn_check_prepare_dynamic "testall $STARGS" "testsuite.at:299"
+printf "%s\n" "$at_srcdir/testsuite.at:300: testall \$STARGS"
+at_fn_check_prepare_dynamic "testall $STARGS" "testsuite.at:300"
 ( $at_check_trace; testall $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:299"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:300"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:300: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 0,26,234,1482,2574"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 0,26,234,1482,2574" "testsuite.at:300"
+printf "%s\n" "$at_srcdir/testsuite.at:301: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 0,26,234,1482,2574"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 0,26,234,1482,2574" "testsuite.at:301"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 0,26,234,1482,2574
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:300"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:301"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3872,7 +3885,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_60
 #AT_START_61
-at_fn_group_banner 61 'testsuite.at:302' \
+at_fn_group_banner 61 'testsuite.at:303' \
   "compression gzip" "                               " 5
 at_xfail=no
 (
@@ -3881,22 +3894,9 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:304: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression gzip"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression gzip" "testsuite.at:304"
+printf "%s\n" "$at_srcdir/testsuite.at:305: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression gzip"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression gzip" "testsuite.at:305"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:304"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-printf "%s\n" "$at_srcdir/testsuite.at:305: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:305"
-( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3906,13 +3906,26 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:305"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:306: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:306"
+( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:306"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_61
 #AT_START_62
-at_fn_group_banner 62 'testsuite.at:307' \
+at_fn_group_banner 62 'testsuite.at:308' \
   "compression szip" "                               " 5
 at_xfail=no
 (
@@ -3921,22 +3934,9 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:309: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression szip"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression szip" "testsuite.at:309"
+printf "%s\n" "$at_srcdir/testsuite.at:310: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression szip"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression szip" "testsuite.at:310"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:309"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-printf "%s\n" "$at_srcdir/testsuite.at:310: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:310"
-( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3946,13 +3946,26 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:310"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:311: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:311"
+( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:311"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_62
 #AT_START_63
-at_fn_group_banner 63 'testsuite.at:312' \
+at_fn_group_banner 63 'testsuite.at:313' \
   "compression fpzip" "                              " 5
 at_xfail=no
 (
@@ -3961,22 +3974,9 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:314: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression fpzip"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip" "testsuite.at:314"
+printf "%s\n" "$at_srcdir/testsuite.at:315: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression fpzip"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip" "testsuite.at:315"
 ( $at_check_trace; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:314"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-printf "%s\n" "$at_srcdir/testsuite.at:315: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:315"
-( $at_check_trace; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3986,13 +3986,26 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:315"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:316: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:316"
+( $at_check_trace; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:316"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_63
 #AT_START_64
-at_fn_group_banner 64 'testsuite.at:317' \
+at_fn_group_banner 64 'testsuite.at:318' \
   "compression lossy3" "                             " 5
 at_xfail=no
 (
@@ -4001,28 +4014,28 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:319: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression lossy3"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3" "testsuite.at:319"
+printf "%s\n" "$at_srcdir/testsuite.at:320: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression lossy3"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3" "testsuite.at:320"
 ( $at_check_trace; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:319"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:320"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:320: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:320"
+printf "%s\n" "$at_srcdir/testsuite.at:321: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:321"
 ( $at_check_trace; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 50 $at_status "$at_srcdir/testsuite.at:320"
+at_fn_check_status 50 $at_status "$at_srcdir/testsuite.at:321"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4032,7 +4045,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_64
 #AT_START_65
-at_fn_group_banner 65 'testsuite.at:322' \
+at_fn_group_banner 65 'testsuite.at:323' \
   "compression minratio1000" "                       " 5
 at_xfail=no
 (
@@ -4041,15 +4054,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:324: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression minratio1000"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000" "testsuite.at:324"
+printf "%s\n" "$at_srcdir/testsuite.at:325: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression minratio1000"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000" "testsuite.at:325"
 ( $at_check_trace; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 1 $at_status "$at_srcdir/testsuite.at:324"
+at_fn_check_status 1 $at_status "$at_srcdir/testsuite.at:325"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4059,7 +4072,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_65
 #AT_START_66
-at_fn_group_banner 66 'testsuite.at:326' \
+at_fn_group_banner 66 'testsuite.at:327' \
   "compression zfp" "                                " 5
 at_xfail=no
 (
@@ -4068,28 +4081,28 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:328: test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression zfp"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression zfp" "testsuite.at:328"
+printf "%s\n" "$at_srcdir/testsuite.at:329: test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression zfp"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression zfp" "testsuite.at:329"
 ( $at_check_trace; test ! \( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression zfp
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:328"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:329"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:329: test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:329"
+printf "%s\n" "$at_srcdir/testsuite.at:330: test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:330"
 ( $at_check_trace; test ! \( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 50 $at_status "$at_srcdir/testsuite.at:329"
+at_fn_check_status 50 $at_status "$at_srcdir/testsuite.at:330"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4099,7 +4112,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_66
 #AT_START_67
-at_fn_group_banner 67 'testsuite.at:331' \
+at_fn_group_banner 67 'testsuite.at:332' \
   "testhzip" "                                       " 5
 at_xfail=no
 (
@@ -4108,15 +4121,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:333: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testhzip \`pwd\`"
-at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:333"
+printf "%s\n" "$at_srcdir/testsuite.at:334: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testhzip \`pwd\`"
+at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:334"
 ( $at_check_trace; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd`
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:333"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:334"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4126,7 +4139,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_67
 #AT_START_68
-at_fn_group_banner 68 'testsuite.at:335' \
+at_fn_group_banner 68 'testsuite.at:336' \
   "checksums" "                                      " 5
 at_xfail=no
 (
@@ -4134,15 +4147,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:336: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND checksums \`pwd\`"
-at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:336"
+printf "%s\n" "$at_srcdir/testsuite.at:337: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND checksums \`pwd\`"
+at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:337"
 ( $at_check_trace; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd`
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:336"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:337"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4152,7 +4165,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_68
 #AT_START_69
-at_fn_group_banner 69 'testsuite.at:338' \
+at_fn_group_banner 69 'testsuite.at:339' \
   "xversion" "                                       " 5
 at_xfail=no
 (
@@ -4160,15 +4173,15 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:339: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testxvers \`pwd\`"
-at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:339"
+printf "%s\n" "$at_srcdir/testsuite.at:340: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testxvers \`pwd\`"
+at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:340"
 ( $at_check_trace; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd`
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:339"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:340"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4178,7 +4191,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_69
 #AT_START_70
-at_fn_group_banner 70 'testsuite.at:341' \
+at_fn_group_banner 70 'testsuite.at:342' \
   "largefile" "                                      " 5
 at_xfail=no
 (
@@ -4187,15 +4200,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:343: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND largefile"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND largefile" "testsuite.at:343"
+printf "%s\n" "$at_srcdir/testsuite.at:344: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND largefile"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND largefile" "testsuite.at:344"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:343"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:344"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4205,7 +4218,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_70
 #AT_START_71
-at_fn_group_banner 71 'testsuite.at:345' \
+at_fn_group_banner 71 'testsuite.at:346' \
   "memfile_simple" "                                 " 5
 at_xfail=no
 (
@@ -4213,28 +4226,28 @@ at_xfail=no
   $at_traceon
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:346: testall -small \$STARGS"
-at_fn_check_prepare_dynamic "testall -small $STARGS" "testsuite.at:346"
+printf "%s\n" "$at_srcdir/testsuite.at:347: testall -small \$STARGS"
+at_fn_check_prepare_dynamic "testall -small $STARGS" "testsuite.at:347"
 ( $at_check_trace; testall -small $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:346"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:347"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:347: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND memfile_simple \$STARGS"
-at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS" "testsuite.at:347"
+printf "%s\n" "$at_srcdir/testsuite.at:348: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND memfile_simple \$STARGS"
+at_fn_check_prepare_dynamic "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS" "testsuite.at:348"
 ( $at_check_trace; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:347"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:348"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4244,7 +4257,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_71
 #AT_START_72
-at_fn_group_banner 72 'testsuite.at:351' \
+at_fn_group_banner 72 'testsuite.at:352' \
   "arrayf77" "                                       " 6
 at_xfail=no
 (
@@ -4253,15 +4266,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:353: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || $VALGRIND arrayf77 $STARGS" "testsuite.at:353"
+printf "%s\n" "$at_srcdir/testsuite.at:354: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || $VALGRIND arrayf77 $STARGS" "testsuite.at:354"
 ( $at_check_trace; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:353"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:354"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4271,7 +4284,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_72
 #AT_START_73
-at_fn_group_banner 73 'testsuite.at:355' \
+at_fn_group_banner 73 'testsuite.at:356' \
   "arrayf90" "                                       " 6
 at_xfail=no
 (
@@ -4280,15 +4293,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:357: test ! \\( -f arrayf90 -o -f ../../arrayf90 \\) && exit 77 || \$VALGRIND arrayf90 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f arrayf90 -o -f ../../arrayf90 \\) && exit 77 || $VALGRIND arrayf90 $STARGS" "testsuite.at:357"
+printf "%s\n" "$at_srcdir/testsuite.at:358: test ! \\( -f arrayf90 -o -f ../../arrayf90 \\) && exit 77 || \$VALGRIND arrayf90 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f arrayf90 -o -f ../../arrayf90 \\) && exit 77 || $VALGRIND arrayf90 $STARGS" "testsuite.at:358"
 ( $at_check_trace; test ! \( -f arrayf90 -o -f ../../arrayf90 \) && exit 77 || $VALGRIND arrayf90 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:357"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:358"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4298,7 +4311,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_73
 #AT_START_74
-at_fn_group_banner 74 'testsuite.at:359' \
+at_fn_group_banner 74 'testsuite.at:360' \
   "curvef77" "                                       " 6
 at_xfail=no
 (
@@ -4307,15 +4320,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:361: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || $VALGRIND curvef77 $STARGS" "testsuite.at:361"
+printf "%s\n" "$at_srcdir/testsuite.at:362: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || $VALGRIND curvef77 $STARGS" "testsuite.at:362"
 ( $at_check_trace; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:361"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:362"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4325,7 +4338,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_74
 #AT_START_75
-at_fn_group_banner 75 'testsuite.at:363' \
+at_fn_group_banner 75 'testsuite.at:364' \
   "matf77" "                                         " 6
 at_xfail=no
 (
@@ -4334,15 +4347,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:365: test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || \$VALGRIND matf77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || $VALGRIND matf77 $STARGS" "testsuite.at:365"
+printf "%s\n" "$at_srcdir/testsuite.at:366: test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || \$VALGRIND matf77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || $VALGRIND matf77 $STARGS" "testsuite.at:366"
 ( $at_check_trace; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:365"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:366"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4352,7 +4365,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_75
 #AT_START_76
-at_fn_group_banner 76 'testsuite.at:367' \
+at_fn_group_banner 76 'testsuite.at:368' \
   "pointf77" "                                       " 6
 at_xfail=no
 (
@@ -4361,15 +4374,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:369: test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || \$VALGRIND pointf77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || $VALGRIND pointf77 $STARGS" "testsuite.at:369"
+printf "%s\n" "$at_srcdir/testsuite.at:370: test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || \$VALGRIND pointf77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || $VALGRIND pointf77 $STARGS" "testsuite.at:370"
 ( $at_check_trace; test ! \( -f pointf77 -o -f ../../pointf77 \) && exit 77 || $VALGRIND pointf77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:369"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:370"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4379,7 +4392,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_76
 #AT_START_77
-at_fn_group_banner 77 'testsuite.at:371' \
+at_fn_group_banner 77 'testsuite.at:372' \
   "quadf77" "                                        " 6
 at_xfail=no
 (
@@ -4388,15 +4401,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:373: test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || \$VALGRIND quadf77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || $VALGRIND quadf77 $STARGS" "testsuite.at:373"
+printf "%s\n" "$at_srcdir/testsuite.at:374: test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || \$VALGRIND quadf77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || $VALGRIND quadf77 $STARGS" "testsuite.at:374"
 ( $at_check_trace; test ! \( -f quadf77 -o -f ../../quadf77 \) && exit 77 || $VALGRIND quadf77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:373"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:374"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4406,7 +4419,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_77
 #AT_START_78
-at_fn_group_banner 78 'testsuite.at:375' \
+at_fn_group_banner 78 'testsuite.at:376' \
   "testallf77" "                                     " 6
 at_xfail=no
 (
@@ -4415,15 +4428,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:377: test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || \$VALGRIND testallf77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || $VALGRIND testallf77 $STARGS" "testsuite.at:377"
+printf "%s\n" "$at_srcdir/testsuite.at:378: test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || \$VALGRIND testallf77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || $VALGRIND testallf77 $STARGS" "testsuite.at:378"
 ( $at_check_trace; test ! \( -f testallf77 -o -f ../../testallf77 \) && exit 77 || $VALGRIND testallf77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:377"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:378"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4433,7 +4446,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_78
 #AT_START_79
-at_fn_group_banner 79 'testsuite.at:379' \
+at_fn_group_banner 79 'testsuite.at:380' \
   "ucdf77" "                                         " 6
 at_xfail=no
 (
@@ -4442,15 +4455,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:381: test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || \$VALGRIND ucdf77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || $VALGRIND ucdf77 $STARGS" "testsuite.at:381"
+printf "%s\n" "$at_srcdir/testsuite.at:382: test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || \$VALGRIND ucdf77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || $VALGRIND ucdf77 $STARGS" "testsuite.at:382"
 ( $at_check_trace; test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:381"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:382"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4460,7 +4473,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_79
 #AT_START_80
-at_fn_group_banner 80 'testsuite.at:383' \
+at_fn_group_banner 80 'testsuite.at:384' \
   "csgmesh" "                                        " 6
 at_xfail=no
 (
@@ -4469,15 +4482,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:385: test ! \\( -f csgmesh -o -f ../../csgmesh \\) && exit 77 || \$VALGRIND csgmesh \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f csgmesh -o -f ../../csgmesh \\) && exit 77 || $VALGRIND csgmesh $STARGS" "testsuite.at:385"
+printf "%s\n" "$at_srcdir/testsuite.at:386: test ! \\( -f csgmesh -o -f ../../csgmesh \\) && exit 77 || \$VALGRIND csgmesh \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f csgmesh -o -f ../../csgmesh \\) && exit 77 || $VALGRIND csgmesh $STARGS" "testsuite.at:386"
 ( $at_check_trace; test ! \( -f csgmesh -o -f ../../csgmesh \) && exit 77 || $VALGRIND csgmesh $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:385"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:386"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4487,7 +4500,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_80
 #AT_START_81
-at_fn_group_banner 81 'testsuite.at:387' \
+at_fn_group_banner 81 'testsuite.at:388' \
   "qmeshmat2df77" "                                  " 6
 at_xfail=no
 (
@@ -4496,15 +4509,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:389: test ! \\( -f qmeshmat2df77 -o -f ../../qmeshmat2df77 \\) && exit 77 || \$VALGRIND qmeshmat2df77 \$STARGS"
-at_fn_check_prepare_dynamic "test ! \\( -f qmeshmat2df77 -o -f ../../qmeshmat2df77 \\) && exit 77 || $VALGRIND qmeshmat2df77 $STARGS" "testsuite.at:389"
+printf "%s\n" "$at_srcdir/testsuite.at:390: test ! \\( -f qmeshmat2df77 -o -f ../../qmeshmat2df77 \\) && exit 77 || \$VALGRIND qmeshmat2df77 \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -f qmeshmat2df77 -o -f ../../qmeshmat2df77 \\) && exit 77 || $VALGRIND qmeshmat2df77 $STARGS" "testsuite.at:390"
 ( $at_check_trace; test ! \( -f qmeshmat2df77 -o -f ../../qmeshmat2df77 \) && exit 77 || $VALGRIND qmeshmat2df77 $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:389"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:390"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4514,7 +4527,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_81
 #AT_START_82
-at_fn_group_banner 82 'testsuite.at:393' \
+at_fn_group_banner 82 'testsuite.at:394' \
   "silock" "                                         " 7
 at_xfail=no
 (
@@ -4523,15 +4536,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:395: testsilock \`pwd\` \$STARGS"
-at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:395"
+printf "%s\n" "$at_srcdir/testsuite.at:396: testsilock \`pwd\` \$STARGS"
+at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:396"
 ( $at_check_trace; testsilock `pwd` $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:395"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:396"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4541,7 +4554,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_82
 #AT_START_83
-at_fn_group_banner 83 'testsuite.at:397' \
+at_fn_group_banner 83 'testsuite.at:398' \
   "force single" "                                   " 7
 at_xfail=no
 (
@@ -4550,22 +4563,9 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:399: specmix \$STARGS"
-at_fn_check_prepare_dynamic "specmix $STARGS" "testsuite.at:399"
+printf "%s\n" "$at_srcdir/testsuite.at:400: specmix \$STARGS"
+at_fn_check_prepare_dynamic "specmix $STARGS" "testsuite.at:400"
 ( $at_check_trace; specmix $STARGS
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:399"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-printf "%s\n" "$at_srcdir/testsuite.at:400: test -z \"\$BROWSER\" && exit 77 || \$VALGRIND testdtypes \`pwd\` \$STARGS"
-at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:400"
-( $at_check_trace; test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -4575,13 +4575,26 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:400"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:401: test -z \"\$BROWSER\" && exit 77 || \$VALGRIND testdtypes \`pwd\` \$STARGS"
+at_fn_check_prepare_notrace 'a `...` command substitution' "testsuite.at:401"
+( $at_check_trace; test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:401"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_83
 #AT_START_84
-at_fn_group_banner 84 'testsuite.at:402' \
+at_fn_group_banner 84 'testsuite.at:403' \
   "multi_file" "                                     " 7
 at_xfail=no
 (
@@ -4590,15 +4603,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:404: \$VALGRIND multi_file \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multi_file $STARGS" "testsuite.at:404"
+printf "%s\n" "$at_srcdir/testsuite.at:405: \$VALGRIND multi_file \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_file $STARGS" "testsuite.at:405"
 ( $at_check_trace; $VALGRIND multi_file $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:404"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:405"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4608,7 +4621,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_84
 #AT_START_85
-at_fn_group_banner 85 'testsuite.at:406' \
+at_fn_group_banner 85 'testsuite.at:407' \
   "multi_file use-ns" "                              " 7
 at_xfail=no
 (
@@ -4617,22 +4630,9 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:408: \$VALGRIND multi_file use-ns \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND multi_file use-ns $STARGS" "testsuite.at:408"
+printf "%s\n" "$at_srcdir/testsuite.at:409: \$VALGRIND multi_file use-ns \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND multi_file use-ns $STARGS" "testsuite.at:409"
 ( $at_check_trace; $VALGRIND multi_file use-ns $STARGS
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:408"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-printf "%s\n" "$at_srcdir/testsuite.at:409: \$VALGRIND namescheme eval-ns \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND namescheme eval-ns $STARGS" "testsuite.at:409"
-( $at_check_trace; $VALGRIND namescheme eval-ns $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -4642,13 +4642,26 @@ at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:409"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+printf "%s\n" "$at_srcdir/testsuite.at:410: \$VALGRIND namescheme eval-ns \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND namescheme eval-ns $STARGS" "testsuite.at:410"
+( $at_check_trace; $VALGRIND namescheme eval-ns $STARGS
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:410"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_85
 #AT_START_86
-at_fn_group_banner 86 'testsuite.at:411' \
+at_fn_group_banner 86 'testsuite.at:412' \
   "testall -medium" "                                " 7
 at_xfail=no
 (
@@ -4657,15 +4670,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:413: \$VALGRIND testall -medium \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND testall -medium $STARGS" "testsuite.at:413"
+printf "%s\n" "$at_srcdir/testsuite.at:414: \$VALGRIND testall -medium \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND testall -medium $STARGS" "testsuite.at:414"
 ( $at_check_trace; $VALGRIND testall -medium $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:413"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:414"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4675,7 +4688,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_86
 #AT_START_87
-at_fn_group_banner 87 'testsuite.at:415' \
+at_fn_group_banner 87 'testsuite.at:416' \
   "testall -large" "                                 " 7
 at_xfail=no
 (
@@ -4684,15 +4697,15 @@ at_xfail=no
 
 
 { set +x
-printf "%s\n" "$at_srcdir/testsuite.at:417: \$VALGRIND testall -large \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND testall -large $STARGS" "testsuite.at:417"
+printf "%s\n" "$at_srcdir/testsuite.at:418: \$VALGRIND testall -large \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND testall -large $STARGS" "testsuite.at:418"
 ( $at_check_trace; $VALGRIND testall -large $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:417"
+at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:418"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
