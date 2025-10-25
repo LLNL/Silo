@@ -65,8 +65,8 @@
 #   one for the HDF5 driver. This is the simple and common case. Each test
 #   involves a single source file which is compiled to produce the test.
 #   The test is run two ways, one on PDB driver and one on HDF5 driver.
-#   Sometimes both runs touch the same file name so HDF5 tests set set
-#   to DEPEND on PDB tests when both are active.
+#   Sometimes both runs touch the same file name so HDF5 tests set to
+#   DEPEND on PDB tests when both are active.
 #
 #   Things get more complicated for these cases...
 #
@@ -90,7 +90,12 @@
 #       SPECIAL_TEST_SOURCES - the key difference between this list and
 #           SKIP list is that SPECIAL source files still get compiled.
 #
-# Notes on valgrind testing...
+#   CMake's RESOURCE_LOCK property is used in some cases but maybe it
+#   should be used more liberally. We should probably use REQUIRED_FILES
+#   more. There may be some logic errors here where we wind up overriding
+#   a test's properties.
+#
+# Notes on how to do valgrind testing...
 #
 # cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF -DSILO_ENABLE_HDF5:BOOL=ON -DSILO_ENABLE_FPZIP:BOOL=ON -DBUILD_TESTING:BOOL=ON -DSILO_HDF5_DIR:PATH=/mnt/nvme/mark/silo/hdf5-1.14.4/build/my_install -DCMAKE_BUILD_TYPE:STRING=Debug -S .. -B memcheck-build 
 # cmake --build memcheck-build -j 8
@@ -186,7 +191,6 @@ add_custom_command(TARGET copy_test_data POST_BUILD
     ${CMAKE_CURRENT_SOURCE_DIR}/z1plt.silo
     ${silo_test_output_dir})
 
-message(STATUS "SHOULD THIS BE COPY_TEST_SCRIPTS")
 add_custom_command(TARGET copy_test_data POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/silo_sh_utils.sh
@@ -252,7 +256,6 @@ set(PARALLEL_SOURCES
 #
 file(GLOB C_TEST_SOURCES *.c)
 file(GLOB CXX_TEST_SOURCES *.cxx)
-
 if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     file(GLOB F_TEST_SOURCES *.f*)
 endif()
@@ -413,9 +416,6 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
 
 endforeach()
 
-message(STATUS "FIX TEST PROPERTIES OVERRIDES")
-
-
 add_dependencies(rocket rocket_silo)
 set_target_properties(rocket PROPERTIES ENABLE_EXPORTS ON)
 
@@ -437,7 +437,6 @@ if(SILO_ENABLE_JSON)
         set_tests_properties(json-hdf5 PROPERTIES LABELS "hdf5")
         set_tests_properties(json-hdf5 PROPERTIES LABELS "json")
     endif()
-    message(STATUS "FIX RESOURCE LOCK LIST")
     set_tests_properties(json;json-hdf5 PROPERTIES RESOURCE_LOCK onehex.silo)
 endif()
 
