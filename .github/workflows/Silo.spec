@@ -60,8 +60,9 @@ This package contains the development files of %{name}.
 %install
 %cmake_install
 
-%check
 #TODO fix parallel testing
+%check
+%global testargs --parallel 1
 %ctest %{?testargs}
 
 %files devel
