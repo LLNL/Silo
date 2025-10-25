@@ -62,6 +62,7 @@ jobs:
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
         make -j 8 check
+        exit 1
 
     - name: Check Silo CTest
       id: makecheck-cmake
