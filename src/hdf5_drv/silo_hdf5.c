@@ -7173,10 +7173,10 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
                 UNWIND();
             }
 
+            for (i=0, mult=1; i<ndims; i++) mult *= dim[i];
+
             if (just_get_datatype == 0)
             {
-                for (i=0, mult=1; i<ndims; i++) mult *= dim[i];
-
                 /* Allocate the return value */
                 if (NULL==(retval=calloc(mult, db_GetMachDataSize(datatype)))) {
                     db_perror(compname, E_CALLFAIL, me);
@@ -7214,6 +7214,15 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
             else
             {
                 *just_get_datatype = datatype;
+                if (mult > 1)
+                {
+                    if (datatype == DB_INT)
+                        *just_get_datatype = DB_INTA;
+                    else if (datatype == DB_FLOAT)
+                        *just_get_datatype = DB_FLOATA;
+                    else if (datatype == DB_DOUBLE)
+                        *just_get_datatype = DB_DOUBLEA;
+                }
             }
         }
         
@@ -8836,18 +8845,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                                   H5T_NATIVE_INT);
                 memcpy(mem_value, file_value, H5Tget_size(atype));
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
-#if 0
                 DBAddIntNComponent(obj, name, nelmts, (int*)mem_value);
-#else
-                if (1==nelmts) {
-                    DBAddIntComponent(obj, name, *((int*)mem_value));
-                } else {
-                    for (j=0; (size_t)j<nelmts; j++) {
-                        sprintf(bigname, "%s%d", name, j+1);
-                        DBAddIntComponent(obj, bigname, ((int*)mem_value)[j]);
-                    }
-                }
-#endif
                 break;
 
             case H5T_FLOAT:
@@ -8857,35 +8855,11 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
                 if (4 == (int) H5Tget_size(member_type))
                 {
-#if 0
                     DBAddFltNComponent(obj, name, nelmts, (double*)mem_value);
-#else
-                    if (1==nelmts) {
-                        DBAddFltComponent(obj, name, *((double*)mem_value));
-                    } else {
-                        for (j=0; (size_t)j<nelmts; j++) {
-                            sprintf(bigname, "%s%d", name, j+1);
-                            DBAddFltComponent(obj, bigname,
-                                              ((double*)mem_value)[j]);
-                        }
-                    }
-#endif
                 }
                 else
                 {
-#if 0
                     DBAddDblNComponent(obj, name, nelmts, (double*)mem_value);
-#else
-                    if (1==nelmts) {
-                        DBAddDblComponent(obj, name, *((double*)mem_value));
-                    } else {
-                        for (j=0; (size_t)j<nelmts; j++) {
-                            sprintf(bigname, "%s%d", name, j+1);
-                            DBAddDblComponent(obj, bigname,
-                                              ((double*)mem_value)[j]);
-                        }
-                    }
-#endif
                 }
                 break;
 

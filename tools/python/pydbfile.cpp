@@ -352,13 +352,13 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     PyDict_SetItemString(retval, "type", PyString_FromString(silo_obj->type));
     for (int i=0; i<silo_obj->ncomponents; i++)
     {
+        PyObject *tmpTuple;
         string compname = silo_obj->comp_names[i];
         string pdbname  = silo_obj->pdb_names[i];
         int type = DBGetComponentType(db, str, compname.c_str());
         void *comp = 0;
 
-        if (type == DB_INT || type == DB_SHORT || type == DB_LONG || type == DB_LONG_LONG ||
-            type == DB_FLOAT || type == DB_DOUBLE || type == DB_CHAR)
+        if (type != DB_NOTYPE)
         {
             comp  = DBGetComponent(db, str, compname.c_str());
             if (!comp)
@@ -369,59 +369,74 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
                 continue;
             }
         }
-        string typestr = "";
         int ival = -1;
         switch (type)
         {
           case DB_INT:
-            typestr = "int";
             ival = *((int*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
+          case DB_INTA:
+            tmpTuple = PyTuple_New(3);
+            PyTuple_SET_ITEM(tmpTuple, 0, PyInt_FromLong((long)((int*)comp)[0]));
+            PyTuple_SET_ITEM(tmpTuple, 1, PyInt_FromLong((long)((int*)comp)[1]));
+            PyTuple_SET_ITEM(tmpTuple, 2, PyInt_FromLong((long)((int*)comp)[2]));
+            PyDict_SetItemString(retval, compname.c_str(), tmpTuple);
+            break;
           case DB_SHORT:
-            typestr = "short";
             ival = *((short*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_LONG:
-            typestr = "long";
             ival = (int) *((long*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_LONG_LONG:
-            typestr = "long long";
             ival = (int) *((long long*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_FLOAT:
-            typestr = "float";
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble((double)*((float*)comp)));
             break;
+          case DB_FLOATA:
+            tmpTuple = PyTuple_New(3);
+            PyTuple_SET_ITEM(tmpTuple, 0, PyFloat_FromDouble((double)((float*)comp)[0]));
+            PyTuple_SET_ITEM(tmpTuple, 1, PyFloat_FromDouble((double)((float*)comp)[1]));
+            PyTuple_SET_ITEM(tmpTuple, 2, PyFloat_FromDouble((double)((float*)comp)[2]));
+            PyDict_SetItemString(retval, compname.c_str(), tmpTuple);
+            break;
           case DB_DOUBLE:
-            typestr = "double";
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble(*((double*)comp)));
             break;
+          case DB_DOUBLEA:
+            tmpTuple = PyTuple_New(3);
+            PyTuple_SET_ITEM(tmpTuple, 0, PyFloat_FromDouble((double)((double*)comp)[0]));
+            PyTuple_SET_ITEM(tmpTuple, 1, PyFloat_FromDouble((double)((double*)comp)[1]));
+            PyTuple_SET_ITEM(tmpTuple, 2, PyFloat_FromDouble((double)((double*)comp)[2]));
+            PyDict_SetItemString(retval, compname.c_str(), tmpTuple);
+            break;
           case DB_CHAR:
-            typestr = "char";
             if (*((char*)comp)== 0)
                 PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(""));
             else
                 PyDict_SetItemString(retval, compname.c_str(), PyString_FromString((char*)comp));
             break;
           case DB_NOTYPE:
-            typestr = "notype";
             break;
           default:
-            typestr = "var";
             string valStr = std::string(pdbname.c_str());
             if (pdbname.find("'<s>") == 0)
             {
                 int len = pdbname.length();
                 valStr = string((const char*)(pdbname.c_str()),4,len-5);
             }
-            if (get_data_flag)
+            bool is_meta_data = false;
+            if ((compname == "align") || (compname == "baseindex") || (compname == "dims") ||
+                (compname == "dtime") || (compname == "max_extents") || (compname == "max_index") ||
+                (compname == "min_extents") || (compname == "min_index") || (compname == "time"))
+                is_meta_data = true;
+            if (get_data_flag || is_meta_data)
             {
-
                 PyObject *argTuple = PyTuple_New(2);
                 PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(valStr.c_str()));
                 PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
@@ -491,7 +506,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
     double dvar;
     char *svar;
     char *data = 0;
-    int dsize[DB_NOTYPE];
+    int dsize[DB_NOTYPE+1];
 
     dsize[DB_INT] = sizeof(int);
     dsize[DB_SHORT] = sizeof(short);
