@@ -20,8 +20,6 @@ jobs:
     runs-on: ${{ matrix.config.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     container: fedora:latest
     steps:
-      - name: Check available HDF5 version
-        run: dnf info hdf5-devel
       - name: Install fedpkg
         run: dnf -y install fedpkg
       - name: Checkout code
