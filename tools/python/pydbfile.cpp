@@ -506,7 +506,7 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
     double dvar;
     char *svar;
     char *data = 0;
-    int dsize[DB_NOTYPE];
+    int dsize[DB_NOTYPE+1];
 
     dsize[DB_INT] = sizeof(int);
     dsize[DB_SHORT] = sizeof(short);
