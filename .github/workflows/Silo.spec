@@ -9,7 +9,7 @@ Source0:        https://github.com/LLNL/Silo/archive/%{version}/%{name}-%{versio
 
 BuildRequires:  gcc-c++
 BuildRequires:  cmake >= 3.12
-BuildRequires:  hdf5-devel 
+BuildRequires:  hdf5-1.14.4
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  python3-devel
 
