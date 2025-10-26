@@ -366,11 +366,11 @@ typedef enum {
     DB_NOTYPE=26           /*unknown type */
 } DBdatatype;
 
-/* Flags for DBCreate */
+/* Flags for DBCreate (used only in DBCreate) */
 #define         DB_CLOBBER      0
 #define         DB_NOCLOBBER    1
 
-/* Flags for DBOpen */
+/* Flags for DBOpen (used only in DBOpen) */
 #define         DB_READ         1
 #define         DB_APPEND       2
 
@@ -379,6 +379,11 @@ typedef enum {
    occupy the 2nd most significant nibble. */
 #define DB_COMPAT_OVER_PERF     0x00000010
 #define DB_PERF_OVER_COMPAT     0x00000020 
+#define DB_H5DEFAULT_COMPAT     0x00000040 
+
+/* File image in core (FIC) flags (used only with FIC VFD) */
+#define DB_H5_FIC_DONT_COPY    0x0002
+#define DB_H5_FIC_DONT_RELEASE 0x0004
 
 /* Target machine for DBCreate */
 #define         DB_LOCAL        0
@@ -510,8 +515,9 @@ typedef enum {
 #define DBOPT_H5_SILO_USE_DIRECT    530
 #define DBOPT_H5_FIC_SIZE           531
 #define DBOPT_H5_FIC_BUF            532
-#define DBOPT_H5_FCPL_HID_T         533
-#define DBOPT_H5_FAPL_HID_T         534
+#define DBOPT_H5_FIC_FLAGS          533
+#define DBOPT_H5_FCPL_HID_T         597
+#define DBOPT_H5_FAPL_HID_T         598
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
@@ -559,7 +565,7 @@ typedef enum {
 #define     E_NOHDF5 33         /*HDF5 driver not available */
 #define     E_EMPTYOBJECT 34    /*Empty object not currently permitted*/
 #define     E_OBJBUFFULL  35    /*No more temp. buffer space for object */
-#define     E_NOSILOHDF5 36     /*Not HDF5 silo produced by silo */
+#define     E_NOSILOHDF5 36     /*Not HDF5 file produced by silo */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -1017,6 +1023,7 @@ typedef struct DBmultimatspecies_ {
     int            empty_cnt;   /* size of empty list */
     int            repr_block_idx; /* index of a 'representative' block */
     char          *specnames_alloc; /* original alloc of matnames as string list */
+    char          *matname; /* associated multi-mat object name */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------
@@ -1036,6 +1043,18 @@ typedef struct DBmultimatspecies_ {
 #define DB_ZONETYPE_PYRAMID     35
 #define DB_ZONETYPE_PRISM       36
 #define DB_ZONETYPE_HEX         38
+#define DB_ZONETYPE_CONVEX_HULL	40
+
+/* Definitions for quadratic elements */
+#define DB_ZONETYPE_QUAD_BEAM      11
+
+#define DB_ZONETYPE_QUAD_TRIANGLE  25
+#define DB_ZONETYPE_QUAD_QUAD      26
+
+#define DB_ZONETYPE_QUAD_TET      118
+#define DB_ZONETYPE_QUAD_PYRAMID  120
+#define DB_ZONETYPE_QUAD_PRISM    113
+#define DB_ZONETYPE_QUAD_HEX      116
 
 typedef struct DBzonelist_ {
     int            ndims;       /* Number of dimensions (2,3) */
@@ -1897,6 +1916,10 @@ SILO_API extern int                    DBSetCompatibilityMode(int mode);
 SILO_API extern int                    DBGetCompatibilityMode(void);
 /*SILO_API extern int                  DBSetCompatibilityModeFile(DBfile *f, int mode); NOT ALLOWED */
 SILO_API extern int                    DBGetCompatibilityModeFile(DBfile *f);
+SILO_API extern int                    DBSetEvalNameschemes(int eval);
+SILO_API extern int                    DBGetEvalNameschemes(void);
+SILO_API extern int                    DBSetEvalNameschemesFile(DBfile *f, int eval);
+SILO_API extern int                    DBGetEvalNameschemesFile(DBfile *f);
 
 SILO_API extern int const *            DBSetUnknownDriverPriorities(int const *);
 SILO_API extern int const *            DBGetUnknownDriverPriorities();
@@ -1911,6 +1934,7 @@ SILO_API extern int                    DBForceSingle(int);
 SILO_API extern DBfile *               DBOpenReal(char const *name, int dbtype, int mode);
 SILO_API extern DBfile *               DBCreateReal(char const *name, int mode, int targ, char const *info, int dbtype);
 SILO_API extern int                    DBInqFileReal(char const *name);
+SILO_API extern int                    DBStat(char const *fname);
 /* 
  * The above functions are the 'Real' implementations of their macro counterparts (below).
  * These are the functions by which client code first gets into Silo. They are separated
@@ -2180,7 +2204,7 @@ SILO_API extern DBgroupelmap *         DBGetGroupelmap(DBfile *dbfile, char cons
 SILO_API extern DBmrgvar *             DBGetMrgvar(DBfile *dbfile, char const *name);
 SILO_API extern DBnamescheme *         DBMakeNamescheme(char const *fmt, ...);
 SILO_API extern char const *           DBGetName(DBnamescheme const *ns, long long natnum);
-SILO_API long long                     DBGetIndex(char const *dbns_name_str, int field, int base);
+SILO_API long long                     DBGetIndex(char const *dbns_name_str, int field, int width, int base);
 SILO_API extern char const *           DBSPrintf(char const *fmt, ...);
 
 /* Multi-block objects and parallel I/O */
@@ -2219,6 +2243,12 @@ SILO_API extern int                    DBIsDifferentDouble(double a, double b, d
 SILO_API extern int                    DBIsDifferentLongLong(long long a, long long b, double abstol, double reltol, double reltol_eps);
 SILO_API extern int                    DBCalcDenseArraysFromMaterial(DBmaterial const *mat, int datatype, int *narrs, void ***vfracs);
 SILO_API extern DBmaterial            *DBCalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims, int const *matnos, int dtype, DBVCP2_t const vfracs);
+SILO_API extern char                  *DBGenerateMBBlockName(int idx, DBnamescheme const *fileNS, DBnamescheme const *blockNS,
+                                           int emptyCnt, int const *emptyLst);
+SILO_API extern void                   DBEvalMultimeshNameschemes(DBfile *dbfile, DBmultimesh *mm);
+SILO_API extern void                   DBEvalMultivarNameschemes(DBfile *dbfile, DBmultivar *mv);
+SILO_API extern void                   DBEvalMultimatNameschemes(DBfile *dbfile, DBmultimat *mm);
+SILO_API extern void                   DBEvalMultimatspeciesNameschemes(DBfile *dbfile, DBmultimatspecies *ms);
 
 /* Fortran interface functions */
 SILO_API extern void *                 DBFortranAccessPointer(int value);

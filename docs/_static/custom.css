@@ -1,0 +1,72 @@
+/* these collapsible styles are to support sections we can
+   expand and collapse in the documentation. This is typically
+   used for displaying actual VisIt code blocks where power
+   users may need more details. Examples can be found where
+   Tensor expressions are documented */
+
+/* ensure space below a collapsible section */
+.collapsible {
+    padding-bottom: 15px;
+}
+
+/* undue effects of wrapping collapsible and header divs in <p>...</p> */
+.collapsible .header p {
+    display: inline;
+}
+
+.collapsible .header {
+    display: block;
+    clear: both;
+    margin-bottom: 0.5cm;
+}
+
+.collapsible .header:before {
+    content: "▶ ";
+}
+
+.collapsible .header.open:before {
+    content: "▼ ";
+}
+
+/*
+.rst-content table.docutils thead,.rst-content table.field-list thead,.wy-table thead{color:#000;text-align:left;vertical-align:bottom;white-space:nowrap}
+.wy-table-responsive table td,.wy-table-responsive table th{white-space:nowrap}
+*/
+
+/* This is to override RTD's default 'nowrap' on table cells
+   which winds up causing tables with a lot of text in a cell
+   to horizontal scroll. */
+.wy-table-responsive table td {
+    white-space: normal;
+}
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: normal;
+}
+
+.wy-table-responsive {
+    max-width:90%;
+}
+
+/* To style links to header objects */
+a[href*="header.html#"] {
+    text-decoration: underline;
+    text-decoration-color: blue;
+}
+
+a > span > code > span {
+    text-decoration: underline;
+    text-decoration-color: blue;
+}
+
+a > code > span {
+    text-decoration: underline;
+    text-decoration-color: blue;
+}
+
+li > a > code > span {
+    text-decoration: none;
+}
+
+.lime-background {
+    background-color: lime;
+}

@@ -4019,8 +4019,10 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
        *  them into separate names.
        *----------------------------------------*/
 
-      if ((tmpnames != NULL) && (mm->nblocks > 0)) {
-         db_StringListToStringArrayMBOpt(tmpnames, &(mm->meshnames), &(mm->meshnames_alloc), mm->nblocks);
+      if (tmpnames != NULL) {
+         if (mm->nblocks > 0)
+             db_StringListToStringArrayMBOpt(tmpnames, &(mm->meshnames), &(mm->meshnames_alloc), mm->nblocks);
+       /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
       if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
          mm->groupnames = DBStringListToStringArray(tmpgnames, &(mm->lgroupings), !skipFirstSemicolon);
@@ -4295,8 +4297,10 @@ db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
        *  them into separate names.
        *----------------------------------------*/
 
-      if (tmpnames != NULL && mv->nvars > 0) {
-         db_StringListToStringArrayMBOpt(tmpnames, &(mv->varnames), &(mv->varnames_alloc), mv->nvars);
+      if (tmpnames != NULL) {
+         if (mv->nvars > 0)
+             db_StringListToStringArrayMBOpt(tmpnames, &(mv->varnames), &(mv->varnames_alloc), mv->nvars);
+       /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
 
       if (rpnames != NULL)
@@ -4432,9 +4436,10 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
        *  them into separate names.
        *----------------------------------------*/
 
-      if (tmpnames != NULL && mt->nmats > 0)
-      {
-          db_StringListToStringArrayMBOpt(tmpnames, &(mt->matnames), &(mt->matnames_alloc), mt->nmats);
+      if (tmpnames != NULL) {
+          if (mt->nmats > 0)
+              db_StringListToStringArrayMBOpt(tmpnames, &(mt->matnames), &(mt->matnames_alloc), mt->nmats);
+        /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
 
       if (tmpmaterial_names && mt->nmatnos > 0)
@@ -4534,6 +4539,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       DEFALL_OBJ("empty_list", &tmpmms.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmms.empty_cnt, DB_INT);
       DEFINE_OBJ("repr_block_idx", &tmpmms.repr_block_idx, DB_INT);
+      DEFALL_OBJ("matname", &tmpmms.matname, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMATSPECIES) < 0)
          return NULL;
@@ -4551,9 +4557,11 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
        *  break them into separate names.
        *----------------------------------------*/
 
-      if (tmpnames != NULL && mms->nspec > 0)
+      if (tmpnames != NULL)
       {
-          db_StringListToStringArrayMBOpt(tmpnames, &(mms->specnames), &(mms->specnames_alloc), mms->nspec);
+          if (mms->nspec > 0)
+              db_StringListToStringArrayMBOpt(tmpnames, &(mms->specnames), &(mms->specnames_alloc), mms->nspec);
+          /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
 
       if (tmpspecnames != NULL)
@@ -6808,17 +6816,11 @@ db_pdb_ReadMatVals(DBfile *_dbfile, char const *vname, int objtype,
         if (mat->matlist[i] >= 0) continue;
 
         mixidx = -(mat->matlist[i]);
-printf("mixidx = %d\n", mixidx);
-printf("dsname[1] = \"%s\"\n", dsnames[1]);
-printf("dsname[2] = \"%s\"\n", dsnames[2]);
-printf("dsname[3] = \"%s\"\n", dsnames[3]);
 
         while (mixidx != 0)
         {
             ind[0] = mixidx-1; ind[1] = mixidx-1; ind[2] = 1;
             PJ_read_alt(dbfile->pdb, (char*)dsnames[2], &mix_next, ind);
-printf("ind[0]=%ld,ind[1]=%ld,ind[2]=%ld\n",ind[0],ind[1],ind[2]);
-printf("mix_next = %d\n",mix_next);
             PJ_read_alt(dbfile->pdb, (char*)dsnames[1], &mix_vf, ind);
             if (memcmp(halfa,halfc,halfn) == 0 || memcmp(halfb,halfd,halfn) == 0)
             {
@@ -7506,7 +7508,7 @@ db_pdb_WriteObject(DBfile   *_file,    /*File to write into */
    group = PJ_make_group(obj->name, obj->type, obj->comp_names,
                          obj->pdb_names, obj->ncomponents);
    if (!PJ_put_group(file, group, (OVER_WRITE==flags?1:0) ||
-                                  SILO_Globals.allowOverwrites)) {
+                                  DBGetAllowOverwritesFile(_file))) {
       PJ_rel_group (group);
       return db_perror ("PJ_put_group", E_CALLFAIL, me);
    }
@@ -10512,8 +10514,6 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
-   strcpy(_csgm._meshname, name);
-
    db_InitCsg(dbfile, name, optlist);
 
    obj = DBMakeObject(name, DB_CSGMESH, 34);
@@ -10928,8 +10928,6 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char const *name, int ndims, char const * con
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
-   strcpy(_um._meshname, name);
-
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
    obj = DBMakeObject(name, DB_UCDMESH, 33);
@@ -11125,8 +11123,6 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char const *name, char const *parentmesh,
    /*-------------------------------------------------------------
     *  Now we can initialize global data, and process options.
     *-------------------------------------------------------------*/
-
-   strcpy(_um._meshname, name);
 
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
@@ -12455,8 +12451,6 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
     *--------------------------------------------------*/
    _qm._nzones = nzones;
    _qm._nnodes = nnodes;
-   FREE(_qm._meshname);
-   _qm._meshname = STRDUP(meshname);
 
    for (i = 0; i < ndims; i++) {
       _qm._dims[i] = dims[i];

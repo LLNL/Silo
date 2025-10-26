@@ -631,10 +631,10 @@ dnl
 # it is an argument to the -D argument. So, I think this is
 # just totally bogus!
 # Default to large file support
-AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE_SOURCE", [CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE";])
-AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE", [CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE";])
-AX_CHECK_COMPILER_FLAGS("-D_FILE_OFFSET_BITS=64", [CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64";])
-AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement", [CFLAGS="$CFLAGS -Wdeclaration-after-statement";])
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE_SOURCE", [CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE"])
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE", [CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"])
+AX_CHECK_COMPILER_FLAGS("-D_FILE_OFFSET_BITS=64", [CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64"])
+AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement", [CFLAGS="$CFLAGS -Wdeclaration-after-statement"])
 
 #
 # Note: regardless of what the stuff above regarding large file support

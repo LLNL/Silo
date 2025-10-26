@@ -51,16 +51,6 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-
-/* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
-   in this file uses version 1.6 of the HDF5 API. This is harmless for
-   versions of HDF5 before 1.8 and ensures correct compilation with
-   version 1.8 and thereafter. When, and if, the HDF5 code in this file
-   is explicitly upgraded to the 1.8 API, this symbol should be removed. */
-#if 0
-#define H5_USE_16_API
-#endif
-
 #include <hdf5.h>
 
 #include <errno.h>
@@ -183,9 +173,13 @@ be used for advertising or product endorsement purposes.
 
 */
 
-/* For Lindstrom compression libs */
-#define DB_HDF5_HZIP_ID (H5Z_FILTER_RESERVED+1)
-#define DB_HDF5_FPZIP_ID (H5Z_FILTER_RESERVED+2)
+/* For Lindstrom compression libs, hzip and fpzip.
+   These IDS were reserved by The HDF Group 11/22/2024.
+   Previously they had been computed offsets from H5Z_FILTER_RESERVED.
+   fpzip also has a reserved ID of 32014 for an implementation from NCAR,
+   https://github.com/NCAR/fpzip_plugin */
+#define DB_HDF5_HZIP_ID 257
+#define DB_HDF5_FPZIP_ID 258
 #ifdef HAVE_HZIP
 #include "hzip.h"
 #ifdef HAVE_LIBZ
@@ -223,7 +217,6 @@ extern void zfp_init_zfp();
 #define BASEDUP(S)       ((S)&&*(S)?db_FullName2BaseName(S):NULL)
 #define ALIGN(ADDR,N)   (((ADDR)+(N)-1)&~((N)-1))
 
-/* copies of equiv. symbols in H5LT library */
 #define db_hdf5_H5LT_FILE_IMAGE_OPEN_RW      0x0001
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_COPY    0x0002
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE 0x0004
@@ -255,19 +248,18 @@ PRIVATE herr_t image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *u
 PRIVATE void *udata_copy(void *udata);
 PRIVATE herr_t udata_free(void *udata);
 
-/* Data structure to pass application data to image file callbacks. */ 
+/* Data structure to pass application data to callbacks. */
 typedef struct {
-    void *app_image_ptr;	/* Pointer to application buffer */ 
-    size_t app_image_size;	/* Size of application buffer */
-    void *fapl_image_ptr;	/* Pointer to FAPL buffer */
-    size_t fapl_image_size;	/* Size of FAPL buffer */
-    int fapl_ref_count;		/* Reference counter for FAPL buffer */
-    void *vfd_image_ptr;	/* Pointer to VFD buffer */
-    size_t vfd_image_size;	/* Size of VFD buffer */
-    int vfd_ref_count;		/* Reference counter for VFD buffer */
-    unsigned flags;		/* Flags indicate how the file image will */
-                                /* be open */
-    int ref_count;		/* Reference counter on udata struct */
+    void    *app_image_ptr;   /* Pointer to application buffer */
+    size_t   app_image_size;  /* Size of application buffer */
+    void    *fapl_image_ptr;  /* Pointer to FAPL buffer */
+    size_t   fapl_image_size; /* Size of FAPL buffer */
+    int      fapl_ref_count;  /* Reference counter for FAPL buffer */
+    void    *vfd_image_ptr;   /* Pointer to VFD buffer */
+    size_t   vfd_image_size;  /* Size of VFD buffer */
+    int      vfd_ref_count;   /* Reference counter for VFD buffer */
+    unsigned flags;           /* Flags indicate how the file image will be open */
+    int ref_count;            /* Reference counter on udata struct */
 } db_hdf5_H5LT_file_image_ud_t;
 #endif
 
@@ -2154,7 +2146,7 @@ db_hdf5_init(void)
 
 #if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_hzip_class.version = H5Z_CLASS_T_VERS;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning SHOULD WE DISABLE HZIP AND FPZIP ENCODING
 #endif
     db_hdf5_hzip_class.encoder_present = 1;
@@ -2800,7 +2792,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     dbfile->pub.newtoc = db_hdf5_NewToc;
     dbfile->pub.mkdir = db_hdf5_MkDir;
     dbfile->pub.cpdir = db_hdf5_CpDir;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning GET RID OF CPLISTEDOBJECTS
 #endif
     dbfile->pub.cpnobjs = db_hdf5_CpListedObjects;
@@ -3352,7 +3344,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
             have_zfp = TRUE;
 #endif
     }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning WHAT ABOUT NULL RETURN FROM DBGETCOMPRESSION
 #endif
 /* Handle some global compression parameters */
@@ -3385,7 +3377,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
             return (-1);
         }
     }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning FIX MISSING .compressionMinsize member
 #endif
 #if 0
@@ -3405,7 +3397,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
     }
 #endif
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning QUERY FILE LEVEL COMPRESSION PARAMS HERE
 #endif
     opt_flag = SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
@@ -3851,7 +3843,9 @@ db_hdf5_get_comp_var(DBfile *_dbfile, char const *name, hsize_t *nelmts,
             /* create a component type with just one member,
                the one we're interested in */
             memtype = H5Tcreate(H5T_COMPOUND, H5Tget_size(comptype));
-            H5Tinsert(memtype, H5Tget_member_name(stypeid, membno), 0, comptype);
+            memname = H5Tget_member_name(stypeid, membno);
+            H5Tinsert(memtype, memname, 0, comptype);
+            free(memname);
 
             /* read attribute for the silo object data */
             H5Aread(attr, memtype, comptype==T_str256?tmp:*buf);
@@ -4132,7 +4126,7 @@ load_toc(hid_t grp, char const *name, H5L_info_t const *dummy, void *_toc)
     }
 
     /* Append to table of contents */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REVISIT THIS CODE BLOCK
 #endif
 #if 0
@@ -4749,7 +4743,7 @@ db_hdf5_resolvename(DBfile *_dbfile,
     static int const nmax = 32;
     static char *cbuf[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                              0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning HARD CODED SIZE HERE
 #endif
     static char cwgname[4096];
@@ -4974,12 +4968,8 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 #endif
 
 #if HDF5_VERSION_GE(1,10,2)
-    H5Pset_libver_bounds(retval, H5F_LIBVER_V18, H5F_LIBVER_V18);
-#endif
-
     if (mode & DB_PERF_OVER_COMPAT)
         H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-#if HDF5_VERSION_GE(1,10,2)
     if (mode & DB_COMPAT_OVER_PERF)
         H5Pset_libver_bounds(retval, H5F_LIBVER_V18, H5F_LIBVER_V18);
 #endif
@@ -5020,7 +5010,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     /* Handle cases where we are running on Windows. If a client
        request anything other than the default driver, we issue
        a warning message and continue only on windows (default) vfd. */
-#if !defined(_WIN32)
+#if !defined(_MSC_VER)
 #warning REMOVED WINDOWS SPECIFIC CHECK
 #endif
 #if 0
@@ -5111,7 +5101,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         /* default HDF5 mpi drivers */
         case DB_FILE_OPTS_H5_DEFAULT_MPIP:
         {
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning DO WE STILL NEED THIS
 #endif
             H5Pclose(retval);
@@ -5171,7 +5161,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                 h5status |= H5Pset_driver(retval, new_driver_id, p);
             }
 
-#if !defined(_WIN32)
+#if !defined(_MSC_VER)
 #warning REMOVED WINDOWS SPECIFIC CHECK
 #endif
 #if 0
@@ -5251,7 +5241,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 
                     /* get backing store flag */
                     if ((p = DBGetOption(opts, DBOPT_H5_CORE_NO_BACK_STORE)))
-                        bs = FALSE;
+                        bs = *((int*)p) ? FALSE : TRUE;
 
                     h5status |= H5Pset_fapl_core(retval, inc, bs);
 
@@ -5262,11 +5252,12 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                         H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy,
                                                                  &image_realloc, &image_free,
                                                                  &udata_copy, &udata_free,
-                                                                 (void *)NULL};
+                                                                 (void *)NULL /* overwritten below */};
                         db_hdf5_H5LT_file_image_ud_t *udata;
 
                         /* no possible default values can be specified for FIC */
-                        int size = -1;
+                        unsigned h5flags = 0x0;
+                        int flags = 0x0, size = -1;
                         void *buf = 0;
 
                         /* cannot use backing store in this case */
@@ -5290,33 +5281,63 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                             return db_perror("To use DB_H5VFD_FIC, you must specify DBOPT_H5_FIC_BUF", E_BADARGS, me);
                         }
 
-                        /* Allocate buffer to communicate user data to callbacks */
-#ifndef _WIN32
-#warning PUT UDATA POINTER IN DBFILE pointer so it can be freed with file is closed.
-#endif
-                        if (NULL == (udata = (db_hdf5_H5LT_file_image_ud_t *)malloc(sizeof(db_hdf5_H5LT_file_image_ud_t))))
+                        /* get optional flags */
+                        if ((p = DBGetOption(opts, DBOPT_H5_FIC_FLAGS)))
                         {
-                            H5Pclose(retval);
-                            return db_perror("Unable to allocate udata for FIC VFD", E_CALLFAIL, me);
+                            flags = *((int*)p);
+                            if (flags & DB_H5_FIC_DONT_COPY)
+                                h5flags |= db_hdf5_H5LT_FILE_IMAGE_DONT_COPY;
+                            if (flags & DB_H5_FIC_DONT_RELEASE)
+                                h5flags |= db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE;
                         }
+                        if (mode != DB_READ)
+                            h5flags |= db_hdf5_H5LT_FILE_IMAGE_OPEN_RW;
 
-                        /* Initialize udata with info about app buffer containing file image  and flags */
-                        udata->app_image_ptr = buf;
-                        udata->app_image_size = size;
-                        udata->fapl_image_ptr = NULL;
-                        udata->fapl_image_size = 0;
-                        udata->fapl_ref_count = 0; /* corresponding to the first FAPL */
-                        udata->vfd_image_ptr = NULL;
-                        udata->vfd_image_size = 0;
-                        udata->vfd_ref_count = 0;
-                        udata->flags = db_hdf5_H5LT_FILE_IMAGE_DONT_COPY;
-                        udata->ref_count = 1;
+                        /* Set callbacks for file image ops ONLY if the file image is NOT copied */
+                        if (flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)
+                        {
 
-                        /* copy address of udata into callbacks */
-                        callbacks.udata = (void *)udata;
+                            /* Allocate buffer to communicate user data to callbacks */
+                            if (NULL == (udata = (db_hdf5_H5LT_file_image_ud_t *)malloc(sizeof(db_hdf5_H5LT_file_image_ud_t))))
+                            {
+                                H5Pclose(retval);
+                                return db_perror("Unable to allocate udata for FIC VFD", E_CALLFAIL, me);
+                            }
 
-                        /* Set file image callbacks */
-                        h5status |= H5Pset_file_image_callbacks(retval, &callbacks);
+                            /* Initialize udata with info about app buffer containing file image and flags */
+                            udata->app_image_ptr   = buf;
+                            udata->app_image_size  = size;
+                            udata->fapl_image_ptr  = NULL;
+                            udata->fapl_image_size = 0;
+                            udata->fapl_ref_count  = 0;
+                            udata->vfd_image_ptr   = NULL;
+                            udata->vfd_image_size  = 0;
+                            udata->vfd_ref_count   = 0;
+                            udata->flags           = flags;
+
+                            /*
+                             * Initialize the udata structure with a reference count of 1. At
+                             * first, nothing holds this reference to the udata structure. The
+                             * call to H5Pset_file_image_callbacks below will associate the
+                             * udata structure with the FAPL, incrementing the structure's
+                             * reference count and causing the FAPL to hold one of the two
+                             * references to the structure in preparation for transfer of
+                             * ownership to the file driver. Once the file has been opened with
+                             * this FAPL and the FAPL is closed, the reference held by the FAPL
+                             * is released and ownership is transferred to the file driver, which
+                             * will then hold the remaining reference to the udata structure.
+                             * The udata structure will then be freed when the file driver calls
+                             * the image_free callback and releases its reference to the structure.
+                             */
+                            udata->ref_count = 1;
+
+                            /* copy address of udata into callbacks */
+                            callbacks.udata = (void *)udata;
+
+                            /* Set file image callbacks */
+                            h5status |= H5Pset_file_image_callbacks(retval, &callbacks);
+
+                        }
 
                         /* Assign file image in user buffer to FAPL */
                         h5status |= H5Pset_file_image(retval, buf, (size_t)size);
@@ -5440,7 +5461,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                     }
                     else
                     {
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning DO WE STILL NEED THIS
 #endif
                         H5Pclose(retval);
@@ -5526,7 +5547,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         }
     }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning FIX THIS
 #endif
 #if 0
@@ -5895,9 +5916,9 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     /* File access mode */
-    if (DB_READ==mode) {
+    if (DB_READ==(mode & 0x0000000F)) {
         hmode = H5F_ACC_RDONLY;
-    } else if (DB_APPEND==mode) {
+    } else if (DB_APPEND==(mode & 0x0000000F)) {
         hmode = H5F_ACC_RDWR;
     } else {
         db_perror("mode", E_INTERNAL, me);
@@ -5915,7 +5936,7 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
     }
 
     faprops = db_hdf5_file_accprops(opts_set_id, mode, 0);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning QUERY FILE IMAGE STUFF HERE TO GET UDATA PTR
 #endif
 
@@ -5925,6 +5946,30 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         db_perror(name, E_DRVRCANTOPEN, me);
         return NULL;
     }
+
+#if HDF5_VERSION_GE(1,10,2)
+    if (DB_APPEND == (mode & 0x0000000F))
+    {
+        if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
+        {
+            if (H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)<0)
+            {
+                H5Fclose(fid);
+                db_perror(name, E_CALLFAIL, me);
+                return NULL;
+            }
+        }
+        else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
+        {
+            if (H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18)<0)
+            {
+                H5Fclose(fid);
+                db_perror(name, E_CALLFAIL, me);
+                return NULL;
+            }
+        }
+    }
+#endif
 
     H5Pclose(faprops);
 
@@ -6006,7 +6051,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
         if (fcprops == -1)
         {
             fcprops = H5Pcreate(H5P_FILE_CREATE);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning BACKWARD COMPAT ISSUE FOR HDF5
 #endif
             /*H5Pset_istore_k(fcprops, 1);*/
@@ -6031,6 +6076,27 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
 
     H5Pclose(faprops);
 
+#if HDF5_VERSION_GE(1,10,2)
+    if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
+    {
+        if (H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)<0)
+        {
+            H5Fclose(fid);
+            db_perror(name, E_CALLFAIL, me);
+            return NULL;
+        }
+    }
+    else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
+    {
+        if (H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18)<0)
+        {
+            H5Fclose(fid);
+            db_perror(name, E_CALLFAIL, me);
+            return NULL;
+        }
+    }
+#endif
+
     /* Create silo file struct */
     if (NULL==(dbfile=(DBfile_hdf5 *)calloc(1, sizeof(DBfile_hdf5)))) {
         db_perror(name, E_NOMEM, me);
@@ -6043,7 +6109,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     *fidp = fid;
     dbfile->pub.GrabId = (void*) fidp;
     dbfile->fid = fid;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning FIX FILE SCOPE GLOBAL INITIALIZATION
 #endif
 #if 0
@@ -6084,8 +6150,16 @@ db_hdf5_Close(DBfile *_dbfile)
     if (dbfile) {
 
         PROTECT {
-
-            FreeNodelists(dbfile, 0);
+            H5FD_file_image_callbacks_t callbacks = {0, 0, 0, 0, 0, 0, 0};
+            hid_t faplid = H5Fget_access_plist(dbfile->fid);
+ 
+            if (H5I_INVALID_HID != faplid &&
+                H5Pget_file_image_callbacks(faplid, &callbacks)>=0)
+            {
+                H5Pclose(faplid);
+                if (callbacks.udata)
+                    free(callbacks.udata);
+            }
 
             /* Free the private parts of the file */
             if (db_hdf5_initiate_close((DBfile*)dbfile)<0 ||
@@ -6095,6 +6169,8 @@ db_hdf5_Close(DBfile *_dbfile)
                 UNWIND();
             }
             dbfile->fid = -1;
+
+            FreeNodelists(dbfile, 0);
 
             /* Free the public parts of the file */
             silo_db_close(_dbfile);
@@ -6509,7 +6585,7 @@ copy_obj(hid_t hobj, char const *name, void *op_data)
             UNWIND();
         }
         asize = H5Tget_size(atype);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning WHY THIS SIZE
 #endif
         msize = MAX(asize, 3*1024);
@@ -6680,7 +6756,7 @@ db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
     return 0;
 }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REMOVE THIS MAYBE
 #endif
 SILO_CALLBACK int
@@ -7803,7 +7879,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
     hsize_t     nbytes_big;
     int         nbytes_small=-1;
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REMOVED db_perror CALLS
 #endif
     PROTECT {
@@ -8365,6 +8441,13 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
            p += H5Tget_size(mtype);
        }
    
+       if (dsnames)
+       {
+           for (i = 0; i < dscount; i++)
+               FREE(dsnames[i]);
+           FREE(dsnames);
+       }
+
        /* Close everything */
        H5Tclose(ftype);
        H5Sclose(fspace);
@@ -8451,7 +8534,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
                    UNWIND();
                }
            }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning WHAT IF EXISTING DATASET WAS COMPRESSED
 #endif
        } else {
@@ -8495,7 +8578,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning COMPARE TO -1 OR TO NEGATIVE
 #endif
        if (dset_type != -1)
@@ -8519,7 +8602,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
        H5E_BEGIN_TRY {
            H5Dclose(dset);
            H5Sclose(space);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning COMPARE TO -1 OR NEGATIVE
 #endif
            if (dset_type != -1)
@@ -8746,7 +8829,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
         }
 
         /* Add members to the DBobject */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning THIS IFDEFD CODE IS IN TRANSITION TO BETTER GENERIC OBJECTS
 #endif
         for (i=0; i<nmembs; i++) {
@@ -8810,14 +8893,14 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
             H5Tclose(member_type);
         }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REVISIT THIS CLEANUP CODE. IS THERE A BETTER SYMBOLIC VALUE THAN -1
 #endif
         /* Cleanup */
         H5Tclose(atype);
         H5Aclose(attr);
         H5Tclose(o);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning USE FREE() MACRO HERE
 #endif
         free(file_value);
@@ -8831,7 +8914,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
             H5Aclose(attr);
             H5Tclose(o);
         } H5E_END_TRY;
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning USE FREE() MACRO HERE
 #endif
         if (file_value) free(file_value);
@@ -9346,7 +9429,6 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
 
     PROTECT {
         db_ResetGlobalData_Csgmesh();
-        strcpy(_csgm._meshname, meshname);
         db_ProcessOptlist(DB_CSGMESH, optlist);
 
         /* Write variable arrays: vars[] */
@@ -9382,7 +9464,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
         m.datatype = datatype;
         m.conserved = _csgm._conserved;
         m.extensive = _csgm._extensive;
-        strcpy(m.meshname, OPT(_csgm._meshname));
+        strcpy(m.meshname, OPT(meshname));
         strcpy(m.label, OPT(_csgm._label));
         strcpy(m.units, OPT(_csgm._unit));
         db_SetMissingValueForPut(m.missing_value, _csgm._missing_value);
@@ -10010,7 +10092,6 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
     int                 compressionFlags;
     void const * const *coords = (void const * const *) _coords;
 
-    FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m); 
 
@@ -10465,7 +10546,6 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         }
     }
 
-    FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m);
 
@@ -10479,7 +10559,6 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         _qm._group_no = -1;
         _qm._missing_value = DB_MISSING_VALUE_NOT_SET;
         db_ProcessOptlist(DB_QUADMESH, optlist); /*yes, QUADMESH*/
-        _qm._meshname = STRDUP(meshname);
         _qm._nzones = _qm._nnodes = 1; /*initial value only*/
         for (nels=(ndims?1:0), i=0; i<ndims; i++) {
             nels *= dims[i];
@@ -10553,7 +10632,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         m.centering = centering;
         strcpy(m.label, OPT(_qm._label));
         strcpy(m.units, OPT(_qm._unit));
-        strcpy(m.meshid, OPT(_qm._meshname));
+        strcpy(m.meshid, OPT(meshname));
         db_SetMissingValueForPut(m.missing_value, _qm._missing_value);
 
         for (i=0; i<ndims; i++) {
@@ -10616,10 +10695,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
             MEMBER_S(str(m.region_pnames), region_pnames);
         } OUTPUT(dbfile, DB_QUADVAR, name, &m);
         
-        FREE(_qm._meshname);
     } CLEANUP {
-        FREE(_qm._meshname);
-        /*void*/
+        void;
     } END_PROTECT;
     return 0;
 }
@@ -10885,7 +10962,6 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char const *name, int ndims, char const * co
         }
 
         /* Set global options */
-        strcpy(_um._meshname, name);
         _um._coord_sys = DB_OTHER;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = ndims;
@@ -11078,7 +11154,6 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char const *name, char const *parentmesh,
         H5Tclose(o);
 
         /* Set global options */
-        strcpy(_um._meshname, name);
         _um._coord_sys = DB_OTHER;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = m.ndims;
@@ -11475,7 +11550,6 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         _um._use_specmf = DB_OFF;
         _um._group_no = -1;
         _um._missing_value = DB_MISSING_VALUE_NOT_SET;
-        strcpy(_um._meshname, meshname);
         db_ProcessOptlist(DB_UCDMESH, optlist); /*yes, UCDMESH*/
 
         /* Prepare for possible compression of ucdvars */
@@ -11494,7 +11568,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         for (i=0; i<nvars && nels; i++) {
             db_hdf5_compwrz(dbfile, datatype, 1, &nels, vars[i],
                 m.value[i]/*out*/, friendly_name(_dbfile,varnames[i], "_data", 0), compressionFlags);
-//#ifndef _WIN32
+//#ifndef _MSC_VER
 //#warning WHY NOT COMPRESS MIX DATA TOO
 //#endif
             if (mixvars && mixvars[i] && mixlen>0) {
@@ -11531,7 +11605,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         m.conserved = _um._conserved;
         m.extensive = _um._extensive;
         db_SetMissingValueForPut(m.missing_value, _um._missing_value);
-        strcpy(m.meshid, OPT(_um._meshname));
+        strcpy(m.meshid, OPT(meshname));
         strcpy(m.label, OPT(_um._label));
         strcpy(m.units, OPT(_um._unit));
 
@@ -14341,7 +14415,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
          * material names.
          */
         /* Write raw data arrays */
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning REPLACE WITH STRING UTILITIES
 #endif
         if (nmats > 0 && matnames)
@@ -14381,7 +14455,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(_dbfile,name,"_matcolors", 0));
             FREE(tmp);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning IS THIS TAKEN CARE OF ELSEWHERE
 #endif
             _mm._matcolors = 0;
@@ -14393,7 +14467,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(_dbfile,name,"_material_names", 0));
             FREE(tmp);
-#ifndef _WIN32
+#ifndef _MSC_VER
 #warning IS THIS TAKEN CARE OF ELSEWHERE
 #endif
             _mm._matnames = 0;
@@ -14820,6 +14894,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
 
         /* Create object and initialize meta data */
         if (NULL==(mm=DBAllocMultimatspecies(0))) return NULL;
+        mm->matname = OPTDUP(m.matname);
         mm->nspec = m.nspec;
         mm->ngroups = m.ngroups;
         mm->blockorigin = m.blockorigin;
@@ -16684,11 +16759,26 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
             iop[i].offset = HADDR_MAX;
         else
         {
-            hid_t dsid;
-            if ((dsid=H5Dopen(dbfile->cwg, names[i], H5P_DEFAULT))<0 ||
-                (iop[i].offset=H5Dget_offset(dsid))==HADDR_UNDEF ||
-                H5Dclose(dsid)<0)
+            hid_t objid;
+ 	    H5O_info2_t oinfo;
+            char *objtokstr = 0;
+            unsigned long long offset;
+
+            if (H5Oget_info_by_name3(dbfile->cwg, names[i], &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+            {
                 iop[i].offset = HADDR_MAX;
+                continue;
+            }
+            objid = H5Oopen(dbfile->cwg, names[i], H5P_DEFAULT);
+            H5Otoken_to_str(objid, &oinfo.token, &objtokstr);
+            if (objtokstr)
+            {
+                errno = 0;
+                offset = strtoull(objtokstr, 0, 0);
+                iop[i].offset = errno ? HADDR_MAX : (haddr_t) offset;
+                free(objtokstr);
+            }
+            H5Oclose(objid);
         }
     }
 
@@ -16704,156 +16794,148 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     return 0;
 }
 
-#if HDF5_VERSION_GE(1,8,9)
-/* Definition of callbacks for file image operations. [ */
+#if HDF5_VERSION_GE(1,8,9) /* [ */
+/* Definition of callbacks for file image operations. */
+/* Verbatim copy from 1.14.5 H5LT.c in HDF5 sources */
 
 /*-------------------------------------------------------------------------
-* Function: image_malloc 
-*
-* Purpose: Simulates malloc() function to avoid copying file images.
-*          The application buffer is set to the buffer on only one FAPL.
-*          Then the FAPL buffer can be copied to other FAPL buffers or
-*          to only one VFD buffer. 
-*
-* Return: Address of "allocated" buffer, if successful. Otherwise, it returns
-*         NULL.
-*
-* Programmer: Christian Chilan 
-*
-* Date: October 3, 2011
-*
-*-------------------------------------------------------------------------
-*/
+ * Function: image_malloc
+ *
+ * Purpose: Simulates malloc() function to avoid copying file images.
+ *          The application buffer is set to the buffer on only one FAPL.
+ *          Then the FAPL buffer can be copied to other FAPL buffers or
+ *          to only one VFD buffer.
+ *
+ * Return: Address of "allocated" buffer, if successful. Otherwise, it returns
+ *         NULL.
+ *
+ *-------------------------------------------------------------------------
+ */
 static void *
 image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 {
-    db_hdf5_H5LT_file_image_ud_t *udata = (db_hdf5_H5LT_file_image_ud_t *)_udata;
-    void * return_value = NULL;
-    
+    db_hdf5_H5LT_file_image_ud_t *udata        = (db_hdf5_H5LT_file_image_ud_t *)_udata;
+    void                 *return_value = NULL;
+
     /* callback is only used if the application buffer is not actually copied */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)) 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY))
         goto out;
 
-    switch ( file_image_op ) {
+    switch (file_image_op) {
         /* the app buffer is "copied" to only one FAPL. Afterwards, FAPLs can be "copied" */
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
-            if (udata->app_image_ptr == NULL) 
+            if (udata->app_image_ptr == NULL)
                 goto out;
-            if (udata->app_image_size != size) 
+            if (udata->app_image_size != size)
                 goto out;
-            if (udata->fapl_image_ptr != NULL) 
+            if (udata->fapl_image_ptr != NULL)
                 goto out;
-            if (udata->fapl_image_size != 0) 
+            if (udata->fapl_image_size != 0)
                 goto out;
-            if (udata->fapl_ref_count != 0) 
+            if (udata->fapl_ref_count != 0)
                 goto out;
 
-            udata->fapl_image_ptr = udata->app_image_ptr;
+            udata->fapl_image_ptr  = udata->app_image_ptr;
             udata->fapl_image_size = udata->app_image_size;
+            return_value           = udata->fapl_image_ptr;
+            udata->fapl_ref_count++;
+            break;
+
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
+            if (udata->fapl_image_ptr == NULL)
+                goto out;
+            if (udata->fapl_image_size != size)
+                goto out;
+            if (udata->fapl_ref_count == 0)
+                goto out;
+
             return_value = udata->fapl_image_ptr;
             udata->fapl_ref_count++;
-	    break;
-
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
-            if (udata->fapl_image_ptr == NULL) 
-                goto out;
-            if (udata->fapl_image_size != size) 
-                goto out;
-            if (udata->fapl_ref_count == 0) 
-                goto out;
-
-            return_value = udata->fapl_image_ptr;
-            udata->fapl_ref_count++;
-	    break;
+            break;
 
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
             goto out;
 
         case H5FD_FILE_IMAGE_OP_FILE_OPEN:
             /* FAPL buffer is "copied" to only one VFD buffer */
-            if (udata->vfd_image_ptr != NULL) 
+            if (udata->vfd_image_ptr != NULL)
                 goto out;
-            if (udata->vfd_image_size != 0) 
+            if (udata->vfd_image_size != 0)
                 goto out;
-            if (udata->vfd_ref_count != 0) 
+            if (udata->vfd_ref_count != 0)
                 goto out;
-            if (udata->fapl_image_ptr == NULL) 
+            if (udata->fapl_image_ptr == NULL)
                 goto out;
-            if (udata->fapl_image_size != size) 
+            if (udata->fapl_image_size != size)
                 goto out;
-            if (udata->fapl_ref_count == 0) 
+            if (udata->fapl_ref_count == 0)
                 goto out;
 
-            udata->vfd_image_ptr = udata->fapl_image_ptr;
- 	    udata->vfd_image_size = size;
+            udata->vfd_image_ptr  = udata->fapl_image_ptr;
+            udata->vfd_image_size = size;
             udata->vfd_ref_count++;
             return_value = udata->vfd_image_ptr;
             break;
 
-	/* added unused labels to shut the compiler up */
-	case H5FD_FILE_IMAGE_OP_NO_OP:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-	case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-	case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
+        /* added unused labels to shut the compiler up */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
         default:
             goto out;
     } /* end switch */
 
-    return(return_value);
+    return (return_value);
 
 out:
     return NULL;
 } /* end image_malloc() */
 
 /*-------------------------------------------------------------------------
-* Function: image_memcpy
-*
-* Purpose:  Simulates memcpy() function to avoid copying file images. 
-*           The image buffer can be set to only one FAPL buffer, and
-*           "copied" to only one VFD buffer. The FAPL buffer can be
-*           "copied" to other FAPLs buffers. 
-*
-* Return: The address of the destination buffer, if successful. Otherwise, it
-*         returns NULL.
-*
-* Programmer: Christian Chilan 
-*
-* Date: October 3, 2011
-*
-*-------------------------------------------------------------------------
-*/
+ * Function: image_memcpy
+ *
+ * Purpose:  Simulates memcpy() function to avoid copying file images.
+ *           The image buffer can be set to only one FAPL buffer, and
+ *           "copied" to only one VFD buffer. The FAPL buffer can be
+ *           "copied" to other FAPLs buffers.
+ *
+ * Return: The address of the destination buffer, if successful. Otherwise, it
+ *         returns NULL.
+ *
+ *-------------------------------------------------------------------------
+ */
 static void *
-image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op,
-    void *_udata)
+image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 {
     db_hdf5_H5LT_file_image_ud_t *udata = (db_hdf5_H5LT_file_image_ud_t *)_udata;
 
     /* callback is only used if the application buffer is not actually copied */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)) 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY))
         goto out;
 
-    switch(file_image_op) {
+    switch (file_image_op) {
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
-            if (dest != udata->fapl_image_ptr) 
+            if (dest != udata->fapl_image_ptr)
                 goto out;
-            if (src != udata->app_image_ptr) 
+            if (src != udata->app_image_ptr)
                 goto out;
-            if (size != udata->fapl_image_size) 
+            if (size != udata->fapl_image_size)
                 goto out;
-            if (size != udata->app_image_size) 
+            if (size != udata->app_image_size)
                 goto out;
-            if (udata->fapl_ref_count == 0) 
+            if (udata->fapl_ref_count == 0)
                 goto out;
             break;
 
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
-            if (dest != udata->fapl_image_ptr) 
+            if (dest != udata->fapl_image_ptr)
                 goto out;
-            if (src != udata->fapl_image_ptr) 
+            if (src != udata->fapl_image_ptr)
                 goto out;
-            if (size != udata->fapl_image_size) 
+            if (size != udata->fapl_image_size)
                 goto out;
-            if (udata->fapl_ref_count < 2) 
+            if (udata->fapl_ref_count < 2)
                 goto out;
             break;
 
@@ -16861,244 +16943,263 @@ image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file
             goto out;
 
         case H5FD_FILE_IMAGE_OP_FILE_OPEN:
-            if (dest != udata->vfd_image_ptr) 
+            if (dest != udata->vfd_image_ptr)
                 goto out;
-            if (src != udata->fapl_image_ptr) 
+            if (src != udata->fapl_image_ptr)
                 goto out;
-            if (size != udata->vfd_image_size) 
+            if (size != udata->vfd_image_size)
                 goto out;
-            if (size != udata->fapl_image_size) 
+            if (size != udata->fapl_image_size)
                 goto out;
-            if (udata->fapl_ref_count == 0) 
+            if (udata->fapl_ref_count == 0)
                 goto out;
-            if (udata->vfd_ref_count != 1) 
+            if (udata->vfd_ref_count != 1)
                 goto out;
             break;
 
-	/* added unused labels to shut the compiler up */
-	case H5FD_FILE_IMAGE_OP_NO_OP:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-	case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-	case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
+        /* added unused labels to shut the compiler up */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
         default:
             goto out;
     } /* end switch */
 
-    return(dest);
+    return (dest);
 
 out:
     return NULL;
 } /* end image_memcpy() */
 
 /*-------------------------------------------------------------------------
-* Function: image_realloc 
-*
-* Purpose: Reallocates the shared application image buffer and updates data
-*          structures that manage buffer "copying". 
-*           
-* Return: Address of reallocated buffer, if successful. Otherwise, it returns
-*         NULL.  
-*
-* Programmer: Christian Chilan 
-*
-* Date: October 3, 2011
-*
-*-------------------------------------------------------------------------
-*/
+ * Function: image_realloc
+ *
+ * Purpose: Reallocates the shared application image buffer and updates data
+ *          structures that manage buffer "copying".
+ *
+ * Return: Address of reallocated buffer, if successful. Otherwise, it returns
+ *         NULL.
+ *
+ *-------------------------------------------------------------------------
+ */
 static void *
 image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 {
-    db_hdf5_H5LT_file_image_ud_t *udata = (db_hdf5_H5LT_file_image_ud_t *)_udata;
-    void * return_value = NULL;
+    db_hdf5_H5LT_file_image_ud_t *udata        = (db_hdf5_H5LT_file_image_ud_t *)_udata;
+    void                 *return_value = NULL;
 
     /* callback is only used if the application buffer is not actually copied */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)) 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY))
         goto out;
 
-    /* realloc() is not allowed when the HDF5 library won't release the image 
+    /* realloc() is not allowed when the HDF5 library won't release the image
        buffer because reallocation may change the address of the buffer. The
        new address cannot be communicated to the application to release it. */
-    if (udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE) 
-        goto out; 
+    if (udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE)
+        goto out;
 
     /* realloc() is not allowed if the image is open in read-only mode */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_OPEN_RW)) 
-        goto out; 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_OPEN_RW))
+        goto out;
 
     if (file_image_op == H5FD_FILE_IMAGE_OP_FILE_RESIZE) {
-        if (udata->vfd_image_ptr != ptr) 
-            goto out; 
+        void *tmp_realloc;
 
-        if (udata->vfd_ref_count != 1) 
+        if (udata->vfd_image_ptr != ptr)
             goto out;
 
-        if (NULL == (udata->vfd_image_ptr = realloc(ptr, size)))
-            goto out; 
-            
+        if (udata->vfd_ref_count != 1)
+            goto out;
+
+        /* Make sure all the udata structure image pointers
+         * match each other before we update them
+         */
+        assert(udata->vfd_image_ptr == udata->app_image_ptr);
+        assert(udata->vfd_image_ptr == udata->fapl_image_ptr);
+
+        tmp_realloc = realloc(ptr, size);
+        if (tmp_realloc) {
+            udata->vfd_image_ptr  = tmp_realloc;
+            udata->app_image_ptr  = udata->vfd_image_ptr;
+            udata->fapl_image_ptr = udata->vfd_image_ptr;
+        }
+        else {
+            free(ptr);
+            udata->vfd_image_ptr  = NULL;
+            udata->app_image_ptr  = NULL;
+            udata->fapl_image_ptr = NULL;
+            goto out;
+        }
+
         udata->vfd_image_size = size;
-        return_value = udata->vfd_image_ptr;
+        return_value          = udata->vfd_image_ptr;
     } /* end if */
     else
         goto out;
 
-    return(return_value);
+    return (return_value);
 
 out:
     return NULL;
 } /* end image_realloc() */
 
-
 /*-------------------------------------------------------------------------
-* Function: image_free
-*
-* Purpose: Simulates deallocation of FAPL and VFD buffers by decreasing
-*          reference counters. Shared application buffer is actually
-*          deallocated if there are no outstanding references.
-*
-* Return: SUCCEED or FAIL 
-*
-* Programmer: Christian Chilan 
-*
-* Date: October 3, 2011
-*
-*-------------------------------------------------------------------------
-*/
+ * Function: image_free
+ *
+ * Purpose: Simulates deallocation of FAPL and VFD buffers by decreasing
+ *          reference counters. Shared application buffer is actually
+ *          deallocated if there are no outstanding references.
+ *
+ * Return: SUCCEED or FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
 {
     db_hdf5_H5LT_file_image_ud_t *udata = (db_hdf5_H5LT_file_image_ud_t *)_udata;
 
     /* callback is only used if the application buffer is not actually copied */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)) 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY))
         goto out;
 
-    switch(file_image_op) {
+    switch (file_image_op) {
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-	    if (udata->fapl_image_ptr != ptr) 
+            if (udata->fapl_image_ptr != ptr)
                 goto out;
-            if (udata->fapl_ref_count == 0) 
+            if (udata->fapl_ref_count == 0)
                 goto out;
 
             udata->fapl_ref_count--;
 
-            /* release the shared buffer only if indicated by the respective flag and there are no outstanding references */ 
+            /* release the shared buffer only if indicated by the respective flag and there are no outstanding
+             * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
-                    !(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE)) {
+                !(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE)) {
                 free(udata->fapl_image_ptr);
-                udata->app_image_ptr = NULL;
+                udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
-                udata->vfd_image_ptr = NULL;
+                udata->vfd_image_ptr  = NULL;
             } /* end if */
             break;
 
         case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
-            if (udata->vfd_image_ptr != ptr) 
+            if (udata->vfd_image_ptr != ptr)
                 goto out;
-            if (udata->vfd_ref_count != 1) 
+            if (udata->vfd_ref_count != 1)
                 goto out;
 
             udata->vfd_ref_count--;
 
-            /* release the shared buffer only if indicated by the respective flag and there are no outstanding references */ 
+            /* release the shared buffer only if indicated by the respective flag and there are no outstanding
+             * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
-                    !(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE)) {
+                !(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE)) {
+                /* Make sure we aren't going to leak memory elsewhere */
+                assert(udata->app_image_ptr == udata->vfd_image_ptr || udata->app_image_ptr == NULL);
+                assert(udata->fapl_image_ptr == udata->vfd_image_ptr || udata->fapl_image_ptr == NULL);
+
                 free(udata->vfd_image_ptr);
-                udata->app_image_ptr = NULL;
+                udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
-                udata->vfd_image_ptr = NULL;
-            } /* end if */
+                udata->vfd_image_ptr  = NULL;
+            }
+
+            /* release reference to udata structure */
+            if (udata_free(udata) < 0)
+                goto out;
+
             break;
 
-	/* added unused labels to keep the compiler quite */
-	case H5FD_FILE_IMAGE_OP_NO_OP:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
-	case H5FD_FILE_IMAGE_OP_FILE_OPEN:
-	case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-	default:
+        /* added unused labels to keep the compiler quite */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
+        case H5FD_FILE_IMAGE_OP_FILE_OPEN:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        default:
             goto out;
     } /* end switch */
 
-    return(0);
+    return (0);
 
 out:
-    return(-1);
+    return (-1);
 } /* end image_free() */
 
 /*-------------------------------------------------------------------------
-* Function: udata_copy 
-*
-* Purpose: Simulates the copying of the user data structure utilized in the
-*          management of the "copying" of file images.
-*
-* Return: Address of "newly allocated" structure, if successful. Otherwise, it
-*         returns NULL.
-*
-* Programmer: Christian Chilan 
-*
-* Date: October 3, 2011
-*
-*-------------------------------------------------------------------------
-*/
+ * Function: udata_copy
+ *
+ * Purpose: Simulates the copying of the user data structure utilized in the
+ *          management of the "copying" of file images.
+ *
+ * Return: Address of "newly allocated" structure, if successful. Otherwise, it
+ *         returns NULL.
+ *
+ *-------------------------------------------------------------------------
+ */
 static void *
 udata_copy(void *_udata)
 {
     db_hdf5_H5LT_file_image_ud_t *udata = (db_hdf5_H5LT_file_image_ud_t *)_udata;
 
     /* callback is only used if the application buffer is not actually copied */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)) 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY))
         goto out;
-    if (udata->ref_count == 0) 
+    if (udata->ref_count == 0)
         goto out;
 
     udata->ref_count++;
 
-    return(udata);
+    return (udata);
 
 out:
     return NULL;
 } /* end udata_copy */
 
-
 /*-------------------------------------------------------------------------
-* Function: udata_free
-*
-* Purpose: Simulates deallocation of the user data structure utilized in the
-*          management of the "copying" of file images. The data structure is
-*          actually deallocated when there are no outstanding references. 
-*
-* Return: SUCCEED or FAIL 
-*
-* Programmer: Christian Chilan 
-*
-* Date: October 3, 2011
-*
-*-------------------------------------------------------------------------
-*/
+ * Function: udata_free
+ *
+ * Purpose: Simulates deallocation of the user data structure utilized in the
+ *          management of the "copying" of file images. The data structure is
+ *          actually deallocated when there are no outstanding references.
+ *
+ * Return: SUCCEED or FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 udata_free(void *_udata)
 {
     db_hdf5_H5LT_file_image_ud_t *udata = (db_hdf5_H5LT_file_image_ud_t *)_udata;
 
     /* callback is only used if the application buffer is not actually copied */
-    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY)) 
+    if (!(udata->flags & db_hdf5_H5LT_FILE_IMAGE_DONT_COPY))
         goto out;
-    if (udata->ref_count == 0) 
+    if (udata->ref_count == 0)
         goto out;
 
     udata->ref_count--;
 
-    /* checks that there are no references outstanding before deallocating udata */
-    if (udata->ref_count == 0 && udata->fapl_ref_count == 0 &&
-            udata->vfd_ref_count == 0)
+    if (udata->ref_count == 0) {
+        /* There should not be any outstanding references
+         * to the udata structure at this point.
+         */
+        assert(udata->fapl_ref_count == 0);
+        assert(udata->vfd_ref_count == 0);
+
         free(udata);
+    }
 
-    return(0);
+    return (0);
 
-out:        
-    return(-1);
+out:
+    return (-1);
 } /* end udata_free */
+
+/* End of callbacks definitions for file image operations */
 #endif /* ] #if HDF5_VERSION_GE(1,8,9) */
 
 #else /* ] defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) [ */

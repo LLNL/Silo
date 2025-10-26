@@ -52,6 +52,7 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
 
+
 /* File-wide modifications:
  *
  *  Sean Ahern, Mon Mar 3 15:38:51 PST 1997 Rearranged most functions, adding
@@ -140,7 +141,6 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
-int Silo_version_4_11 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -187,7 +187,7 @@ PUBLIC char   *_db_err_list[] =
     "You need to configure the Silo library using the\n"
     "--with-hdf5=<INC,LIB> option and re-compile and\n"
     "re-install Silo. If you do not have an installation\n"
-    "of HDF5 already on your sytem, you will also need\n"
+    "of HDF5 already on your system, you will also need\n"
     "to obtain HDF5 from www.hdfgroup.org and install it.", /* 33 */
     "Empty objects not permitted. See DBSetAllowEmptyObjects().", /* 34 */
     "No more tiny array buffer space for custom object.", /* 35 */
@@ -302,6 +302,7 @@ SILO_Globals_t SILO_Globals = {
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
     0,     /* compatability mode */
+    0,     /* evalNameschemes */
     {      /* file options sets [32 of them] */
         0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -589,12 +590,14 @@ DBVariableNameValid(const char *s)
 
         if (! okay)
         {
+#if 0
             if (DB_NONE!=SILO_Globals._db_err_level)
             {
                 fprintf(stderr,"\"%s\" is an invalid name.  Silo variable\n"
                         "names may contain only alphanumeric characters\n"
                         "or the _ character.\n", s);
             }
+#endif
             return 0;
         }
     }
@@ -2163,7 +2166,7 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
 PRIVATE int
 db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
 {
-    int retval = db_silo_stat_one_file(name, statbuf); 
+    int retval;
 
     /* check for case where we're opening a buffer as a file */
     if (opts_set_id > DB_FILE_OPTS_LAST)
@@ -2176,12 +2179,15 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
         {
             static int n = 0;
             statbuf->s.st_mode = 0x0;
-            statbuf->s.st_mode |= S_IREAD;
+            statbuf->s.st_mode |= S_IRUSR;
+            statbuf->s.st_mode |= S_IWUSR;
             statbuf->s.st_dev = (dev_t) n++;
             statbuf->s.st_ino = (ino_t) n++;
             return 0;
         }
     }
+ 
+    retval = db_silo_stat_one_file(name, statbuf); 
 
     if (opts_set_id == -1 ||
         opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT ||
@@ -2250,6 +2256,13 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
     }
 
     return retval;
+}
+
+PUBLIC int
+DBStat(char const *fname)
+{
+    db_silo_stat_t dbstat;
+    return db_silo_stat(fname, &dbstat, -1);
 }
 
 /*-------------------------------------------------------------------------
@@ -2550,6 +2563,7 @@ DB_SETGET(int, CompatibilityMode, compatibilityMode, DB_INTBOOL_NOT_SET)
 #ifndef _WIN32
 #warning WHAT ABOUT FORCESINGLE SHOWERRORS
 #endif
+DB_SETGET(int, EvalNameschemes, evalNameschemes, DB_INTBOOL_NOT_SET)
 
 /* The compression stuff has some custom initialization */
 static void _db_set_compression_params(char **dst, char const *s)
@@ -5935,7 +5949,7 @@ db_can_overwrite_dstobj_with_srcobj(
 
     for (q = 0; q < srcObj->ncomponents; q++)
     {
-        int r, dstr = -1;;
+        int r, dstr = -1;
         char const *curr_compname = srcObj->comp_names[q];
 
         for (r = 0; r < dstObj->ncomponents && dstr==-1; r++)
@@ -6320,6 +6334,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
     char const *many_to_one_dir = 0;
     int N = 0;
     char const **srcPathNames = 0, **dstPathNames = 0;
+    int srcPathNamesAlloc = 0, dstPathNamesAlloc = 0;
     char srcStartCwg[1024], dstStartCwg[1024];
 
 #ifndef _WIN32
@@ -6376,7 +6391,6 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         /* Process varargs in two passes. Pass 1, count them. Pass 2
            allocate space and capture them. */
         int pass;
-
         for (pass = 0; pass < 2; pass++)
         {
             int n = 0;
@@ -6386,8 +6400,12 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
             if (pass == 1)
             {
                 srcPathNames = (char const **) malloc(N * sizeof(char const *));
+                srcPathNamesAlloc = 1;
                 if (src_dst_pairs)
+                {
                     dstPathNames = (char const **) malloc(N * sizeof(char const *));
+                    dstPathNamesAlloc = 1;
+                }
             }
             while ((arg = va_arg(ap, char const *)) != DB_EOA)
             {
@@ -6410,16 +6428,24 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
     }
 
-#ifndef _WIN32
-#warning FIX LEAKS WITH EARLY RETURN HERE
-#endif
-
     if (n_src_dir_triple && N == 0)
+    {
+        if (srcPathNamesAlloc) FREE(srcPathNames);
+        if (dstPathNamesAlloc) FREE(dstPathNames);
         return 0;
+    }
     if (!n_src_dir_triple && N < 2)
+    {
+        if (srcPathNamesAlloc) FREE(srcPathNames);
+        if (dstPathNamesAlloc) FREE(dstPathNames);
         return db_perror("src or dst unspecified", E_BADARGS, me);
+    }
     if (src_dst_pairs && N%2)
+    {
+        if (srcPathNamesAlloc) FREE(srcPathNames);
+        if (dstPathNamesAlloc) FREE(dstPathNames);
         return db_perror("non-even arg count for -2 option", E_BADARGS, me);
+    }
 
     /* target dir is at end of list of sources */
     if (!many_to_one_dir && !src_dst_pairs && !n_src_dst_triple && !n_src_dir_triple)
@@ -6432,6 +6458,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
     {
         int q;
         dstPathNames = (char const **) malloc(N * sizeof(char const *));
+        dstPathNamesAlloc = 1;
         for (q = 0; q < N; q++)
             dstPathNames[q] = many_to_one_dir; /* all point to same char* */
     }
@@ -6475,7 +6502,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
                 db_perror("Object copy failed", E_CALLFAIL, me);
                 goto endLoop;
             }
-            continue;
+            goto endLoop;
         }
 
         /* If we get this far into the loop body here, then src is a dir */
@@ -6534,6 +6561,9 @@ endLoop:
         FREE(srcObjAbsName);
         FREE(dstObjAbsName);
     }
+
+    if (srcPathNamesAlloc) FREE(srcPathNames);
+    if (dstPathNamesAlloc) FREE(dstPathNames);
 
     DBSetDir(srcFile, srcStartCwg);
     DBSetDir(dstFile, dstStartCwg);
@@ -6837,6 +6867,7 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
+#warning FIXME
 #if 0
         /* We don't know what name to pass to DBInqVarExists here because it
            is the driver that knows how to construct component names */
@@ -7240,6 +7271,231 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+/*----------------------------------------------------------------------
+ *  Routine                                        DBGenerateMBBlockName
+ *
+ *  Purpose: Use multiblock object block and file nameschemes and empty
+ *  list information to generate a multiblock object block name for a 
+ *  given block index. The result is returned in a static local variable
+ *  and should be *USED IMMEDIATELY*.
+ *
+ *  This code was taken entirely from VisIt's Silo plugin.
+ *
+ *  Mark C. Miller (copied from Cyrus Harrison), Wed Jul  2 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC char
+*DBGenerateMBBlockName(
+    int idx,                     /* block index for name to be generated */
+    DBnamescheme const *fileNS,  /* file path namescheme */
+    DBnamescheme const *blockNS, /* block path namescheme */
+    int emptyCnt,                /* optional empty list size */
+    int const *emptyLst)         /* optional list of empty block numbers */
+{
+    static char res[4096];
+    int avail = (int) sizeof(res)-1;
+
+    strcpy(res, "EMPTY");
+    if (emptyLst)
+    {
+        int bot = 0;
+        int top = emptyCnt - 1;
+        int mid;
+        while (bot <= top)
+        {
+            mid = (bot + top) >> 1;
+
+            if (idx > emptyLst[mid])
+                bot = mid + 1;
+            else if (idx < emptyLst[mid])
+                top = mid - 1;
+            else
+                return res;
+        }
+    }
+
+    // namescheme case
+    res[0] = '\0';
+    if (fileNS != 0)
+    {
+        const char *file_res = DBGetName(fileNS,idx);
+        if (file_res != 0)
+        {
+            strncat(res, file_res, avail);
+            avail -= strlen(file_res);
+            strncat(res, ":", avail);
+            avail--;
+        }
+    }
+
+    if (blockNS != 0)
+    {
+        const char *block_res = DBGetName(blockNS,idx);
+        if (block_res != 0)
+            strncat(res, block_res, avail);
+    }
+
+    return res;
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                 _dbEvalMultiblockNameschemes
+ *
+ *  Purpose: Workhorse to iterate over relevant members of a multiblock
+ *  object with nameschemes to generate an explicit list of names and,
+ *  where needed, block types.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PRIVATE void
+_dbEvalMultiblockNameschemes(
+    DBfile *dbfile,         /* Silo file the associated MB object was obtained from */
+    int nblocks,            /* number of names to generate */
+    int block_type,         /* homogeneous block type of all blocks */
+    char const *file_ns,    /* The file path namescheme */
+    char const *block_ns,   /* The block path (within a file) namescheme */
+    int empty_cnt,          /* Size of empty list */
+    int const * empty_list, /* List of empty block indices */
+    int **block_types,      /* Returned block types array */
+    char ***block_names     /* Returned block names array */
+)
+{
+    DBnamescheme *fileNS = DBMakeNamescheme(file_ns, 0, dbfile, 0);
+    DBnamescheme *blockNS = DBMakeNamescheme(block_ns, 0, dbfile, 0);
+
+    *block_names = (char **) malloc(nblocks * sizeof(char*));
+    if (block_types)
+        *block_types = (int *) malloc(nblocks * sizeof(int));
+
+    for (int i = 0; i < nblocks; i++)
+    {
+        (*block_names)[i] = strdup(DBGenerateMBBlockName(i, fileNS, blockNS, empty_cnt, empty_list));
+        if (block_types)
+            (*block_types)[i] = block_type;
+    }
+
+    DBFreeNamescheme(fileNS);
+    DBFreeNamescheme(blockNS);
+}
+
+
+/*----------------------------------------------------------------------
+ *  Routine                                   DBEvalMultimeshNameschemes
+ *
+ *  Purpose: Convert a DBmultimesh object with nameschemes to an
+ *  explicit list of names. The object is converted in place. It is
+ *  harmless to call this method on an object that is not using
+ *  nameschemes
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimeshNameschemes(
+    DBfile *dbfile,  /* The file the object was read from */
+    DBmultimesh *mm) /* The object to convert */
+{
+    if (mm->meshnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mm->nblocks, mm->block_type,
+        mm->file_ns, mm->block_ns, mm->empty_cnt, mm->empty_list,
+        &mm->meshtypes, &mm->meshnames);
+
+    FREE(mm->file_ns);
+    FREE(mm->block_ns);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                    DBEvalMultivarNameschemes
+ *
+ *  Purpose: Convert a DBmultivar object with nameschemes to an
+ *  explicit list of names. The object is converted in place. It is
+ *  harmless to call this method on an object that is not using
+ *  nameschemes
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultivarNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultivar *mv) /* The object to convert */
+{
+    if (mv->varnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mv->nvars, mv->block_type,
+        mv->file_ns, mv->block_ns, mv->empty_cnt, mv->empty_list,
+        &mv->vartypes, &mv->varnames);
+
+    FREE(mv->file_ns);
+    FREE(mv->block_ns);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                    DBEvalMultimatNameschemes
+ *
+ *  Purpose: Convert a DBmultimat object with nameschemes to an
+ *  explicit list of names.
+ *
+ *  Note: A DBmultimat has no member for the mesh or variable type of
+ *  each block. So, those arguments to _dbEvalMultiblockNameschemes are
+ *  NULL'd out. The object is converted in place. It is harmless to call
+ *  this method on an object that is not using nameschemes.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimatNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultimat *mm) /* The object to convert */
+{
+    if (mm->matnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, mm->nmats, 0 /*no mm->block_type */,
+        mm->file_ns, mm->block_ns, mm->empty_cnt, mm->empty_list,
+        0 /*no mm->mattypes */, &mm->matnames);
+
+    FREE(mm->file_ns);
+    FREE(mm->block_ns);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                             DBEvalMultimatspeciesNameschemes
+ *
+ *  Purpose: Convert a DBmultimatspecies object with nameschemes to an
+ *  explicit list of names.
+ *
+ *  Note: A DBmultimatspecies has no member for mesh or variable type of
+ *  each block. So, those arguments to _dbEvalMultiblockNameschemes are
+ *  NULL'd out. The object is converted in place. It is harmless to call
+ *  this method on an object that is not using nameschemes.
+ *
+ *  Mark C. Miller, Wed Jul  2 10:33:39 PDT 2025
+ *
+ *  Modifications
+ *--------------------------------------------------------------------*/
+PUBLIC void
+DBEvalMultimatspeciesNameschemes(
+    DBfile *dbfile, /* The file the object was read from */
+    DBmultimatspecies *ms) /* The object to convert */
+{
+    if (ms->specnames) return;
+
+    _dbEvalMultiblockNameschemes(dbfile, ms->nspec, 0 /* no ms->block_type */,
+        ms->file_ns, ms->block_ns, ms->empty_cnt, ms->empty_list,
+        0 /* no ms->spectypes */, &ms->specnames);
+
+    FREE(ms->file_ns);
+    FREE(ms->block_ns);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBGetMultimesh
  *
@@ -7280,6 +7536,8 @@ DBGetMultimesh(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mm) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultimeshNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7364,6 +7622,8 @@ DBGetMultivar(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mv) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultivarNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7406,6 +7666,8 @@ DBGetMultimat(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mt) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultimatNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7448,6 +7710,8 @@ DBGetMultimatspecies(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_mms) (dbfile, name);
+        if (DBGetEvalNameschemesFile(dbfile))
+          DBEvalMultimatspeciesNameschemes(dbfile, retval);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -11091,139 +11355,105 @@ _DBdarrminmax(double arr[], int len, double *arr_min, double *arr_max)
     return 0;
 }
 
-/***********************************************************************
- *
- * Purpose: Return the min and max values of a subset of the given
- *          array.
- *
- * Programmer: Eric S. Brugger
- * Date:       May 26, 1995
- *
- * Input arguments:
- *    arr      : The array to evaluate.
- *    datatype : The data type of the array.
- *    nx       : The x dimension of the array.
- *    ny       : The y dimension of the array.
- *    nz       : The z dimension of the array.
- *    ixmin    : The 0 origin min index in the x direction.
- *    ixmax    : The 0 origin max index in the x direction.
- *    iymin    : The 0 origin min index in the y direction.
- *    iymax    : The 0 origin max index in the y direction.
- *    izmin    : The 0 origin min index in the z direction.
- *    izmax    : The 0 origin max index in the z direction.
- *
- * Output arguments:
- *    amin     : The minimum value in the array.
- *    amax     : The maximum value in the array.
- *
- * Input/Output arguments:
- *
- * Notes:
- *
- * Modifications:
- *    Eric Brugger, Tue May 30 17:03:51 PDT 1995
- *    I changed the initial calculation of the index to use ixmin,
- *    iymin, and izmin instead of i, j, k which were not initialized.
- *
- *    Jim Reus, 23 Apr 97
- *    I changed to prototype form, moved location within file.
- *
- *    Eric Brugger, Thu Sep 23 15:05:18 PDT 1999
- *    I removed the unused argument nz.
- ***********************************************************************/
-
 INTERNAL int
-_DBSubsetMinMax3(float arr[], int datatype, float *amin, float *amax , int nx,
-                 int ny, int ixmin, int ixmax, int iymin , int iymax,
-                 int izmin, int izmax)
+include_point(int ptidx, int ndims, int const *dims,
+    int const *minidx, int const *maxidx)
 {
-    int             i, j, k, index, nxy;
-    float           tmin, tmax;
-    double          dtmin, dtmax;
-    double         *darr, *damin, *damax;
+    if (dims == 0) return 1;
 
-    switch (datatype)
-    {
-    case DB_FLOAT:
+    int i = ndims>0 ? (ptidx)                   % dims[0] : 0;
+    int j = ndims>1 ? (ptidx/dims[0])           % dims[1] : 0;
+    int k = ndims>2 ? (ptidx/(dims[1]*dims[0])) % dims[2] : 0;
 
-        nxy = nx * ny;
+    if (i < minidx[0]) return 0;
+    if (i > maxidx[0]) return 0;
+    if (j < minidx[1]) return 0;
+    if (j > maxidx[1]) return 0;
+    if (k < minidx[2]) return 0;
+    if (k > maxidx[2]) return 0;
 
-        index = INDEX3(ixmin, iymin, izmin, nx, nxy);
-        tmin = arr[index];
-        tmax = arr[index];
-
-        for (k = izmin; k <= izmax; k++)
-        {
-            for (j = iymin; j <= iymax; j++)
-            {
-                for (i = ixmin; i <= ixmax; i++)
-                {
-                    index = INDEX3(i, j, k, nx, nxy);
-                    tmin = MIN(tmin, arr[index]);
-                    tmax = MAX(tmax, arr[index]);
-                }
-            }
-        }
-
-        *amin = tmin;
-        *amax = tmax;
-        break;
-
-    case DB_DOUBLE:
-
-        darr = (double *)arr;
-
-        nxy = nx * ny;
-
-        index = INDEX3(ixmin, iymin, izmin, nx, nxy);
-        dtmin = darr[index];
-        dtmax = darr[index];
-
-        for (k = izmin; k <= izmax; k++)
-        {
-            for (j = iymin; j <= iymax; j++)
-            {
-                for (i = ixmin; i <= ixmax; i++)
-                {
-                    index = INDEX3(i, j, k, nx, nxy);
-                    dtmin = MIN(dtmin, darr[index]);
-                    dtmax = MAX(dtmax, darr[index]);
-                }
-            }
-        }
-
-        damin = (double *)amin;
-        damax = (double *)amax;
-        *damin = dtmin;
-        *damax = dtmax;
-        break;
-
-    default:
-        break;
-    }
-
-    return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
- * Routine                                               CSGM_CalcExtents
+ * Routine                                               _CalcExtents
  *
- * Purpose
+ * Purpose: Return min/max of each dimension of coordinate array data
  *
- *      Return the extents of the given csg mesh.
+ * Modifications:
+ *      Sean Ahern, Wed Oct 21 10:55:21 PDT 1998
+ *      Changed the function so that the min_extents and max_extents are 
+ *      passed in as void* variables.
  *
+ *      Mark C. Miller, Mon May 20 12:25:25 PDT 2024
+ *      Adjusted to avoid strict pointer aliasing optimization issues.
  *--------------------------------------------------------------------*/
 INTERNAL int
-CSGM_CalcExtents(int datatype, int ndims, int nbounds,
-               const int *typeflags, const void *coeffs,
-               double *min_extents, double *max_extents)
+_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
+             void *min_extents, void *max_extents,
+             int const *dims, int const *minidx, int const *maxidx)
 {
-    min_extents[0] = -DBL_MAX;
-    min_extents[1] = -DBL_MAX;
-    min_extents[2] = -DBL_MAX;
-    max_extents[0] = DBL_MAX;
-    max_extents[1] = DBL_MAX;
-    max_extents[2] = DBL_MAX;
+    int i, j, first;
+
+    if (npts <= 0) return 0;
+
+    if (datatype == DB_DOUBLE) {
+
+        double *dmin_extents = (double *) min_extents;
+        double *dmax_extents = (double *) max_extents;
+        double const * const * _coord_arrays = (double const * const *) coord_arrays;
+        double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+
+        for (i = 0; i < ndims; i++)
+        {
+            for (j = 0, first = 1; j < npts; j++)
+            {
+                if (include_point(j, ndims, dims, minidx, maxidx))
+                {
+                    if (first)
+                    {
+                        first = 0;
+                        dmin_extents[i] = dcoord_arrays[i][j];
+                        dmax_extents[i] = dcoord_arrays[i][j];
+                    }
+                    else
+                    {
+                        dmin_extents[i] = MIN(dmin_extents[i], dcoord_arrays[i][j]);
+                        dmax_extents[i] = MAX(dmax_extents[i], dcoord_arrays[i][j]);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        float *fmin_extents = (float *) min_extents;
+        float *fmax_extents = (float *) max_extents;
+        float  const * const * _coord_arrays = (float const * const *) coord_arrays;
+        float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+
+        for (i = 0; i < ndims; i++)
+        {
+            for (j = 0, first = 1; j < npts; j++)
+            {
+                if (include_point(j, ndims, dims, minidx, maxidx))
+                {
+                    if (first)
+                    {
+                        first = 0;
+                        fmin_extents[i] = fcoord_arrays[i][j];
+                        fmax_extents[i] = fcoord_arrays[i][j];
+                    }
+                    else
+                    {
+                        fmin_extents[i] = MIN(fmin_extents[i], fcoord_arrays[i][j]);
+                        fmax_extents[i] = MAX(fmax_extents[i], fcoord_arrays[i][j]);
+                    }
+                }
+            }
+        }
+    }
+
     return 0;
 }
 
@@ -11260,343 +11490,72 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
                  int const *max_index, int const *dims, int ndims, int coordtype,
                  void *min_extents, void *max_extents)
 {
-    float         *x = NULL, *y = NULL, *z = NULL;
-    double        *dx = NULL, *dy = NULL, *dz = NULL;
-    double        *dmin_extents = NULL, *dmax_extents = NULL;
-    float         *fmin_extents = NULL, *fmax_extents = NULL;
-    int            i, is_empty = 1;
-    char          *me = "_DBQMCalcExtents";
+    int i, npts;
 
+    npts = 1;
     for (i = 0; i < ndims; i++)
+        npts *= dims[i];
+
+    if (npts <= 0) return 0;
+
+    if (coordtype == DB_COLLINEAR)
     {
-        if (dims[i] > 0)
+        if (datatype == DB_DOUBLE)
         {
-            is_empty = 0;
-            break;
+            double *dmin_extents = (double *) min_extents;
+            double *dmax_extents = (double *) max_extents;
+            double const * const * _coord_arrays = (double const * const *) coord_arrays;
+            double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            for (i = 0; i < ndims; i++)
+                _CalcExtents(&dcoord_arrays[i], datatype, 1, dims[i], &dmin_extents[i], &dmax_extents[i],
+                    &dims[i], &min_index[i], &max_index[i]);
+        }
+        else
+        {
+            float *fmin_extents = (float *) min_extents;
+            float *fmax_extents = (float *) max_extents;
+            float const * const * _coord_arrays = (float const * const *) coord_arrays;
+            float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            for (i = 0; i < ndims; i++)
+                _CalcExtents(&fcoord_arrays[i], datatype, 1, dims[i], &fmin_extents[i], &fmax_extents[i],
+                    &dims[i], &min_index[i], &max_index[i]);
         }
     }
-
-    if (is_empty) return 0;
-
-    if (datatype == DB_FLOAT)
+    else
     {
-        fmin_extents = (float*)min_extents;
-        fmax_extents = (float*)max_extents;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            fmin_extents[i] = 0.;
-            fmax_extents[i] = 0.;
-        }
-    } else if (datatype == DB_DOUBLE)
-    {
-        dmin_extents = (double*)min_extents;
-        dmax_extents = (double*)max_extents;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            dmin_extents[i] = 0.;
-            dmax_extents[i] = 0.;
-        }
-    }
-
-    /* Read default coordinate variables. */
-    switch (ndims) {
-        case 3:
-            z = ((float**)coord_arrays)[2];
-            /* Fall through */
-        case 2:
-            y = ((float**)coord_arrays)[1];
-            /* Fall through */
-        case 1:
-            x = ((float**)coord_arrays)[0];
-            break;
-        default:
-            break;
-    }
-
-    if (datatype == DB_DOUBLE) {
-        dx = (double *)x;
-        dy = (double *)y;
-        dz = (double *)z;
-    }
-
-    /* Get mesh coordinate extents. */
-    switch (coordtype) {
-
-        case DB_COLLINEAR:
-
-            switch (ndims) {
-                case 3:
-                    if (datatype == DB_DOUBLE) {
-                        dmin_extents[2] = dz[min_index[2]];
-                        dmax_extents[2] = dz[max_index[2]];
-                    }
-                    else {
-                        fmin_extents[2] = z[min_index[2]];
-                        fmax_extents[2] = z[max_index[2]];
-                    }
-                case 2:
-                    if (datatype == DB_DOUBLE) {
-                        dmin_extents[1] = dy[min_index[1]];
-                        dmax_extents[1] = dy[max_index[1]];
-                    }
-                    else {
-                        fmin_extents[1] = y[min_index[1]];
-                        fmax_extents[1] = y[max_index[1]];
-                    }
-                case 1:
-                    if (datatype == DB_DOUBLE) {
-                        dmin_extents[0] = dx[min_index[0]];
-                        dmax_extents[0] = dx[max_index[0]];
-                    }
-                    else {
-                        fmin_extents[0] = x[min_index[0]];
-                        fmax_extents[0] = x[max_index[0]];
-                    }
-                    break;
-            }
-            break;
-
-        case DB_NONCOLLINEAR:
-
-            switch (ndims) {
-                case 3:
-                    if (datatype == DB_DOUBLE) {
-                        _DBSubsetMinMax3((float *)dx, datatype,
-                                         (float *)(&dmin_extents[0]),
-                                         (float *)(&dmax_extents[0]),
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3((float *)dy, datatype,
-                                         (float *)(&dmin_extents[1]),
-                                         (float *)(&dmax_extents[1]),
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3((float *)dz, datatype,
-                                         (float *)(&dmin_extents[2]),
-                                         (float *)(&dmax_extents[2]),
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                    }
-                    else {
-                        _DBSubsetMinMax3(x, datatype,
-                                         &fmin_extents[0], &fmax_extents[0],
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3(y, datatype,
-                                         &fmin_extents[1], &fmax_extents[1],
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                        _DBSubsetMinMax3(z, datatype,
-                                         &fmin_extents[2], &fmax_extents[2],
-                                         dims[0], dims[1],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1],
-                                         min_index[2], max_index[2]);
-                    }
-                    break;
-                case 2:
-                    if (datatype == DB_DOUBLE) {
-                        _DBSubsetMinMax2((float *)dx, datatype,
-                                         (float *)(&dmin_extents[0]),
-                                         (float *)(&dmax_extents[0]),
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-                        _DBSubsetMinMax2((float *)dy, datatype,
-                                         (float *)(&dmin_extents[1]),
-                                         (float *)(&dmax_extents[1]),
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-                    }
-                    else {
-
-                        _DBSubsetMinMax2(x, datatype,
-                                         &fmin_extents[0], &fmax_extents[0],
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-
-                        _DBSubsetMinMax2(y, datatype,
-                                         &fmin_extents[1], &fmax_extents[1],
-                                         dims[0],
-                                         min_index[0], max_index[0],
-                                         min_index[1], max_index[1]);
-                    }
-                    break;
-                case 1:
-                    return db_perror("1-d noncollinear", E_NOTIMP, me);
-            }
-            break;
-
-        default:
-            return db_perror("default case", E_INTERNAL, me);
+        _CalcExtents(coord_arrays, datatype, ndims, npts, min_extents, max_extents,
+            dims, min_index, max_index);
     }
 
     return 0;
 }
 
-/*--------------------------------------------------------------------------
- *  Routine                                                  _DBSubsetMinMax2
- *
- *  Purpose
- *
- *      Return the min and max values of a subset of the given array.
- *
- *  Paramters
- *
- *      arr       =|  The array to evaluate
- *      datatype  =|  The type of data pointed to by 'arr'. (float or double)
- *      amin,amax  |= Returned min,max values
- *      nx,ny     =|  The dimensions of 'arr'
- *      ixmin...  =|  The actual 0-origin indeces to use for subselection
- *
- * Modified
- *    Robb Matzke, Wed Jan 11 06:46:23 PST 1995
- *    Changed name from SubsetMinMax2 since that conflicted with MeshTV.
- *
- *    Eric Brugger, Thu Mar 14 16:22:08 PST 1996
- *    I corrected a bug in the calculation of the minimum, where it
- *    got the initial minimum value by indexing into the coordinate
- *    arrays as 1d arrays instead of a 2d arrays.
- *
- *    Eric Brugger, Thu Sep 23 15:05:18 PDT 1999
- *    I removed the unused argument ny.
- *--------------------------------------------------------------------------*/
 INTERNAL int
-_DBSubsetMinMax2(void const *arr, int datatype, float *amin, float *amax, int nx,
-                 int ixmin, int ixmax, int iymin, int iymax)
+UM_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
+               void *min_extents, void *max_extents)
 {
-    int            k, j, index;
-    float          tmin, tmax;
-    double         dtmin, dtmax;
-    double        *darr = NULL, *damin = NULL, *damax = NULL;
-    float         *farr = NULL;
-
-    switch (datatype) {
-        case DB_FLOAT:
-
-            farr = (float *)arr;
-
-            index = INDEX (ixmin, iymin, nx);
-            tmin = farr[index];
-            tmax = farr[index];
-
-            for (j = iymin; j <= iymax; j++) {
-                for (k = ixmin; k <= ixmax; k++) {
-                    index = INDEX (k, j, nx);
-                    tmin = MIN (tmin, farr[index]);
-                    tmax = MAX (tmax, farr[index]);
-                }
-            }
-            *amin = tmin;
-            *amax = tmax;
-            break;
-
-        case DB_DOUBLE:
-
-            darr = (double *)arr;
-
-            index = INDEX (ixmin, iymin, nx);
-            dtmin = darr[index];
-            dtmax = darr[index];
-
-            for (j = iymin; j <= iymax; j++) {
-                for (k = ixmin; k <= ixmax; k++) {
-                    index = INDEX (k, j, nx);
-                    dtmin = MIN (dtmin, darr[index]);
-                    dtmax = MAX (dtmax, darr[index]);
-                }
-            }
-
-            damin = (double *)amin;
-            damax = (double *)amax;
-            *damin = dtmin;
-            *damax = dtmax;
-            break;
-
-        default:
-            break;
-    }
-    return 0;
+    return _CalcExtents(coord_arrays, datatype, ndims, npts, min_extents, max_extents,0,0,0);
 }
 
 /*----------------------------------------------------------------------
- * Routine                                               UM_CalcExtents
+ * Routine                                               CSGM_CalcExtents
  *
  * Purpose
  *
- *      Return the extents of the given ucd mesh.
+ *      Return the extents of the given csg mesh.
  *
- * Modifications:
- *      Sean Ahern, Wed Oct 21 10:55:21 PDT 1998
- *      Changed the function so that the min_extents and max_extents are 
- *      passed in as void* variables.
  *--------------------------------------------------------------------*/
 INTERNAL int
-UM_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int nnodes,
-               void *min_extents, void *max_extents)
+CSGM_CalcExtents(int datatype, int ndims, int nbounds,
+               const int *typeflags, const void *coeffs,
+               double *min_extents, double *max_extents)
 {
-    int            i, j;
-    double       **dcoord_arrays = NULL;
-    double        *dmin_extents = NULL, *dmax_extents = NULL;
-    float         *fmin_extents = NULL, *fmax_extents = NULL;
-    float        **fcoord_arrays = NULL;
-
-    if (nnodes <= 0) return 0;
-
-    if (datatype == DB_DOUBLE) {
-
-        dmin_extents = (double *)min_extents;
-        dmax_extents = (double *)max_extents;
-        dcoord_arrays = (double **)coord_arrays;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            dmin_extents[i] = dcoord_arrays[i][0];
-            dmax_extents[i] = dcoord_arrays[i][0];
-        }
-
-        for (i = 0; i < ndims; i++) {
-            for (j = 0; j < nnodes; j++) {
-                dmin_extents[i] = MIN(dmin_extents[i], dcoord_arrays[i][j]);
-                dmax_extents[i] = MAX(dmax_extents[i], dcoord_arrays[i][j]);
-            }
-        }
-
-    }
-    else {
-        fmin_extents = (float *)min_extents;
-        fmax_extents = (float *)max_extents;
-        fcoord_arrays = (float **)coord_arrays;
-
-        /* Initialize extent arrays */
-        for (i = 0; i < ndims; i++) {
-            fmin_extents[i] = fcoord_arrays[i][0];
-            fmax_extents[i] = fcoord_arrays[i][0];
-        }
-
-        for (i = 0; i < ndims; i++) {
-            for (j = 0; j < nnodes; j++) {
-                fmin_extents[i] = MIN(fmin_extents[i], fcoord_arrays[i][j]);
-                fmax_extents[i] = MAX(fmax_extents[i], fcoord_arrays[i][j]);
-            }
-        }
-
-    }
-
+    min_extents[0] = -DBL_MAX;
+    min_extents[1] = -DBL_MAX;
+    min_extents[2] = -DBL_MAX;
+    max_extents[0] = DBL_MAX;
+    max_extents[1] = DBL_MAX;
+    max_extents[2] = DBL_MAX;
     return 0;
 }
 
@@ -13104,7 +13063,6 @@ db_ResetGlobalData_PointMesh (int ndims) {
 INTERNAL int
 db_ResetGlobalData_QuadMesh (int ndims) {
 
-   FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
 
    _qm._coord_sys = DB_OTHER;
@@ -13443,7 +13401,7 @@ db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAt
     char **retval;
 
     /* handle null case */
-    if (!strList)
+    if (!strList || strList[0] == '\0')
     {
         if (_n && *_n < 0) *_n = 0;
         return 0;
@@ -13465,6 +13423,12 @@ db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAt
     else
     {
         n = *_n;
+    }
+
+    if (n <= 0)
+    {
+        if (_n && *_n < 0) *_n = n;
+        return 0;
     }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
@@ -15126,11 +15090,25 @@ _db_safe_strdup(const char *s)
  *
  * Mark C. Miller, Tue Feb  7 15:18:38 PST 2012
  * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
+ *
+ * Mark C. Miller, Mon Oct 24, 23:00:00 PDT 2022
+ * Handle nans properly
  *-------------------------------------------------------------------------
  */
 int DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps)
 {
    double       num, den;
+
+   /* handle possible NaNs first */
+   if (isnan(a))
+   {
+       if (isnan(b)) return 0;
+       return 1;
+   }
+   else if (isnan(b))
+   {
+       return 1;
+   }
 
    /*
     * First, see if we should use the alternate diff.

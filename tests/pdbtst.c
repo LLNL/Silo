@@ -94,6 +94,7 @@ running into problems with this test, you can always re-configure to
 #include <config.h>
 
 #include <lite_pdb.h>
+#include <config.h>
 
 #include <assert.h>
 #ifndef _WIN32
@@ -106,11 +107,11 @@ running into problems with this test, you can always re-configure to
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #include <sys/types.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -4025,7 +4026,7 @@ static int run_test(PFTest test, int n, char *host, int native)
 #else
     PRINT(STDOUT,
           "\t\t     %3d    %8lld  %8lld   %7lld     %.2g\n",
-          n, bytaa, bytfa, bytaa - bytfa, time);
+          n, (long long) bytaa, (long long) bytfa, (long long) bytaa - bytfa, time);
 #endif
 
     return(fail);}

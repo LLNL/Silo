@@ -28,7 +28,7 @@ _t2(compress_omp, Scalar, 1)(zfp_stream* stream, const zfp_field* field)
     uint block;
     /* set up thread-local bit stream */
     zfp_stream s = *stream;
-    zfp_stream_set_bit_stream(&s, bs[chunk]);
+    zfpns.zfp_stream_set_bit_stream(&s, bs[chunk]);
     /* compress sequence of blocks */
     for (block = bmin; block < bmax; block++) {
       /* determine block origin x within array */
@@ -76,7 +76,7 @@ _t2(compress_strided_omp, Scalar, 1)(zfp_stream* stream, const zfp_field* field)
     uint block;
     /* set up thread-local bit stream */
     zfp_stream s = *stream;
-    zfp_stream_set_bit_stream(&s, bs[chunk]);
+    zfpns.zfp_stream_set_bit_stream(&s, bs[chunk]);
     /* compress sequence of blocks */
     for (block = bmin; block < bmax; block++) {
       /* determine block origin x within array */
@@ -128,7 +128,7 @@ _t2(compress_strided_omp, Scalar, 2)(zfp_stream* stream, const zfp_field* field)
     uint block;
     /* set up thread-local bit stream */
     zfp_stream s = *stream;
-    zfp_stream_set_bit_stream(&s, bs[chunk]);
+    zfpns.zfp_stream_set_bit_stream(&s, bs[chunk]);
     /* compress sequence of blocks */
     for (block = bmin; block < bmax; block++) {
       /* determine block origin (x, y) within array */
@@ -186,7 +186,7 @@ _t2(compress_strided_omp, Scalar, 3)(zfp_stream* stream, const zfp_field* field)
     uint block;
     /* set up thread-local bit stream */
     zfp_stream s = *stream;
-    zfp_stream_set_bit_stream(&s, bs[chunk]);
+    zfpns.zfp_stream_set_bit_stream(&s, bs[chunk]);
     /* compress sequence of blocks */
     for (block = bmin; block < bmax; block++) {
       /* determine block origin (x, y, z) within array */
@@ -248,7 +248,7 @@ _t2(compress_strided_omp, Scalar, 4)(zfp_stream* stream, const zfp_field* field)
     uint block;
     /* set up thread-local bit stream */
     zfp_stream s = *stream;
-    zfp_stream_set_bit_stream(&s, bs[chunk]);
+    zfpns.zfp_stream_set_bit_stream(&s, bs[chunk]);
     /* compress sequence of blocks */
     for (block = bmin; block < bmax; block++) {
       /* determine block origin (x, y, z, w) within array */

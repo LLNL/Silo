@@ -86,7 +86,7 @@ On old silo file handle returned from DBOpen...
 AT_CHECK($VALGRIND dbversion $STARGS,,expout,ignore)
 AT_CLEANUP
 AT_SETUP(namescheme)
-AT_CHECK($VALGRIND namescheme,,ignore)
+AT_CHECK($VALGRIND namescheme,,[ignore])
 AT_CLEANUP
 AT_SETUP(realloc_obj_and_opts)
 AT_CHECK($VALGRIND realloc_obj_and_opts $STARGS,,ignore)
@@ -111,6 +111,9 @@ AT_CHECK($VALGRIND array $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test testread)
 AT_CHECK($VALGRIND multi_test testread $STARGS,,ignore)
+AT_CLEANUP
+AT_SETUP(multi_test testread libver)
+AT_CHECK($VALGRIND multi_test testread libver $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test testbadread)
 AT_CHECK($VALGRIND multi_test testbadread $STARGS,,ignore)
@@ -161,6 +164,9 @@ AT_CLEANUP
 AT_SETUP(twohex)
 AT_CHECK($VALGRIND twohex $STARGS,,ignore)
 AT_CLEANUP
+AT_SETUP(degen_hex)
+AT_CHECK($VALGRIND degen_hex $STARGS,,ignore)
+AT_CLEANUP
 AT_SETUP(multispec)
 AT_CHECK($VALGRIND multispec $STARGS,,ignore)
 AT_CLEANUP
@@ -196,7 +202,7 @@ AT_SETUP(csg)
 AT_CHECK($VALGRIND csg $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(rocket)
-AT_CHECK(test ! \( -e ./rocket_silo.so -o -e ../../rocket_silo.so -o -e ./.libs/rocket_silo.so -o -e ../../.libs/rocket_silo.so \) && exit 77 || $VALGRIND rocket $STARGS,,ignore)
+AT_CHECK($VALGRIND rocket $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(mmadjacency)
 AT_CHECK($VALGRIND mmadjacency $STARGS,,ignore)
@@ -235,8 +241,8 @@ AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.l
 AT_CLEANUP
 AT_SETUP(write)
 AT_KEYWORDS(python)
-AT_DATA(expout,[toc=nvar = 12
-var_names = (_fileinfo, _silolibinfo, t1, t10, t11, t2, t3, t4, t5, t6, t7, t8)
+AT_DATA(expout,[toc=nvar = 15
+var_names = (_fileinfo, _silolibinfo, t1, t10, t11, t12, t13, t14, t2, t3, t4, t5, t6, t7, t8)
 ndir = 1
 dir_names = (a)
 
@@ -244,8 +250,9 @@ t2='hello'
 t6=1.20,10.20
 a/t8='x2'
 t9=x3
-/t5=1.20,10.00
+/t5=1.20,10.20
 ])
+AT_CHECK(sami $STARGS,,ignore,ignore)
 AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_write.py,,expout,ignore)
 AT_CLEANUP
 AT_SETUP(error handling)
@@ -255,6 +262,7 @@ AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.l
 AT_CLEANUP
 AT_SETUP(write objects)
 AT_KEYWORDS(python)
+AT_CHECK(onehex $STARGS,,ignore) # don't valgrind these intermediate parts
 AT_CHECK(test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`,,ignore,ignore)
 AT_CLEANUP
 
@@ -278,7 +286,7 @@ AT_BANNER(HDF5 Driver Specific)
 AT_SETUP(grab)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
 AT_CLEANUP
-AT_SETUP(onehex with split driver)
+AT_SETUP(onehex with split VFD)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(onehex with custom fapl/fcpl)
@@ -335,10 +343,10 @@ AT_SETUP(largefile)
 AT_KEYWORDS(large)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile,,ignore,ignore)
 AT_CLEANUP
-#AT_SETUP(memfile_simple)
-#AT_CHECK(testall -small $STARGS,,ignore)
-#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
-#AT_CLEANUP
+AT_SETUP(memfile_simple)
+AT_CHECK(testall -small $STARGS,,ignore)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
+AT_CLEANUP
 
 AT_BANNER(Fortran)
 AT_SETUP(arrayf77)
@@ -390,7 +398,7 @@ AT_CLEANUP
 AT_SETUP(force single)
 AT_KEYWORDS(conversions)
 AT_CHECK(specmix $STARGS,,ignore)
-AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
+AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(multi_file)
 AT_KEYWORDS(large)
@@ -399,6 +407,7 @@ AT_CLEANUP
 AT_SETUP(multi_file use-ns)
 AT_KEYWORDS(large)
 AT_CHECK($VALGRIND multi_file use-ns $STARGS,,ignore)
+AT_CHECK($VALGRIND namescheme eval-ns $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(testall -medium)
 AT_KEYWORDS(large)

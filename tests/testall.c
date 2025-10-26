@@ -80,7 +80,7 @@ be used for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <stdlib.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #else
 #include <stdio.h>
@@ -1636,7 +1636,7 @@ build_rect3d(DBfile * dbfile, int size, int order)
 
     DBPutQuadmesh(dbfile, meshname, NULL, coords, dims, ndims, DB_FLOAT,
                   DB_COLLINEAR, optlist);
-#ifndef WIN32
+#ifndef _WIN32
     binf = open("rect3dz.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 #else
     binf = open("rect3dz.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IREAD|S_IWRITE);
@@ -1653,7 +1653,7 @@ build_rect3d(DBfile * dbfile, int size, int order)
     close(binf);
     printf("zsize = nz=%d, ny=%d, nx=%d\n", zdims[2], zdims[1], zdims[0]);
 
-#ifndef WIN32
+#ifndef _WIN32
     binf = open("rect3dn.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 #else
     binf = open("rect3dn.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IREAD|S_IWRITE);

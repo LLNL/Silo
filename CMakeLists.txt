@@ -61,6 +61,15 @@ file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/SILO_VERSION SILO_VERSION)
 # Strip suffix
 string(REGEX REPLACE "-.*" "" SILO_VERSION "${SILO_VERSION}")
 
+###
+# Set shell path separator char
+###
+if (WIN32)
+    set(_envvar_path_sep ";")
+else()
+    set(_envvar_path_sep ":")
+endif()
+
 ###-----------------------------------------------------------------------------
 # project command will automatically create cmake vars for major, minor,
 # patch and tweak from passed VERSION
@@ -77,7 +86,7 @@ set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
 ###-----------------------------------------------------------------------------
 
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Set to one of Debug, Release (default), RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
 ###-----------------------------------------------------------------------------
@@ -99,6 +108,9 @@ endif()
 # turn on folders (VS IDE, ignored otherwise)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Query if the generator is multi-config or not.
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 #
 # create an include dir for generated include files
 #
@@ -110,14 +122,17 @@ file(MAKE_DIRECTORY ${silo_build_include_dir})
 ###---------------------------------------------------------------------------
 
 option(SILO_ENABLE_SHARED  "Build silo shared library." ON)
-option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
+option(SILO_ENABLE_SILOCK "Enable building of silock" ON)
+option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt6)" OFF)
 option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
-option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
+option(SILO_ENABLE_INSTALL_LITE_HEADERS "Enable installation of PDB Lite headers" OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
+# Use CMake standard variables for these...
+option(BUILD_TESTING "Enable tests" OFF)
 
 include(CMakeDependentOption)
 
@@ -141,8 +156,9 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compress
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
 ##
-set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
-
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
+endif()
 
 set(BUILD_SHARED_LIBS ${SILO_ENABLE_SHARED})
 
@@ -229,6 +245,9 @@ else()
     include(${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
     set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE)
     check_type_size("off64_t" SIZEOF_OFF64_T)
+    if(NOT SIZEOF_OFF64_T)
+        set(SIZEOF_OFF64_T ${CMAKE_SIZEOF_VOID_P})
+    endif()
 endif()
 
 
@@ -320,13 +339,17 @@ if(SILO_VERS_PAT)
     string(APPEND SILO_VERS_TAG "_${SILO_VERS_PAT}")
 endif()
 
+# Bump if API changes
+set(SILO_SOVERSION 4)
+
 configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
                ${silo_build_include_dir}/silo.h)
 
 
 ###-----------------------------------------------------------------------------
-# Create config.h from config.h.in
+# Define and populate CMAKE_INSTALL_*DIR variables
 ###-----------------------------------------------------------------------------
+include(GNUInstallDirs)
 
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
@@ -335,28 +358,12 @@ if(SILO_ENABLE_FORTRAN)
     FortranCInterface_HEADER(${silo_build_include_dir}/silo_FC.h MACRO_NAMESPACE "FC_")
     if(EXISTS ${silo_build_include_dir}/silo_FC.h)
         set(HAVE_SILO_FC_H 1)
-        install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION include
+        install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
                 PERMISSIONS OWNER_READ OWNER_WRITE
                             GROUP_READ GROUP_WRITE
                             WORLD_READ)
     endif()
 endif()
-
-# set up some vars to be passed to config.h.in
-set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
-set(SILO_NAME "silo")
-set(SILO_TARNAME "silo")
-set(SILO_URL "https://silo.llnl.gov")
-
-# these are always defined
-set(HAVE_PDB_DRIVER 1)
-set(HAVE_NETCDF_DRIVER 1)
-set(HAVE_TAURUS_DRIVER 1)
-
-set(STDC_HEADERS 1)
-
-configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
-               ${silo_build_include_dir}/config.h)
 
 
 ###-----------------------------------------------------------------------------
@@ -447,7 +454,7 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/taurus/taurus.c
     ${Silo_SOURCE_DIR}/src/unknown/silo_unknown.c)
 
-if(SILO_ENABLE_FORTRAN)
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_f.c)
 endif()
 
@@ -536,8 +543,8 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 
     if(SILO_ENABLE_FPZIP)
+        set(HAVE_FPZIP 1)
         list(APPEND SILO_COMPILE_DEFINES
-            HAVE_FPZIP
             FPZIP_FP=FPZIP_FP_SAFE)
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/fpzip/error.cpp
@@ -551,8 +558,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 
     if(SILO_ENABLE_HZIP)
-        list(APPEND SILO_COMPILE_DEFINES HAVE_HZIP)
-
+        set(HAVE_HZIP 1)
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/hzip/hzmdecoder.cpp
             ${Silo_SOURCE_DIR}/src/hzip/hzmencoder.cpp
@@ -570,7 +576,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
             ${Silo_SOURCE_DIR}/src/hzip)
     endif()
 
-    if(zlib_FOUND)
+    if(ZLIB_FOUND)
         list(APPEND silo_library_include_dirs ${ZLIB_INCLUDE_DIR})
     else()
         list(APPEND SILO_COMPILE_DEFINES WITHOUT_ZLIB)
@@ -578,6 +584,13 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 add_library(silo ${silo_library_sources})
+set_target_properties(silo PROPERTIES SOVERSION ${SILO_SOVERSION})
+
+if(UNIX)
+    target_link_libraries(silo m)
+endif()
+
+target_link_libraries(silo ${CMAKE_DL_LIBS})
 target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
 target_include_directories(silo PRIVATE ${silo_library_include_dirs})
@@ -587,19 +600,27 @@ if(UNIX)
 endif()
 
 # add list of public headers to be installed
-set(silo_headers
-    ${silo_build_include_dir}/lite_pdb.h
-    ${silo_build_include_dir}/lite_score.h
-    ${silo_build_include_dir}/pdform.h
+set(silo_public_headers
     ${silo_build_include_dir}/silo.h
-    ${Silo_SOURCE_DIR}/src/silo/silo.inc
-    ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc
-    ${Silo_SOURCE_DIR}/src/silo/silo_exports.h)
+    ${Silo_SOURCE_DIR}/src/silo/silo_exports.h
+    ${Silo_SOURCE_DIR}/src/silo/pmpio.h)
+
+if(SILO_ENABLE_INSTALL_LITE_HEADERS)
+    list(APPEND silo_public_headers
+        ${silo_build_include_dir}/lite_pdb.h
+        ${silo_build_include_dir}/lite_score.h)
+endif()
+
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    list(APPEND silo_public_headers
+        ${Silo_SOURCE_DIR}/src/silo/silo.inc
+        ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc)
+endif()
 
 if(WIN32)
-    list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
+    list(APPEND silo_public_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
     # Also install silodiff.bat into bin
-    install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION bin
+    install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION ${CMAKE_INSTALL_BINDIR}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
@@ -608,15 +629,20 @@ if(WIN32)
         # copy silo dll to build/bin dir
         add_custom_command(TARGET copy_deps POST_BUILD
              COMMAND ${CMAKE_COMMAND} -E copy_if_different
-             $<TARGET_FILE:silo> ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+             $<TARGET_FILE:silo> ${Silo_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)
     endif()
 endif()
 
-install(FILES ${silo_headers} DESTINATION include
+install(FILES ${silo_public_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
 
+# Symlink old style silo_f77.inc
+if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink silo.inc silo_f77.inc
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})")
+endif()
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     # since we change the ouputname from silo to siloh5 when building
@@ -630,6 +656,7 @@ endif()
 # setting up for installing Silo CMake config files
 set(silo_targets_name "SiloTargets")
 install(TARGETS silo EXPORT ${silo_targets_name}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
@@ -654,15 +681,17 @@ endif()
 ##
 # silock
 ##
-if(NOT WIN32)
+if(SILO_ENABLE_SILOCK AND NOT WIN32)
     add_executable(silock
         ${Silo_SOURCE_DIR}/tools/silock/silock.c)
-    add_dependencies(silock silo)
-    target_link_libraries(silock $<TARGET_LINKER_FILE:silo>)
+    target_link_libraries(silock silo)
+    if(UNIX)
+        target_link_libraries(silock m ${CMAKE_DL_LIBS})
+    endif()
     target_include_directories(silock PRIVATE
         ${silo_build_include_dir}
         ${Silo_SOURCE_DIR}/src/silo)
-    install(TARGETS silock DESTINATION bin EXPORT ${silo_targets_name}
+    install(TARGETS silock DESTINATION ${CMAKE_INSTALL_BINDIR} EXPORT ${silo_targets_name}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
@@ -675,30 +704,72 @@ if(SILO_ENABLE_PYTHON_MODULE)
    add_subdirectory(tools/python)
 endif()
 
-#-----------------------------------------------------------------------------
-# TESTS
-#-----------------------------------------------------------------------------
-if(SILO_ENABLE_TESTS)
+###-----------------------------------------------------------------------------
+# Testing support
+###-----------------------------------------------------------------------------
+include(CTest)
+if(BUILD_TESTING)
+    set(_debug_build_types Debug RelWithDebInfo)
+    if(CMAKE_BUILD_TYPE IN_LIST _debug_build_types)
+        find_program(MEMORYCHECK_COMMAND NAMES valgrind)
+        if (MEMORYCHECK_COMMAND)
+            set(MEMORYCHECK_COMMAND_OPTIONS
+                "--leak-check=full --track-origins=yes --error-exitcode=1")
+        endif()
+    endif()
+
+    # Using h5stat as test case, determine directory holding HDF5 tools
+    find_program(_h5stat_exe NAMES h5stat
+        HINTS ${HDF5_ROOT} ${HDF5_DIR} ${SILO_HDF5_DIR}
+        PATH_SUFFIXES bin ../bin Tools/bin)
+    get_filename_component(_h5stat_dir "${_h5stat_exe}" DIRECTORY)
+    set(_sh_path "${_h5stat_dir}${_envvar_path_sep}$ENV{PATH}")
     add_subdirectory(tests)
 endif()
+
+###-----------------------------------------------------------------------------
+# Create config.h from config.h.in
+# Put this near end so we capture any set(SOMEVAR 1) calls above.
+###-----------------------------------------------------------------------------
+
+# set up some vars to be passed to config.h.in
+set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
+set(SILO_NAME "silo")
+set(SILO_TARNAME "silo")
+set(SILO_URL "https://silo.llnl.gov")
+
+# these are always defined
+set(HAVE_PDB_DRIVER 1)
+set(HAVE_NETCDF_DRIVER 1)
+set(HAVE_TAURUS_DRIVER 1)
+
+set(STDC_HEADERS 1)
+
+configure_file(${Silo_SOURCE_DIR}/CMake/config.h.cmake.in
+               ${silo_build_include_dir}/config.h)
 
 
 #-----------------------------------------------------------------------------
 # INSTALL
 #-----------------------------------------------------------------------------
 
-install(EXPORT ${silo_targets_name} DESTINATION cmake)
+###
+# Set up the CMAKE install location
+###
+set(CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Silo)
+
+install(EXPORT ${silo_targets_name} DESTINATION ${CMAKE_MODULE_INSTALL_DIR})
 
 include(${CMAKE_ROOT}/Modules/CMakePackageConfigHelpers.cmake)
 
 ###
 # Set up the include install location for use with the package config files
 ###
-set(INCLUDE_INSTALL_DIR include)
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
 
 configure_package_config_file(${Silo_SOURCE_DIR}/CMake/SiloConfig.cmake.in
   ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
-  INSTALL_DESTINATION cmake
+  INSTALL_DESTINATION ${CMAKE_MODULE_INSTALL_DIR}
   PATH_VARS INCLUDE_INSTALL_DIR
   )
 
@@ -711,7 +782,7 @@ write_basic_package_version_file(
 
 install(FILES ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
               ${Silo_BINARY_DIR}/cmake/SiloConfigVersion.cmake
-        DESTINATION cmake
+        DESTINATION ${CMAKE_MODULE_INSTALL_DIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)

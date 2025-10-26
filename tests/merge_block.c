@@ -55,7 +55,7 @@ product endorsement purposes.
 #include <silo.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <dirent.h>
 #include <unistd.h>
 #else
@@ -713,7 +713,7 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
     int       nFileMax;
     char    **files=NULL;
 
-#ifndef WIN32
+#ifndef _WIN32
     DIR      *dirp=NULL;
     struct dirent  *dp=NULL;
 #else
@@ -727,7 +727,7 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
     /*
      * Open the directory.
      */
-#ifndef WIN32
+#ifndef _WIN32
     dirp = opendir (".");
     if (dirp == NULL) {
         printf ("Error opening current directory\n");
@@ -754,7 +754,7 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
     nFiles = 0;
     nFileMax = 128;
     files = ALLOC_N (char *, nFileMax);
-#ifndef WIN32
+#ifndef _WIN32
     for (dp = readdir (dirp); dp != NULL; dp = readdir (dirp))
     {
         char *fName = dp->d_name;
@@ -790,7 +790,7 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
     /*
      * Close the directory.
      */
-#ifndef WIN32
+#ifndef _WIN32
     closedir (dirp);
 #else
     FindClose(dirHandle);

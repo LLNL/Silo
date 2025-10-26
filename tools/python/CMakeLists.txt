@@ -66,7 +66,7 @@ project(SiloPythonModule LANGUAGES CXX)
 # Python_add_library comes from CMake's FindPython package.
 # It automatically adds python includes/links to the target being created
 
-Python_add_library(Silo MODULE
+Python_add_library(SiloPy MODULE
     pydbfile.cpp
     pydbtoc.cpp
     pysilo.cpp)
@@ -74,38 +74,32 @@ Python_add_library(Silo MODULE
 # Have the output be relative to the root build dir, not in tools/python subdir
 if(WIN32)
   # on Windows, the module should live alongside the silo dll, so put it in bin
-  set(mod_dest bin)
+  set(mod_dest ${CMAKE_INSTALL_BINDIR})
 else()
-  set(mod_dest lib)
+  set(mod_dest ${CMAKE_INSTALL_LIBDIR})
 endif()
+set(SILO_INSTALL_PYTHONDIR ${mod_dest} CACHE PATH "Install destination of Silo python module (Silo.so)")
 
-set_target_properties(Silo PROPERTIES
-                      LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/${mod_dest})
+set_target_properties(SiloPy PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/${mod_dest}
+                      OUTPUT_NAME Silo)
 
-add_dependencies(Silo silo)
-target_link_libraries(Silo PRIVATE silo)
-target_include_directories(Silo PRIVATE
+add_dependencies(SiloPy silo)
+target_link_libraries(SiloPy PRIVATE silo)
+target_include_directories(SiloPy PRIVATE
      ${Silo_SOURCE_DIR}/src/silo
      ${silo_build_include_dir})
 
-install(TARGETS Silo DESTINATION ${mod_dest} EXPORT ${silo_targets_name}
+install(TARGETS SiloPy DESTINATION ${SILO_INSTALL_PYTHONDIR} EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
 
-install(FILES s2ex.py DESTINATION bin
+install(FILES s2ex.py DESTINATION ${CMAKE_INSTALL_BINDIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
-if(WIN32)
-    add_custom_command(TARGET Silo POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
-            ${Silo_BINARY_DIR}/bin/$<CONFIG>)
-else()
-    add_custom_command(TARGET Silo POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
-            ${Silo_BINARY_DIR}/bin/)
-endif()
-
+add_custom_command(TARGET SiloPy POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
+        ${Silo_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)

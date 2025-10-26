@@ -61,7 +61,7 @@
 
 if(DEFINED SILO_HDF5_SZIP_DIR AND EXISTS ${SILO_HDF5_SZIP_DIR}/szip-config.cmake)
     # this works for szip with CMake
-    find_package(SZIP PATHS ${SILO_HDF5_SZIP_DIR} CONFIG)
+    find_package(SZIP PATHS ${SILO_HDF5_SZIP_DIR} CONFIG NO_DEFAULT_PATH)
 else()
     if(DEFINED SILO_HDF5_SZIP_DIR AND EXISTS ${SILO_HDF5_SZIP_DIR})
         # help CMake find the specified szip
@@ -73,17 +73,18 @@ endif()
 if(SZIP_FOUND)
     # needed for config.h
     set(HAVE_LIBSZ 1)
-    if(WIN32 AND (SILO_ENABLE_SILEX OR SILEX_ENABLE_BROWSER))
+    if(WIN32)
         get_target_property(SZIP_DLL szip IMPORTED_LOCATION_RELEASE )
-        install(FILES ${SZIP_DLL} DESTINATION bin
-                PERMISSIONS OWNER_READ OWNER_WRITE
-                            GROUP_READ GROUP_WRITE
-                            WORLD_READ)
+        if(SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER)
+            install(FILES ${SZIP_DLL} DESTINATION ${CMAKE_INSTALL_BINDIR}
+                    PERMISSIONS OWNER_READ OWNER_WRITE
+                                GROUP_READ GROUP_WRITE
+                                WORLD_READ)
 
-        add_custom_command(TARGET copy_deps POST_BUILD
-             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-             ${SZIP_DLL} ${Silo_BINARY_DIR}/bin/$<CONFIG>)
-
+            add_custom_command(TARGET copy_deps POST_BUILD
+                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                 ${SZIP_DLL} ${Silo_BINARY_DIR}/bin/$<$<BOOL:${is_multi_config}>:$<CONFIG>>/)
+        endif()
     endif()
 else()
     message(FATAL_ERROR "Could not find szip, you may want to try setting SILO_HDF5_SZIP_DIR")

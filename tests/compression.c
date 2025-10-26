@@ -118,6 +118,7 @@ main(int argc, char *argv[])
     int            has_loss = 0;
     int            show_errors = DB_TOP;
     double         noise = 0.3;
+    int            compat = DB_COMPAT_OVER_PERF;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -159,6 +160,8 @@ main(int argc, char *argv[])
        } else if (!strcmp(argv[i], "lossy3")) {
           DBSetCompression("METHOD=FPZIP LOSS=3");
           has_loss = 1;
+       /* These test fail/fallback behavior. We target a compresion ratio
+          of 1000:1 and FAIL or FALLBACK if we can't hit...which we can't. */
        } else if (!strcmp(argv[i], "minratio1000")) {
           DBSetCompression("ERRMODE=FAIL MINRATIO=1000 METHOD=FPZIP");
        } else if (!strcmp(argv[i], "minratio1001")) {
@@ -174,6 +177,8 @@ main(int argc, char *argv[])
           printf("       readonly - checks an existing file (used for cross platform test)\n");
           printf("       DB_HDF5  - enable HDF5 driver, the default\n");
           return (0);
+       } else if (!strcmp(argv[i], "perf-over-compat")) {
+           compat = DB_PERF_OVER_COMPAT;
        } else if (!strcmp(argv[i], "show-all-errors")) {
           show_errors = DB_ALL_AND_DRVR;
        } else if (argv[i][0] != '\0') {
@@ -187,6 +192,7 @@ main(int argc, char *argv[])
     dval = (double*) malloc(ONE_MEG);
     drval = (double*) malloc(ONE_MEG);
 
+    DBSetCompatibilityMode(compat);
     DBShowErrors(show_errors, 0);
 
     if (!readonly)
@@ -223,7 +229,13 @@ main(int argc, char *argv[])
             if (DBWrite(dbfile, tmpname, fval, fdims, ndims, DB_FLOAT) < 0)
             {
                 if (DBErrno() == E_COMPRESSION)
+                {
+                    free(fval);
+                    free(frval);
+                    free(dval);
+                    free(drval);
                     return GNU_AUTOTEST_SKIP_CODE; /* compression requested not supported in this build */
+                }
                 nerrors++;
                 break;
             }
@@ -249,7 +261,13 @@ main(int argc, char *argv[])
             if (DBWrite(dbfile, tmpname, dval, ddims, ndims, DB_DOUBLE) < 0)
             {
                 if (DBErrno() == E_COMPRESSION)
+                {
+                    free(fval);
+                    free(frval);
+                    free(dval);
+                    free(drval);
                     return GNU_AUTOTEST_SKIP_CODE; /* compression requested not supported in this build */
+                }
                 nerrors++;
                 break;
             }
@@ -273,7 +291,13 @@ main(int argc, char *argv[])
     }
 
     if (nerrors)
+    {
+        free(fval);
+        free(frval);
+        free(dval);
+        free(drval);
         return nerrors;
+    }
 
     /*
      * Now try opening the file again and verify the simple

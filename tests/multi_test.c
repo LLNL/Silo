@@ -51,11 +51,21 @@ product endorsement purposes.
 */
 #include <config.h>
 
+#ifdef HAVE_HDF5_H
+#include <hdf5.h>
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+#else
+#define HDF5_VERSION_GE(Maj,Min,Rel)  0>1
+#endif
+
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -513,6 +523,7 @@ int matcounts[MAXBLOCKS];
 int matlists[MAXBLOCKS][MAXMATNO+1];
 int driver = DB_PDB;
 int check_early_close = FALSE;
+int check_libver = FALSE;
 int testread = FALSE;
 int testbadread = FALSE;
 int testflush = FALSE;
@@ -857,6 +868,8 @@ main(int argc, char *argv[])
         /* Tests that Silo library responds well if file object is closed pre-maturely */
         } else if (!strcmp(argv[i], "earlyclose")) {
             check_early_close = TRUE;
+        } else if (!strcmp(argv[i], "libver")) {
+            check_libver = TRUE;
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly")) {
@@ -869,7 +882,7 @@ main(int argc, char *argv[])
         /* Tests attempts to read correctly named object using wrong DBGet method */
         } else if (!strcmp(argv[i], "testbadread")) {
             testbadread = TRUE;
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
         /* Tests DBFlush functionality, by execv'ing and re-reading */
         } else if (!strcmp(argv[i], "testflush")) {
             testflush = TRUE;
@@ -892,6 +905,7 @@ main(int argc, char *argv[])
         }
     }
 
+    DBSetCompatibilityMode(compat);
     DBShowErrors(DB_ALL_AND_DRVR, NULL);
     if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
     DBSetEnableChecksums(dochecks);
@@ -901,7 +915,7 @@ main(int argc, char *argv[])
     /*
      * Create the multi-block rectilinear 2d mesh.
      *
-     * testfush and testflushread functionality here is designed to test
+     * testflush and testflushread functionality here is designed to test
      * DBFlush and then re-reading the flushed but not closed file into
      * a new execv'd process.
      */
@@ -936,7 +950,7 @@ main(int argc, char *argv[])
                        newargv[qq] = argv[qq];
                    newargv[qq++] = strdup("testflushread");
                    DBFlush(dbfile);
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
                    execv(argv[0], newargv);
 #endif
                }
@@ -3255,6 +3269,26 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             }
         }
 
+        /* Fiddle with libver settings directly in the middle of a file
+           creation to understand the effects. */
+#if HDF5_VERSION_GE(1,10,2)
+        if (block == 10 || block == 20)
+        {
+            if (!check_early_close && driver != DB_PDB && check_libver)
+            {
+                const void *fidvp = DBGrabDriver(dbfile);
+                hid_t fid = *((hid_t*)fidvp);
+                H5Fflush(fid, H5F_SCOPE_LOCAL );
+                H5Fflush(fid, H5F_SCOPE_GLOBAL);
+                if (block == 10)
+                    H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+                else
+                    H5Fset_libver_bounds(fid, H5F_LIBVER_V18, H5F_LIBVER_V18);
+                DBUngrabDriver(dbfile, fidvp);
+            }
+        }
+#endif
+
         /* 
          * Calculate the external face list.
          */
@@ -3392,6 +3426,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     FREE(mix_next);
     FREE(mix_mat);
     FREE(mix_zone);
+    FREE(mix_zone2);
+    FREE(mix_zone_map);
     FREE(matlist2);
     FREE(ghost);
 

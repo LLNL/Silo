@@ -754,6 +754,8 @@ int main(int argc, char **argv)
             mdc_config = strdup(argv[i]+11);
         } else if (!strncmp(argv[i], "atts=",5)) {
             atts = (int) strtol(argv[i]+5,0,10);
+        } else if (!strncmp(argv[i], "DB_HDF5",7)) {
+            /*void*/;
         } else if (strstr(argv[i], "help")) {
             help = 1;
         } else if (argv[i][0] != '\0') {

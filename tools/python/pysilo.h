@@ -92,13 +92,11 @@ void SiloErrorFunc(const char *errString);
     #define PyInt_FromLong PyLong_FromLong
     #define PyInt_AS_LONG PyLong_AS_LONG
     #define PyInt_Check PyLong_Check
-#endif
-
-#if PY_VERSION_GE(3,0,0)
     #define PyString_FromString PyUnicode_FromString
     #define PyString_Check PyUnicode_Check
     #define PyString_FromStringAndSize PyUnicode_FromStringAndSize
     #define PyString_AsString PyUnicode_AsUTF8
+    #define PyString_Size PyUnicode_GetLength
 #endif
 
 

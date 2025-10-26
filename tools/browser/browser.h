@@ -440,6 +440,7 @@ extern helptoc_t        HelpVarToc[50];
 extern int              NHelpVarToc;
 extern helptoc_t        HelpOpToc[25];
 extern int              NHelpOpToc;
+extern int              browserErrno;
 
 /*
  * Classes...

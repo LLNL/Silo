@@ -264,8 +264,9 @@ typedef struct context_t {
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
                         if (DBDebugAPI>0) {                                   \
-                           write (DBDebugAPI, M, strlen(M));                  \
-                           write (DBDebugAPI, "\n", 1);                       \
+                           size_t _nbyt;                                      \
+                           _nbyt = write (DBDebugAPI, M, strlen(M));          \
+                           _nbyt = write (DBDebugAPI, "\n", 1);               \
                         }                                                     \
                         if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
@@ -295,8 +296,9 @@ typedef struct context_t {
                             return R;                                         \
                         }                                                     \
                         if (DBDebugAPI>0) {                                   \
-                           write (DBDebugAPI, M, strlen(M));                  \
-                           write (DBDebugAPI, "\n", 1);                       \
+                           size_t _nbyt;                                      \
+                           _nbyt = write (DBDebugAPI, M, strlen(M));          \
+                           _nbyt = write (DBDebugAPI, "\n", 1);               \
                         }                                                     \
                         if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
@@ -534,7 +536,6 @@ struct _qm {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char          *_meshname;
     int            _baseindex[3];
     int            _baseindex_set;
     int            _group_no;
@@ -610,7 +611,6 @@ struct _um {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char           _meshname[256];
     char           _nm_dims[64];
     char           _nm_zones[64];
     char           _nm_alignz[64];
@@ -655,7 +655,6 @@ struct _csgm {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char           _meshname[256];
     char           _nm_time[64];
     char           _nm_dtime[64];
     char           _nm_cycle[64];
@@ -847,6 +846,7 @@ typedef struct SILO_Globals_t {
     float compressionMinratio;
     int compressionErrmode;
     int compatibilityMode;
+    int evalNameschemes;
     const DBoptlist *fileOptionsSets[MAX_FILE_OPTIONS_SETS];
     int _db_err_level;
     void  (*_db_err_func)(char *);
@@ -902,10 +902,6 @@ INTERNAL int _DBQMCalcExtents (DBVCP2_t, int, int const *, int const *, int cons
                                    int, void *, void *);
 INTERNAL int UM_CalcExtents (DBVCP2_t, int, int, int, void *,
                                  void *);
-INTERNAL int _DBSubsetMinMax2 (DBVCP1_t, int, float *, float *, int,
-                                   int, int, int, int);
-INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
-                               int, int, int, int, int, int);
 INTERNAL int db_ProcessOptlist (int, DBoptlist const * const);
 INTERNAL int db_VariableNameValid(char const *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);

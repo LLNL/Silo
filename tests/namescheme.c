@@ -64,6 +64,7 @@ be used for advertising or product endorsement purposes.
 #include <silo.h>
 #include <std.c>
 #include <string.h>
+#include <limits.h>
 
 #define TEST_GET_NAME(NS,I,EXP)                                                                            \
 if (!NS)                                                                                                   \
@@ -81,20 +82,13 @@ else                                                                            
     }                                                                                                      \
 }
 
-#define TEST_GET_INDEX(NS,I,IND)                                                                           \
-if (!NS)                                                                                                   \
+/* Uses a hard-coded min field width of 3 */
+#define TEST_GET_INDEX(STR, FLD, BASE, EXP)                                                                \
+if (DBGetIndex(STR, FLD, 3, BASE) != (long long) EXP)                                                      \
 {                                                                                                          \
-    fprintf(stderr, "Got NULL namescheme from DBMakeNamescheme at line %d\n", __LINE__);                   \
+    fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",    \
+        __LINE__, FLD, STR, (long long) EXP, DBGetIndex(STR,FLD,3,BASE));                                  \
     return 1;                                                                                              \
-}                                                                                                          \
-else                                                                                                       \
-{                                                                                                          \
-    if (DBGetIndex(NS, I) != IND)                                                                          \
-    {                                                                                                      \
-        fprintf(stderr, "DBGetIndex() at line %d failed for field %d of \"%s\". Expected %lld, got %lld\n",\
-            __LINE__, FLD, STR, (long long) IND, DBGetIndex(STR,FLD,BASE));                                \
-        return 1;                                                                                          \
-    }                                                                                                      \
 }
 
 #define TEST_STR(A,B)                                                                                      \
@@ -105,6 +99,12 @@ if (strcmp(A,B))                                                                
     return 1;                                                                                              \
 }
 
+#define FAILED(MSG)                                                                                        \
+{                                                                                                          \
+    fprintf(stderr, "%s at line %d.\n", MSG, __LINE__);                                                    \
+    return 1;                                                                                              \
+}
+
 int main(int argc, char **argv)
 {
     int i;
@@ -112,6 +112,7 @@ int main(int argc, char **argv)
     char const * const N[3] = {"red","green","blue"};
     char blockName[1024];
     int driver = DB_PDB;
+    int eval_ns = 0;
     int show_all_errors = 0;
 	DBnamescheme *ns, *ns2;
     char teststr[256];
@@ -123,6 +124,8 @@ int main(int argc, char **argv)
             driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strcmp(argv[i], "eval-ns")) { /* test evaluate nameschemes */
+            eval_ns = 1;
         } else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -130,12 +133,38 @@ int main(int argc, char **argv)
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
-    /* test namescheme with constant componets */
+    /* test namescheme with constant componets with and without delimters */
     {
         ns = DBMakeNamescheme("foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
         TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
+        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("@/Density@");
+        TEST_GET_NAME(ns, 0, "/Density");
+        TEST_GET_NAME(ns, 1, "/Density");
+        TEST_GET_NAME(ns, 513, "/Density");
+        TEST_GET_NAME(ns, 134571, "/Density");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("/radar/");
+        TEST_GET_NAME(ns, 0, "/radar/");
+        TEST_GET_NAME(ns, 1, "/radar/");
+        TEST_GET_NAME(ns, 137, "/radar/");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme(":radar:");
+        TEST_GET_NAME(ns, 0, "radar");
+        TEST_GET_NAME(ns, 1, "radar");
+        TEST_GET_NAME(ns, 137, "radar");
+        DBFreeNamescheme(ns);
+        ns = DBMakeNamescheme("_radar_");
+        TEST_GET_NAME(ns, 0, "_radar_");
+        TEST_GET_NAME(ns, 1, "_radar_");
+        TEST_GET_NAME(ns, 137, "_radar_");
         DBFreeNamescheme(ns);
     }
 
@@ -146,9 +175,8 @@ int main(int argc, char **argv)
 
     /* test returned string is different for successive calls (Dan Laney bug) */
     ns = DBMakeNamescheme("@/foo/bar/proc-%d@n");
-    sprintf(teststr, "%s %s", DBGetName(ns,0), DBGetName(ns,123));
-    if (strcmp(teststr, "/foo/bar/proc-0 /foo/bar/proc-123") != 0)
-        return 1;
+    snprintf(teststr, sizeof(teststr), "%s %s", DBGetName(ns,0), DBGetName(ns,123));
+    TEST_STR(teststr, "/foo/bar/proc-0 /foo/bar/proc-123")
     DBFreeNamescheme(ns);
 
     /* Test ?:: operator */
@@ -165,10 +193,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test embedded string value results */
-    ns = DBMakeNamescheme("@foo_%s@(n-5)?'master':'slave':");
-    TEST_GET_NAME(ns, 4, "foo_master");
-    TEST_GET_NAME(ns, 5, "foo_slave");
-    TEST_GET_NAME(ns, 6, "foo_master");
+    ns = DBMakeNamescheme("@foo_%s@(n-5)?'leader':'follower':");
+    TEST_GET_NAME(ns, 4, "foo_leader");
+    TEST_GET_NAME(ns, 5, "foo_follower");
+    TEST_GET_NAME(ns, 6, "foo_leader");
     DBFreeNamescheme(ns);
 
     /* Test array-based references to int valued arrays and whose
@@ -199,18 +227,15 @@ int main(int argc, char **argv)
     strcpy(blockName, DBGetName(ns, 123)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 123)); /* blockname part */
-    if (strcmp(blockName, "multi_file.dir/003/ucd3d3.pdb:/block123/mesh1") != 0)
-        return 1;
+    TEST_STR(blockName, "multi_file.dir/003/ucd3d3.pdb:/block123/mesh1")
     strcpy(blockName, DBGetName(ns, 0)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 0)); /* blockname part */
-    if (strcmp(blockName, "multi_file.dir/000/ucd3d0.pdb:/block0/mesh1") != 0)
-        return 1;
+    TEST_STR(blockName, "multi_file.dir/000/ucd3d0.pdb:/block0/mesh1")
     strcpy(blockName, DBGetName(ns, 287)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 287)); /* blockname part */
-    if (strcmp(blockName, "multi_file.dir/007/ucd3d7.pdb:/block287/mesh1") != 0)
-        return 1;
+    TEST_STR(blockName, "multi_file.dir/007/ucd3d7.pdb:/block287/mesh1")
     DBFreeNamescheme(ns);
     DBFreeNamescheme(ns2);
 
@@ -350,9 +375,9 @@ int main(int argc, char **argv)
 
         /* Test invalid namescheme construction */
         ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n");
-        if (ns) return 1;
+        if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
         ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n", 0, dbfile, 0);
-        if (ns) return 1;
+        if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
 
         /* Test construction via retrieval from MB object */
         DBSetDir(dbfile, "/meshes/mesh1");
@@ -411,12 +436,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test using namescheme as a simple integer mapping */
-    ns = DBMakeNamescheme("|chemA_%04X|n%3");
-    TEST_GET_INDEX(ns, 0, 0);
-    TEST_GET_INDEX(ns, 1, 1);
-    TEST_GET_INDEX(ns, 2, 2);
-    TEST_GET_INDEX(ns, 3, 0);
-    TEST_GET_INDEX(ns, 4, 1);
+    ns = DBMakeNamescheme("|chemA_0x%04X|n");
+    TEST_GET_INDEX(DBGetName(ns,  1), 0, 0, 1);
+    TEST_GET_INDEX(DBGetName(ns, 50), 0, 0, 50);
+    TEST_GET_INDEX(DBGetName(ns, 37), 0, 0, 37);
     DBFreeNamescheme(ns);
 
     /* simple offset by -2 mapping */
@@ -430,10 +453,10 @@ int main(int argc, char **argv)
 
     /* Get different fields as indices from nameschemed strings */
     ns = DBMakeNamescheme("|foo_%03d_%03d|n/5|n%5");
-    TEST_GET_INDEX(DBGetName(ns,0), 0, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns,0), 1, 0, 0);
-    TEST_GET_INDEX(DBGetName(ns,18), 0, 2, 0);
-    TEST_GET_INDEX(DBGetName(ns,18), 1, 3, 0);
+    TEST_GET_INDEX(DBGetName(ns,0),  0, 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,0),  1, 0, 0);
+    TEST_GET_INDEX(DBGetName(ns,18), 0, 0, 3);
+    TEST_GET_INDEX(DBGetName(ns,17), 1, 0, 2);
     DBFreeNamescheme(ns);
 
     /* Case where index is bigger than an int */
@@ -442,22 +465,128 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(DBGetName(ns,0x7FFFFFFFF), 0, 0, 0x7FFFFFFFF); /* make sure another `F` works */
     DBFreeNamescheme(ns);
 
+    /* Test inferring base 2 (binary, leading '0b') */
+    TEST_GET_INDEX("block_0b0101", 0, 0, 5);
+    TEST_GET_INDEX("block_0b0101_0b1100", 1, 0, 12);
+
+    /* Test inferring base 8 (octal, leading '0') */
+    TEST_GET_INDEX("slice1_035", 0, 0, 29);
+
+    /* Test non-standard base 5 */
+    TEST_GET_INDEX("VisIt_docs_section_0002_chapter_1234", 1, 5, 194);
+
+    /* Test negative values */
+    TEST_GET_INDEX("block_-0b0101", 0, 0, -5);
+
+    /* Test some cases that could lead to error */
+    TEST_GET_INDEX("block_0b0", 1, 0, LLONG_MAX);
+    TEST_GET_INDEX("block_+", 1, 0, LLONG_MAX);
+    TEST_GET_INDEX("block_0x", 1, 0, LLONG_MAX);
+    TEST_GET_INDEX("VisIt_docs_section_0002_chapter_1234", 5, 5, LLONG_MAX);
+
     /* Test the convenience method, DBSPrintf */
-#if 0
     snprintf(teststr, sizeof(teststr), "%s, %s",
         DBSPrintf("block_%d,level_%04d", 505, 17),
-        DBSPrintf("side_%s_%cx%g", "master",'z',1.0/3));
-    TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
-#endif
-    
-    /* Test case where fewer expressions that conversion specs */
-    ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
-    if (ns) return 1;
+        DBSPrintf("side_%s_%cx%g", "leader",'z',1.0/3));
+    TEST_STR(teststr, "block_505,level_0017, side_leader_zx0.333333")
 
+    /* Test case where fewer expressions than conversion specs */
+    ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
+    if (ns) FAILED("DBMakeNamescheme succeeded on an invalid string");
+
+    /* Test DBEvalNamescheme() logic. Requires multi_file test to have run
+       with `use-ns` command-line option. This will have produced a root
+       file with multiblock objects in it using nameschemes. */
+    if (eval_ns)
+    {
+        /* Because of how Autotool's testing works, the test may be run next to
+           or two directories below where the files exist. And, we have to handle
+           either the hdf5 or the pdb variants multi_file can produce. */
+        char const *rootFiles[] = {"ucd3d_root.pdb", "ucd3d_root.h5",
+            "../../ucd3d_root.pdb", "../../ucd3d_root.h5"};
+        int const nRootCandidates = sizeof(rootFiles)/sizeof(rootFiles[0]);
+
+        for (i = 0; i < nRootCandidates; i++)
+        {
+            DBfile *dbfile;
+            DBmultimesh *mm_w_ns, *mm;
+            DBmultimat *mmat;
+            DBnamescheme *fns, *bns;
+
+            if (DBStat(rootFiles[i]) == -1) continue;
+
+            /* Get a multi-block object from the root file without
+               evaluating nameschemes */
+            dbfile = DBOpen(rootFiles[i], DB_UNKNOWN, DB_READ);
+            mm_w_ns = DBGetMultimesh(dbfile, "mesh1");
+            DBClose(dbfile);
+
+            /* if the acquired multiblock object is not using nameschemes,
+               we cannot perform this test */
+            if (mm_w_ns->file_ns == 0 || mm_w_ns->block_ns == 0)
+                FAILED("selected root file candidate has no nameschemes.");
+
+            fns = DBMakeNamescheme(mm_w_ns->file_ns);
+            bns = DBMakeNamescheme(mm_w_ns->block_ns);
+
+            /* Test the utility function DBGenerateMBBlockName */
+            if (driver == DB_PDB)
+            {
+                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d0.pdb:/block17/mesh1");
+            }
+            else
+            {
+                TEST_STR(DBGenerateMBBlockName(17, fns, bns, 0, 0), "ucd3d0.h5:/block17/mesh1");
+            }
+
+            /* Get some multi-block objects from the root file while also
+               evaluating nameschemes */
+            dbfile = DBOpen(rootFiles[i], DB_UNKNOWN, DB_READ);
+            DBSetEvalNameschemesFile(dbfile,1);
+            mm = DBGetMultimesh(dbfile, "mesh1");
+            mmat = DBGetMultimat(dbfile, "mat1");
+            DBClose(dbfile);
+
+            /* if the acquired multiblock object has nameschemes, the test fails */
+            if (mm->file_ns != 0 || mm->block_ns != 0)
+                FAILED("Requested eval nameschemes but still get them.");
+            if (mmat->file_ns != 0 || mmat->block_ns != 0)
+                FAILED("Requested eval nameschemes but still get them.");
+
+            /* Ok, now lets generate a Silo object block name from mm_w_ns and compare it
+               to what we get for the same block in mm (where nameschemes were evaluated). */
+            snprintf(teststr, sizeof(teststr), "%s:%s", DBGetName(fns,5), DBGetName(bns,5));
+            TEST_STR(teststr, mm->meshnames[5]);
+            snprintf(teststr, sizeof(teststr), "%s:%s", DBGetName(fns,73), DBGetName(bns,73));
+            TEST_STR(teststr, mm->meshnames[73]);
+            DBFreeNamescheme(fns);
+            DBFreeNamescheme(bns);
+
+            /* Just explicitly test an entry in a multimat */
+            if (driver == DB_PDB)
+            {
+                TEST_STR("ucd3d2.pdb:/block73/mat1", mmat->matnames[73]);
+            }
+            else
+            {
+                TEST_STR("ucd3d2.h5:/block73/mat1", mmat->matnames[73]);
+            }
+
+            DBFreeMultimesh(mm_w_ns);
+            DBFreeMultimesh(mm);
+            DBFreeMultimat(mmat);
+
+            /* Arriving here at the end of the loop's body, we're done with the test */
+            break; 
+        }
+        if (i == nRootCandidates)
+            FAILED("test-eval requested but no root file candidates found");
+    }
+    
     /* hackish way to cleanup the circular cache used internally */
     DBSPrintf(0);
     DBGetName(0,-1);
-    
+
     CleanupDriverStuff();
 
     return 0;

@@ -62,7 +62,6 @@
 
 EXTRA_DIST= \
  package.m4 \
- pdbcmp.csh \
  testsuite.at \
  testsuite \
  pmpio_hdf5_test.c \
@@ -87,7 +86,6 @@ EXTRA_DIST= \
  bcastopen.c \
  bcastopen_main.c \
  memfile_simple.c \
- zeros.dat \
  testhdf5.c \
  $(check_SCRIPTS) \
  $(check_DATA)
@@ -96,8 +94,10 @@ include_HEADERS = \
  ioperf.h
 
 # Note: use top entry in check_SCRIPTS as sole target to
-# copy all scripts and data in one rule
+# copy all scripts in one rule
 check_SCRIPTS= \
+ cp_scripts \
+ silo_sh_utils.sh \
  checksums \
  testhzip \
  testxvers \
@@ -109,10 +109,12 @@ check_SCRIPTS= \
  testsilock \
  testdtypes
 
+# Note: use top entry in check_DATA as sole target to
+# copy all data in one rule
 check_DATA= \
+ cp_data \
  xvers_data.tar.xz \
- pion0244.silo \
- zeros.dat
+ pion0244.silo
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
@@ -140,6 +142,10 @@ mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 testpdb_CPPFLAGS += -DPDB_LITE
 pdbtst_CPPFLAGS += -DPDB_LITE
 mk_nasf_pdb_CPPFLAGS += -DPDB_LITE
+BCASTOPEN =
+if HDF5_DRV_NEEDED
+  BCASTOPEN += bcastopen
+endif
 PDBTESTS = testpdb pdbtst
 JSONTESTS =
 if JSON_NEEDED
@@ -159,8 +165,9 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile dbversion namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      test_mat_compression bcastopen memfile_simple \
-      empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
+      test_mat_compression memfile_simple empty majorder realloc_obj_and_opts \
+      degen_hex \
+      $(PDBTESTS) $(JSONTESTS) $(BCASTOPEN)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
@@ -185,7 +192,11 @@ rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
 rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 
-EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
+if HDF5_DRV_NEEDED
+    EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
+else
+    EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
+endif
 ioperf_LDFLAGS = -ldl
 ioperf_CXXFALGS = -rdynamic
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
@@ -201,6 +212,7 @@ check_PROGRAMS = \
  arbpoly \
  arbpoly2d \
  array \
+ degen_hex \
  extface \
  multi_test \
  partial_io \
@@ -250,8 +262,8 @@ check_PROGRAMS = \
  majorder \
  realloc_obj_and_opts \
  test_mat_compression \
- bcastopen \
  memfile_simple \
+ $(BCASTOPEN) \
  $(PDBTESTS) \
  $(JSONTESTS)
 
@@ -265,6 +277,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_arbpoly_SOURCES = dummy.cxx
  nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
  nodist_EXTRA_array_SOURCES = dummy.cxx
+ nodist_EXTRA_degen_hex_SOURCES = dummy.cxx
  nodist_EXTRA_extface_SOURCES = dummy.cxx
  nodist_EXTRA_multi_test_SOURCES = dummy.cxx
  nodist_EXTRA_partial_io_SOURCES = dummy.cxx
@@ -460,11 +473,20 @@ resample.lo: resample.c
 
 tests: $(PROGS)
 
-# Single rule to capture anything put into check_DATA or check_SCRIPTS
+# Single rule to capture anything put into check_DATA
 # this assumes the only action necessary to create is a copy
-checksums: copy_cksd
-copy_cksd:
-	@for f in $(check_SCRIPTS) $(check_DATA); do \
+cp_data:
+	@for f in $(check_DATA); do \
+	    if test ! -e $$f ; then \
+	        cp $(srcdir)/$$f . ;\
+	    fi ;\
+	done
+	touch $@
+
+# Single rule to capture anything put into check_SCRIPTS
+# this assumes the only action necessary to create is a copy
+cp_scripts:
+	@for f in $(check_SCRIPTS); do \
 	    if test ! -e $$f ; then \
 	        cp $(srcdir)/$$f . ;\
 	    fi ;\

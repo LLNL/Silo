@@ -52,9 +52,6 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
 
-#ifndef _WIN32
-#warning MAKE THIS CONDITIONAL LATER
-#endif
 #define HAVE_SILO
 //#define STATIC_PLUGINS
 
@@ -147,7 +144,7 @@ vector<int> nodelist_g, nodecnts_g, nodestarts_g;
 // Material names and numbers
 // 
 int matnos[] = {1,2,3,4,5};
-char *matNames[] =
+char const *matNames[] =
 {
     "High Explosive",
     "Solid Propellant",
@@ -155,7 +152,7 @@ char *matNames[] =
     "Electronics",
     "Body"
 };
-char *matColors[] =
+char const *matColors[] =
 {
     "Red",
     "Magenta",
@@ -770,7 +767,7 @@ WriteAllFormats(int argc, char **argv)
     map<string, func_and_handle_t> formatMap;
 
     // Accomodate all possible places autotools may wind up building the plugins
-    char *dirs[] = {".", "../..", ".libs", "../../.libs"};
+    char const *dirs[] = {".", "./lib", "../..", ".libs", "../../.libs"};
     for (d = 0; d < sizeof(dirs)/sizeof(dirs[0]) && !foundOne; d++)
     {
         DIR *cwdir = opendir(dirs[d]);

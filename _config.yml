@@ -1,0 +1,30 @@
+title: Silo
+
+description: File-based scientific data exchange and software interoperability
+
+theme: minima
+
+minima:
+  skin: solarized
+
+# we exclude a lot to keep generation process fast. None of this stuff is needed
+# to generate the site.
+exclude: [CMake, config, config-site, docs, resources, src, svn_bin, tests, tools]
+
+show_downloads: false
+
+# This plugin needed to generate main landing page, index.html, from README.md
+plugins:
+  - jekyll-readme-index
+
+readme_index:
+  enabled:          true
+  remove_originals: false
+  with_frontmatter: true
+
+header_pages:
+  - ghpages/releases/releases.md
+  - ghpages/examples/examples.md
+  - ghpages/help.md
+  - ghpages/documentation.md
+  - ghpages/more.md

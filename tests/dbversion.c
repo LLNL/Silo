@@ -166,6 +166,8 @@ main(int argc, char *argv[])
     dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
         dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+    if (dbfile == 0)
+        dbfile = DBOpen("./bin/pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile)
     {
         printf("On old silo file handle returned from DBOpen...\n");
@@ -204,6 +206,8 @@ main(int argc, char *argv[])
             dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
             if (dbfile == 0)
                 dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+            if (dbfile == 0)
+                dbfile = DBOpen("./bin/pion0244.silo", DB_UNKNOWN, DB_READ);
         }
         else
         {
@@ -269,6 +273,8 @@ main(int argc, char *argv[])
     dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
         dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+    if (dbfile == 0)
+        dbfile = DBOpen("./bin/pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
     {
         fprintf(stderr, "Could not open file.\n");
