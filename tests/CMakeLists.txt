@@ -593,9 +593,9 @@ set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "multi")
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME partial-io-setup COMMAND $<TARGET_FILE:testall> DB_HDF5)
     add_test(NAME partial-io-rect3d COMMAND $<TARGET_FILE:partial_io> DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9])
-    set_tests_properties(partial-io-rect3d PROPERTIES DEPENDS "partial-io-setup")
+    set_tests_properties(partial-io-rect3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5")
     add_test(NAME partial-io-ucd3d COMMAND $<TARGET_FILE:partial_io> DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574])
-    set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup")
+    set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5")
 endif()
 
 add_custom_target(testdtypes ALL)
@@ -623,13 +623,13 @@ if(SILO_ENABLE_SILOCK)
     add_test(NAME testsilock
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/testsilock")
-    set_tests_properties(onehex PROPERTIES DEPENDS testsilock)
+    set_tests_properties(onehex PROPERTIES DEPENDS testsilock RESOURCE_LOCK onehex.silo)
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         add_test(NAME testsilock-hdf5
             COMMAND ${CMAKE_COMMAND} -E env
             "${silo_test_output_dir}/testsilock" DB_HDF5)
         set_tests_properties(onehex-hdf5 PROPERTIES DEPENDS testsilock-hdf5)
-        set_tests_properties(testsilock-hdf5 PROPERTIES DEPENDS testsilock)
+        set_tests_properties(testsilock-hdf5 PROPERTIES DEPENDS testsilock RESOURCE_LOCK onehex.silo)
     endif()
 endif()
 
