@@ -76,11 +76,13 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # Ensure the multi_test executable is available
 #
 multi_test=$(find_file -x tests/bin/multi_test tests/multi_test ./multi_test ../../multi_test)
+[ $? -eq 0 ] || exit 1
 
 #
 # Ensure we have Silo's 'browser' tool available
 #
 browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser ../tools/browser/browser ../../../tools/browser/browser)
+[ $? -eq 0 ] || exit 1
 
 #
 # Create data with checksums (only on HDF5 driver) and save files
@@ -147,7 +149,7 @@ tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 #
 result=0
 brOut=$($browser -q -e 'block2/fl1.nodelist[523:528]' multi_ucd3d_corrupt.h5)
-if test -z "$(echo $brOut | grep '{299, 0, 0, 0, 0, 179}')"; then
+if [ -z "$(echo $brOut | grep '{299, 0, 0, 0, 0, 179}')" ]; then
     result=1
 fi
 
@@ -156,7 +158,7 @@ fi
 # detect a checksumming error.
 #
 brOut=$($browser -q -c -e block2/fl1 multi_ucd3d_corrupt.h5 2>&1)
-if test -z "$(echo $brOut | grep 'Checksum failure')"; then
+if [ -z "$(echo $brOut | grep 'Checksum failure')" ]; then
     result=1
 fi
 

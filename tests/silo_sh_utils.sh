@@ -60,8 +60,8 @@ walk_up_to_top_of_build() {
         cd ..
     done
     if [ ! -r CMakeCache.txt ] && [ ! -r config.log ]; then
-        echo "Unable to find 'CMakeCache.txt' or 'config.log' in any dir parent"
-        exit 3
+        echo "walk_up_to_top_of_build: Unable to find 'CMakeCache.txt' or 'config.log' in any dir parent"
+        exit 2
     fi
     pwd
     cd $cwd
@@ -77,6 +77,6 @@ find_file() {
             return
         fi
     done
-    echo "Unable to find any of '$*'"
-    exit 4
+    echo "find_file: Unable to find any of '$*'"
+    exit 3
 }

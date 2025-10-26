@@ -9,7 +9,7 @@ Source0:        https://github.com/LLNL/Silo/archive/%{version}/%{name}-%{versio
 
 BuildRequires:  gcc-c++
 BuildRequires:  cmake >= 3.12
-BuildRequires:  hdf5-devel 
+BuildRequires:  hdf5-devel
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  python3-devel
 
@@ -61,9 +61,9 @@ This package contains the development files of %{name}.
 %cmake_install
 
 %check
-#TODO fix checksums and testonehex tests
-#TODO fix parallel testing
-%global testargs --exclude-regex '\(checksums\|testonehex\)' --parallel 1
+# FIX: Bug in HDF5-1.14.6 causes checksum testing to fail
+# The issue was reported to The HDF Group 10/25/25
+%global testargs --exclude-regex '\(checksums\)' --parallel 1
 %ctest %{?testargs}
 
 %files devel

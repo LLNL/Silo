@@ -60,8 +60,8 @@
 #   Mark C. Miller, Mon Aug  9 16:59:23 PDT 2010
 #   Made it work for any HDF5 driver, not just DB_HDF5.
 # -----------------------------------------------------------------------------
-
-# Determine directory of this script
+#
+# Find dir where this script lives and source the shell utils script there.
 #
 # dirname -- "$0" gets the script’s directory even if this script is run via a
 #     relative path like ../../foo/bar/gorfo.sh.
@@ -71,34 +71,27 @@
 #     a subshell so the cwd of the current script is unchanged.
 #
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. $script_dir/silo_sh_utils.sh
 
 #
 # Ensure some specmix data is available
 #
 specmix_files=""
-for f in specmix_quad.pdb specmix_ucd.pdb specmix_quad.h5 specmix_ucd.h5; do
-    if [ -r "$f" ]; then
-        specmix_files="$specmix_files $f"
-    fi
-done
-
-#
+some_files=$(find_file -r tests/specmix_quad.pdb tests/testsuite.dir/*/specmix_quad.pdb)
+[ $? -eq 0 ] && specmix_files="$specmix_files $some_files"
+some_files=$(find_file -r tests/specmix_ucd.pdb tests/testsuite.dir/*/specmix_ucd.pdb)
+[ $? -eq 0 ] && specmix_files="$specmix_files $some_files"
+some_files=$(find_file -r tests/specmix_quad.h5 tests/testsuite.dir/*/specmix_quad.h5)
+[ $? -eq 0 ] && specmix_files="$specmix_files $some_files"
+some_files=$(find_file -r tests/specmix_ucd.h5 tests/testsuite.dir/*/specmix_ucd.h5)
+[ $? -eq 0 ] && specmix_files="$specmix_files $some_files"
+[ -n "$specmix_files" ] || exit 1
+ 
+# 
 # Ensure we have Silo's 'browser' tool available
-#
-if [ ! -x $script_dir/../../bin/browser ]; then
-    if [ ! -x $script_dir/../tools/browser/browser ]; then
-        if [ ! -x $script_dir/../../../tools/browser/browser ]; then
-            echo "Silo's 'browser' tool is required and not found."
-            exit 1
-        else
-            browser=$(command -v $script_dir/../../../tools/browser/browser)
-        fi
-    else
-        browser=$(command -v $script_dir/../tools/browser/browser)
-    fi
-else
-    browser=$(command -v $script_dir/../../bin/browser)
-fi
+# 
+browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser)
+[ $? -eq 0 ] || exit 1
 
 #
 # Loop over all files, variables and types with and without force single enabled
@@ -114,12 +107,15 @@ for fsmode in "-s 1" "    "; do
         fi
         for v in "n" "z"; do
             for d in "c" "s" "i" "l" "L" "d"; do
-                diffs=$($browser -q ${fsmode} -e "diff f${v}var ${d}${v}var" $file | grep -v 'different data sizes' | grep -v 'byte data' | grep vals | head)
-                if test -n "$diffs"; then
+                this_result=0
+                browser_out=$($browser --proper-exit-code -q ${fsmode} -e "diff f${v}var ${d}${v}var" $file)
+                [ $? -eq 0 ] || this_result=1
+                diffs=$(echo $browser_out | grep -v 'different data sizes' | grep -v 'byte data' | grep vals | head)
+                if [ $this_result -ne 0 ] || [ -n "$diffs" ]; then
                     result=1
-#                    echo "${dr}\t${fsmode}\t${mt}\t${v}\t${d}\tFAILED"
-#                else
-#                    echo "${dr}\t${fsmode}\t${mt}\t${v}\t${d}\tPASSED"
+                    echo "${dr}\t${fsmode}\t${mt}\t${v}\t${d}\tFAILED"
+                else
+                    echo "${dr}\t${fsmode}\t${mt}\t${v}\t${d}\tPASSED"
                 fi
             done
         done
