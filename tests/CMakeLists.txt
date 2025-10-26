@@ -623,13 +623,13 @@ if(SILO_ENABLE_SILOCK)
     add_test(NAME testsilock
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/testsilock")
-    set_tests_properties(onehex PROPERTIES DEPENDS testsilock)
+    set_tests_properties(onehex PROPERTIES DEPENDS testsilock RESOURCE_LOCK onehex.silo)
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         add_test(NAME testsilock-hdf5
             COMMAND ${CMAKE_COMMAND} -E env
             "${silo_test_output_dir}/testsilock" DB_HDF5)
         set_tests_properties(onehex-hdf5 PROPERTIES DEPENDS testsilock-hdf5)
-        set_tests_properties(testsilock-hdf5 PROPERTIES DEPENDS testsilock)
+        set_tests_properties(testsilock-hdf5 PROPERTIES DEPENDS testsilock RESOURCE_LOCK onehex.silo)
     endif()
 endif()
 
