@@ -889,6 +889,11 @@ sym_init (void)
               "string are considered false) then the browser calls DBSetEvalNameschemes(1) "
               "forcing Silo library to evaluate nameschemes on multi-block objects. "
               "Note that this feature is NOT compatible with writable.");
+   sym_bi_set("properec",         "0",
+              "Exit with proper exit codes.",
+              "If this variable has any true value (nil, zero, and the empty "
+              "string are considered false) then the browser will terminate with a "
+              "call to exit(1) iff an error is ever encountered during a run.");
    sym_bi_set("h5vfdopts",       NULL,
               "Specify hdf5 (vfd) options sets when attempting to open files.",
               "The value of this variable should be a list of OPTION=VALUE "

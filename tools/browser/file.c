@@ -2296,7 +2296,7 @@ static obj_t
 file_deref (obj_t _self, int argc, obj_t argv[]) {
 
     obj_file_t  *self = MYCLASS(_self);
-    char        *name=NULL, *orig=NULL, cwd[1024], fullname[1024];
+    char        *name=NULL, *orig=NULL, cwd[1024], fullname[2050];
     char        path[1024], *base=NULL, buf[1024];
     char        *type_name=NULL;
     DBfile      *file=NULL;

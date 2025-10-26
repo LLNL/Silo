@@ -64,18 +64,19 @@
 #   each. Two tests are created, one for the PDB driver and, when enabled,
 #   one for the HDF5 driver. This is the simple and common case. Each test
 #   involves a single source file which is compiled to produce the test.
+#   The test is run two ways, one on PDB driver and one on HDF5 driver.
+#   Sometimes both runs touch the same file name so HDF5 tests set to
+#   DEPEND on PDB tests when both are active.
 #
 #   Things get more complicated for these cases...
 #
+#       * A test works only on HDF5 or only on PDB driver
+#       * A test is defined only for certain options
 #       * A test needs special command-line arguments
 #       * A test is run many different ways producing the same file(s)
 #       * A test requires the data produced by another
 #       * A test involves a shell or python script
-#       * A test works only on HDF5 or only on PDB driver
 #       * A test involves multiple source files 
-#
-#   Making this more complicated still, many tests get defined only when
-#   certain options are enabled.
 #
 #   The C_TEST_SOURCES, CXX_TEST_SOURCES and F_TEST_SOURCES are the main
 #   file globbed list of C, C++ and Fortran source files. There are some
@@ -89,8 +90,12 @@
 #       SPECIAL_TEST_SOURCES - the key difference between this list and
 #           SKIP list is that SPECIAL source files still get compiled.
 #
+#   CMake's RESOURCE_LOCK property is used in some cases but maybe it
+#   should be used more liberally. We should probably use REQUIRED_FILES
+#   more. There may be some logic errors here where we wind up overriding
+#   a test's properties.
 #
-# Notes on valgrind testing...
+# Notes on how to do valgrind testing...
 #
 # cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF -DSILO_ENABLE_HDF5:BOOL=ON -DSILO_ENABLE_FPZIP:BOOL=ON -DBUILD_TESTING:BOOL=ON -DSILO_HDF5_DIR:PATH=/mnt/nvme/mark/silo/hdf5-1.14.4/build/my_install -DCMAKE_BUILD_TYPE:STRING=Debug -S .. -B memcheck-build 
 # cmake --build memcheck-build -j 8
@@ -186,7 +191,6 @@ add_custom_command(TARGET copy_test_data POST_BUILD
     ${CMAKE_CURRENT_SOURCE_DIR}/z1plt.silo
     ${silo_test_output_dir})
 
-message(STATUS "SHOULD THIS BE COPY_TEST_SCRIPTS")
 add_custom_command(TARGET copy_test_data POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/silo_sh_utils.sh
@@ -252,7 +256,6 @@ set(PARALLEL_SOURCES
 #
 file(GLOB C_TEST_SOURCES *.c)
 file(GLOB CXX_TEST_SOURCES *.cxx)
-
 if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     file(GLOB F_TEST_SOURCES *.f*)
 endif()
@@ -413,9 +416,6 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
 
 endforeach()
 
-message(STATUS "FIX TEST PROPERTIES OVERRIDES")
-
-
 add_dependencies(rocket rocket_silo)
 set_target_properties(rocket PROPERTIES ENABLE_EXPORTS ON)
 
@@ -437,7 +437,6 @@ if(SILO_ENABLE_JSON)
         set_tests_properties(json-hdf5 PROPERTIES LABELS "hdf5")
         set_tests_properties(json-hdf5 PROPERTIES LABELS "json")
     endif()
-    message(STATUS "FIX RESOURCE LOCK LIST")
     set_tests_properties(json;json-hdf5 PROPERTIES RESOURCE_LOCK onehex.silo)
 endif()
 
@@ -622,19 +621,23 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(testdtypes PROPERTIES DEPENDS specmix-hdf5)
 endif()
 
-add_custom_target(testsilock ALL)
-add_custom_command(TARGET testsilock POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_SOURCE_DIR}/testsilock
-    ${silo_test_output_dir})
-if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    add_test(NAME testsilock-hdf5
-        COMMAND ${CMAKE_COMMAND} -E env
-        "${silo_test_output_dir}/testsilock" DB_HDF5)
-else()
+if(SILO_ENABLE_SILOCK)
+    add_custom_target(testsilock ALL)
+    add_custom_command(TARGET testsilock POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/testsilock
+        ${silo_test_output_dir})
     add_test(NAME testsilock
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/testsilock")
+    set_tests_properties(onehex PROPERTIES DEPENDS testsilock)
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+        add_test(NAME testsilock-hdf5
+            COMMAND ${CMAKE_COMMAND} -E env
+            "${silo_test_output_dir}/testsilock" DB_HDF5)
+        set_tests_properties(onehex-hdf5 PROPERTIES DEPENDS testsilock-hdf5)
+        set_tests_properties(testsilock-hdf5 PROPERTIES DEPENDS testsilock)
+    endif()
 endif()
 
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
@@ -646,6 +649,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME checksums
         COMMAND ${CMAKE_COMMAND} -E env
         "${silo_test_output_dir}/checksums")
+    set_tests_properties(multi_test-hdf5 PROPERTIES DEPENDS checksums)
 endif()
 
 #

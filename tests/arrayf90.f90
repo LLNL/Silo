@@ -96,7 +96,7 @@
 
 !...Create file named "robb.pdb".  Database ID is returned in 'dbid'.
 
-    err = dbcreate("arrayf77.silo", 13, 0, DB_LOCAL, "file info", &
+    err = dbcreate("arrayf90.silo", 13, 0, DB_LOCAL, "file info", &
     9, driver, dbid)
 
 
@@ -114,7 +114,7 @@
 !  Now try to read from the file...
 ! CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-    err = dbopen ("arrayf77.silo", 13, DB_UNKNOWN, DB_READ, dbid)
+    err = dbopen ("arrayf90.silo", 13, DB_UNKNOWN, DB_READ, dbid)
 
     err = dbgetca (dbid, "carray", 6, 32, g_enames, g_elengths, &
     g_nelems, g_values, g_nvalues, g_datatype)
