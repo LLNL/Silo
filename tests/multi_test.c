@@ -1314,10 +1314,6 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         }                              /* if */
     }                                  /* for */
 
-    /* test behavior when file is closed prematurely */
-    if (check_early_close)
-        DBClose(dbfile);
-
     /* create the blocks */
 
     switch (meshtype)
@@ -1827,6 +1823,13 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
+        if (check_early_close && block >= nblocks_x * nblocks_y / 2)
+        {
+            fprintf(stdout, "Closing file early at block %d of %d\n",
+                block, nblocks_x * nblocks_y);
+            DBClose(dbfile);
+        }
+
         fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /*
@@ -1877,7 +1880,7 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         {
             fprintf(stderr, "Could not set directory \"%s\"\n",
                     dirnames[block]);
-            return;
+            goto cleanup;
         }                       /* if */
 
         /* Write out the variables. */
@@ -1925,9 +1928,12 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
-            return;
+            goto cleanup;
         }                       /* if */
     }                           /* for */
+
+cleanup:
+
     for(i=0;i<nmats;i++)
         FREE(matnames[i]);
     FREE(matnames);
@@ -2160,6 +2166,13 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
+        if (check_early_close && block >= nblocks_x * nblocks_y / 2)
+        {
+            fprintf(stdout, "Closing file early at block %d of %d\n",
+                block, nblocks_x * nblocks_y);
+            DBClose(dbfile);
+        }
+
         fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
@@ -2190,7 +2203,7 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         {
             fprintf(stderr, "Could not set directory \"%s\"\n",
                     dirnames[block]);
-            return;
+            goto cleanup;
         }                              /* if */
         /* Write out the variables. */
         cycle = 48;
@@ -2234,9 +2247,11 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
-            return;
+            goto cleanup;
         }                              /* if */
     }                                  /* for */
+
+cleanup:
 
     FREE(matlist);
     FREE(mix_next);
@@ -2393,6 +2408,13 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
+        if (check_early_close && block >= nblocks_x * nblocks_y / 2)
+        {
+            fprintf(stdout, "Closing file early at block %d of %d\n",
+                block, nblocks_x * nblocks_y);
+            DBClose(dbfile);
+        }
+
         fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
@@ -2417,7 +2439,7 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         {
             fprintf(stderr, "Could not set directory \"%s\"\n",
                     dirnames[block]);
-            return;
+            goto cleanup;
         }                              /* if */
         /* Write out the variables. */
         cycle = 48;
@@ -2469,9 +2491,11 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
-            return;
+            goto cleanup;
         }                              /* if */
     }                                  /* for */
+
+cleanup:
 
     FREE(x);
     FREE(y);
@@ -2721,6 +2745,13 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
+        if (check_early_close && block >= nblocks_x * nblocks_y * nblocks_z / 2)
+        {
+            fprintf(stdout, "Closing file early at block %d of %d\n",
+                block, nblocks_x * nblocks_y * nblocks_z);
+            DBClose(dbfile);
+        }
+
         fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
@@ -2786,7 +2817,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         {
             fprintf(stderr, "Could not set directory \"%s\"\n",
                     dirnames[block]);
-            return;
+            goto cleanup;
         }                              /* if */
         /* Write out the variables. */
         cycle = 48;
@@ -2849,9 +2880,11 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
-            return;
+            goto cleanup;
         }                              /* if */
     }                                  /* for */
+
+cleanup:
 
     FREE(matlist);
     FREE(mix_next);
@@ -3133,6 +3166,13 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
+        if (check_early_close && block >= nblocks_x * nblocks_y * nblocks_z / 2)
+        {
+            fprintf(stdout, "Closing file early at block %d of %d\n",
+                block, nblocks_x * nblocks_y * nblocks_z);
+            DBClose(dbfile);
+        }
+
         fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
@@ -3319,7 +3359,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         {
             fprintf(stderr, "Could not set directory \"%s\"\n",
                     dirnames[block]);
-            return;
+            goto cleanup;
         }                              /* if */
         /* Write out the mesh and variables. */
         optlist = DBMakeOptlist(20);
@@ -3415,9 +3455,11 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
-            return;
+            goto cleanup;
         }                              /* if */
     }                                  /* for */
+
+cleanup:
 
     FREE(zonelist);
     FREE(facelist);
@@ -3711,6 +3753,13 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
+        if (check_early_close && block >= nblocks_x * nblocks_y * nblocks_z / 2)
+        {
+            fprintf(stdout, "Closing file early at block %d of %d\n",
+                block, nblocks_x * nblocks_y * nblocks_z);
+            DBClose(dbfile);
+        }
+
         fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
@@ -3761,7 +3810,7 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         {
             fprintf(stderr, "Could not set directory \"%s\"\n",
                     dirnames[block]);
-            return;
+            goto cleanup;
         }                              /* if */
         /* Write out the variables. */
         cycle = 48;
@@ -3808,9 +3857,11 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
-            return;
+            goto cleanup;
         }                              /* if */
     }                                  /* for */
+
+cleanup:
 
     FREE(matlist);
     FREE(mix_next);
