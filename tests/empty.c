@@ -116,7 +116,7 @@ main(int argc, char *argv[])
     void           *var = (void*)1;
     int             iarr[3] = {1,1,1}; /* dummy int array */
     int             ZDIMS[3] = {0,0,0};
-    double          exts[4] = {0,0,0,0};
+    double          exts[6] = {0,0,0,0,0,0};
     DBoptlist      *ol = 0;
     double          dtime = 0.0;
     int             hide_from_gui=0;
