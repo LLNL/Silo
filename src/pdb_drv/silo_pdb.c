@@ -6290,8 +6290,9 @@ db_pdb_GetVar (DBfile *_dbfile, char const *name)
       return NULL;
    }
 
-   /* Read it and return. */
-   data = ALLOC_N(char, n);
+   /* Read it and return. On the off chance this is a string we're reading,
+      we'll allocate 1 more than needed for the null terminator. */
+   data = ALLOC_N(char, n+1);
    if (DBReadVar(_dbfile, name, data) < 0) {
       db_perror("DBReadVar", E_CALLFAIL, me);
       FREE(data);
@@ -10534,12 +10535,27 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
 
    if (extents)
    {
-      min_extents[0] = extents[0];
-      min_extents[1] = extents[1];
-      min_extents[2] = extents[2];
-      max_extents[0] = extents[3];
-      max_extents[1] = extents[4];
-      max_extents[2] = extents[5];
+      if (ndims == 3)
+      {
+          min_extents[0] = extents[0];
+          min_extents[1] = extents[1];
+          min_extents[2] = extents[2];
+          max_extents[0] = extents[3];
+          max_extents[1] = extents[4];
+          max_extents[2] = extents[5];
+      }
+      else if (ndims == 2)
+      {
+          min_extents[0] = extents[0];
+          min_extents[1] = extents[1];
+          max_extents[0] = extents[2];
+          max_extents[1] = extents[3];
+      }
+      else if (ndims == 1)
+      {
+          min_extents[0] = extents[0];
+          max_extents[0] = extents[1];
+      }
 
       count[0] = ndims;
       DBWriteComponent(dbfile, obj, "min_extents", name, "double",
