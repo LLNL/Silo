@@ -469,6 +469,45 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     return retval;
 }
 
+/* Returns 1 (true) if all items have the same type.
+   If allow_subclasses != 0, accepts subtypes of the first element's type.
+   On non-iterable, sets TypeError and returns -1.
+   If out_type != NULL and seq non-empty, *out_type is set (borrowed). */
+static int
+all_same_type(PyObject *seq, int allow_subclasses, PyTypeObject **out_type)
+{
+    PyObject *fast = PySequence_Fast(seq, "expected a sequence or iterable");
+    if (!fast)
+    {
+        PyErr_Clear();
+        return -1;
+    }
+
+    Py_ssize_t n = PySequence_Fast_GET_SIZE(fast);
+    if (n == 0) {
+        if (out_type) *out_type = NULL;
+        Py_DECREF(fast);
+        return 1;  /* define empty as "homogeneous" */
+    }
+
+    PyObject *first = PySequence_Fast_GET_ITEM(fast, 0);  // borrowed
+    PyTypeObject *t0 = Py_TYPE(first);
+
+    int ok = 1;
+    for (Py_ssize_t i = 1; i < n; i++) {
+        PyObject *it = PySequence_Fast_GET_ITEM(fast, i);  // borrowed
+        if (allow_subclasses) {
+            if (!PyObject_TypeCheck(it, t0)) { ok = 0; break; }
+        } else {
+            if (Py_TYPE(it) != t0) { ok = 0; break; }
+        }
+    }
+
+    Py_DECREF(fast);
+    if (ok && out_type) *out_type = t0;
+    return ok;
+}
+
 // ****************************************************************************
 //  Method:  DBfile_DBWrite
 //
@@ -666,7 +705,8 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                 {
                     if (!PyInt_Check(item))
                     {
-                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_SHORT");
+                        PyErr_Format(PyExc_TypeError,
+                            "For DB_SHORT data, hit non-Python integer at index %d of %d", i, len);
                         goto fail_exit;
                     }
                     short *ps = (short*)p;
@@ -677,7 +717,8 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                 {
                     if (!PyInt_Check(item))
                     {
-                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_INT");
+                        PyErr_Format(PyExc_TypeError,
+                            "For DB_INT data, hit non-Python integer at index %d of %d", i, len);
                         goto fail_exit;
                     }
                     int *pi = (int*)p;
@@ -688,7 +729,8 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                 {
                     if (!PyLong_Check(item))
                     {
-                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_LONG");
+                        PyErr_Format(PyExc_TypeError,
+                            "For DB_LONG data, hit non-Python integer at index %d of %d", i, len);
                         goto fail_exit;
                     }
                     long *pl = (long*)p;
@@ -699,7 +741,8 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                 {
                     if (!PyLong_Check(item))
                     {
-                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_LONG");
+                        PyErr_Format(PyExc_TypeError,
+                            "For DB_LONG_LONG data, hit non-Python integer at index %d of %d", i, len);
                         goto fail_exit;
                     }
                     long long *pll = (long long*)p;
@@ -710,7 +753,8 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                 {
                     if (!PyFloat_Check(item))
                     {
-                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_FLOAT");
+                        PyErr_Format(PyExc_TypeError,
+                            "For DB_FLOAT data, hit non-Python float at index %d of %d", i, len);
                         goto fail_exit;
                     }
                     float *pf = (float*)p;
@@ -721,7 +765,8 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
                 {
                     if (!PyFloat_Check(item))
                     {
-                        PyErr_SetString(PyExc_TypeError, "Data is not a single DB_DOUBLE");
+                        PyErr_Format(PyExc_TypeError,
+                            "For DB_DOUBLE data, hit non-Python float at index %d of %d", i, len);
                         goto fail_exit;
                     }
                     double *pd = (double*)p;
