@@ -55,8 +55,16 @@ db.Write("t1", 12)
 db.Write("t2", "hello")
 db.Write("t3", (13,))
 db.Write("t4", 14.5)
+try:
+    db.Write("t5", (1.2, 10))
+except TypeError:
+    pass
 db.Write("t5", (1.2, 10.2))
 db.Write("t6", (1.2, 10.2))
+try:
+    db.Write("t7", (10, 1.2))
+except TypeError:
+    pass
 db.Write("t7", (10, 12))
 db.Write("t8", "a")
 db.MkDir("a")
