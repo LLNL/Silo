@@ -11402,7 +11402,10 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
         double *dmin_extents = (double *) min_extents;
         double *dmax_extents = (double *) max_extents;
         double const * const * _coord_arrays = (double const * const *) coord_arrays;
-        double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+        double const *dcoord_arrays[3] = {
+            ndims>0?_coord_arrays[0]:0,
+            ndims>1?_coord_arrays[1]:0,
+            ndims>2?_coord_arrays[2]:0};
 
         for (i = 0; i < ndims; i++)
         {
@@ -11430,7 +11433,10 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
         float *fmin_extents = (float *) min_extents;
         float *fmax_extents = (float *) max_extents;
         float  const * const * _coord_arrays = (float const * const *) coord_arrays;
-        float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+        float const *fcoord_arrays[3] = {
+            ndims>0?_coord_arrays[0]:0,
+            ndims>1?_coord_arrays[1]:0,
+            ndims>2?_coord_arrays[2]:0};
 
         for (i = 0; i < ndims; i++)
         {
@@ -11505,7 +11511,10 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
             double *dmin_extents = (double *) min_extents;
             double *dmax_extents = (double *) max_extents;
             double const * const * _coord_arrays = (double const * const *) coord_arrays;
-            double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            double const *dcoord_arrays[3] = {
+                ndims>0?_coord_arrays[0]:0,
+                ndims>1?_coord_arrays[1]:0,
+                ndims>2?_coord_arrays[2]:0};
             for (i = 0; i < ndims; i++)
                 _CalcExtents(&dcoord_arrays[i], datatype, 1, dims[i], &dmin_extents[i], &dmax_extents[i],
                     &dims[i], &min_index[i], &max_index[i]);
@@ -11515,7 +11524,10 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
             float *fmin_extents = (float *) min_extents;
             float *fmax_extents = (float *) max_extents;
             float const * const * _coord_arrays = (float const * const *) coord_arrays;
-            float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            float const *fcoord_arrays[3] = {
+                ndims>0?_coord_arrays[0]:0,
+                ndims>1?_coord_arrays[1]:0,
+                ndims>2?_coord_arrays[2]:0};
             for (i = 0; i < ndims; i++)
                 _CalcExtents(&fcoord_arrays[i], datatype, 1, dims[i], &fmin_extents[i], &fmax_extents[i],
                     &dims[i], &min_index[i], &max_index[i]);
