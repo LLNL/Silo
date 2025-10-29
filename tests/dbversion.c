@@ -96,6 +96,7 @@ main(int argc, char *argv[])
     static char   *filename="version.pdb";
     int            show_all_errors = FALSE;
     int           vnos[4];
+    char          voverwrite[5] = "99.9";
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
@@ -303,7 +304,7 @@ main(int argc, char *argv[])
        future and test again */
     DBSetAllowOverwrites(1);
     i = 5;
-    DBWrite(dbfile, SILO_VSTRING_NAME, "99.9", &i, 1, DB_CHAR);
+    DBWrite(dbfile, SILO_VSTRING_NAME, voverwrite, &i, 1, DB_CHAR);
     DBClose(dbfile);
     DBSetAllowOverwrites(0);
 
