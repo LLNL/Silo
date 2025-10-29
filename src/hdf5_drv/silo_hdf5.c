@@ -8501,7 +8501,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    static char  *me = "db_hdf5_Write";
    hid_t        mtype=-1, ftype=-1, space=-1, dset=-1, dset_type=-1;
-   hsize_t      ds_size[H5S_MAX_RANK];
+   hsize_t      ds_size[H5S_MAX_RANK], new_ds_size[H5S_MAX_RANK];
    H5T_class_t  fclass, mclass;
    int          i;
 
@@ -8534,6 +8534,9 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
                    UNWIND();
                }
            }
+           /* Now, reset the space for the actual data being written */
+           for (i=0; i<ndims; i++) new_ds_size[i] = dims[i];
+           H5Sset_extent_simple(space, ndims, new_ds_size, ds_size);
 #ifndef _MSC_VER
 #warning WHAT IF EXISTING DATASET WAS COMPRESSED
 #endif
