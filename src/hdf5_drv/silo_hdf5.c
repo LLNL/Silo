@@ -4967,7 +4967,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     H5AC_cache_config_t h5mdc_config;
 #endif
 
-#if HDF5_VERSION_GE(1,10,2)
+#if HDF5_VERSION_GE(1,10,0)
     if (mode & DB_PERF_OVER_COMPAT)
         H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     if (mode & DB_COMPAT_OVER_PERF)
@@ -5916,18 +5916,23 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     /* File access mode */
-    if (DB_READ==(mode & 0x0000000F)) {
+    if (DB_READ==(mode & 0x00000003)) {
         hmode = H5F_ACC_RDONLY;
-    } else if (DB_APPEND==(mode & 0x0000000F)) {
+    } else if (DB_APPEND==(mode & 0x00000003)) {
         hmode = H5F_ACC_RDWR;
     } else {
         db_perror("mode", E_INTERNAL, me);
         return NULL;
     }
 
+#if HDF5_VERSION_GE(1,10,0)
+    if (DB_CONCURRENT==(mode & 0x00000004))
+        hmode |= H5F_ACC_SWMR_READ;
+#endif
+
     /* use mode to pass compatibility option into
        db_hdf5_file_accprops */
-    if (((mode & 0x0000000F) == DB_APPEND))
+    if (((mode & 0x00000003) == DB_APPEND))
     {
         if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
             mode |= DB_PERF_OVER_COMPAT;
@@ -5947,8 +5952,8 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         return NULL;
     }
 
-#if HDF5_VERSION_GE(1,10,2)
-    if (DB_APPEND == (mode & 0x0000000F))
+#if HDF5_VERSION_GE(1,10,0)
+    if (DB_APPEND == (mode & 0x00000003))
     {
         if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
         {
@@ -5958,6 +5963,8 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
                 db_perror(name, E_CALLFAIL, me);
                 return NULL;
             }
+            if (DB_CONCURRENT==(mode & 0x00000004))
+                H5Fstart_swmr_write(fid);
         }
         else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
         {
@@ -6042,7 +6049,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     faprops = db_hdf5_file_accprops(opts_set_id, mode, &fcprops);
 
         /* Create or open hdf5 file */
-    if (DB_CLOBBER==(mode & 0x0000000F)) {
+    if (DB_CLOBBER==(mode & 0x00000003)) {
         /* If we ever use checksumming (which requires chunked datasets),
          * HDF5's BTree's will effect storage overhead. Since Silo really
          * doesn't support growing/shrinking datasets, we just use a value
@@ -6061,7 +6068,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
         if (created_fcprops)
             H5Pclose(fcprops);
         H5Glink(fid, H5G_LINK_HARD, "/", ".."); /*don't care if fails*/
-    } else if (DB_NOCLOBBER==(mode & 0x0000000F)) {
+    } else if (DB_NOCLOBBER==(mode & 0x00000003)) {
         fid = H5Fopen(name, H5F_ACC_RDWR, faprops);
     } else {
         H5Pclose(faprops);
@@ -6076,7 +6083,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
 
     H5Pclose(faprops);
 
-#if HDF5_VERSION_GE(1,10,2)
+#if HDF5_VERSION_GE(1,10,0)
     if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
     {
         if (H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)<0)
@@ -6085,6 +6092,8 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
             db_perror(name, E_CALLFAIL, me);
             return NULL;
         }
+        if (DB_CONCURRENT==(mode & 0x00000004))
+            H5Fstart_swmr_write(fid);
     }
     else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
     {
@@ -6190,6 +6199,9 @@ db_hdf5_Close(DBfile *_dbfile)
         H5close();
     }
 #endif
+
+    /* free circular buffer stuff */
+    db_hdf5_resolvename(0,0,0);
 
     return retval;
 }
