@@ -62,7 +62,7 @@
 #
 # Find dir where this script lives and source the shell utils script there.
 #
-# dirname -- "$0" gets the script’s directory even if this script is run via a
+# dirname -- "$0" gets the script directory even if this script is run via a
 #     relative path like ../../foo/bar/gorfo.sh.
 # The CDPATH= nulls that env. variable and prevents cd from printing anything
 #     if CDPATH is set in the environment.
@@ -119,13 +119,8 @@ mkdir h5_check_files
 minoffset=$(ls -l h5_check_files/multi_ucd3d.h5 | cut -d' ' -f5)
 skip=0
 while [ $skip -lt 16 ]; do
-    offset=$(od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1)
-    if [ -z "$offset" ]; then
-        skip=$(expr $skip + 1)
-        continue
-    fi
-    offset=$(echo $offset | cut -d' ' -f1 | sed 's/^0*//')
-    if [ $offset -lt $minoffset ]; then
+    offset=$(od -j $skip -A d -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1 | head -n 1)
+    if [ -n "$offset" ] && [ $offset -lt $minoffset ]; then
         minoffset=$offset
     fi
     skip=$(expr $skip + 1)
