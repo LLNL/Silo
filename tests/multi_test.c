@@ -835,6 +835,7 @@ main(int argc, char *argv[])
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
     int            compat = 0x00000000;
+    int            concurrent = 0x00000000;
 
     /* set up variable name to varextents index map */
     vidx['d'-'a'] = 3;
@@ -886,8 +887,15 @@ main(int argc, char *argv[])
         /* Tests DBFlush functionality, by execv'ing and re-reading */
         } else if (!strcmp(argv[i], "testflush")) {
             testflush = TRUE;
+            compat = DB_PERF_OVER_COMPAT;
+            concurrent = DB_CONCURRENT;
+        /* testflushread is an internal use only command line arg used
+           in the 2nd phase of a testflush where a new instance of this
+           test is execv'd to read what was flushed in the 1rst phase. */
         } else if (!strcmp(argv[i], "testflushread")) {
             testflushread = TRUE;
+            compat = DB_PERF_OVER_COMPAT;
+            concurrent = DB_CONCURRENT;
 #endif
         } else if (!strcmp(argv[i], "missing-value")) {
             missing_value = strtod(argv[++i],0);
@@ -935,7 +943,7 @@ main(int argc, char *argv[])
            sprintf(filename2, "../../multi_rect2d_%03d%s", t, file_ext);
        }
        if (testflushread || 
-           (dbfile = DBCreate(filename, DB_CLOBBER | compat, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
+           (dbfile = DBCreate(filename, DB_CLOBBER | compat | concurrent, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
        {
            if (!testflushread)
            {
@@ -963,8 +971,8 @@ main(int argc, char *argv[])
            if (testread || testbadread || testflushread)
            {
                fprintf(stdout, "reading %s\n", filename);
-               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) ||
-                   (dbfile = DBOpen(filename2, DB_UNKNOWN, DB_READ)))
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ | concurrent)) ||
+                   (dbfile = DBOpen(filename2, DB_UNKNOWN, DB_READ | concurrent)))
                {
                    if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3*emb, 4*emb, 1*emb, DB_COLLINEAR, 1) == -1)
                        fprintf(stderr, "Error reading contents of '%s'.\n", filename);
