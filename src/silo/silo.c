@@ -4136,7 +4136,7 @@ DBOpenReal(const char *name, int type, int mode)
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
         }
-        if (((mode & 0x0000000F) != DB_READ) && ((mode & 0x0000000F) != DB_APPEND))
+        if (((mode & 0x00000003) != DB_READ) && ((mode & 0x00000003) != DB_APPEND))
         {
             sprintf(ascii, "%d", mode);
             API_ERROR(ascii, E_BADARGS);
@@ -4205,7 +4205,7 @@ DBOpenReal(const char *name, int type, int mode)
         i = db_isregistered_file(0, &filestate);
         if (i != -1)
         {
-            if (_db_regstatus[i].w != 0 || (mode & 0x0000000F) != DB_READ)
+            if (_db_regstatus[i].w != 0 || ((mode & 0x00000003) != DB_READ))
                 API_ERROR(name, E_CONCURRENT);
         }
 
@@ -4240,7 +4240,7 @@ DBOpenReal(const char *name, int type, int mode)
         }
         dbfile->pub.fileid = fileid;
         db_InitFileGlobals(dbfile, mode);
-        db_register_file(dbfile, &filestate, (mode&0x0000000F)!=DB_READ);
+        db_register_file(dbfile, &filestate, (((mode&0x00000003)!=DB_READ)));
 
         /*
          * Install filters.  First, all `init' filters, then the
