@@ -259,7 +259,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Arg name | Description
   :---|:---
   `pathname` | Path name of file to create. This can be either an absolute or relative path.
-  `mode` | Creation `mode`. Pass `DB_CLOBBER` or `DB_NOCLOBBER`, optionally OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode)
+  `mode` | Creation `mode`. Pass `DB_CLOBBER` or `DB_NOCLOBBER`, optionally OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode), optionally OR'd with `DB_CONCURRENT` if another process intends to read the file's contents concurrently with the writer (concurrent acccess is available only on the HDF5 driver).
   `target` | Destination file format. In the distant past, this option was used to target binary numeric formats in the file to a specific host CPU architecture (such as Sun or Sgi or Cray). More recently, this argument has become less relevant and should most likely always be set to `DB_LOCAL`.
   `fileinfo` | Character string containing descriptive information about the file's contents. This information is usually printed by applications when this file is opened. If no such information is needed, pass `NULL` for this argument.
   `filetype` | Destination file type. Applications typically use one of either `DB_PDB`, which will create PDB files, or `DB_HDF5`, which will create HDF5 files. Other options include `DB_PDBP`, `DB_HDF5_SEC2`, `DB_HDF5_STDIO`, `DB_HDF5_CORE`, `DB_HDF5_SPLIT` or `DB_FILE_OPTS(optlist_id)` where `optlist_id` is a registered file options set. For a description of the meaning of these options as well as many other advanced features and control of underlying I/O behavior, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
@@ -427,7 +427,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   :---|:---
   `name` | Name of the file to open. Can be either an absolute or relative path.
   `type` | The `type` of file to open. One of the predefined types, typically `DB_UNKNOWN`, `DB_PDB`, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
-  `mode` | The `mode` of the file to open. Pass `DB_READ` or `DB_APPEND`. Optionally, `DB_APPEND` can be OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode). OR'ing of `DB_READ` with compatibility mode flags is not allowed.
+  `mode` | The `mode` of the file to open. Pass `DB_READ` or `DB_APPEND`. Optionally, `DB_APPEND` can be OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode). OR'ing of `DB_READ` with compatibility mode flags is not allowed. Optionally, either `DB_READ` or `DB_APPEND` can be OR'd with `DB_CONCURRENT` when another process intends to read the file's contents concurrently with a writer and vise versa.
 
 * **Returned value:**
 
