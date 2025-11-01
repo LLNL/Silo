@@ -275,9 +275,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBCreate` function creates a Silo file and initializes it for writing data.
 
   Silo supports two underlying drivers for storing named arrays and objects of machine independent data.
-  One is called the Portable DataBase Library (PDBLib or just PDB), and the other is Hierarchical Data Format, Version 5 (HDF5), http://www.hdfgroup.org/HDF5.
+  One is called the Portable DataBase Library ([PDBLib](https://pubs.aip.org/aip/cip/article/7/3/304/281673/Software-for-Portable-Scientific-Data-Management) or just PDB), and the other is Hierarchical Data Format, Version 5 ([HDF5](https://www.hdfgroup.org/solutions/hdf5/))
 
-  When Silo is configured with the `--with-pdb-proper=<path-to-PACT-PDB>` option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as *PDB Lite*) identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a PACT installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing `P` for *PDB Proper*).
+  When Silo is configured with the `--with-pdb-proper=<path-to-PACT-PDB>` option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as *PDB Lite*) identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a *current* PACT installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing `P` for *PDB Proper*).
   PDB Proper is known to give far superior performance than PDB Lite on BG/P and BG/L class systems and so is recommended when using PDB driver on such systems.
 
   For the HDF5 library, there are many more available options for fine tuned control of the underlying I/O through the use of HDF5's Virtual File Drivers (VFDs).
@@ -392,6 +392,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   `DB_HDF5_MPIO` and `DB_HDF5_MPIOP`
   : These have been removed from Silo as of version 4.10.3.
+
+  The HDF5 driver also supports one or more *concurrent* readers reading a Silo file produced by a *single* writer.
+  This feature uses HDF5's *SWMR* (pronounced `swimmer` meaning single writer, multiple reader) capabilities.
+  In this case, both the data producer (calling `DBCreate()`) and each consumer (calling `DBOpen()`) must also pass the `DB_CONCURRENT` flag OR'd into the `mode` argument in their respective calls.
 
   In Fortran, an integer represent the file's id is returned.
   That integer is then used as the database file id in all functions to read and write data from the file.
