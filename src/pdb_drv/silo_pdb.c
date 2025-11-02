@@ -2739,9 +2739,9 @@ db_pdb_NewToc (DBfile *_dbfile)
           * Read the type field of each object and increment
           * the appropriate count.
           */
-         sprintf(name, "%s.type", list[i]);
+         sprintf(name, "%s->type", list[i]);
          if (!PJ_read(file, name, &ctype)) {
-            sprintf(name, "%s->type", list[i]);
+            sprintf(name, "%s.type", list[i]);
             if (!PJ_read(file, name, &ctype)) {
                FREE(types);
                FREE(list);
