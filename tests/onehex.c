@@ -241,7 +241,7 @@ main(int argc, char *argv[])
     }
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
-    printf("Creating test file \"%s\".\n", filename);
+    printf("%s test file \"%s\".\n", append?"Opening":"Creating", filename);
     if (append)
     {
         dbfile = DBOpen(filename, driver, DB_APPEND);
