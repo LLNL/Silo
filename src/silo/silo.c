@@ -8493,6 +8493,7 @@ DBReadVarVals(DBfile *dbfile, const char *name, int mode, int nvals,
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
+static int _DBGetVarByteLength_r(DBfile *dbfile, const char *name);
 #ifndef _WIN32
 #warning DO WE NEED THIS METHOD
 #endif
@@ -8524,12 +8525,25 @@ db_get_obj_byte_length(DBfile *dbfile, char const *name)
 
             srcObjDirName = db_dirname(name);
             srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
+            free(subObjName);
+            free(srcObjDirName);
 
-            bytlen = DBGetVarByteLength(dbfile, srcSubObjAbsName); /* recursion */
+            bytlen = _DBGetVarByteLength_r(dbfile, srcSubObjAbsName); /* recursion */
+            free(srcSubObjAbsName);
             if (bytlen > 0) sum += bytlen;
         }
     }
+    DBFreeObject(srcObj);
     return sum;
+}
+
+PRIVATE int
+_DBGetVarByteLength_r(DBfile *dbfile, const char *name)
+{
+    int retval = (dbfile->pub.g_varbl) (dbfile, name);
+    if (retval < 0)
+        retval = (int) db_get_obj_byte_length(dbfile, name);
+    return retval;
 }
 
 PUBLIC int
@@ -8547,10 +8561,7 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_varbl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_varbl) (dbfile, name);
-
-        if (retval < 0)
-            retval = (int) db_get_obj_byte_length(dbfile, name);
+        retval = _DBGetVarByteLength_r(dbfile, name);
 
         API_RETURN(retval);
     }
