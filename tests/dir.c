@@ -206,8 +206,6 @@ int main(int argc, char *argv[])
     /* Try a recursive copy */
     DBCp("-r", dbfile, dbfile2, "/quad_dir/quad_subdir1", "quad_dir_copy", DB_EOA);
 
-    DBSetDir(dbfile2, "..");
-
     build_ucd_tri(dbfile2, "trimesh", 0x2); /* make a larger tri mesh here */
 
     /* try to copy the smaller trimesh on top of the larger one */
@@ -218,17 +216,22 @@ int main(int argc, char *argv[])
         int nlist  = ndirs + 5;
         char **list = malloc((nlist) * sizeof(char*));
         DBSetDir(dbfile, "/");
-        for (i = 0; i < nlist; i++) list[i] = 0;
         DBLs(dbfile, 0, 0, &nlist);
         DBLs(dbfile, 0, list, &nlist);
         for (i = 0; i < nlist; i++)
+        {
             printf("\"%s\"\n", list[i]);
+            free(list[i]);
+        }
 
         nlist = ndirs + 5;
         DBSetDir(dbfile, "/tri_dir");
-        for (i = 0; i < nlist; i++) list[i] = 0;
         DBLs(dbfile, 0, list, &nlist);
-        for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+        for (i = 0; i < nlist; i++)
+        {
+            printf("\"%s\"\n", list[i]);
+            free(list[i]);
+        }
         free(list);
     }
 
