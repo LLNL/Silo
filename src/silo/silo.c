@@ -6363,7 +6363,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
     }
 
-    /* Sanity checks */
+    /* Smoke checks */
     if (!dstFile)
         dstFile = srcFile;
 
@@ -9420,7 +9420,7 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
@@ -9556,7 +9556,7 @@ DBPutMultimeshadj(DBfile *dbfile, char const *name, int nmesh,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
@@ -9627,7 +9627,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
@@ -9703,7 +9703,7 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
