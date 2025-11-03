@@ -8589,7 +8589,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char const *name, int nmesh,
        DBWriteComponent(dbfile, obj, "meshtypes", name, "integer",
                         meshtypes, 1, count);
 
-   if (meshnames)
+   if (meshnames && nmesh>0)
    {
        /* Compute size needed for string of concatenated block names.
         *
@@ -9096,7 +9096,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char const *name, int nvars,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    if (varnames)
+    if (varnames && nvars>0)
     {
         len = 2;
         for(i=0; i<nvars; i++)
@@ -9282,7 +9282,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    if (matnames)
+    if (matnames && nmats>0)
     {
         len = 2;
         for(i=0; i<nmats; i++)
@@ -9492,7 +9492,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char const *name, int nspec,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    if (specnames)
+    if (specnames && nspec>0)
     {
         len = 2;
         for(i=0; i<nspec; i++)
