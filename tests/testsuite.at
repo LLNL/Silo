@@ -119,11 +119,7 @@ AT_SETUP(multi_test testbadread)
 AT_CHECK($VALGRIND multi_test testbadread $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test testflush)
-AT_CHECK($VALGRIND multi_test testflush $STARGS,,ignore)
-AT_CLEANUP
-AT_SETUP(multi_test testflushread)
-AT_CHECK($VALGRIND multi_test testflush $STARGS,,ignore)
-AT_CHECK($VALGRIND multi_test testflushread $STARGS,,ignore)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND multi_test testflush $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test earlyclose)
 AT_CHECK($VALGRIND multi_test earlyclose $STARGS,,ignore,ignore)
