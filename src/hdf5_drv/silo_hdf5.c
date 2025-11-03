@@ -4964,7 +4964,8 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
     herr_t h5status = 0;
 #if HDF5_VERSION_GE(1,8,4)
-    H5AC_cache_config_t h5mdc_config;
+    H5AC_cache_config_t h5mdc_config_best_perf;
+    H5AC_cache_config_t h5mdc_config_min_space;
 #endif
 
 #if HDF5_VERSION_GE(1,10,0)
@@ -4979,18 +4980,27 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 #endif
 
     /* First, initialize our copy of h5mdc_config */
-    h5mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-    H5Pget_mdc_config(retval, &h5mdc_config);
+    h5mdc_config_best_perf.version = 
+    h5mdc_config_min_space.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+    H5Pget_mdc_config(retval, &h5mdc_config_best_perf);
+    H5Pget_mdc_config(retval, &h5mdc_config_min_space);
 
-    /* Setup Mainzer mdc config params */
-    h5mdc_config.set_initial_size = 1;
-    h5mdc_config.initial_size = 16384;
-    h5mdc_config.min_size = 8192;
-    h5mdc_config.epoch_length = 3000;
-    h5mdc_config.lower_hr_threshold = 1e-5;
+    /* Setup min space mdc config params */
+    h5mdc_config_min_space.max_size = 1024; /* H5C__MIN_MAX_CACHE_SIZE */
+    h5mdc_config_min_space.min_size = h5mdc_config_min_space.max_size;
+    h5mdc_config_min_space.initial_size = h5mdc_config_min_space.max_size;
+    h5mdc_config_min_space.incr_mode = H5C_incr__off;
+    h5mdc_config_min_space.decr_mode = H5C_decr__off;
+
+    /* Setup Mainzer (best performance) mdc config params */
+    h5mdc_config_best_perf.set_initial_size = 1;
+    h5mdc_config_best_perf.initial_size = 16384;
+    h5mdc_config_best_perf.min_size = 8192;
+    h5mdc_config_best_perf.epoch_length = 3000;
+    h5mdc_config_best_perf.lower_hr_threshold = 1e-5;
 
     /* Set mdc config params */
-    H5Pset_mdc_config(retval, &h5mdc_config);
+    H5Pset_mdc_config(retval, &h5mdc_config_best_perf);
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
@@ -5055,6 +5065,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         /* default HDF5 core driver 1 Meg inc & backing store */
         case DB_FILE_OPTS_H5_DEFAULT_CORE:
             h5status |= H5Pset_fapl_core(retval, (1<<20), TRUE);
+            H5Pset_mdc_config(retval, &h5mdc_config_min_space);
             break;
 
         /* default HDF5 log driver. Should NOT do any actual I/O. */
@@ -5244,6 +5255,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                         bs = *((int*)p) ? FALSE : TRUE;
 
                     h5status |= H5Pset_fapl_core(retval, inc, bs);
+                    H5Pset_mdc_config(retval, &h5mdc_config_min_space);
 
                     /* Set up the file image too */
                     if (vfd == DB_H5VFD_FIC)
