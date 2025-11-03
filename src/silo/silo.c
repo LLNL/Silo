@@ -6472,8 +6472,8 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         char *srcObjAbsName, *dstObjAbsName;
         char savcwg[1024], srccwg[1024], dstcwg[1024];
         char opts2[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        char **dirItems, **otherItems;
-        int  dirItemCount, otherItemCount;
+        char **dirItems=0, **otherItems;
+        int  dirItemCount=0, otherItemCount;
 
         if (i == 0)
         {
@@ -6558,6 +6558,12 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         DBSetDir(dstFile, "..");
 
 endLoop:
+        if (dirItems)
+        {
+            for (int k = 0; k < dirItemCount; k++)
+                FREE(dirItems[k]);
+            FREE(dirItems);
+        }
         FREE(srcObjAbsName);
         FREE(dstObjAbsName);
     }
