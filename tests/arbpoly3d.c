@@ -402,6 +402,10 @@ main(int argc, char *argv[])
     DBAddOption(ol, DBOPT_PHZONELIST, "phzl_r");
     DBPutUcdmesh(dbfile, "arbmesh_r", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
     DBFreeOptlist(ol);
+ 
+    free(x);
+    free(y);
+    free(z);
 
     DBPutPHZonelist(dbfile, "phzl_r",
         nfaces, nodecnts, lnodelist, nodelist2, 0,
