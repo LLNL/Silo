@@ -496,6 +496,9 @@ main(int argc, char **argv)
 
     DBPutQuadvar1(dbfile, "qvar", "qmesh", (float*) qvar, dims, 2,
                              NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+    free(qx);
+    free(qy);
+    free(qvar);
 
     build_analytic_lineout_curves(dbfile,Nt,Nc,Nx,Ny,Dx,Dy);
 
