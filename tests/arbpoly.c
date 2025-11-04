@@ -677,6 +677,10 @@ main(int argc, char *argv[])
             1, 9, 0);
 
         DBSetDir(dbfile, "..");
+
+        free(x);
+        free(y);
+        free(z);
     }
 
     DBClose(dbfile);
