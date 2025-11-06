@@ -1142,8 +1142,9 @@ db_FreeToc(DBfile *dbfile)
 #ifndef _WIN32
 #warning WE SHOULD PROBABLY JUST EITHER MAKE THIS CONSISTENT OR PERHAPS COPY ALL CHARS INTO LINK@TARGET format
 #endif
-        /* toc->symlink_names is just copy of other members here.
-           So, we don't free it here. */
+        /* Here we free just the list of pointers to names that are actually
+           other names in the toc */
+        FREE(toc->symlink_names);
     }
 
     FREE(dbfile->pub.toc);
