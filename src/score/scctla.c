@@ -89,10 +89,11 @@ typedef struct s_mem_descriptor mem_descriptor;
  * these fields.  These machines need this defined: irix, linux.
  * These machines might get away with not defining this: meiko, solaris,
  * sun, sun-gnu.
+ *
+ * MCM: November 5, 2025. I turned on NEED_MEM_TRACE permanently. There
+ * were leaks I was seeing in PDB Lite that having it on eliminated.
  */
-#if NORMAL_SCLITE_HEADERS
 #define NEED_MEM_TRACE
-#endif
 #ifdef NEED_MEM_TRACE
 
 /*
