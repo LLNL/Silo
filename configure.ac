@@ -403,15 +403,6 @@ AC_ARG_ENABLE(optimization,
     esac],
     [USING_DEBUG="yes"])
 
-dnl Switch to disable score lite memory header optimizations
-AC_ARG_ENABLE(normal-sclite-mem-headers,
-    AC_HELP_STRING([--enable-normal-sclite-mem-headers],
-        [compile with normal score lite memory headers @<:@default=no@:>@]),
-    if test "$enableval" = "yes" ; then
-        AC_DEFINE(NORMAL_SCLITE_HEADERS,1,[SCORE lite memory header optimizations])
-    fi,
-    AC_DEFINE(NORMAL_SCLITE_HEADERS,0,[SCORE lite memory header optimizations]))
-
 dnl Switch to have 'make install' install score/pdb lite header files
 AC_ARG_ENABLE(install-lite-headers,
     AC_HELP_STRING([--enable-install-lite-headers],
