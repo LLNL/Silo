@@ -664,7 +664,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
     int             block, eb;
     int             delta_x, delta_y, delta_z;
-    int             empty_blocks[] = {0,1,2,3,4,5,6,7,8,16,47,122,241};
+    int             empty_blocks[] = {0,1,2,3,4,5,6,7,8,16,47,122,241,-1};
 
     char            filename[120];
     DBfile         *dbfile;
@@ -915,7 +915,6 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         {
             if (empties && block == empty_blocks[eb])
                 eb++;
-
             continue;
         }
 
