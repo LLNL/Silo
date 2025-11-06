@@ -943,6 +943,7 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
 
     // Ok, we've built up the object, now write it
     DBWriteObject(db, siloobj, 1);
+    DBFreeObject(siloobj);
 
     PyErr_Clear();
     Py_INCREF(Py_None);
