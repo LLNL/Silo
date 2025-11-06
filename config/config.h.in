@@ -173,9 +173,6 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
-/* SCORE lite memory header optimizations */
-#undef NORMAL_SCLITE_HEADERS
-
 /* Name of package */
 #undef PACKAGE
 
