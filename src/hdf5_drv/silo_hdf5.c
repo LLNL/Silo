@@ -4979,7 +4979,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 #endif
 
     /* First, initialize our copy of h5mdc_config */
-    h5mdc_config_best_perf.version = = H5AC__CURR_CACHE_CONFIG_VERSION;
+    h5mdc_config_best_perf.version = H5AC__CURR_CACHE_CONFIG_VERSION;
     H5Pget_mdc_config(retval, &h5mdc_config_best_perf);
 
     /* Setup Mainzer (best performance) mdc config params */
@@ -7473,6 +7473,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
         }
         if ((mtype=H5Tcreate(H5T_COMPOUND, msize))<0 ||
             (ftype=H5Tcreate(H5T_COMPOUND, fsize))<0) {
+            free(object);
+            object = 0;
             db_perror("H5Tcreate", E_CALLFAIL, me);
             UNWIND();
         }
@@ -7484,6 +7486,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               H5T_NATIVE_INT)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               dbfile->T_int)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7496,6 +7500,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               H5T_NATIVE_FLOAT)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               dbfile->T_float)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7508,6 +7514,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               H5T_NATIVE_DOUBLE)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               dbfile->T_double)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7522,6 +7530,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 hid_t str_type;
                 if (len > 1024 && !DBGetAllowLongStrComponentsFile(_dbfile))
                 {
+                    free(object);
+                    object = 0;
                     db_perror("encountered Str component > 1024 chars", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7531,6 +7541,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               str_type)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               str_type)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7567,6 +7579,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                free(object);
+                                object = 0;
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
                                 UNWIND();
                             }
@@ -7574,6 +7588,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             H5Tclose(_f_ary);
                             H5Tclose(_m_ary);
 #else
+                            free(object);
+                            object = 0;
                             db_perror("Cannot customize standard object", E_CALLFAIL, me);
                             UNWIND();
 #endif
@@ -7592,6 +7608,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                free(object);
+                                object = 0;
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
                                 UNWIND();
                             }
@@ -7599,6 +7617,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             H5Tclose(_f_ary);
                             H5Tclose(_m_ary);
 #else
+                            free(object);
+                            object = 0;
                             db_perror("Cannot customize standard object", E_CALLFAIL, me);
                             UNWIND();
 #endif
@@ -7617,6 +7637,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                free(object);
+                                object = 0;
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
                                 UNWIND();
                             }
@@ -7624,6 +7646,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             H5Tclose(_f_ary);
                             H5Tclose(_m_ary);
 #else
+                            free(object);
+                            object = 0;
                             db_perror("Cannot customize standard object", E_CALLFAIL, me);
                             UNWIND();
 #endif
@@ -7642,6 +7666,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                                   str_type)<0 ||
                         H5Tinsert(ftype, obj->comp_names[i], foffset,
                               str_type)<0) {
+                        free(object);
+                        object = 0;
                         db_perror("H5Tinsert", E_CALLFAIL, me);
                         UNWIND();
                     }
@@ -7655,6 +7681,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
 
         if (db_hdf5_hdrwr(dbfile, obj->name, mtype, ftype, object,
                           (DBObjectType) DBGetObjtypeTag(obj->type))<0) {
+            free(object);
+            object = 0;
             UNWIND();
         }
         H5Tclose(mtype);
