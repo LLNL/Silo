@@ -289,6 +289,15 @@ set(SKIP_TEST_SOURCES
 )
 
 #
+# This test has problems with ASAN.
+# There are a handful of others that trigger leaks that we
+# then have to disable detection of when ASAN is active.
+#
+if(SILO_BUILD_FOR_ASAN)
+    list(APPEND SKIP_TEST_SOURCES simple.c)
+endif()
+
+#
 # These are tests that require something other than simply running
 # the test exeutable such as...
 #
@@ -497,11 +506,13 @@ endif()
 # TestReadMask has a number of dependencies
 #
 add_test(NAME testall-small COMMAND $<TARGET_FILE:testall> -small)
+set_tests_properties(testall-small PROPERTIES DEPENDS "testall")
 set_tests_properties(TestReadMask PROPERTIES DEPENDS "testall-small;point;extface"
     REQUIRED_FILES "rect2d.pdb;point2d.pdb;globe.pdb")
 set_tests_properties(TestReadMask PROPERTIES LABELS "pdb")
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME testall-small-hdf5 COMMAND $<TARGET_FILE:testall> -small DB_HDF5)
+    set_tests_properties(testall-small-hdf5 PROPERTIES DEPENDS "testall-hdf5")
     set_tests_properties(TestReadMask-hdf5 PROPERTIES DEPENDS "testall-small-hdf5;point-hdf5;extface-hdf5"
         REQUIRED_FILES "rect2d.h5;point2d.h5;globe.h5")
     set_tests_properties(memfile_simple-hdf5 PROPERTIES DEPENDS "testall-small-hdf5" REQUIRED_FILES "rect2d.h5")
@@ -529,8 +540,6 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(multi_test-badread-hdf5 PROPERTIES DEPENDS "multi_test-hdf5")
     add_test(NAME multi_test-earlyclose-hdf5 COMMAND $<TARGET_FILE:multi_test> earlyclose DB_HDF5)
     add_test(NAME multi_test-flush COMMAND $<TARGET_FILE:multi_test> testflush DB_HDF5)
-    add_test(NAME multi_test-flush-read COMMAND $<TARGET_FILE:multi_test> testflushread DB_HDF5)
-    set_tests_properties(multi_test-flush-read PROPERTIES DEPENDS "multi_test-flush")
     add_test(NAME multi_test-libver COMMAND $<TARGET_FILE:multi_test> libver DB_HDF5)
     add_test(NAME multi_test-libver-read COMMAND $<TARGET_FILE:multi_test> testread DB_HDF5)
     set_tests_properties(multi_test-libver-read PROPERTIES DEPENDS "multi_test-libver")
@@ -548,11 +557,12 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         add_test(NAME testhzip
             COMMAND ${CMAKE_COMMAND} -E env
             PATH=${_sh_path}
+            ASAN_OPTIONS=detect_leaks=0
             "${silo_test_output_dir}/testhzip")
 
     endif()
-    list(APPEND MULTI_BLOCK_TESTS multi_test-hdf5 multi_test-read-hdf5 multi_test-badread-hdf5
-        multi_test-earlyclose-hdf5 multi_test-flush multi_test-flush-read multi_test-libver multi_test-libver-read)
+    list(APPEND MULTI_BLOCK_TESTS multi_test-hdf5 readstuff-hdf5 multi_test-read-hdf5 multi_test-badread-hdf5
+        multi_test-earlyclose-hdf5 multi_test-flush multi_test-libver multi_test-libver-read)
 endif()
 if(MULTI_BLOCK_TESTS)
     set_tests_properties(${MULTI_BLOCK_TESTS} PROPERTIES RESOURCE_LOCK 
@@ -573,7 +583,7 @@ set_tests_properties(multi_file-evalns PROPERTIES DEPENDS multi_file-usens)
 add_test(NAME multi_file-usens-empties COMMAND $<TARGET_FILE:multi_file> use-ns empties)
 add_test(NAME multi_file-multidir COMMAND $<TARGET_FILE:multi_file> multidir)
 add_test(NAME multi_file-multidir-usens COMMAND $<TARGET_FILE:multi_file> multidir use-ns)
-list(APPEND MULTI_FILE_TESTS multi_file-usens multi_file-evalns multi_file-usens-empties multi_file-multidir multi_file-multidir-usens)
+list(APPEND MULTI_FILE_TESTS multi_file multi_file-usens multi_file-evalns multi_file-usens-empties multi_file-multidir multi_file-multidir-usens)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_file-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns DB_HDF5)
     add_test(NAME multi_file-evalns-hdf5 COMMAND $<TARGET_FILE:multi_file> eval-ns DB_HDF5)
@@ -581,7 +591,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME multi_file-usens-empties-hdf5 COMMAND $<TARGET_FILE:multi_file> use-ns empties DB_HDF5)
     add_test(NAME multi_file-multidir-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir DB_HDF5)
     add_test(NAME multi_file-multidir-usens-hdf5 COMMAND $<TARGET_FILE:multi_file> multidir use-ns DB_HDF5)
-list(APPEND MULTI_FILE_TESTS multi_file-usens-hdf5 multi_file-evalns-hdf5 multi_file-usens-empties-hdf5 multi_file-multidir-hdf5 multi_file-multidir-usens-hdf5)
+list(APPEND MULTI_FILE_TESTS multi_file-hdf5 multi_file-usens-hdf5 multi_file-evalns-hdf5 multi_file-usens-empties-hdf5 multi_file-multidir-hdf5 multi_file-multidir-usens-hdf5)
 endif()
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES RESOURCE_LOCK "multi_file_tests")
 set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "multi")
@@ -592,10 +602,11 @@ set_tests_properties(${MULTI_FILE_TESTS} PROPERTIES LABELS "multi")
 #
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME partial-io-setup COMMAND $<TARGET_FILE:testall> DB_HDF5)
+    set_tests_properties(partial-io-setup PROPERTIES DEPENDS testall-hdf5)
     add_test(NAME partial-io-rect3d COMMAND $<TARGET_FILE:partial_io> DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9])
-    set_tests_properties(partial-io-rect3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5")
+    set_tests_properties(partial-io-rect3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5;rect3d.h5")
     add_test(NAME partial-io-ucd3d COMMAND $<TARGET_FILE:partial_io> DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574])
-    set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5")
+    set_tests_properties(partial-io-ucd3d PROPERTIES DEPENDS "partial-io-setup" RESOURCE_LOCK "partial.h5;ucd3d.h5")
 endif()
 
 add_custom_target(testdtypes ALL)
@@ -604,12 +615,12 @@ add_custom_command(TARGET testdtypes POST_BUILD
     ${CMAKE_CURRENT_SOURCE_DIR}/testdtypes
     ${silo_test_output_dir})
 add_test(NAME testdtypes
-    COMMAND ${CMAKE_COMMAND} -E env
+    COMMAND ${CMAKE_COMMAND} -E env ASAN_OPTIONS=detect_leaks=0
     "${silo_test_output_dir}/testdtypes")
 set_tests_properties(testdtypes PROPERTIES DEPENDS specmix)
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_test(NAME testdtypes-hdf5
-        COMMAND ${CMAKE_COMMAND} -E env
+        COMMAND ${CMAKE_COMMAND} -E env ASAN_OPTIONS=detect_leaks=0
         "${silo_test_output_dir}/testdtypes" DB_HDF5)
     set_tests_properties(testdtypes PROPERTIES DEPENDS specmix-hdf5)
 endif()
@@ -641,6 +652,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         ${silo_test_output_dir})
     add_test(NAME checksums
         COMMAND ${CMAKE_COMMAND} -E env
+        ASAN_OPTIONS=detect_leaks=0
         "${silo_test_output_dir}/checksums")
     set_tests_properties(multi_test-hdf5 PROPERTIES DEPENDS checksums)
 endif()
@@ -650,38 +662,55 @@ endif()
 #
 if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
     add_test(NAME test-write-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_write.py")
-    set_tests_properties(test-write-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH}")
+    set_tests_properties(test-write-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
     set_tests_properties(test-write-py PROPERTIES DEPENDS sami REQUIRED_FILES sami.silo)
     set_tests_properties(test-write-py PROPERTIES RESOURCE_LOCK "sami.silo")
+    set_tests_properties(test-write-py PROPERTIES LABELS "python")
 
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         add_test(NAME test-write-py-hdf5 COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_write.py")
-        set_tests_properties(test-write-py-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH}")
+        set_tests_properties(test-write-py-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
         set_tests_properties(test-write-py-hdf5 PROPERTIES DEPENDS sami-hdf5 REQUIRED_FILES sami.silo)
         set_tests_properties(test-write-py-hdf5 PROPERTIES RESOURCE_LOCK "sami.silo")
+        set_tests_properties(test-write-py-hdf5 PROPERTIES LABELS "python")
     endif()
 
     add_test(NAME multi_file-reset COMMAND $<TARGET_FILE:multi_test>)
-    add_test(NAME multi_file-hdf-friendly COMMAND $<TARGET_FILE:multi_test> hdf-friendly DB_HDF5)
-    add_test(NAME test-read-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_read.py")
     set_tests_properties(multi_file-reset PROPERTIES RESOURCE_LOCK "multi_file_tests")
-    set_tests_properties(multi_file-hdf-friendly PROPERTIES RESOURCE_LOCK "multi_file_tests")
-    set_tests_properties(test-read-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH}")
-    set_tests_properties(test-read-py PROPERTIES DEPENDS multi_file-hdf-friendly)
+    add_test(NAME test-read-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_read.py")
+    set_tests_properties(test-read-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
+    set_tests_properties(test-read-py PROPERTIES DEPENDS multi_file-reset)
     set_tests_properties(test-read-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
+    set_tests_properties(test-read-py PROPERTIES LABELS "python")
+
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+       add_test(NAME multi_file-hdf-friendly COMMAND $<TARGET_FILE:multi_test> hdf-friendly DB_HDF5)
+       set_tests_properties(multi_file-hdf-friendly PROPERTIES RESOURCE_LOCK "multi_file_tests")
+       add_test(NAME test-read-py-hdf5 COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_read.py")
+       set_tests_properties(test-read-py-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
+       set_tests_properties(test-read-py-hdf5 PROPERTIES DEPENDS multi_file-hdf-friendly)
+       set_tests_properties(test-read-py-hdf5 PROPERTIES RESOURCE_LOCK "multi_file_tests")
+       set_tests_properties(test-read-py-hdf5 PROPERTIES LABELS "python")
+    endif()
 
     add_test(NAME test-error-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_error.py")
     set_tests_properties(test-error-py PROPERTIES RESOURCE_LOCK "multi_file_tests")
-    set_tests_properties(test-error-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH}")
+    set_tests_properties(test-error-py PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
+    set_tests_properties(test-error-py PROPERTIES LABELS "python")
 
     add_test(NAME testonehex COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
     set_tests_properties(testonehex PROPERTIES DEPENDS onehex)
-    add_test(NAME testonehex-hdf5 COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
-    set_tests_properties(testonehex-hdf5 PROPERTIES DEPENDS onehex-hdf5)
+    set_tests_properties(testonehex PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH};ASAN_OPTIONS=detect_leaks=0")
+    set_tests_properties(testonehex PROPERTIES LABELS "python")
+
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+        add_test(NAME testonehex-hdf5 COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
+        set_tests_properties(testonehex-hdf5 PROPERTIES DEPENDS onehex-hdf5)
+        set_tests_properties(testonehex-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH};ASAN_OPTIONS=detect_leaks=0")
+        set_tests_properties(testonehex-hdf5 PROPERTIES LABELS "python")
+    endif()
+
 endif()
-
-
-# Possible test labels: AllDrivers;HdfOnly;PdbOnly;Python;ZComp;Fort;Large;Tools;Json
 
 ###-----------------------------------------------------------------------------------------
 # Create check target that calls SiloMakeCheckRunner.

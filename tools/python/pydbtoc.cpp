@@ -122,7 +122,7 @@ static int DBtoc_as_string(PyObject *self, char *s)
     char tmp[1000];
     int len = 0;
 
-    if (s) strcpy(s, "");
+    if (s) s[0] = '\0';
 
     PRINT_OBJS(var);
     PRINT_OBJS(dir);
@@ -148,7 +148,7 @@ static int DBtoc_as_string(PyObject *self, char *s)
     PRINT_OBJS(mrgvar);
     PRINT_OBJS(groupelmap);
 
-    return len;
+    return len+100;
 }
 
 // ****************************************************************************

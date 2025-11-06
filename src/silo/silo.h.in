@@ -193,7 +193,7 @@ typedef char const * const *         DBCAS_t;
 #define DB_H5VFD_FAMILY  7
 #define DB_H5VFD_MPIO    8
 #define DB_H5VFD_MPIP    9
-#define DB_H5VFD_SILO    10
+#define DB_H5VFD_SILO    10 /* Silo block-based VFD */
 #define DB_H5VFD_FIC     11 /* File Image in Core */
 
 /* Macro for defining various HDF5 vfds as 'type' arg in create/open.
@@ -367,12 +367,16 @@ typedef enum {
 } DBdatatype;
 
 /* Flags for DBCreate (used only in DBCreate) */
-#define         DB_CLOBBER      0
-#define         DB_NOCLOBBER    1
+#define         DB_CLOBBER   0
+#define         DB_NOCLOBBER 1
 
-/* Flags for DBOpen (used only in DBOpen) */
-#define         DB_READ         1
-#define         DB_APPEND       2
+/* Flags for DBOpen (only one of these used only in DBOpen) */
+#define         DB_READ      1
+#define         DB_APPEND    2
+
+/* Or'd into flag in DBCreate and DBOpen when readers need to read
+   a partially written file */
+#define DB_CONCURRENT        4
 
 /* Compatibility flags for DBOpen|DBCreate
    These can get OR'd into above flags and

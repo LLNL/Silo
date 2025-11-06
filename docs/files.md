@@ -259,7 +259,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Arg name | Description
   :---|:---
   `pathname` | Path name of file to create. This can be either an absolute or relative path.
-  `mode` | Creation `mode`. Pass `DB_CLOBBER` or `DB_NOCLOBBER`, optionally OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode)
+  `mode` | Creation `mode`. Pass `DB_CLOBBER` or `DB_NOCLOBBER`, optionally OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode), optionally OR'd with `DB_CONCURRENT` if another process intends to read the file's contents concurrently with the writer (concurrent acccess is available only on the HDF5 driver).
   `target` | Destination file format. In the distant past, this option was used to target binary numeric formats in the file to a specific host CPU architecture (such as Sun or Sgi or Cray). More recently, this argument has become less relevant and should most likely always be set to `DB_LOCAL`.
   `fileinfo` | Character string containing descriptive information about the file's contents. This information is usually printed by applications when this file is opened. If no such information is needed, pass `NULL` for this argument.
   `filetype` | Destination file type. Applications typically use one of either `DB_PDB`, which will create PDB files, or `DB_HDF5`, which will create HDF5 files. Other options include `DB_PDBP`, `DB_HDF5_SEC2`, `DB_HDF5_STDIO`, `DB_HDF5_CORE`, `DB_HDF5_SPLIT` or `DB_FILE_OPTS(optlist_id)` where `optlist_id` is a registered file options set. For a description of the meaning of these options as well as many other advanced features and control of underlying I/O behavior, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
@@ -275,9 +275,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBCreate` function creates a Silo file and initializes it for writing data.
 
   Silo supports two underlying drivers for storing named arrays and objects of machine independent data.
-  One is called the Portable DataBase Library (PDBLib or just PDB), and the other is Hierarchical Data Format, Version 5 (HDF5), http://www.hdfgroup.org/HDF5.
+  One is called the Portable DataBase Library ([PDBLib](https://pubs.aip.org/aip/cip/article/7/3/304/281673/Software-for-Portable-Scientific-Data-Management) or just PDB), and the other is Hierarchical Data Format, Version 5 ([HDF5](https://www.hdfgroup.org/solutions/hdf5/))
 
-  When Silo is configured with the `--with-pdb-proper=<path-to-PACT-PDB>` option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as *PDB Lite*) identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a PACT installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing `P` for *PDB Proper*).
+  When Silo is configured with the `--with-pdb-proper=<path-to-PACT-PDB>` option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as *PDB Lite*) identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a *current* PACT installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing `P` for *PDB Proper*).
   PDB Proper is known to give far superior performance than PDB Lite on BG/P and BG/L class systems and so is recommended when using PDB driver on such systems.
 
   For the HDF5 library, there are many more available options for fine tuned control of the underlying I/O through the use of HDF5's Virtual File Drivers (VFDs).
@@ -393,6 +393,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   `DB_HDF5_MPIO` and `DB_HDF5_MPIOP`
   : These have been removed from Silo as of version 4.10.3.
 
+  The HDF5 driver also supports one or more *concurrent* readers reading a Silo file produced by a *single* writer.
+  This feature uses HDF5's *SWMR* (pronounced `swimmer` meaning single writer, multiple reader) capabilities.
+  In this case, both the data producer (calling `DBCreate()`) and each consumer (calling `DBOpen()`) must also pass the `DB_CONCURRENT` flag OR'd into the `mode` argument in their respective calls.
+
   In Fortran, an integer represent the file's id is returned.
   That integer is then used as the database file id in all functions to read and write data from the file.
 
@@ -427,7 +431,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   :---|:---
   `name` | Name of the file to open. Can be either an absolute or relative path.
   `type` | The `type` of file to open. One of the predefined types, typically `DB_UNKNOWN`, `DB_PDB`, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
-  `mode` | The `mode` of the file to open. Pass `DB_READ` or `DB_APPEND`. Optionally, `DB_APPEND` can be OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode). OR'ing of `DB_READ` with compatibility mode flags is not allowed.
+  `mode` | The `mode` of the file to open. Pass `DB_READ` or `DB_APPEND`. Optionally, `DB_APPEND` can be OR'd with `DB_PERF_OVER_COMPAT` or `DB_COMPAT_OVER_PERF` (see [`DBSetCompatibilityMode`](globals.md#dbsetcompatibilitymode). OR'ing of `DB_READ` with compatibility mode flags is not allowed. Optionally, either `DB_READ` or `DB_APPEND` can be OR'd with `DB_CONCURRENT` when another process intends to read the file's contents concurrently with a writer and vise versa.
 
 * **Returned value:**
 

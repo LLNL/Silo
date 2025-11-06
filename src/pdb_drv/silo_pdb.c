@@ -2739,9 +2739,9 @@ db_pdb_NewToc (DBfile *_dbfile)
           * Read the type field of each object and increment
           * the appropriate count.
           */
-         sprintf(name, "%s.type", list[i]);
+         sprintf(name, "%s->type", list[i]);
          if (!PJ_read(file, name, &ctype)) {
-            sprintf(name, "%s->type", list[i]);
+            sprintf(name, "%s.type", list[i]);
             if (!PJ_read(file, name, &ctype)) {
                FREE(types);
                FREE(list);
@@ -6290,8 +6290,9 @@ db_pdb_GetVar (DBfile *_dbfile, char const *name)
       return NULL;
    }
 
-   /* Read it and return. */
-   data = ALLOC_N(char, n);
+   /* Read it and return. On the off chance this is a string we're reading,
+      we'll allocate 1 more than needed for the null terminator. */
+   data = ALLOC_N(char, n+1);
    if (DBReadVar(_dbfile, name, data) < 0) {
       db_perror("DBReadVar", E_CALLFAIL, me);
       FREE(data);
@@ -8588,7 +8589,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char const *name, int nmesh,
        DBWriteComponent(dbfile, obj, "meshtypes", name, "integer",
                         meshtypes, 1, count);
 
-   if (meshnames)
+   if (meshnames && nmesh>0)
    {
        /* Compute size needed for string of concatenated block names.
         *
@@ -9095,7 +9096,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char const *name, int nvars,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    if (varnames)
+    if (varnames && nvars>0)
     {
         len = 2;
         for(i=0; i<nvars; i++)
@@ -9281,7 +9282,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    if (matnames)
+    if (matnames && nmats>0)
     {
         len = 2;
         for(i=0; i<nmats; i++)
@@ -9491,7 +9492,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char const *name, int nspec,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    if (specnames)
+    if (specnames && nspec>0)
     {
         len = 2;
         for(i=0; i<nspec; i++)
@@ -10534,12 +10535,27 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
 
    if (extents)
    {
-      min_extents[0] = extents[0];
-      min_extents[1] = extents[1];
-      min_extents[2] = extents[2];
-      max_extents[0] = extents[3];
-      max_extents[1] = extents[4];
-      max_extents[2] = extents[5];
+      if (ndims == 3)
+      {
+          min_extents[0] = extents[0];
+          min_extents[1] = extents[1];
+          min_extents[2] = extents[2];
+          max_extents[0] = extents[3];
+          max_extents[1] = extents[4];
+          max_extents[2] = extents[5];
+      }
+      else if (ndims == 2)
+      {
+          min_extents[0] = extents[0];
+          min_extents[1] = extents[1];
+          max_extents[0] = extents[2];
+          max_extents[1] = extents[3];
+      }
+      else if (ndims == 1)
+      {
+          min_extents[0] = extents[0];
+          max_extents[0] = extents[1];
+      }
 
       count[0] = ndims;
       DBWriteComponent(dbfile, obj, "min_extents", name, "double",

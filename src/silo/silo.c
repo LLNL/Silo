@@ -1142,8 +1142,9 @@ db_FreeToc(DBfile *dbfile)
 #ifndef _WIN32
 #warning WE SHOULD PROBABLY JUST EITHER MAKE THIS CONSISTENT OR PERHAPS COPY ALL CHARS INTO LINK@TARGET format
 #endif
-        /* toc->symlink_names is just copy of other members here.
-           So, we don't free it here. */
+        /* Here we free just the list of pointers to names that are actually
+           other names in the toc */
+        FREE(toc->symlink_names);
     }
 
     FREE(dbfile->pub.toc);
@@ -4136,7 +4137,7 @@ DBOpenReal(const char *name, int type, int mode)
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
         }
-        if (((mode & 0x0000000F) != DB_READ) && ((mode & 0x0000000F) != DB_APPEND))
+        if (((mode & 0x00000003) != DB_READ) && ((mode & 0x00000003) != DB_APPEND))
         {
             sprintf(ascii, "%d", mode);
             API_ERROR(ascii, E_BADARGS);
@@ -4205,7 +4206,7 @@ DBOpenReal(const char *name, int type, int mode)
         i = db_isregistered_file(0, &filestate);
         if (i != -1)
         {
-            if (_db_regstatus[i].w != 0 || (mode & 0x0000000F) != DB_READ)
+            if (_db_regstatus[i].w != 0 || ((mode & 0x00000003) != DB_READ))
                 API_ERROR(name, E_CONCURRENT);
         }
 
@@ -4240,7 +4241,7 @@ DBOpenReal(const char *name, int type, int mode)
         }
         dbfile->pub.fileid = fileid;
         db_InitFileGlobals(dbfile, mode);
-        db_register_file(dbfile, &filestate, (mode&0x0000000F)!=DB_READ);
+        db_register_file(dbfile, &filestate, (((mode&0x00000003)!=DB_READ)));
 
         /*
          * Install filters.  First, all `init' filters, then the
@@ -6363,7 +6364,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
     }
 
-    /* Sanity checks */
+    /* Smoke checks */
     if (!dstFile)
         dstFile = srcFile;
 
@@ -6472,8 +6473,8 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         char *srcObjAbsName, *dstObjAbsName;
         char savcwg[1024], srccwg[1024], dstcwg[1024];
         char opts2[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        char **dirItems, **otherItems;
-        int  dirItemCount, otherItemCount;
+        char **dirItems=0, **otherItems;
+        int  dirItemCount=0, otherItemCount;
 
         if (i == 0)
         {
@@ -6558,6 +6559,12 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         DBSetDir(dstFile, "..");
 
 endLoop:
+        if (dirItems)
+        {
+            for (int k = 0; k < dirItemCount; k++)
+                FREE(dirItems[k]);
+            FREE(dirItems);
+        }
         FREE(srcObjAbsName);
         FREE(dstObjAbsName);
     }
@@ -8487,6 +8494,7 @@ DBReadVarVals(DBfile *dbfile, const char *name, int mode, int nvals,
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
+static int _DBGetVarByteLength_r(DBfile *dbfile, const char *name);
 #ifndef _WIN32
 #warning DO WE NEED THIS METHOD
 #endif
@@ -8518,12 +8526,25 @@ db_get_obj_byte_length(DBfile *dbfile, char const *name)
 
             srcObjDirName = db_dirname(name);
             srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
+            free(subObjName);
+            free(srcObjDirName);
 
-            bytlen = DBGetVarByteLength(dbfile, srcSubObjAbsName); /* recursion */
+            bytlen = _DBGetVarByteLength_r(dbfile, srcSubObjAbsName); /* recursion */
+            free(srcSubObjAbsName);
             if (bytlen > 0) sum += bytlen;
         }
     }
+    DBFreeObject(srcObj);
     return sum;
+}
+
+PRIVATE int
+_DBGetVarByteLength_r(DBfile *dbfile, const char *name)
+{
+    int retval = (dbfile->pub.g_varbl) (dbfile, name);
+    if (retval < 0)
+        retval = (int) db_get_obj_byte_length(dbfile, name);
+    return retval;
 }
 
 PUBLIC int
@@ -8541,10 +8562,7 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_varbl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_varbl) (dbfile, name);
-
-        if (retval < 0)
-            retval = (int) db_get_obj_byte_length(dbfile, name);
+        retval = _DBGetVarByteLength_r(dbfile, name);
 
         API_RETURN(retval);
     }
@@ -9420,7 +9438,7 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
@@ -9556,7 +9574,7 @@ DBPutMultimeshadj(DBfile *dbfile, char const *name, int nmesh,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
@@ -9627,7 +9645,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
@@ -9703,7 +9721,7 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
  *
  *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
  *    Added support for nameschemes on multi-block objects. This meant
- *    adjusting sanity checks for args as some can be null now.
+ *    adjusting smoke checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
@@ -11402,7 +11420,10 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
         double *dmin_extents = (double *) min_extents;
         double *dmax_extents = (double *) max_extents;
         double const * const * _coord_arrays = (double const * const *) coord_arrays;
-        double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+        double const *dcoord_arrays[3] = {
+            ndims>0?_coord_arrays[0]:0,
+            ndims>1?_coord_arrays[1]:0,
+            ndims>2?_coord_arrays[2]:0};
 
         for (i = 0; i < ndims; i++)
         {
@@ -11430,7 +11451,10 @@ _CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int npts,
         float *fmin_extents = (float *) min_extents;
         float *fmax_extents = (float *) max_extents;
         float  const * const * _coord_arrays = (float const * const *) coord_arrays;
-        float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+        float const *fcoord_arrays[3] = {
+            ndims>0?_coord_arrays[0]:0,
+            ndims>1?_coord_arrays[1]:0,
+            ndims>2?_coord_arrays[2]:0};
 
         for (i = 0; i < ndims; i++)
         {
@@ -11505,7 +11529,10 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
             double *dmin_extents = (double *) min_extents;
             double *dmax_extents = (double *) max_extents;
             double const * const * _coord_arrays = (double const * const *) coord_arrays;
-            double const *dcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            double const *dcoord_arrays[3] = {
+                ndims>0?_coord_arrays[0]:0,
+                ndims>1?_coord_arrays[1]:0,
+                ndims>2?_coord_arrays[2]:0};
             for (i = 0; i < ndims; i++)
                 _CalcExtents(&dcoord_arrays[i], datatype, 1, dims[i], &dmin_extents[i], &dmax_extents[i],
                     &dims[i], &min_index[i], &max_index[i]);
@@ -11515,7 +11542,10 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
             float *fmin_extents = (float *) min_extents;
             float *fmax_extents = (float *) max_extents;
             float const * const * _coord_arrays = (float const * const *) coord_arrays;
-            float const *fcoord_arrays[3] = {_coord_arrays[0], _coord_arrays[1], _coord_arrays[2]};
+            float const *fcoord_arrays[3] = {
+                ndims>0?_coord_arrays[0]:0,
+                ndims>1?_coord_arrays[1]:0,
+                ndims>2?_coord_arrays[2]:0};
             for (i = 0; i < ndims; i++)
                 _CalcExtents(&fcoord_arrays[i], datatype, 1, dims[i], &fmin_extents[i], &fmax_extents[i],
                     &dims[i], &min_index[i], &max_index[i]);

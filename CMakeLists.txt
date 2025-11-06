@@ -131,6 +131,8 @@ option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
 option(SILO_ENABLE_INSTALL_LITE_HEADERS "Enable installation of PDB Lite headers" OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
+option(SILO_BUILD_FOR_ASAN "Build with flags to run GNU/Clang address sanitizer" OFF)
+
 # Use CMake standard variables for these...
 option(BUILD_TESTING "Enable tests" OFF)
 
@@ -688,6 +690,10 @@ if(SILO_ENABLE_SILOCK AND NOT WIN32)
     if(UNIX)
         target_link_libraries(silock m ${CMAKE_DL_LIBS})
     endif()
+    if(SILO_BUILD_FOR_ASAN)
+        target_compile_options(silock PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1)
+        target_link_options(silock PRIVATE -Wl,--no-as-needed -fsanitize=address,undefined)
+    endif()
     target_include_directories(silock PRIVATE
         ${silo_build_include_dir}
         ${Silo_SOURCE_DIR}/src/silo)
@@ -709,6 +715,7 @@ endif()
 ###-----------------------------------------------------------------------------
 include(CTest)
 if(BUILD_TESTING)
+
     set(_debug_build_types Debug RelWithDebInfo)
     if(CMAKE_BUILD_TYPE IN_LIST _debug_build_types)
         find_program(MEMORYCHECK_COMMAND NAMES valgrind)
@@ -716,15 +723,54 @@ if(BUILD_TESTING)
             set(MEMORYCHECK_COMMAND_OPTIONS
                 "--leak-check=full --track-origins=yes --error-exitcode=1")
         endif()
+        if(SILO_BUILD_FOR_ASAN)
+            string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1")
+            string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1")
+            string(APPEND CMAKE_EXE_LINKER_FLAGS_DEBUG " -Wl,--no-as-needed -fsanitize=address,undefined")
+            string(APPEND CMAKE_SHARED_LINKER_FLAGS_DEBUG " -Wl,--no-as-needed -fsanitize=address,undefined")
+            string(APPEND CMAKE_MODULE_LINKER_FLAGS_DEBUG " -Wl,--no-as-needed -fsanitize=address,undefined")
+            set(SILO_ASAN_OPTIONS "detect_leaks=1;halt_on_error=0;malloc_context_size=50;fast_unwind_on_malloc=0;detect_stack_use_after_return=1")
+
+            execute_process(
+                COMMAND ${CMAKE_C_COMPILER} -print-file-name=libasan.so
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                RESULT_VARIABLE find_libasan_result
+                OUTPUT_VARIABLE SILO_LIBASAN_PATH
+                ERROR_VARIABLE find_libasan_error
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+            if(NOT find_libasan_result EQUAL 0)
+                message(STATUS "Finding libasan.so failed (${find_libasan_error}). Some tests disabled")
+            endif()
+            execute_process(
+                COMMAND ${CMAKE_C_COMPILER} -print-file-name=libubsan.so
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                RESULT_VARIABLE find_libubsan_result
+                OUTPUT_VARIABLE SILO_LIBUBSAN_PATH
+                ERROR_VARIABLE find_libubsan_error
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+            if(NOT find_libasan_result EQUAL 0)
+                message(STATUS "Finding libubsan.so failed (${find_libubsan_error}). Some tests disabled")
+            endif()
+
+            # Make CTest include a script before running tests in this (sub)tree
+            set_property(DIRECTORY PROPERTY TEST_INCLUDE_FILES "${CMAKE_SOURCE_DIR}/tests/CTestAsanEnv.cmake")
+
+        endif()
     endif()
 
-    # Using h5stat as test case, determine directory holding HDF5 tools
-    find_program(_h5stat_exe NAMES h5stat
-        HINTS ${HDF5_ROOT} ${HDF5_DIR} ${SILO_HDF5_DIR}
-        PATH_SUFFIXES bin ../bin Tools/bin)
-    get_filename_component(_h5stat_dir "${_h5stat_exe}" DIRECTORY)
-    set(_sh_path "${_h5stat_dir}${_envvar_path_sep}$ENV{PATH}")
+    if(SILO_ENABLE_HDF5)
+        # Using h5stat as test case, determine directory holding HDF5 tools
+        find_program(_h5stat_exe NAMES h5stat
+            HINTS ${HDF5_ROOT} ${HDF5_DIR} ${SILO_HDF5_DIR}
+            PATH_SUFFIXES bin ../bin Tools/bin)
+        get_filename_component(_h5stat_dir "${_h5stat_exe}" DIRECTORY)
+        set(_sh_path "${_h5stat_dir}${_envvar_path_sep}$ENV{PATH}")
+    endif()
+
     add_subdirectory(tests)
+
 endif()
 
 ###-----------------------------------------------------------------------------

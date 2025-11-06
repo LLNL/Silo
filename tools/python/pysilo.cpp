@@ -239,7 +239,7 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
 //    contents returned by GetVarInfo method.
 //
 // ****************************************************************************
-#define ADD_CONSTANT(C)  PyDict_SetItemString(d, #C, PyInt_FromLong(C))
+#define ADD_CONSTANT(C) { PyObject *sym = PyInt_FromLong(C); PyDict_SetItemString(d, #C, sym); Py_DECREF(sym); }
 extern "C"
 #if PY_VERSION_GE(3,0,0)
 SILOMODULE_API PyObject * PyInit_Silo(void)
@@ -260,6 +260,7 @@ void SILOMODULE_API initSilo(void)
     d = PyModule_GetDict(siloModule);
     SiloError = PyErr_NewException("Silo.SiloException", NULL, NULL);
     PyDict_SetItemString(d, "SiloException", SiloError);
+    Py_DECREF(SiloError);
 
     // File Drivers
     ADD_CONSTANT(DB_PDB);

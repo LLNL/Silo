@@ -4964,10 +4964,10 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
     herr_t h5status = 0;
 #if HDF5_VERSION_GE(1,8,4)
-    H5AC_cache_config_t h5mdc_config;
+    H5AC_cache_config_t h5mdc_config_best_perf;
 #endif
 
-#if HDF5_VERSION_GE(1,10,2)
+#if HDF5_VERSION_GE(1,10,0)
     if (mode & DB_PERF_OVER_COMPAT)
         H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     if (mode & DB_COMPAT_OVER_PERF)
@@ -4979,18 +4979,18 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 #endif
 
     /* First, initialize our copy of h5mdc_config */
-    h5mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-    H5Pget_mdc_config(retval, &h5mdc_config);
+    h5mdc_config_best_perf.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+    H5Pget_mdc_config(retval, &h5mdc_config_best_perf);
 
-    /* Setup Mainzer mdc config params */
-    h5mdc_config.set_initial_size = 1;
-    h5mdc_config.initial_size = 16384;
-    h5mdc_config.min_size = 8192;
-    h5mdc_config.epoch_length = 3000;
-    h5mdc_config.lower_hr_threshold = 1e-5;
+    /* Setup Mainzer (best performance) mdc config params */
+    h5mdc_config_best_perf.set_initial_size = 1;
+    h5mdc_config_best_perf.initial_size = 16384;
+    h5mdc_config_best_perf.min_size = 8192;
+    h5mdc_config_best_perf.epoch_length = 3000;
+    h5mdc_config_best_perf.lower_hr_threshold = 1e-5;
 
     /* Set mdc config params */
-    H5Pset_mdc_config(retval, &h5mdc_config);
+    H5Pset_mdc_config(retval, &h5mdc_config_best_perf);
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
@@ -5916,18 +5916,23 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     /* File access mode */
-    if (DB_READ==(mode & 0x0000000F)) {
+    if (DB_READ==(mode & 0x00000003)) {
         hmode = H5F_ACC_RDONLY;
-    } else if (DB_APPEND==(mode & 0x0000000F)) {
+    } else if (DB_APPEND==(mode & 0x00000003)) {
         hmode = H5F_ACC_RDWR;
     } else {
         db_perror("mode", E_INTERNAL, me);
         return NULL;
     }
 
+#if HDF5_VERSION_GE(1,10,0)
+    if (DB_CONCURRENT==(mode & 0x00000004))
+        hmode |= H5F_ACC_SWMR_READ;
+#endif
+
     /* use mode to pass compatibility option into
        db_hdf5_file_accprops */
-    if (((mode & 0x0000000F) == DB_APPEND))
+    if (((mode & 0x00000003) == DB_APPEND))
     {
         if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
             mode |= DB_PERF_OVER_COMPAT;
@@ -5947,8 +5952,8 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         return NULL;
     }
 
-#if HDF5_VERSION_GE(1,10,2)
-    if (DB_APPEND == (mode & 0x0000000F))
+#if HDF5_VERSION_GE(1,10,0)
+    if (DB_APPEND == (mode & 0x00000003))
     {
         if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
         {
@@ -5958,6 +5963,8 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
                 db_perror(name, E_CALLFAIL, me);
                 return NULL;
             }
+            if (DB_CONCURRENT==(mode & 0x00000004))
+                H5Fstart_swmr_write(fid);
         }
         else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
         {
@@ -6042,7 +6049,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     faprops = db_hdf5_file_accprops(opts_set_id, mode, &fcprops);
 
         /* Create or open hdf5 file */
-    if (DB_CLOBBER==(mode & 0x0000000F)) {
+    if (DB_CLOBBER==(mode & 0x00000003)) {
         /* If we ever use checksumming (which requires chunked datasets),
          * HDF5's BTree's will effect storage overhead. Since Silo really
          * doesn't support growing/shrinking datasets, we just use a value
@@ -6061,7 +6068,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
         if (created_fcprops)
             H5Pclose(fcprops);
         H5Glink(fid, H5G_LINK_HARD, "/", ".."); /*don't care if fails*/
-    } else if (DB_NOCLOBBER==(mode & 0x0000000F)) {
+    } else if (DB_NOCLOBBER==(mode & 0x00000003)) {
         fid = H5Fopen(name, H5F_ACC_RDWR, faprops);
     } else {
         H5Pclose(faprops);
@@ -6076,7 +6083,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
 
     H5Pclose(faprops);
 
-#if HDF5_VERSION_GE(1,10,2)
+#if HDF5_VERSION_GE(1,10,0)
     if (SILO_Globals.compatibilityMode == DB_PERF_OVER_COMPAT)
     {
         if (H5Fset_libver_bounds(fid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)<0)
@@ -6085,6 +6092,8 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
             db_perror(name, E_CALLFAIL, me);
             return NULL;
         }
+        if (DB_CONCURRENT==(mode & 0x00000004))
+            H5Fstart_swmr_write(fid);
     }
     else if (SILO_Globals.compatibilityMode == DB_COMPAT_OVER_PERF)
     {
@@ -6190,6 +6199,9 @@ db_hdf5_Close(DBfile *_dbfile)
         H5close();
     }
 #endif
+
+    /* free circular buffer stuff */
+    db_hdf5_resolvename(0,0,0);
 
     return retval;
 }
@@ -7461,6 +7473,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
         }
         if ((mtype=H5Tcreate(H5T_COMPOUND, msize))<0 ||
             (ftype=H5Tcreate(H5T_COMPOUND, fsize))<0) {
+            free(object);
+            object = 0;
             db_perror("H5Tcreate", E_CALLFAIL, me);
             UNWIND();
         }
@@ -7472,6 +7486,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               H5T_NATIVE_INT)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               dbfile->T_int)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7484,6 +7500,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               H5T_NATIVE_FLOAT)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               dbfile->T_float)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7496,6 +7514,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               H5T_NATIVE_DOUBLE)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               dbfile->T_double)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7510,6 +7530,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 hid_t str_type;
                 if (len > 1024 && !DBGetAllowLongStrComponentsFile(_dbfile))
                 {
+                    free(object);
+                    object = 0;
                     db_perror("encountered Str component > 1024 chars", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7519,6 +7541,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                               str_type)<0 ||
                     H5Tinsert(ftype, obj->comp_names[i], foffset,
                               str_type)<0) {
+                    free(object);
+                    object = 0;
                     db_perror("H5Tinsert", E_CALLFAIL, me);
                     UNWIND();
                 }
@@ -7555,6 +7579,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                free(object);
+                                object = 0;
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
                                 UNWIND();
                             }
@@ -7562,6 +7588,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             H5Tclose(_f_ary);
                             H5Tclose(_m_ary);
 #else
+                            free(object);
+                            object = 0;
                             db_perror("Cannot customize standard object", E_CALLFAIL, me);
                             UNWIND();
 #endif
@@ -7580,6 +7608,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                free(object);
+                                object = 0;
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
                                 UNWIND();
                             }
@@ -7587,6 +7617,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             H5Tclose(_f_ary);
                             H5Tclose(_m_ary);
 #else
+                            free(object);
+                            object = 0;
                             db_perror("Cannot customize standard object", E_CALLFAIL, me);
                             UNWIND();
 #endif
@@ -7605,6 +7637,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size);
                             if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
                                 H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                free(object);
+                                object = 0;
                                 db_perror("H5Tinsert", E_CALLFAIL, me);
                                 UNWIND();
                             }
@@ -7612,6 +7646,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                             H5Tclose(_f_ary);
                             H5Tclose(_m_ary);
 #else
+                            free(object);
+                            object = 0;
                             db_perror("Cannot customize standard object", E_CALLFAIL, me);
                             UNWIND();
 #endif
@@ -7630,6 +7666,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                                   str_type)<0 ||
                         H5Tinsert(ftype, obj->comp_names[i], foffset,
                               str_type)<0) {
+                        free(object);
+                        object = 0;
                         db_perror("H5Tinsert", E_CALLFAIL, me);
                         UNWIND();
                     }
@@ -7643,6 +7681,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
 
         if (db_hdf5_hdrwr(dbfile, obj->name, mtype, ftype, object,
                           (DBObjectType) DBGetObjtypeTag(obj->type))<0) {
+            free(object);
+            object = 0;
             UNWIND();
         }
         H5Tclose(mtype);
@@ -8501,7 +8541,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    static char  *me = "db_hdf5_Write";
    hid_t        mtype=-1, ftype=-1, space=-1, dset=-1, dset_type=-1;
-   hsize_t      ds_size[H5S_MAX_RANK];
+   hsize_t      ds_size[H5S_MAX_RANK], new_ds_size[H5S_MAX_RANK];
    H5T_class_t  fclass, mclass;
    int          i;
 
@@ -8534,6 +8574,9 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
                    UNWIND();
                }
            }
+           /* Now, reset the space for the actual data being written */
+           for (i=0; i<ndims; i++) new_ds_size[i] = dims[i];
+           H5Sset_extent_simple(space, ndims, new_ds_size, ds_size);
 #ifndef _MSC_VER
 #warning WHAT IF EXISTING DATASET WAS COMPRESSED
 #endif

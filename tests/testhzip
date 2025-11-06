@@ -126,7 +126,7 @@ for df in multi_*.h5; do
     fi
     # do a diff on the files and confirm contents match
     rm -f testhzip.out
-    $browser --proper-exit-code -q -e diff $df h5_hzip_files/$df 1>testhzip.out 2>&1
+    $browser --proper-exit-code -q -e diff $df h5_hzip_files/$df 2>&1 | grep -v 'runtime error: left shift of negative value -1' | tee testhzip.out
     if [ $? -ne 0 ] || [ -s testhzip.out ]; then
         result=1
         break

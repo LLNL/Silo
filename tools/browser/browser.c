@@ -1617,6 +1617,8 @@ main(int argc, char *argv[])
         for (;;) {
             in = parse_stmt(input_stack, true);
             if (in && C_SYM==in->pub.cls && !strcmp(obj_name(in), "__END__")) {
+                in = obj_dest(in);
+                out = obj_dest(out);
                 break;
             }
             out_reset(OUT_STDOUT);
@@ -1624,6 +1626,8 @@ main(int argc, char *argv[])
             if (PAGER_INTERRUPT==out_brokenpipe(OUT_STDOUT)) {
                 fflush(OUT_STDOUT->f);
                 fputs("\nCaught SIGINT.\n", stdout);
+                in = obj_dest(in);
+                out = obj_dest(out);
                 exit(1);
             }
             if (out || Verbosity>=2) {
@@ -1654,6 +1658,7 @@ main(int argc, char *argv[])
     for (;;) {
         in = parse_stmt(input_stack, true);
         if (in && C_SYM==in->pub.cls && !strcmp(obj_name(in), "__END__")) {
+            obj_dest(in);
             break;
         }
 
@@ -1683,6 +1688,6 @@ main(int argc, char *argv[])
     lex_close(input_stack);
 
     if (sym_bi_true("properec"))
-        return(browserErrno);
+        return browserErrno;
     return 0;
 }

@@ -843,8 +843,8 @@ build_ucd_tri(DBfile *dbfile, char *name, int flags)
 
     if (!nofl)
     {
-        DBPutFacelist(dbfile, "tri_fl", nfaces, 2, fnodelist, lfnodelist, 0,
-                      NULL, &fshapesize, &fshapecnt, nfshapes,
+        DBPutFacelist(dbfile, "tri_fl", nfaces, 2, z7?fnodelistz7:fnodelist,
+                      lfnodelist, 0, NULL, &fshapesize, &fshapecnt, nfshapes,
                       NULL, NULL, 0);
     }
 

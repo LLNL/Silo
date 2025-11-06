@@ -101,6 +101,11 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     target_link_libraries(browser ${HDF5_C_LIBRARIES})
 endif()
 
+if(SILO_BUILD_FOR_ASAN)
+    target_compile_options(browser PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1)
+    target_link_options(browser PRIVATE -Wl,--no-as-needed -fsanitize=address,undefined)
+endif()
+
 install(TARGETS browser DESTINATION ${CMAKE_INSTALL_BINDIR} EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE

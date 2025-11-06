@@ -41,9 +41,28 @@ jobs:
               -DSILO_ENABLE_HDF5:BOOL=ON \
               -DSILO_ENABLE_FPZIP:BOOL=ON \
               -DBUILD_TESTING:BOOL=ON \
-              -DSILO_HDF5_DIR:PATH= `pwd`/../hdf5-1.14.4-3 \
+              -DSILO_HDF5_DIR:PATH=`pwd`/../hdf5-1.14.4-3 \
               -DSILO_ENABLE_SILOCK:BOOL=ON \
               -DCMAKE_BUILD_TYPE:STRING=Release \
+              -DSILO_ENABLE_PYTHON_MODULE:BOOL=ON \
+              -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
+              ..
+        make -j 8 install
+
+    - name: Build Silo CMake with ASAN
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        mkdir cmake_asan_build
+        cd cmake_asan_build
+        cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
+              -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF \
+              -DSILO_ENABLE_HDF5:BOOL=ON \
+              -DSILO_ENABLE_FPZIP:BOOL=ON \
+              -DBUILD_TESTING:BOOL=ON \
+              -DSILO_HDF5_DIR:PATH=`pwd`/../hdf5-1.14.4-3 \
+              -DSILO_ENABLE_SILOCK:BOOL=ON \
+              -DCMAKE_BUILD_TYPE:STRING=Debug \
+              -DSILO_BUILD_FOR_ASAN:BOOL=ON \
               -DSILO_ENABLE_PYTHON_MODULE:BOOL=ON \
               -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
               ..
@@ -71,6 +90,14 @@ jobs:
         cd cmake_build
         ctest --output-log ctest.log
 
+    - name: Check Silo CTest+ASAN
+      id: makecheck-cmake-asan
+      continue-on-error: true
+      run: |
+        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
+        cd cmake_asan_build
+        ctest --output-log ctest.log
+
     - name: Package Artifact Autotools
       id: pack-autotools
       if: ${{ steps.makecheck-autotools.outcome == 'failure' }}
@@ -85,18 +112,26 @@ jobs:
         cd cmake_build/tests
         tar -cJf ctest.tar.xz Testing/Temporary ctest.log
 
+    - name: Package Artifact CMake-Asan
+      id: pack-cmake-asan
+      if: ${{ steps.makecheck-cmake-asan.outcome == 'failure' }}
+      run: |
+        cd cmake_asan_build/tests
+        tar -cJf ctest.tar.xz Testing/Temporary ctest.log
+
     - name: Upload artifacts
-      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' }}
+      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' || steps.makecheck-cmake-asan.outcome == 'failure' }}
       uses: actions/upload-artifact@v4
       with:
         name: silo-test-artifacts
         path: |
           build/tests/testsuite.dir.tar.xz
           cmake_build/tests/ctest.tar.xz
+          cmake_asan_build/tests/ctest.tar.xz
         if-no-files-found: error
         retention-days: 14
 
     # Re-signal the failure so the job ends red.
     - name: Fail job if make check failed
-      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' }}
+      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' || steps.makecheck-cmake-asan.outcome == 'failure' }}
       run: exit 1

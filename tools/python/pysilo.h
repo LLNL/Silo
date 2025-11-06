@@ -79,9 +79,11 @@ void SiloErrorFunc(const char *errString);
 #endif
 
 #if PY_VERSION_GE(3,0,0)
-    #define PY_SILO_MOD_DEF(ob, name, methods) \
+    #define PY_SILO_MOD_DEF(ob, name, methods)  \
         static struct PyModuleDef moduledef = { \
-            PyModuleDef_HEAD_INIT, name, NULL, -1, methods }; \
+            PyModuleDef_HEAD_INIT,              \
+            .m_name = name,                     \
+            .m_methods = methods };             \
         ob = PyModule_Create(&moduledef);
 #else
     #define PY_SILO_MOD_DEF(ob, name, methods) \
