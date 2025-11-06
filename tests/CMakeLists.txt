@@ -289,6 +289,15 @@ set(SKIP_TEST_SOURCES
 )
 
 #
+# This test has problems with ASAN.
+# There are a handful of others that trigger leaks that we
+# then have to disable detection of when ASAN is active.
+#
+if(SILO_BUILD_FOR_ASAN)
+    list(APPEND SKIP_TEST_SOURCES simple.c)
+endif()
+
+#
 # These are tests that require something other than simply running
 # the test exeutable such as...
 #
