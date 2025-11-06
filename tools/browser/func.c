@@ -794,14 +794,17 @@ V_exit (int argc, obj_t argv[]) {
 #endif
 
    if (0==argc) {
+      if (sym_bi_true("properec"))
+         exit(browserErrno);
       exit (0);
-      
    }
    if (1==argc) {
       if (!num_int(argv[0])) {
          out_errorn ("exit: arg-1 is not an integer");
          return NIL;
       }
+      if (sym_bi_true("properec") && num_int(argv[0])==0)
+         exit(browserErrno);
       exit (num_int(argv[0]));
    }
 
