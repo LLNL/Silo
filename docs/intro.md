@@ -18,7 +18,40 @@ However, the reader should take care not to infer from this that Silo can read *
 It cannot.
 For the most part, Silo is able to read only files that it has also written.
 
-## Where to Find Example Code
+## Installing Silo
+
+As of version 4.12.0, CMake 3.12 or newer is used to install Silo.
+Autotools is still available but deprecated in 4.12.0 and will be completely removed after 4.12.0.
+
+### Installing with CMake
+
+CMake installation supports the following options...
+
+  * [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html): Dir for `bin`, `lib` and `include` subdirs (def: `SiloInstall` peer to build dir)
+  * [`CMAKE_BUILD_TYPE`](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html): One of `Release`, `Debug`, `RelWithDebInfo` (def: `Release`)
+  * `BUILD_TESTING`: Enable build of tests and testing with [`ctest`](https://cmake.org/cmake/help/latest/manual/ctest.1.html) (req: `Debug` / def: OFF)
+  * `SILO_BUILD_FOR_ASAN`: Build to run GNU/Clang address sanitizer (req: `Debug`, `TESTING` / def: OFF)
+  * `SILO_BUILD_FOR_BSD_LICENSE`:  Build only BSD licensed code (def: ON)
+  * `SILO_ENABLE_INSTALL_LITE_HEADERS`: Install PDB Lite headers (def: OFF)
+  * `SILO_ENABLE_FORTRAN`: Enable Fortran interface (def: ON)
+  * `SILO_ENABLE_PYTHON_MODULE`: Enable python module (def: OFF)
+  * `SILO_INSTALL_PYTHONDIR`: Installation dir for python module (def: `CMAKE_INSTALL_LIBDIR`)
+  * `SILO_ENABLE_SILOCK`: Enable building of silock (def: ON)
+  * `SILO_ENABLE_SILEX`: Enable building of silex (req: Qt6, def: OFF)
+  * `SILO_ENABLE_BROWSER`: Enable building of browser (def: ON)
+  * `SILO_ENABLE_HDF5`: Enable HDF5 support (def: ON)
+  * `SILO_ENABLE_JSON`: Enable experimental json features (def: OFF)
+  * `SILO_ENABLE_ZFP`: Enable ZFP compression features (req: HDF5 / def: OFF)
+  * `SILO_ENABLE_FPZIP`: Enable FPZIP compression features (req: HDF5, !BSD / default: OFF)
+  * `SILO_ENABLE_HZIP`: Enable HZIP compression features (req: HDF5, !BSD / default: OFF)
+
+
+### Fortran
+
+cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF -DSILO_ENABLE_HDF5:BOOL=ON -DSILO_ENABLE_FPZIP:BOOL=ON -DBUILD_TESTING:BOOL=ON -DSILO_HDF5_DIR:PATH=/mnt/nvme/mark/silo/hdf5-1.14.4/build/my_install -DSILO_ENABLE_SILOCK:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=Release -DSILO_ENABLE_PYTHON_MODULE:BOOL=ON -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON  ..
+
+
+
 
 In the [`tests`](https://github.com/LLNL/Silo/tree/main/tests) directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
 There are not as many examples of reading the data there.
@@ -185,6 +218,14 @@ The facelist structure is analogous to the zonelist structure, but defines the n
 ![](./images/ucd2dmesh.gif)
 
 ![](./images/celltypes.gif)
+
+Silo also supports...
+
+  * Quadratic versions of the above elements.
+  * These elements as degenerate hexahedra.
+    See the details in the description of [`DBPutZonelist2()`](./objects.md#dbputzonelist2).
+  * Arbitrary polyehedral zones.
+    See the details in the description of [`DBPutPHZonelist()`](./objects.md/#dbputphzonelist).
 
 ### Point Meshes and Related Data
 
@@ -449,4 +490,4 @@ A good choice for N is the number of concurrent I/O channels available to the ap
 
 This technique for using a serial I/O library effectively in parallel while being able to tune the number of files concurrently being written to is [*Multiple Independent File (MIF)*](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O. 
 
-There is a separate header file, `pmpio.h`, with a set of convenience CPP macros and methods to facilitate PMPIO-based parallel I/O with Silo.
+There is a separate header file, `pmpio.h`, with a set of convenience CPP macros and methods to facilitate MIF parallel I/O with Silo.
