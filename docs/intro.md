@@ -18,7 +18,132 @@ However, the reader should take care not to infer from this that Silo can read *
 It cannot.
 For the most part, Silo is able to read only files that it has also written.
 
-## Where to Find Example Code
+## Installing Silo
+
+As of version 4.12.0, CMake 3.12 or newer is used to install Silo.
+Autotools is still available but deprecated in 4.12.0 and will be completely removed after 4.12.0.
+
+### Installing with CMake
+
+CMake installation supports the CMake options described below.
+Default values are specified with `=<value>` for each option.
+
+[`CMAKE_INSTALL_PREFIX:PATH=$CWD/../SiloInstall`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
+: This is the standard CMake variable for specifying the installation directory which will hold `bin`, `lib` and `include` sub-directories of the installed product.
+  The default is a directory named `SiloInstall` which is a peer to the directory where the CMake build is don.
+
+[`CMAKE_BUILD_TYPE:STRING=Release`](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html)
+: This is the standard CMake variable for specifying the type of build.
+  Choices are `Release`, `Debug`, `RelWithDebInfo` or `MinSizeRel`.
+  The default is `Release`.
+
+`BUILD_TESTING:BOOL=OFF`
+: This is the standard CMake variable for controlling whether testing of the product with [`ctest`](https://cmake.org/cmake/help/latest/manual/ctest.1.html) is enabled.
+  Silo has a large number of test clients.
+  Enabling testing probably doubles the total build time for Silo (e.g. from 1-2 mins to 2-4 mins).
+
+`SILO_BUILD_FOR_ASAN:BOOL=OFF`
+: Build to run testing with GNU/Clang address sanitizer enabled.
+  Currently works only for newish GCC compilers.
+  Requires `CMAKE_BUILD_TYPE` of `Debug` to be enabled.
+  As of version 4.12.0, Silo's Continuous Integration (CI) testing currently runs the entire test suite with address sanitizer and no faults or leaks are detected.
+
+`SILO_BUILD_FOR_BSD_LICENSE:BOOL=ON`
+: Build only BSD licensed code.
+  Two compression libraries built into Silo, [fpzip](https://computing.llnl.gov/projects/fpzip) and [hzip](https://computing.llnl.gov/projects/hzip), are not available in a BSD licensed build.
+
+`SILO_ENABLE_INSTALL_LITE_HEADERS:BOOL=OFF`
+: Install PDB Lite headers.
+  PDB Lite is an ancient version of the [PACT/PDB Library](https://pubs.aip.org/aip/cip/article/7/3/304/281673/Software-for-Portable-Scientific-Data-Management), a revolutionary C data structure I/O support library, that was frozen into Silo back in 1996.
+  Many Silo customers have come to rely on PDB Lite for PDB-only applications.
+  For those customers, the option of *installing* PDB Lite headers is provided so that PDB-only applications can compile and link against Silo.
+  However, PDB Lite headers are NOT required simply to use Silo's PDB driver to read and write Silo/PDB files.
+  In a GNU Autotools build, Silo has had the ability to also link to the most recent relase of PACT/PDB using the `--with-pdb-proper=<path-to-PACT-PDB>` configuration option.
+  This creates a new, separate PDB driver identified with the `DB_PDBP` (note the trailing `P` for **PDB Proper**) driver id that produces Silo/PDB files using the newest PDB Library available instead of the PDB Lite library from 1996.
+  Currently, in a CMake build, the option to create the PDB Proper driver is not available.
+
+`SILO_ENABLE_FORTRAN:BOOL=ON`
+: Enable Fortran interface using CMake's `enable_language()` feature.
+  The default is for Fortran to be enabled. 
+  However, if the `enable_language()` feature of CMake fails to set the value of `CMAKE_Fortran_COMPILER`, Fortran will be disabled.
+
+`SILO_ENABLE_PYTHON_MODULE:BOOL=OFF`
+: Enable the python module using CMake's `find_package()`.
+  This will create a shared library, `Silo.so` which you can import into Python with `import Silo`.
+  If a Python interpreter and Python header files cannot be found, this feature will be disabled.
+
+`SILO_PYTHON_DIR:PATH=`
+: Tell Silo's CMake where to find a Python installation if it is not in *standard* places CMake looks for it.
+
+`SILO_INSTALL_PYTHONDIR:PATH=${CMAKE_INSTALL_LIBDIR}`
+: Specify a separate installation dir for the python module.
+
+`SILO_ENABLE_SILOCK:BOOL=ON`
+: Enable building of the `silock` tool.
+
+`SILO_ENABLE_BROWSER:BOOL=ON`
+: Enable building of the textual browser tool, `browser`.
+  This tool can be used much like a `sh` shell to navigate, browse and even diff contents of Silo files.
+
+`SILO_ENABLE_SILEX:BOOL=OFF`
+: Enable building of the `silex` tool, a GUI based tool similar to `browser` to examine Silo files.
+  This feature requires Qt6 and it will look for Qt6 using `find_package()`.
+  If Qt6 cannot be found, this feature will be disabled.
+
+`SILO_QT6_DIR:PATH=`
+: Tell Silo's CMake where to find a Qt6 installation if it is not in *standard* places CMake looks for it.
+
+`SILO_ENABLE_HDF5:BOOL=ON`
+: Enable the HDF5 driver using CMake's `find_package()`.
+  The HDF5 driver supports many features the built-in, PDB driver does not.
+  This includes things like compression of Silo objects, application level checksuming of raw data, memory files, etc.
+  In addition, the HDF5 driver tends to provide better time performance though with earlier versions of HDF5, space performance was sometimes poorer.
+
+`SILO_HDF5_DIR:PATH=`
+: Tell Silo's CMake where to find an HDF5 installation if it is not in *standard* places CMake looks for it.
+
+`SILO_HDF5_SZIP_DIR:PATH=`
+: Tell Silo's CMake where to find an SZIP compression library installation if it is not in *standard* places CMake looks for it.
+  Sometimes, an HDF5 installation has a dependence on SZIP and getting Silo to link to that HDF5 installation then also requires telling it where to find SZIP.
+
+`SILO_ZLIB_DIR:PATH=`
+: Tell Silo's CMake where to find a ZLIB installation if it is not in *standard* places CMake looks for it.
+  Sometimes, an HDF5 installation has a dependence on ZLIB and getting Silo to link to that HDF5 installation then also requires telling it where to find ZLIB.
+
+`SILO_ENABLE_ZFP:BOOL=ON` (if HDF5 is enabled)
+: Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features.
+  This requires HDF5 to also be enabled.
+  If HDF5 is enabled, ZFP is also enabled by default.
+
+`SILO_ENABLE_FPZIP:BOOL=OFF`
+: Enable [fpzip](https://computing.llnl.gov/projects/fpzip) compression features
+  Even if HDF5 is enabled, fpzip is off by default because fpzip is not BSD licensed.
+  To enable fpzip, you also have to disable a BSD only build. 
+
+`SILO_ENABLE_HZIP:BOOL=OFF`
+: Enable [hzip](https://computing.llnl.gov/projects/hzip) compression features.
+  Even if HDF5 is enabled, hzip is off by default because hzip is not BSD licensed.
+  To enable hzip, you also have to disable a BSD only build. 
+
+Below is an example of a CMake command-line used to build Silo.
+After untaring the release distribution, cd into `silo-4.12.0` and make a `build` directory.
+Then, cd into `build` and enter a command like the following...
+
+```
+cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
+      -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF \
+      -DSILO_ENABLE_HDF5:BOOL=ON \
+      -DSILO_ENABLE_FPZIP:BOOL=ON \
+      -DBUILD_TESTING:BOOL=ON \
+      -DSILO_HDF5_DIR:PATH=/mnt/nvme/mark/silo/hdf5-1.14.4/build/my_install \
+      -DSILO_ENABLE_SILOCK:BOOL=ON \
+      -DCMAKE_BUILD_TYPE:STRING=Release \
+      -DSILO_ENABLE_PYTHON_MODULE:BOOL=ON \
+      -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
+      ..
+```
+
+### Where to Find Example Code
 
 In the [`tests`](https://github.com/LLNL/Silo/tree/main/tests) directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
 There are not as many examples of reading the data there.
@@ -185,6 +310,14 @@ The facelist structure is analogous to the zonelist structure, but defines the n
 ![](./images/ucd2dmesh.gif)
 
 ![](./images/celltypes.gif)
+
+Silo also supports...
+
+  * Quadratic versions of the above elements.
+  * These elements as degenerate hexahedra.
+    See the details in the description of [`DBPutZonelist2()`](./objects.md#dbputzonelist2).
+  * Arbitrary polyehedral zones.
+    See the details in the description of [`DBPutPHZonelist()`](./objects.md/#dbputphzonelist).
 
 ### Point Meshes and Related Data
 
@@ -449,4 +582,4 @@ A good choice for N is the number of concurrent I/O channels available to the ap
 
 This technique for using a serial I/O library effectively in parallel while being able to tune the number of files concurrently being written to is [*Multiple Independent File (MIF)*](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O. 
 
-There is a separate header file, `pmpio.h`, with a set of convenience CPP macros and methods to facilitate PMPIO-based parallel I/O with Silo.
+There is a separate header file, `pmpio.h`, with a set of convenience CPP macros and methods to facilitate MIF parallel I/O with Silo.
