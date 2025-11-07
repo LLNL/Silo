@@ -1,8 +1,8 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 ! 
-!      SILO include file for Fortan applications.
+!      SILO include file for Fortran applications.
 ! 
-!  Programmer:   miller86 Tue Sep 12 10:09:10 PDT 2023
+!  Programmer:   miller86 Thu Nov  6 18:20:01 PST 2025
 ! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
@@ -18,437 +18,447 @@
 
 
 !...Functions.
-      integer, external :: dbaddcaopt
-      integer, external :: dbaddccmp
-      integer, external :: dbaddcopt
-      integer, external :: dbadddopt
-      integer, external :: dbaddiaopt
-      integer, external :: dbaddicmp
-      integer, external :: dbaddiopt
-      integer, external :: dbaddrcmp
-      integer, external :: dbaddregion
-      integer, external :: dbaddregiona
-      integer, external :: dbaddropt
-      integer, external :: dbcalcfl
-      integer, external :: dbclose
-      integer, external :: dbcreate
-      integer, external :: dberrlvl
-      integer, external :: dberrno
-      integer, external :: dbfgetca
-      integer, external :: dbfreecaopt
-      integer, external :: dbfreemrgtree
-      integer, external :: dbfreeobject
-      integer, external :: dbfreeoptlist
-      integer, external :: dbget2dstrlen
-      integer, external :: dbgetca
-      integer, external :: dbgetcksums
-      integer, external :: dbgetcompress
-      integer, external :: dbgetcurve
-      integer, external :: dbgetdepwarn
-      integer, external :: dbgetemptyok
-      integer, external :: dbgethdfnms
-      integer, external :: dbgetovrwrt
-      integer, external :: dbgetqv1
-      integer, external :: dbinqblen
-      integer, external :: dbinqca
-      integer, external :: dbinqdtyp
-      integer, external :: dbinqfile
-      integer, external :: dbinqlen
-      integer, external :: dbinqmtyp
-      integer, external :: dbinqvtyp
-      integer, external :: dbmkdir
-      integer, external :: dbmkmrgtree
-      integer, external :: dbmkobject
-      integer, external :: dbmkoptlist
-      integer, external :: dbmkptr
-      integer, external :: dbopen
-      integer, external :: dbpmrgv
-      integer, external :: dbputca
-      integer, external :: dbputcsgm
-      integer, external :: dbputcsgv
-      integer, external :: dbputcsgzl
-      integer, external :: dbputcurve
-      integer, external :: dbputdefvars
-      integer, external :: dbputfl
-      integer, external :: dbputgrplmap
-      integer, external :: dbputmat
-      integer, external :: dbputmmat
-      integer, external :: dbputmmesh
-      integer, external :: dbputmrgtree
-      integer, external :: dbputmsp
-      integer, external :: dbputmvar
-      integer, external :: dbputpm
-      integer, external :: dbputpv1
-      integer, external :: dbputqm
-      integer, external :: dbputqv
-      integer, external :: dbputqv1
-      integer, external :: dbputum
-      integer, external :: dbputuv1
-      integer, external :: dbputzl
-      integer, external :: dbputzl2
-      integer, external :: dbrdvar
-      integer, external :: dbrdvarslice
-      integer, external :: dbregfopts
-      integer, external :: dbrmptr
-      integer, external :: dbset2dstrlen
-      integer, external :: dbsetcksums
-      integer, external :: dbsetcompress
-      integer, external :: dbsetcwr
-      integer, external :: dbsetdepwarn
-      integer, external :: dbsetdir
-      integer, external :: dbsetemptyok
-      integer, external :: dbsethdfnms
-      integer, external :: dbsetovrwrt
-      integer, external :: dbshowerrors
-      integer, external :: dbunregafopts
-      integer, external :: dbunregfopts
-      integer, external :: dbwrite
-      integer, external :: dbwriteslice
-      integer, external :: dbwrtfl
+      integer(kind=4), external :: dbaddcaopt
+      integer(kind=4), external :: dbaddccmp
+      integer(kind=4), external :: dbaddcopt
+      integer(kind=4), external :: dbadddopt
+      integer(kind=4), external :: dbaddiaopt
+      integer(kind=4), external :: dbaddicmp
+      integer(kind=4), external :: dbaddiopt
+      integer(kind=4), external :: dbaddrcmp
+      integer(kind=4), external :: dbaddregion
+      integer(kind=4), external :: dbaddregiona
+      integer(kind=4), external :: dbaddropt
+      integer(kind=4), external :: dbcalcfl
+      integer(kind=4), external :: dbclose
+      integer(kind=4), external :: dbcreate
+      integer(kind=4), external :: dberrlvl
+      integer(kind=4), external :: dberrno
+      integer(kind=4), external :: dbfgetca
+      integer(kind=4), external :: dbfreecaopt
+      integer(kind=4), external :: dbfreemrgtree
+      integer(kind=4), external :: dbfreeobject
+      integer(kind=4), external :: dbfreeoptlist
+      integer(kind=4), external :: dbget2dstrlen
+      integer(kind=4), external :: dbgetca
+      integer(kind=4), external :: dbgetcksums
+      integer(kind=4), external :: dbgetcompress
+      integer(kind=4), external :: dbgetcurve
+      integer(kind=4), external :: dbgetdepwarn
+      integer(kind=4), external :: dbgetemptyok
+      integer(kind=4), external :: dbgethdfnms
+      integer(kind=4), external :: dbgetovrwrt
+      integer(kind=4), external :: dbgetqv1
+      integer(kind=4), external :: dbinqblen
+      integer(kind=4), external :: dbinqca
+      integer(kind=4), external :: dbinqdtyp
+      integer(kind=4), external :: dbinqfile
+      integer(kind=4), external :: dbinqlen
+      integer(kind=4), external :: dbinqmtyp
+      integer(kind=4), external :: dbinqvtyp
+      integer(kind=4), external :: dbmkdir
+      integer(kind=4), external :: dbmkmrgtree
+      integer(kind=4), external :: dbmkobject
+      integer(kind=4), external :: dbmkoptlist
+      integer(kind=4), external :: dbmkptr
+      integer(kind=4), external :: dbopen
+      integer(kind=4), external :: dbpmrgv
+      integer(kind=4), external :: dbputca
+      integer(kind=4), external :: dbputcsgm
+      integer(kind=4), external :: dbputcsgv
+      integer(kind=4), external :: dbputcsgzl
+      integer(kind=4), external :: dbputcurve
+      integer(kind=4), external :: dbputdefvars
+      integer(kind=4), external :: dbputfl
+      integer(kind=4), external :: dbputgrplmap
+      integer(kind=4), external :: dbputmat
+      integer(kind=4), external :: dbputmmat
+      integer(kind=4), external :: dbputmmesh
+      integer(kind=4), external :: dbputmrgtree
+      integer(kind=4), external :: dbputmsp
+      integer(kind=4), external :: dbputmvar
+      integer(kind=4), external :: dbputpm
+      integer(kind=4), external :: dbputpv1
+      integer(kind=4), external :: dbputqm
+      integer(kind=4), external :: dbputqv
+      integer(kind=4), external :: dbputqv1
+      integer(kind=4), external :: dbputum
+      integer(kind=4), external :: dbputuv1
+      integer(kind=4), external :: dbputzl
+      integer(kind=4), external :: dbputzl2
+      integer(kind=4), external :: dbrdvar
+      integer(kind=4), external :: dbrdvarslice
+      integer(kind=4), external :: dbregfopts
+      integer(kind=4), external :: dbrmptr
+      integer(kind=4), external :: dbset2dstrlen
+      integer(kind=4), external :: dbsetcksums
+      integer(kind=4), external :: dbsetcompress
+      integer(kind=4), external :: dbsetcwr
+      integer(kind=4), external :: dbsetdepwarn
+      integer(kind=4), external :: dbsetdir
+      integer(kind=4), external :: dbsetemptyok
+      integer(kind=4), external :: dbsethdfnms
+      integer(kind=4), external :: dbsetovrwrt
+      integer(kind=4), external :: dbshowerrors
+      integer(kind=4), external :: dbunregafopts
+      integer(kind=4), external :: dbunregfopts
+      integer(kind=4), external :: dbwrite
+      integer(kind=4), external :: dbwriteslice
+      integer(kind=4), external :: dbwrtfl
 
 
 !...Parameters.
-      integer, parameter :: SILO_VERS_MAJ = 4
-      integer, parameter :: SILO_VERS_MIN = 11
-      integer, parameter :: SILO_VERS_PAT = 1
-      integer, parameter :: SILO_VERS_PRE = 0
-      integer, parameter :: DB_NETCDF = 0
-      integer, parameter :: DB_PDB = 2
-      integer, parameter :: DB_TAURUS = 3
-      integer, parameter :: DB_UNKNOWN = 5
-      integer, parameter :: DB_DEBUG = 6
-      integer, parameter :: DB_HDF5X = 7
-      integer, parameter :: DB_PDBP = 1
-      integer, parameter :: DB_HDF5_SEC2_OBSOLETE = 256
-      integer, parameter :: DB_HDF5_STDIO_OBSOLETE = 512
-      integer, parameter :: DB_HDF5_CORE_OBSOLETE = 768
-      integer, parameter :: DB_HDF5_MPIO_OBSOLETE = 1024
-      integer, parameter :: DB_HDF5_MPIOP_OBSOLETE = 1280
-      integer, parameter :: DB_H5VFD_DEFAULT = 0
-      integer, parameter :: DB_H5VFD_SEC2 = 1
-      integer, parameter :: DB_H5VFD_STDIO = 2
-      integer, parameter :: DB_H5VFD_CORE = 3
-      integer, parameter :: DB_H5VFD_LOG = 4
-      integer, parameter :: DB_H5VFD_SPLIT = 5
-      integer, parameter :: DB_H5VFD_DIRECT = 6
-      integer, parameter :: DB_H5VFD_FAMILY = 7
-      integer, parameter :: DB_H5VFD_MPIO = 8
-      integer, parameter :: DB_H5VFD_MPIP = 9
-      integer, parameter :: DB_H5VFD_SILO = 10
-      integer, parameter :: DB_H5VFD_FIC = 11
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_DEFAULT = 0
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_SEC2 = 1
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_STDIO = 2
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_CORE = 3
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_LOG = 4
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_SPLIT = 5
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_DIRECT = 6
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_FAMILY = 7
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_MPIO = 8
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_MPIP = 9
-      integer, parameter :: DB_FILE_OPTS_H5_DEFAULT_SILO = 10
-      integer, parameter :: DB_FILE_OPTS_LAST = 10
-      integer, parameter :: DB_HDF5 = 7
-      integer, parameter :: DB_HDF5_SEC2 = 2055
-      integer, parameter :: DB_HDF5_STDIO = 4103
-      integer, parameter :: DB_HDF5_CORE = 6151
-      integer, parameter :: DB_HDF5_LOG = 8199
-      integer, parameter :: DB_HDF5_SPLIT = 10247
-      integer, parameter :: DB_HDF5_DIRECT = 12295
-      integer, parameter :: DB_HDF5_FAMILY = 14343
-      integer, parameter :: DB_HDF5_MPIO = 16391
-      integer, parameter :: DB_HDF5_MPIOP = 18439
-      integer, parameter :: DB_HDF5_MPIP = 18439
-      integer, parameter :: DB_HDF5_SILO = 20487
-      integer, parameter :: DB_NFILES = 256
-      integer, parameter :: DB_NFILTERS = 32
-      integer, parameter :: DB_COLLINEAR = 130
-      integer, parameter :: DB_NONCOLLINEAR = 131
-      integer, parameter :: DB_QUAD_RECT = 130
-      integer, parameter :: DB_QUAD_CURV = 131
-      integer, parameter :: DB_INVALID_OBJECT = -1
-      integer, parameter :: DB_QUADRECT = 130
-      integer, parameter :: DB_QUADCURV = 131
-      integer, parameter :: DB_QUADMESH = 500
-      integer, parameter :: DB_QUADVAR = 501
-      integer, parameter :: DB_UCDMESH = 510
-      integer, parameter :: DB_UCDVAR = 511
-      integer, parameter :: DB_MULTIMESH = 520
-      integer, parameter :: DB_MULTIVAR = 521
-      integer, parameter :: DB_MULTIMAT = 522
-      integer, parameter :: DB_MULTIMATSPECIES = 523
-      integer, parameter :: DB_MULTIBLOCKMESH = 520
-      integer, parameter :: DB_MULTIBLOCKVAR = 521
-      integer, parameter :: DB_MULTIMESHADJ = 524
-      integer, parameter :: DB_MATERIAL = 530
-      integer, parameter :: DB_MATSPECIES = 531
-      integer, parameter :: DB_FACELIST = 550
-      integer, parameter :: DB_ZONELIST = 551
-      integer, parameter :: DB_EDGELIST = 552
-      integer, parameter :: DB_PHZONELIST = 553
-      integer, parameter :: DB_CSGZONELIST = 554
-      integer, parameter :: DB_CSGMESH = 555
-      integer, parameter :: DB_CSGVAR = 556
-      integer, parameter :: DB_CURVE = 560
-      integer, parameter :: DB_DEFVARS = 565
-      integer, parameter :: DB_POINTMESH = 570
-      integer, parameter :: DB_POINTVAR = 571
-      integer, parameter :: DB_ARRAY = 580
-      integer, parameter :: DB_DIR = 600
-      integer, parameter :: DB_SYMLINK = 601
-      integer, parameter :: DB_VARIABLE = 610
-      integer, parameter :: DB_MRGTREE = 611
-      integer, parameter :: DB_GROUPELMAP = 612
-      integer, parameter :: DB_MRGVAR = 613
-      integer, parameter :: DB_USERDEF = 700
-      integer, parameter :: DB_INT = 16
-      integer, parameter :: DB_SHORT = 17
-      integer, parameter :: DB_LONG = 18
-      integer, parameter :: DB_FLOAT = 19
-      integer, parameter :: DB_DOUBLE = 20
-      integer, parameter :: DB_CHAR = 21
-      integer, parameter :: DB_LONG_LONG = 22
-      integer, parameter :: DB_NOTYPE = 25
-      integer, parameter :: DB_CLOBBER = 0
-      integer, parameter :: DB_NOCLOBBER = 1
-      integer, parameter :: DB_READ = 1
-      integer, parameter :: DB_APPEND = 2
-      integer, parameter :: DB_COMPAT_OVER_PERF = 16
-      integer, parameter :: DB_PERF_OVER_COMPAT = 32
-      integer, parameter :: DB_LOCAL = 0
-      integer, parameter :: DB_SUN3 = 10
-      integer, parameter :: DB_SUN4 = 11
-      integer, parameter :: DB_SGI = 12
-      integer, parameter :: DB_RS6000 = 13
-      integer, parameter :: DB_CRAY = 14
-      integer, parameter :: DB_INTEL = 15
-      integer, parameter :: DBOPT_FIRST = 260
-      integer, parameter :: DBOPT_ALIGN = 260
-      integer, parameter :: DBOPT_COORDSYS = 262
-      integer, parameter :: DBOPT_CYCLE = 263
-      integer, parameter :: DBOPT_FACETYPE = 264
-      integer, parameter :: DBOPT_HI_OFFSET = 265
-      integer, parameter :: DBOPT_LO_OFFSET = 266
-      integer, parameter :: DBOPT_LABEL = 267
-      integer, parameter :: DBOPT_XLABEL = 268
-      integer, parameter :: DBOPT_YLABEL = 269
-      integer, parameter :: DBOPT_ZLABEL = 270
-      integer, parameter :: DBOPT_MAJORORDER = 271
-      integer, parameter :: DBOPT_NSPACE = 272
-      integer, parameter :: DBOPT_ORIGIN = 273
-      integer, parameter :: DBOPT_PLANAR = 274
-      integer, parameter :: DBOPT_TIME = 275
-      integer, parameter :: DBOPT_UNITS = 276
-      integer, parameter :: DBOPT_XUNITS = 277
-      integer, parameter :: DBOPT_YUNITS = 278
-      integer, parameter :: DBOPT_ZUNITS = 279
-      integer, parameter :: DBOPT_DTIME = 280
-      integer, parameter :: DBOPT_USESPECMF = 281
-      integer, parameter :: DBOPT_XVARNAME = 282
-      integer, parameter :: DBOPT_YVARNAME = 283
-      integer, parameter :: DBOPT_ZVARNAME = 284
-      integer, parameter :: DBOPT_ASCII_LABEL = 285
-      integer, parameter :: DBOPT_MATNOS = 286
-      integer, parameter :: DBOPT_NMATNOS = 287
-      integer, parameter :: DBOPT_MATNAME = 288
-      integer, parameter :: DBOPT_NMAT = 289
-      integer, parameter :: DBOPT_NMATSPEC = 290
-      integer, parameter :: DBOPT_BASEINDEX = 291
-      integer, parameter :: DBOPT_ZONENUM = 292
-      integer, parameter :: DBOPT_NODENUM = 293
-      integer, parameter :: DBOPT_BLOCKORIGIN = 294
-      integer, parameter :: DBOPT_GROUPNUM = 295
-      integer, parameter :: DBOPT_GROUPORIGIN = 296
-      integer, parameter :: DBOPT_NGROUPS = 297
-      integer, parameter :: DBOPT_MATNAMES = 298
-      integer, parameter :: DBOPT_EXTENTS_SIZE = 299
-      integer, parameter :: DBOPT_EXTENTS = 300
-      integer, parameter :: DBOPT_MATCOUNTS = 301
-      integer, parameter :: DBOPT_MATLISTS = 302
-      integer, parameter :: DBOPT_MIXLENS = 303
-      integer, parameter :: DBOPT_ZONECOUNTS = 304
-      integer, parameter :: DBOPT_HAS_EXTERNAL_ZONES = 305
-      integer, parameter :: DBOPT_PHZONELIST = 306
-      integer, parameter :: DBOPT_MATCOLORS = 307
-      integer, parameter :: DBOPT_BNDNAMES = 308
-      integer, parameter :: DBOPT_REGNAMES = 309
-      integer, parameter :: DBOPT_ZONENAMES = 310
-      integer, parameter :: DBOPT_HIDE_FROM_GUI = 311
-      integer, parameter :: DBOPT_TOPO_DIM = 312
-      integer, parameter :: DBOPT_REFERENCE = 313
-      integer, parameter :: DBOPT_GROUPINGS_SIZE = 314
-      integer, parameter :: DBOPT_GROUPINGS = 315
-      integer, parameter :: DBOPT_GROUPINGNAMES = 316
-      integer, parameter :: DBOPT_ALLOWMAT0 = 317
-      integer, parameter :: DBOPT_MRGTREE_NAME = 318
-      integer, parameter :: DBOPT_REGION_PNAMES = 319
-      integer, parameter :: DBOPT_TENSOR_RANK = 320
-      integer, parameter :: DBOPT_MMESH_NAME = 321
-      integer, parameter :: DBOPT_TV_CONNECTIVITY = 322
-      integer, parameter :: DBOPT_DISJOINT_MODE = 323
-      integer, parameter :: DBOPT_MRGV_ONAMES = 324
-      integer, parameter :: DBOPT_MRGV_RNAMES = 325
-      integer, parameter :: DBOPT_SPECNAMES = 326
-      integer, parameter :: DBOPT_SPECCOLORS = 327
-      integer, parameter :: DBOPT_LLONGNZNUM = 328
-      integer, parameter :: DBOPT_CONSERVED = 329
-      integer, parameter :: DBOPT_EXTENSIVE = 330
-      integer, parameter :: DBOPT_MB_FILE_NS = 331
-      integer, parameter :: DBOPT_MB_BLOCK_NS = 332
-      integer, parameter :: DBOPT_MB_BLOCK_TYPE = 333
-      integer, parameter :: DBOPT_MB_EMPTY_LIST = 334
-      integer, parameter :: DBOPT_MB_EMPTY_COUNT = 335
-      integer, parameter :: DBOPT_MB_REPR_BLOCK_IDX = 336
-      integer, parameter :: DBOPT_MISSING_VALUE = 337
-      integer, parameter :: DBOPT_ALT_ZONENUM_VARS = 338
-      integer, parameter :: DBOPT_ALT_NODENUM_VARS = 339
-      integer, parameter :: DBOPT_GHOST_NODE_LABELS = 340
-      integer, parameter :: DBOPT_GHOST_ZONE_LABELS = 341
-      integer, parameter :: DBOPT_LAST = 499
-      integer, parameter :: DBOPT_H5_FIRST = 500
-      integer, parameter :: DBOPT_H5_VFD = 500
-      integer, parameter :: DBOPT_H5_RAW_FILE_OPTS = 501
-      integer, parameter :: DBOPT_H5_RAW_EXTENSION = 502
-      integer, parameter :: DBOPT_H5_META_FILE_OPTS = 503
-      integer, parameter :: DBOPT_H5_META_EXTENSION = 504
-      integer, parameter :: DBOPT_H5_CORE_ALLOC_INC = 505
-      integer, parameter :: DBOPT_H5_CORE_NO_BACK_STORE = 506
-      integer, parameter :: DBOPT_H5_META_BLOCK_SIZE = 507
-      integer, parameter :: DBOPT_H5_SMALL_RAW_SIZE = 508
-      integer, parameter :: DBOPT_H5_ALIGN_MIN = 509
-      integer, parameter :: DBOPT_H5_ALIGN_VAL = 510
-      integer, parameter :: DBOPT_H5_DIRECT_MEM_ALIGN = 511
-      integer, parameter :: DBOPT_H5_DIRECT_BLOCK_SIZE = 512
-      integer, parameter :: DBOPT_H5_DIRECT_BUF_SIZE = 513
-      integer, parameter :: DBOPT_H5_LOG_NAME = 514
-      integer, parameter :: DBOPT_H5_LOG_BUF_SIZE = 515
-      integer, parameter :: DBOPT_H5_MPIO_COMM = 516
-      integer, parameter :: DBOPT_H5_MPIO_INFO = 517
-      integer, parameter :: DBOPT_H5_MPIP_NO_GPFS_HINTS = 518
-      integer, parameter :: DBOPT_H5_SIEVE_BUF_SIZE = 519
-      integer, parameter :: DBOPT_H5_CACHE_NELMTS = 520
-      integer, parameter :: DBOPT_H5_CACHE_NBYTES = 521
-      integer, parameter :: DBOPT_H5_CACHE_POLICY = 522
-      integer, parameter :: DBOPT_H5_FAM_SIZE = 523
-      integer, parameter :: DBOPT_H5_FAM_FILE_OPTS = 524
-      integer, parameter :: DBOPT_H5_USER_DRIVER_ID = 525
-      integer, parameter :: DBOPT_H5_USER_DRIVER_INFO = 526
-      integer, parameter :: DBOPT_H5_SILO_BLOCK_SIZE = 527
-      integer, parameter :: DBOPT_H5_SILO_BLOCK_COUNT = 528
-      integer, parameter :: DBOPT_H5_SILO_LOG_STATS = 529
-      integer, parameter :: DBOPT_H5_SILO_USE_DIRECT = 530
-      integer, parameter :: DBOPT_H5_FIC_SIZE = 531
-      integer, parameter :: DBOPT_H5_FIC_BUF = 532
-      integer, parameter :: DBOPT_H5_FCPL_HID_T = 533
-      integer, parameter :: DBOPT_H5_FAPL_HID_T = 534
-      integer, parameter :: DBOPT_H5_LAST = 599
-      integer, parameter :: DB_TOP = 0
-      integer, parameter :: DB_NONE = 1
-      integer, parameter :: DB_ALL = 2
-      integer, parameter :: DB_ABORT = 3
-      integer, parameter :: DB_SUSPEND = 4
-      integer, parameter :: DB_RESUME = 5
-      integer, parameter :: DB_ALL_AND_DRVR = 6
-      integer, parameter :: DB_ROWMAJOR = 0
-      integer, parameter :: DB_COLMAJOR = 1
-      integer, parameter :: DB_NOTCENT = 0
-      integer, parameter :: DB_NODECENT = 110
-      integer, parameter :: DB_ZONECENT = 111
-      integer, parameter :: DB_FACECENT = 112
-      integer, parameter :: DB_BNDCENT = 113
-      integer, parameter :: DB_EDGECENT = 114
-      integer, parameter :: DB_BLOCKCENT = 115
-      integer, parameter :: DB_CARTESIAN = 120
-      integer, parameter :: DB_CYLINDRICAL = 121
-      integer, parameter :: DB_SPHERICAL = 122
-      integer, parameter :: DB_NUMERICAL = 123
-      integer, parameter :: DB_OTHER = 124
-      integer, parameter :: DB_RECTILINEAR = 100
-      integer, parameter :: DB_CURVILINEAR = 101
-      integer, parameter :: DB_AREA = 140
-      integer, parameter :: DB_VOLUME = 141
-      integer, parameter :: DB_ON = 1000
-      integer, parameter :: DB_OFF = -1000
-      integer, parameter :: DB_ABUTTING = 142
-      integer, parameter :: DB_FLOATING = 143
-      integer, parameter :: DB_VARTYPE_SCALAR = 200
-      integer, parameter :: DB_VARTYPE_VECTOR = 201
-      integer, parameter :: DB_VARTYPE_TENSOR = 202
-      integer, parameter :: DB_VARTYPE_SYMTENSOR = 203
-      integer, parameter :: DB_VARTYPE_ARRAY = 204
-      integer, parameter :: DB_VARTYPE_MATERIAL = 205
-      integer, parameter :: DB_VARTYPE_SPECIES = 206
-      integer, parameter :: DB_VARTYPE_LABEL = 207
-      integer, parameter :: DB_GHOSTTYPE_NOGHOST = 0
-      integer, parameter :: DB_GHOSTTYPE_INTDUP = 1
-      integer, parameter :: DBCSG_QUADRIC_G = 16777216
-      integer, parameter :: DBCSG_SPHERE_PR = 33619968
-      integer, parameter :: DBCSG_ELLIPSOID_PRRR = 33685504
-      integer, parameter :: DBCSG_PLANE_G = 50331648
-      integer, parameter :: DBCSG_PLANE_X = 50397184
-      integer, parameter :: DBCSG_PLANE_Y = 50462720
-      integer, parameter :: DBCSG_PLANE_Z = 50528256
-      integer, parameter :: DBCSG_PLANE_PN = 50593792
-      integer, parameter :: DBCSG_PLANE_PPP = 50659328
-      integer, parameter :: DBCSG_CYLINDER_PNLR = 67108864
-      integer, parameter :: DBCSG_CYLINDER_PPR = 67174400
-      integer, parameter :: DBCSG_BOX_XYZXYZ = 83886080
-      integer, parameter :: DBCSG_CONE_PNLA = 100663296
-      integer, parameter :: DBCSG_CONE_PPA = 100728832
-      integer, parameter :: DBCSG_POLYHEDRON_KF = 117440512
-      integer, parameter :: DBCSG_HEX_6F = 117506048
-      integer, parameter :: DBCSG_TET_4F = 117571584
-      integer, parameter :: DBCSG_PYRAMID_5F = 117637120
-      integer, parameter :: DBCSG_PRISM_5F = 117702656
-      integer, parameter :: DBCSG_QUADRATIC_G = 134217728
-      integer, parameter :: DBCSG_CIRCLE_PR = 150994944
-      integer, parameter :: DBCSG_ELLIPSE_PRR = 151060480
-      integer, parameter :: DBCSG_LINE_G = 167772160
-      integer, parameter :: DBCSG_LINE_X = 167837696
-      integer, parameter :: DBCSG_LINE_Y = 167903232
-      integer, parameter :: DBCSG_LINE_PN = 167968768
-      integer, parameter :: DBCSG_LINE_PP = 168034304
-      integer, parameter :: DBCSG_BOX_XYXY = 184549376
-      integer, parameter :: DBCSG_ANGLE_PNLA = 201326592
-      integer, parameter :: DBCSG_ANGLE_PPA = 201392128
-      integer, parameter :: DBCSG_POLYGON_KP = 218103808
-      integer, parameter :: DBCSG_TRI_3P = 218169344
-      integer, parameter :: DBCSG_QUAD_4P = 218234880
-      integer, parameter :: DBCSG_INNER = 2130706432
-      integer, parameter :: DBCSG_OUTER = 2130771968
-      integer, parameter :: DBCSG_ON = 2130837504
-      integer, parameter :: DBCSG_UNION = 2130903040
-      integer, parameter :: DBCSG_INTERSECT = 2130968576
-      integer, parameter :: DBCSG_DIFF = 2131034112
-      integer, parameter :: DBCSG_COMPLIMENT = 2131099648
-      integer, parameter :: DBCSG_XFORM = 2131165184
-      integer, parameter :: DBCSG_SWEEP = 2131230720
-      integer, parameter :: DB_PREORDER = 1
-      integer, parameter :: DB_POSTORDER = 2
-      integer, parameter :: DB_FROMCWR = 4
-      integer, parameter :: DB_F77NULL = (-99)
-      integer, parameter :: DB_PARTIO_POINTS = 1
-      integer, parameter :: DB_PARTIO_HSLABS = 2
+      integer(kind=4), parameter :: SILO_VERS_MAJ = 4_4
+      integer(kind=4), parameter :: SILO_VERS_MIN = 12_4
+      integer(kind=4), parameter :: SILO_VERS_PAT = 0_4
+      integer(kind=4), parameter :: SILO_VERS_PRE = 1_4
+      integer(kind=4), parameter :: DB_NETCDF = 0_4
+      integer(kind=4), parameter :: DB_PDB = 2_4
+      integer(kind=4), parameter :: DB_TAURUS = 3_4
+      integer(kind=4), parameter :: DB_UNKNOWN = 5_4
+      integer(kind=4), parameter :: DB_DEBUG = 6_4
+      integer(kind=4), parameter :: DB_HDF5X = 7_4
+      integer(kind=4), parameter :: DB_PDBP = 1_4
+      integer(kind=4), parameter :: DB_HDF5_SEC2_OBSOLETE = 256_4
+      integer(kind=4), parameter :: DB_HDF5_STDIO_OBSOLETE = 512_4
+      integer(kind=4), parameter :: DB_HDF5_CORE_OBSOLETE = 768_4
+      integer(kind=4), parameter :: DB_HDF5_MPIO_OBSOLETE = 1024_4
+      integer(kind=4), parameter :: DB_HDF5_MPIOP_OBSOLETE = 1280_4
+      integer(kind=4), parameter :: DB_H5VFD_DEFAULT = 0_4
+      integer(kind=4), parameter :: DB_H5VFD_SEC2 = 1_4
+      integer(kind=4), parameter :: DB_H5VFD_STDIO = 2_4
+      integer(kind=4), parameter :: DB_H5VFD_CORE = 3_4
+      integer(kind=4), parameter :: DB_H5VFD_LOG = 4_4
+      integer(kind=4), parameter :: DB_H5VFD_SPLIT = 5_4
+      integer(kind=4), parameter :: DB_H5VFD_DIRECT = 6_4
+      integer(kind=4), parameter :: DB_H5VFD_FAMILY = 7_4
+      integer(kind=4), parameter :: DB_H5VFD_MPIO = 8_4
+      integer(kind=4), parameter :: DB_H5VFD_MPIP = 9_4
+      integer(kind=4), parameter :: DB_H5VFD_SILO = 10_4
+      integer(kind=4), parameter :: DB_H5VFD_FIC = 11_4
+      integer(kind=4), parameter ::                                     &
+     &  DB_FILE_OPTS_H5_DEFAULT_DEFAULT = 0_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_SEC2 = 1_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_STDIO = 2_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_CORE = 3_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_LOG = 4_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_SPLIT = 5_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_DIRECT = 6_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_FAMILY = 7_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_MPIO = 8_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_MPIP = 9_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_H5_DEFAULT_SILO = 10_4
+      integer(kind=4), parameter :: DB_FILE_OPTS_LAST = 10_4
+      integer(kind=4), parameter :: DB_HDF5 = 7_4
+      integer(kind=4), parameter :: DB_HDF5_SEC2 = 2055_4
+      integer(kind=4), parameter :: DB_HDF5_STDIO = 4103_4
+      integer(kind=4), parameter :: DB_HDF5_CORE = 6151_4
+      integer(kind=4), parameter :: DB_HDF5_LOG = 8199_4
+      integer(kind=4), parameter :: DB_HDF5_SPLIT = 10247_4
+      integer(kind=4), parameter :: DB_HDF5_DIRECT = 12295_4
+      integer(kind=4), parameter :: DB_HDF5_FAMILY = 14343_4
+      integer(kind=4), parameter :: DB_HDF5_MPIO = 16391_4
+      integer(kind=4), parameter :: DB_HDF5_MPIOP = 18439_4
+      integer(kind=4), parameter :: DB_HDF5_MPIP = 18439_4
+      integer(kind=4), parameter :: DB_HDF5_SILO = 20487_4
+      integer(kind=4), parameter :: DB_NFILES = 256_4
+      integer(kind=4), parameter :: DB_NFILTERS = 32_4
+      integer(kind=4), parameter :: DB_COLLINEAR = 130_4
+      integer(kind=4), parameter :: DB_NONCOLLINEAR = 131_4
+      integer(kind=4), parameter :: DB_QUAD_RECT = 130_4
+      integer(kind=4), parameter :: DB_QUAD_CURV = 131_4
+      integer(kind=4), parameter :: DB_INVALID_OBJECT = -1_4
+      integer(kind=4), parameter :: DB_QUADRECT = 130_4
+      integer(kind=4), parameter :: DB_QUADCURV = 131_4
+      integer(kind=4), parameter :: DB_QUADMESH = 500_4
+      integer(kind=4), parameter :: DB_QUADVAR = 501_4
+      integer(kind=4), parameter :: DB_UCDMESH = 510_4
+      integer(kind=4), parameter :: DB_UCDVAR = 511_4
+      integer(kind=4), parameter :: DB_MULTIMESH = 520_4
+      integer(kind=4), parameter :: DB_MULTIVAR = 521_4
+      integer(kind=4), parameter :: DB_MULTIMAT = 522_4
+      integer(kind=4), parameter :: DB_MULTIMATSPECIES = 523_4
+      integer(kind=4), parameter :: DB_MULTIBLOCKMESH = 520_4
+      integer(kind=4), parameter :: DB_MULTIBLOCKVAR = 521_4
+      integer(kind=4), parameter :: DB_MULTIMESHADJ = 524_4
+      integer(kind=4), parameter :: DB_MATERIAL = 530_4
+      integer(kind=4), parameter :: DB_MATSPECIES = 531_4
+      integer(kind=4), parameter :: DB_FACELIST = 550_4
+      integer(kind=4), parameter :: DB_ZONELIST = 551_4
+      integer(kind=4), parameter :: DB_EDGELIST = 552_4
+      integer(kind=4), parameter :: DB_PHZONELIST = 553_4
+      integer(kind=4), parameter :: DB_CSGZONELIST = 554_4
+      integer(kind=4), parameter :: DB_CSGMESH = 555_4
+      integer(kind=4), parameter :: DB_CSGVAR = 556_4
+      integer(kind=4), parameter :: DB_CURVE = 560_4
+      integer(kind=4), parameter :: DB_DEFVARS = 565_4
+      integer(kind=4), parameter :: DB_POINTMESH = 570_4
+      integer(kind=4), parameter :: DB_POINTVAR = 571_4
+      integer(kind=4), parameter :: DB_ARRAY = 580_4
+      integer(kind=4), parameter :: DB_DIR = 600_4
+      integer(kind=4), parameter :: DB_SYMLINK = 601_4
+      integer(kind=4), parameter :: DB_VARIABLE = 610_4
+      integer(kind=4), parameter :: DB_MRGTREE = 611_4
+      integer(kind=4), parameter :: DB_GROUPELMAP = 612_4
+      integer(kind=4), parameter :: DB_MRGVAR = 613_4
+      integer(kind=4), parameter :: DB_USERDEF = 700_4
+      integer(kind=4), parameter :: DB_INT = 16_4
+      integer(kind=4), parameter :: DB_SHORT = 17_4
+      integer(kind=4), parameter :: DB_LONG = 18_4
+      integer(kind=4), parameter :: DB_FLOAT = 19_4
+      integer(kind=4), parameter :: DB_DOUBLE = 20_4
+      integer(kind=4), parameter :: DB_CHAR = 21_4
+      integer(kind=4), parameter :: DB_LONG_LONG = 22_4
+      integer(kind=4), parameter :: DB_INTA = 23_4
+      integer(kind=4), parameter :: DB_FLOATA = 24_4
+      integer(kind=4), parameter :: DB_DOUBLEA = 25_4
+      integer(kind=4), parameter :: DB_NOTYPE = 26_4
+      integer(kind=4), parameter :: DB_CLOBBER = 0_4
+      integer(kind=4), parameter :: DB_NOCLOBBER = 1_4
+      integer(kind=4), parameter :: DB_READ = 1_4
+      integer(kind=4), parameter :: DB_APPEND = 2_4
+      integer(kind=4), parameter :: DB_CONCURRENT = 4_4
+      integer(kind=4), parameter :: DB_COMPAT_OVER_PERF = 16_4
+      integer(kind=4), parameter :: DB_PERF_OVER_COMPAT = 32_4
+      integer(kind=4), parameter :: DB_H5DEFAULT_COMPAT = 64_4
+      integer(kind=4), parameter :: DB_H5_FIC_DONT_COPY = 2_4
+      integer(kind=4), parameter :: DB_H5_FIC_DONT_RELEASE = 4_4
+      integer(kind=4), parameter :: DB_LOCAL = 0_4
+      integer(kind=4), parameter :: DB_SUN3 = 10_4
+      integer(kind=4), parameter :: DB_SUN4 = 11_4
+      integer(kind=4), parameter :: DB_SGI = 12_4
+      integer(kind=4), parameter :: DB_RS6000 = 13_4
+      integer(kind=4), parameter :: DB_CRAY = 14_4
+      integer(kind=4), parameter :: DB_INTEL = 15_4
+      integer(kind=4), parameter :: DBOPT_FIRST = 260_4
+      integer(kind=4), parameter :: DBOPT_ALIGN = 260_4
+      integer(kind=4), parameter :: DBOPT_COORDSYS = 262_4
+      integer(kind=4), parameter :: DBOPT_CYCLE = 263_4
+      integer(kind=4), parameter :: DBOPT_FACETYPE = 264_4
+      integer(kind=4), parameter :: DBOPT_HI_OFFSET = 265_4
+      integer(kind=4), parameter :: DBOPT_LO_OFFSET = 266_4
+      integer(kind=4), parameter :: DBOPT_LABEL = 267_4
+      integer(kind=4), parameter :: DBOPT_XLABEL = 268_4
+      integer(kind=4), parameter :: DBOPT_YLABEL = 269_4
+      integer(kind=4), parameter :: DBOPT_ZLABEL = 270_4
+      integer(kind=4), parameter :: DBOPT_MAJORORDER = 271_4
+      integer(kind=4), parameter :: DBOPT_NSPACE = 272_4
+      integer(kind=4), parameter :: DBOPT_ORIGIN = 273_4
+      integer(kind=4), parameter :: DBOPT_PLANAR = 274_4
+      integer(kind=4), parameter :: DBOPT_TIME = 275_4
+      integer(kind=4), parameter :: DBOPT_UNITS = 276_4
+      integer(kind=4), parameter :: DBOPT_XUNITS = 277_4
+      integer(kind=4), parameter :: DBOPT_YUNITS = 278_4
+      integer(kind=4), parameter :: DBOPT_ZUNITS = 279_4
+      integer(kind=4), parameter :: DBOPT_DTIME = 280_4
+      integer(kind=4), parameter :: DBOPT_USESPECMF = 281_4
+      integer(kind=4), parameter :: DBOPT_XVARNAME = 282_4
+      integer(kind=4), parameter :: DBOPT_YVARNAME = 283_4
+      integer(kind=4), parameter :: DBOPT_ZVARNAME = 284_4
+      integer(kind=4), parameter :: DBOPT_ASCII_LABEL = 285_4
+      integer(kind=4), parameter :: DBOPT_MATNOS = 286_4
+      integer(kind=4), parameter :: DBOPT_NMATNOS = 287_4
+      integer(kind=4), parameter :: DBOPT_MATNAME = 288_4
+      integer(kind=4), parameter :: DBOPT_NMAT = 289_4
+      integer(kind=4), parameter :: DBOPT_NMATSPEC = 290_4
+      integer(kind=4), parameter :: DBOPT_BASEINDEX = 291_4
+      integer(kind=4), parameter :: DBOPT_ZONENUM = 292_4
+      integer(kind=4), parameter :: DBOPT_NODENUM = 293_4
+      integer(kind=4), parameter :: DBOPT_BLOCKORIGIN = 294_4
+      integer(kind=4), parameter :: DBOPT_GROUPNUM = 295_4
+      integer(kind=4), parameter :: DBOPT_GROUPORIGIN = 296_4
+      integer(kind=4), parameter :: DBOPT_NGROUPS = 297_4
+      integer(kind=4), parameter :: DBOPT_MATNAMES = 298_4
+      integer(kind=4), parameter :: DBOPT_EXTENTS_SIZE = 299_4
+      integer(kind=4), parameter :: DBOPT_EXTENTS = 300_4
+      integer(kind=4), parameter :: DBOPT_MATCOUNTS = 301_4
+      integer(kind=4), parameter :: DBOPT_MATLISTS = 302_4
+      integer(kind=4), parameter :: DBOPT_MIXLENS = 303_4
+      integer(kind=4), parameter :: DBOPT_ZONECOUNTS = 304_4
+      integer(kind=4), parameter :: DBOPT_HAS_EXTERNAL_ZONES = 305_4
+      integer(kind=4), parameter :: DBOPT_PHZONELIST = 306_4
+      integer(kind=4), parameter :: DBOPT_MATCOLORS = 307_4
+      integer(kind=4), parameter :: DBOPT_BNDNAMES = 308_4
+      integer(kind=4), parameter :: DBOPT_REGNAMES = 309_4
+      integer(kind=4), parameter :: DBOPT_ZONENAMES = 310_4
+      integer(kind=4), parameter :: DBOPT_HIDE_FROM_GUI = 311_4
+      integer(kind=4), parameter :: DBOPT_TOPO_DIM = 312_4
+      integer(kind=4), parameter :: DBOPT_REFERENCE = 313_4
+      integer(kind=4), parameter :: DBOPT_GROUPINGS_SIZE = 314_4
+      integer(kind=4), parameter :: DBOPT_GROUPINGS = 315_4
+      integer(kind=4), parameter :: DBOPT_GROUPINGNAMES = 316_4
+      integer(kind=4), parameter :: DBOPT_ALLOWMAT0 = 317_4
+      integer(kind=4), parameter :: DBOPT_MRGTREE_NAME = 318_4
+      integer(kind=4), parameter :: DBOPT_REGION_PNAMES = 319_4
+      integer(kind=4), parameter :: DBOPT_TENSOR_RANK = 320_4
+      integer(kind=4), parameter :: DBOPT_MMESH_NAME = 321_4
+      integer(kind=4), parameter :: DBOPT_TV_CONNECTIVITY = 322_4
+      integer(kind=4), parameter :: DBOPT_DISJOINT_MODE = 323_4
+      integer(kind=4), parameter :: DBOPT_MRGV_ONAMES = 324_4
+      integer(kind=4), parameter :: DBOPT_MRGV_RNAMES = 325_4
+      integer(kind=4), parameter :: DBOPT_SPECNAMES = 326_4
+      integer(kind=4), parameter :: DBOPT_SPECCOLORS = 327_4
+      integer(kind=4), parameter :: DBOPT_LLONGNZNUM = 328_4
+      integer(kind=4), parameter :: DBOPT_CONSERVED = 329_4
+      integer(kind=4), parameter :: DBOPT_EXTENSIVE = 330_4
+      integer(kind=4), parameter :: DBOPT_MB_FILE_NS = 331_4
+      integer(kind=4), parameter :: DBOPT_MB_BLOCK_NS = 332_4
+      integer(kind=4), parameter :: DBOPT_MB_BLOCK_TYPE = 333_4
+      integer(kind=4), parameter :: DBOPT_MB_EMPTY_LIST = 334_4
+      integer(kind=4), parameter :: DBOPT_MB_EMPTY_COUNT = 335_4
+      integer(kind=4), parameter :: DBOPT_MB_REPR_BLOCK_IDX = 336_4
+      integer(kind=4), parameter :: DBOPT_MISSING_VALUE = 337_4
+      integer(kind=4), parameter :: DBOPT_ALT_ZONENUM_VARS = 338_4
+      integer(kind=4), parameter :: DBOPT_ALT_NODENUM_VARS = 339_4
+      integer(kind=4), parameter :: DBOPT_GHOST_NODE_LABELS = 340_4
+      integer(kind=4), parameter :: DBOPT_GHOST_ZONE_LABELS = 341_4
+      integer(kind=4), parameter :: DBOPT_LAST = 499_4
+      integer(kind=4), parameter :: DBOPT_H5_FIRST = 500_4
+      integer(kind=4), parameter :: DBOPT_H5_VFD = 500_4
+      integer(kind=4), parameter :: DBOPT_H5_RAW_FILE_OPTS = 501_4
+      integer(kind=4), parameter :: DBOPT_H5_RAW_EXTENSION = 502_4
+      integer(kind=4), parameter :: DBOPT_H5_META_FILE_OPTS = 503_4
+      integer(kind=4), parameter :: DBOPT_H5_META_EXTENSION = 504_4
+      integer(kind=4), parameter :: DBOPT_H5_CORE_ALLOC_INC = 505_4
+      integer(kind=4), parameter :: DBOPT_H5_CORE_NO_BACK_STORE = 506_4
+      integer(kind=4), parameter :: DBOPT_H5_META_BLOCK_SIZE = 507_4
+      integer(kind=4), parameter :: DBOPT_H5_SMALL_RAW_SIZE = 508_4
+      integer(kind=4), parameter :: DBOPT_H5_ALIGN_MIN = 509_4
+      integer(kind=4), parameter :: DBOPT_H5_ALIGN_VAL = 510_4
+      integer(kind=4), parameter :: DBOPT_H5_DIRECT_MEM_ALIGN = 511_4
+      integer(kind=4), parameter :: DBOPT_H5_DIRECT_BLOCK_SIZE = 512_4
+      integer(kind=4), parameter :: DBOPT_H5_DIRECT_BUF_SIZE = 513_4
+      integer(kind=4), parameter :: DBOPT_H5_LOG_NAME = 514_4
+      integer(kind=4), parameter :: DBOPT_H5_LOG_BUF_SIZE = 515_4
+      integer(kind=4), parameter :: DBOPT_H5_MPIO_COMM = 516_4
+      integer(kind=4), parameter :: DBOPT_H5_MPIO_INFO = 517_4
+      integer(kind=4), parameter :: DBOPT_H5_MPIP_NO_GPFS_HINTS = 518_4
+      integer(kind=4), parameter :: DBOPT_H5_SIEVE_BUF_SIZE = 519_4
+      integer(kind=4), parameter :: DBOPT_H5_CACHE_NELMTS = 520_4
+      integer(kind=4), parameter :: DBOPT_H5_CACHE_NBYTES = 521_4
+      integer(kind=4), parameter :: DBOPT_H5_CACHE_POLICY = 522_4
+      integer(kind=4), parameter :: DBOPT_H5_FAM_SIZE = 523_4
+      integer(kind=4), parameter :: DBOPT_H5_FAM_FILE_OPTS = 524_4
+      integer(kind=4), parameter :: DBOPT_H5_USER_DRIVER_ID = 525_4
+      integer(kind=4), parameter :: DBOPT_H5_USER_DRIVER_INFO = 526_4
+      integer(kind=4), parameter :: DBOPT_H5_SILO_BLOCK_SIZE = 527_4
+      integer(kind=4), parameter :: DBOPT_H5_SILO_BLOCK_COUNT = 528_4
+      integer(kind=4), parameter :: DBOPT_H5_SILO_LOG_STATS = 529_4
+      integer(kind=4), parameter :: DBOPT_H5_SILO_USE_DIRECT = 530_4
+      integer(kind=4), parameter :: DBOPT_H5_FIC_SIZE = 531_4
+      integer(kind=4), parameter :: DBOPT_H5_FIC_BUF = 532_4
+      integer(kind=4), parameter :: DBOPT_H5_FIC_FLAGS = 533_4
+      integer(kind=4), parameter :: DBOPT_H5_FCPL_HID_T = 597_4
+      integer(kind=4), parameter :: DBOPT_H5_FAPL_HID_T = 598_4
+      integer(kind=4), parameter :: DBOPT_H5_LAST = 599_4
+      integer(kind=4), parameter :: DB_TOP = 0_4
+      integer(kind=4), parameter :: DB_NONE = 1_4
+      integer(kind=4), parameter :: DB_ALL = 2_4
+      integer(kind=4), parameter :: DB_ABORT = 3_4
+      integer(kind=4), parameter :: DB_SUSPEND = 4_4
+      integer(kind=4), parameter :: DB_RESUME = 5_4
+      integer(kind=4), parameter :: DB_ALL_AND_DRVR = 6_4
+      integer(kind=4), parameter :: DB_ROWMAJOR = 0_4
+      integer(kind=4), parameter :: DB_COLMAJOR = 1_4
+      integer(kind=4), parameter :: DB_NOTCENT = 0_4
+      integer(kind=4), parameter :: DB_NODECENT = 110_4
+      integer(kind=4), parameter :: DB_ZONECENT = 111_4
+      integer(kind=4), parameter :: DB_FACECENT = 112_4
+      integer(kind=4), parameter :: DB_BNDCENT = 113_4
+      integer(kind=4), parameter :: DB_EDGECENT = 114_4
+      integer(kind=4), parameter :: DB_BLOCKCENT = 115_4
+      integer(kind=4), parameter :: DB_CARTESIAN = 120_4
+      integer(kind=4), parameter :: DB_CYLINDRICAL = 121_4
+      integer(kind=4), parameter :: DB_SPHERICAL = 122_4
+      integer(kind=4), parameter :: DB_NUMERICAL = 123_4
+      integer(kind=4), parameter :: DB_OTHER = 124_4
+      integer(kind=4), parameter :: DB_RECTILINEAR = 100_4
+      integer(kind=4), parameter :: DB_CURVILINEAR = 101_4
+      integer(kind=4), parameter :: DB_AREA = 140_4
+      integer(kind=4), parameter :: DB_VOLUME = 141_4
+      integer(kind=4), parameter :: DB_ON = 1000_4
+      integer(kind=4), parameter :: DB_OFF = -1000_4
+      integer(kind=4), parameter :: DB_ABUTTING = 142_4
+      integer(kind=4), parameter :: DB_FLOATING = 143_4
+      integer(kind=4), parameter :: DB_VARTYPE_SCALAR = 200_4
+      integer(kind=4), parameter :: DB_VARTYPE_VECTOR = 201_4
+      integer(kind=4), parameter :: DB_VARTYPE_TENSOR = 202_4
+      integer(kind=4), parameter :: DB_VARTYPE_SYMTENSOR = 203_4
+      integer(kind=4), parameter :: DB_VARTYPE_ARRAY = 204_4
+      integer(kind=4), parameter :: DB_VARTYPE_MATERIAL = 205_4
+      integer(kind=4), parameter :: DB_VARTYPE_SPECIES = 206_4
+      integer(kind=4), parameter :: DB_VARTYPE_LABEL = 207_4
+      integer(kind=4), parameter :: DB_GHOSTTYPE_NOGHOST = 0_4
+      integer(kind=4), parameter :: DB_GHOSTTYPE_INTDUP = 1_4
+      integer(kind=4), parameter :: DBCSG_QUADRIC_G = 16777216_4
+      integer(kind=4), parameter :: DBCSG_SPHERE_PR = 33619968_4
+      integer(kind=4), parameter :: DBCSG_ELLIPSOID_PRRR = 33685504_4
+      integer(kind=4), parameter :: DBCSG_PLANE_G = 50331648_4
+      integer(kind=4), parameter :: DBCSG_PLANE_X = 50397184_4
+      integer(kind=4), parameter :: DBCSG_PLANE_Y = 50462720_4
+      integer(kind=4), parameter :: DBCSG_PLANE_Z = 50528256_4
+      integer(kind=4), parameter :: DBCSG_PLANE_PN = 50593792_4
+      integer(kind=4), parameter :: DBCSG_PLANE_PPP = 50659328_4
+      integer(kind=4), parameter :: DBCSG_CYLINDER_PNLR = 67108864_4
+      integer(kind=4), parameter :: DBCSG_CYLINDER_PPR = 67174400_4
+      integer(kind=4), parameter :: DBCSG_BOX_XYZXYZ = 83886080_4
+      integer(kind=4), parameter :: DBCSG_CONE_PNLA = 100663296_4
+      integer(kind=4), parameter :: DBCSG_CONE_PPA = 100728832_4
+      integer(kind=4), parameter :: DBCSG_POLYHEDRON_KF = 117440512_4
+      integer(kind=4), parameter :: DBCSG_HEX_6F = 117506048_4
+      integer(kind=4), parameter :: DBCSG_TET_4F = 117571584_4
+      integer(kind=4), parameter :: DBCSG_PYRAMID_5F = 117637120_4
+      integer(kind=4), parameter :: DBCSG_PRISM_5F = 117702656_4
+      integer(kind=4), parameter :: DBCSG_QUADRATIC_G = 134217728_4
+      integer(kind=4), parameter :: DBCSG_CIRCLE_PR = 150994944_4
+      integer(kind=4), parameter :: DBCSG_ELLIPSE_PRR = 151060480_4
+      integer(kind=4), parameter :: DBCSG_LINE_G = 167772160_4
+      integer(kind=4), parameter :: DBCSG_LINE_X = 167837696_4
+      integer(kind=4), parameter :: DBCSG_LINE_Y = 167903232_4
+      integer(kind=4), parameter :: DBCSG_LINE_PN = 167968768_4
+      integer(kind=4), parameter :: DBCSG_LINE_PP = 168034304_4
+      integer(kind=4), parameter :: DBCSG_BOX_XYXY = 184549376_4
+      integer(kind=4), parameter :: DBCSG_ANGLE_PNLA = 201326592_4
+      integer(kind=4), parameter :: DBCSG_ANGLE_PPA = 201392128_4
+      integer(kind=4), parameter :: DBCSG_POLYGON_KP = 218103808_4
+      integer(kind=4), parameter :: DBCSG_TRI_3P = 218169344_4
+      integer(kind=4), parameter :: DBCSG_QUAD_4P = 218234880_4
+      integer(kind=4), parameter :: DBCSG_INNER = 2130706432_4
+      integer(kind=4), parameter :: DBCSG_OUTER = 2130771968_4
+      integer(kind=4), parameter :: DBCSG_ON = 2130837504_4
+      integer(kind=4), parameter :: DBCSG_UNION = 2130903040_4
+      integer(kind=4), parameter :: DBCSG_INTERSECT = 2130968576_4
+      integer(kind=4), parameter :: DBCSG_DIFF = 2131034112_4
+      integer(kind=4), parameter :: DBCSG_COMPLIMENT = 2131099648_4
+      integer(kind=4), parameter :: DBCSG_XFORM = 2131165184_4
+      integer(kind=4), parameter :: DBCSG_SWEEP = 2131230720_4
+      integer(kind=4), parameter :: DB_PREORDER = 1_4
+      integer(kind=4), parameter :: DB_POSTORDER = 2_4
+      integer(kind=4), parameter :: DB_FROMCWR = 4_4
+      integer(kind=4), parameter :: DB_F77NULL = (-99)
+      integer(kind=4), parameter :: DB_PARTIO_POINTS = 1_4
+      integer(kind=4), parameter :: DB_PARTIO_HSLABS = 2_4
       real (kind=8), parameter :: DB_MISSING_VALUE_NOT_SET = 1.0D+308
-      integer, parameter :: DB_EOA = 0
-      integer, parameter :: DB_NOBJ_TYPES = 25
-      integer, parameter :: DB_ZONETYPE_BEAM = 10
-      integer, parameter :: DB_ZONETYPE_POLYGON = 20
-      integer, parameter :: DB_ZONETYPE_TRIANGLE = 23
-      integer, parameter :: DB_ZONETYPE_QUAD = 24
-      integer, parameter :: DB_ZONETYPE_POLYHEDRON = 30
-      integer, parameter :: DB_ZONETYPE_TET = 34
-      integer, parameter :: DB_ZONETYPE_PYRAMID = 35
-      integer, parameter :: DB_ZONETYPE_PRISM = 36
-      integer, parameter :: DB_ZONETYPE_HEX = 38
-      integer, parameter :: DB_ZONETYPE_QUAD_BEAM = 11
-      integer, parameter :: DB_ZONETYPE_QUAD_TRIANGLE = 25
-      integer, parameter :: DB_ZONETYPE_QUAD_QUAD = 26
-      integer, parameter :: DB_ZONETYPE_QUAD_TET = 118
-      integer, parameter :: DB_ZONETYPE_QUAD_PYRAMID = 120
-      integer, parameter :: DB_ZONETYPE_QUAD_PRISM = 113
-      integer, parameter :: DB_ZONETYPE_QUAD_HEX = 116
-      integer, parameter :: DB_MAX_H5_OBJ_VALS = 64
+      integer(kind=4), parameter :: DB_EOA = 0_4
+      integer(kind=4), parameter :: DB_NOBJ_TYPES = 25_4
+      integer(kind=4), parameter :: DB_ZONETYPE_BEAM = 10_4
+      integer(kind=4), parameter :: DB_ZONETYPE_POLYGON = 20_4
+      integer(kind=4), parameter :: DB_ZONETYPE_TRIANGLE = 23_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD = 24_4
+      integer(kind=4), parameter :: DB_ZONETYPE_POLYHEDRON = 30_4
+      integer(kind=4), parameter :: DB_ZONETYPE_TET = 34_4
+      integer(kind=4), parameter :: DB_ZONETYPE_PYRAMID = 35_4
+      integer(kind=4), parameter :: DB_ZONETYPE_PRISM = 36_4
+      integer(kind=4), parameter :: DB_ZONETYPE_HEX = 38_4
+      integer(kind=4), parameter :: DB_ZONETYPE_CONVEX_HULL = 40_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_BEAM = 11_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_TRIANGLE = 25_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_QUAD = 26_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_TET = 118_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_PYRAMID = 120_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_PRISM = 113_4
+      integer(kind=4), parameter :: DB_ZONETYPE_QUAD_HEX = 116_4
+      integer(kind=4), parameter :: DB_MAX_H5_OBJ_VALS = 64_4
       character (len=10), parameter :: DB_F77NULLSTRING = "NULLSTRING"
 
 
