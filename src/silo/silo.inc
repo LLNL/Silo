@@ -1,6 +1,6 @@
 Ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 C 
-C      SILO include file for Fortan applications.
+C       SILO include file for Fortan applications.
 C 
 C  Programmer:   miller86 Tue Sep 12 10:09:10 PDT 2023
 C 
