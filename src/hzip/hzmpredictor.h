@@ -23,7 +23,7 @@ public:
 private:
   unsigned index(unsigned x) const { return x & (size - 1); }
   unsigned length(unsigned u, unsigned v) const { return u > v ? u - v : v - u; }
-  unsigned node(const unsigned* v, int i, int j) const { return v[(i << dims) + j]; }
+  unsigned node(const unsigned* v, int i, int j) const { return v[i * (1 << dims) + j]; }
 
   const unsigned dims;  // number of dimensions
   const unsigned size;  // hash table size
