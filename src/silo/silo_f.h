@@ -54,7 +54,6 @@ be used for advertising or product endorsement purposes.
 #ifndef SILO_F_H
 #define SILO_F_H
 
-
 /*
  * SILO FORTRAN Interface.
  */
