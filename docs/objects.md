@@ -424,6 +424,70 @@ Finally, Silo also supports the specification of expressions representing derive
   This includes the coordinate arrays, the topological dimension of the mesh (1,2,3,...) and the type of coordinates (collinear or non-collinear).
   In addition, other information is useful and is therefore optionally included (row-major indicator, time and cycle of mesh, offsets to *real* zones, plus coordinate system type.)
 
+  **Special considerations for the `dims` argument**
+
+  Consider a 2D mesh of quadrilateral zones arranged, geometrically, in 2 rows and 3 columns of elements as pictured below...
+
+  ```
+     2 a-----b-----c-----d
+       |     |     |     |
+  Y    |  A  |  B  |  C  |
+  ^  1 e-----f-----g-----h
+  |    |     |     |     |
+  |    |  D  |  E  |  F  |
+     0 i-----j-----k-----l
+       0     1     2     3
+
+             ---> X
+  ```
+
+  The zones are labeled, in order, with upper case letters whereas the nodes are labeled in order with lower case letters.
+  Lets ignore, for the moment, that the example illustrates a *rectilinear* mesh and instead treat it as *curvilinear*.
+  This means the *nodal* coordinate arrays and *zonal* variable array will all be two dimensional arrays of data.
+
+  What do the cooresponding arrays typically look like in the memory of a C application?
+
+  ```
+      /* nodal dimensions */
+      int ndims[2] = {4,3};
+
+      /* 2D nodal coordinate arrays: a,b,c,d,e,f,g,h,i,j,k,l */
+      float xcoords[3][4] =         {0,1,2,3,0,1,2,3,0,1,2,3};
+      float ycoords[3][4] =         {2,2,2,2,1,1,1,1,0,0,0,0}
+
+      /* zonal dimensions */
+      int zdims[2] = {3,2};
+
+      /* 2D zonal variable array */
+      float zvar[2][3] = {A,B,C,D,E,F};
+  ```
+
+  In particular, note that while the nodal arrays are dimensioned `[3][4]`, the associated `dims[2]` array is `{4,3}` indicating that `dims[0]` is the fastest varying dimension of size 4 whereas `dims[1]` is the slowest varying dimension of size 3.
+  So, they are the *reverse* of each other.
+  But, this is only an artifact of the way we specify the *dimensions* of multidimensional arrays in programming languages such as C or Fortran versus the *contents* of a single dimensional array holding the *sizes* of those dimensions.
+
+  To see how dimensions are handled for a working example in C, see...
+
+  ```{literalinclude} ../tests/majorder.c
+  :start-at: "main(int argc, char *argv[])"
+  :end-at: "    CleanupDriverStuff();"
+  ```
+
+  For a working example in Fortran, see...
+
+  ```{literalinclude} ../tests/quadf77.f
+  :start-at: "      parameter  (NX     = 4)"
+  :end-at: "C...End of function buildquad"
+  ```
+  
+  Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
+  For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
+  However, this function can also be used to define a surface of quadrilaterals embedded in 3-space or a path of line segments embedded in 2- or 3-space.
+  In these less common cases, the topological dimension is lower than the geometric dimension.
+  The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent *extra* dimensions to one.
+  For example, to specify a mesh of quadrilaterals in 3-space, set `ndims` to 3 but set dims[2] to 1.
+  To specify a mesh of lines defining a path embedded in 3-space, `ndims` would again be 3 but dims[1] and dims[2] would both be 1.
+  In fact, this works in general.
   Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
   For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
   However, this function can also be used to define a surface of quadrilaterals embedded in 3-space or a path of line segments embedded in 2- or 3-space.
@@ -434,6 +498,8 @@ Finally, Silo also supports the specification of expressions representing derive
   In fact, this works in general.
   For N geometric dimensions and N-k topological dimensions, set ndims=N and dims[N-1-k]...dims[N-1] to 1.
   An example of doing this can be found in some [VisIt test data](https://github.com/visit-dav/visit/blob/31e345e285a75a18a483d07643c30cc3ee58bcac/src/tools/data/datagen/quad_disk.C#L189)
+
+  When writing multidimensional data from Fortran codes, consider the `DB_MAJORORDER` optlist option.
 
   The following table describes the options accepted by this function.
   See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
@@ -450,7 +516,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
   `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
   `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
-  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0, `DB_ROWMAJOR`) or column-major (1, `DB_COLMAJOR`) storage for multidimensional arrays.|0
   `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
   `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
   `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_OTHER`
@@ -612,7 +678,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
   `DBOPT_LABEL`|`char*`|Character string defining the label associated with this variable| `NULL`
-  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0, `DB_ROWMAJOR`) or column-major (1, `DB_COLMAJOR`) storage for multidimensional arrays.|0
   `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
   `DBOPT_TIME`|`float`|Problem time value.|0.0
   `DBOPT_DTIME`|`double`|Problem time value.|0.0
@@ -2397,14 +2463,6 @@ Finally, Silo also supports the specification of expressions representing derive
   If an error occurs, `NULL` is returned.
 
 {{ EndFunc }}
-
-## `DBInqMeshname()`
-
-* **Summary:** Inquire the mesh name associated with a variable.
-
-* **C Signature:**
-
-  ```
   int DBInqMeshname (DBfile *dbfile, char const *varname,
       char *meshname)
   ```
