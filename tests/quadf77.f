@@ -78,7 +78,7 @@ C...............................................................................
       include "silo.inc"
 
       integer  buildquad
-      integer  dbid, meshid, err, driver, nargs, anint
+      integer  dbid, err, driver, nargs, anint
       integer  iarr(20)
       real*8   darr(20)
       character*8 cname
@@ -97,8 +97,8 @@ C...Create file.
       err = dbcreate("quadf77.silo", 12, DB_CLOBBER, DB_LOCAL,
      .               "file info", 9, driver, dbid)
 
-      meshid = buildquad (dbid, "quad", 4)
-      meshid = buildquad (dbid, "quad2", 5)
+      err = buildquad (dbid, "quad", 4)
+C     err = buildquad (dbid, "quad2", 5)
 
       call testdb (dbid)
 
@@ -114,7 +114,8 @@ C...Read stuff.
 
       err = dbinqlen(dbid, "quad_coord0", 11, anint)
       if (err .ne. 0) print *, 'Unable to read quad_coord0 length'
-      if (anint .ne. 4) print *, 'Error reading quad_coord0 length'
+C...anint should be NX*NY
+      if (anint .ne. 12) print *, 'Error reading quad_coord0 length'
 
       err = dbinqdtyp(dbid, "quad_coord0", 11, anint)
       if (err .ne. 0) print *, 'Unable to read quad_coord0 data type'
@@ -159,15 +160,19 @@ C----------------------------------------------------------------------
 
       parameter  (NX     = 4)
       parameter  (NY     = 3)
+      parameter  (NX1    = 3)
+      parameter  (NY1    = 2)
       parameter  (NZONES = 6)
       parameter  (NNODES = 12)
 
       include 'silo.inc'
 
-      integer    i, meshid, varid
+      integer    i, dummyid, varid
       integer    tcycle, mixlen, optlistid
-      integer    dims(3), ndims
-      real       x(NX), y(NY), d(NZONES), f(2*NZONES)
+      integer    ndims(2), zdims(2), dimcnt
+      real       x(NX,NY), y(NX,NY), d(NX-1,NY-1)
+C...vector variable
+      real       f(NX,NY,2) 
       real       ttime
       double precision dttime
       character*1024 vnames(2)
@@ -176,16 +181,31 @@ C----------------------------------------------------------------------
 
 C...Initializations.
 
-      data  x/1.,2.,3.,4./
-      data  y/1.,2.,3./
-      data  d/1.,2.,3.,4.,5.,6./
-      data  f/1.0,1.1,1.2,1.3,1.4,1.5,2.0,2.1,2.2,2.3,2.4,2.5/
-
+      data ndims/NY,  NX/
+      data zdims/NY1, NX1/
+      data  x/
+     .    1., 2., 3., 4.,
+     .    1., 2., 3., 4.,
+     .    1., 2., 3., 4./
+      data  y/
+     .    3., 3., 3., 3.,
+     .    2., 2., 2., 2.,
+     .    1., 1., 1., 1./
+      data  d/
+     .    1.1, 1.2, 1.3,
+     .    2.1, 2.2, 2.3/
+      data  f/
+     .    1., 2., 3., 4.,
+     .    1., 2., 3., 4.,
+     .    1., 2., 3., 4.,
+     .    3., 3., 3., 3.,
+     .    2., 2., 2., 2.,
+     .    1., 1., 1., 1./
+          
+      dimcnt    = 2
       ttime     = 2.345
       dttime    = 2.345
       tcycle    = 200
-
-
 
 C...Create an option list containing time and cycle information. Note
 C...that the function names are different depending on the data type
@@ -196,57 +216,36 @@ C...to this option list in future function invocations.
       ierr = dbaddropt   (optlistid, DBOPT_TIME, ttime)    ! real
       ierr = dbaddiopt   (optlistid, DBOPT_CYCLE, tcycle)  ! integer
       ierr = dbadddopt   (optlistid, DBOPT_DTIME, dttime)  ! double
+      ierr = dbaddiopt   (optlistid, DBOPT_MAJORORDER, DB_COLMAJOR)
 
-C...The following option would change the major order for multi-
-C...dimensional arrays from row-major (default) to column-major.
-C...If you have arrays defined like:  real  x(300,200) you might
-C...need this.
-
-C     ierr = dbaddiopt   (optlistid, DBOPT_MAJORORDER, DB_COLMAJOR)
-
-
-C...Write simple 2-D quad mesh. Dims defines number of NODES. The
-C...parameter 'meshid' is returned and should be used on future
-C...writes of quad variables.
-
-      ndims     = 2
-      dims(1)   = NX
-      dims(2)   = NY
-
+C...Write simple 2-D quad mesh. Dims defines number of NODES.
 
       err = dbputqm(dbid, name, lname,
      .              "X", 1, "Y", 1, DB_F77NULLSTRING, 0,
-     .              x, y, -1, dims, ndims, DB_FLOAT, DB_COLLINEAR,
-     .              optlistid, meshid)
+     .              x, y, -1, ndims, dimcnt, DB_FLOAT, DB_NONCOLLINEAR,
+     .              optlistid, dummyid)
 
 
 C...Write quad variable. Dims defines number of ZONES (since zone-centered).
 C...Possible values for centering are: DB_ZONECENT, DB_NODECENT, DB_NOTCENT.
 
-      ndims   = 2
-      dims(1) = NX - 1
-      dims(2) = NY - 1
-
-C...Hack to make sure we don't wind up writing same variable name twice to
-C...two different meshes
       if (lname .eq. 4) err = dbputqv1 (dbid, "d", 1, name,
-     .                lname, d, dims, ndims,
+     .                lname, d, zdims, dimcnt,
      .                DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
      .                optlistid, varid)
-      if (lname .eq. 5) err = dbputqv1 (dbid, "e", 1, name,
-     .                lname, d, dims, ndims,
-     .                DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
-     .                optlistid, varid)
+
+C...As of 10Nov25, VisIt does not handle the case below correctly. It
+C...fails to deal with major order correctly. The problem is in the
+C...Silo plugin's CopyAndPadPointOrQuadVectorVar. Issue #662
       vnames(1) = "FooBar"
       lvnames(1) = 6
       vnames(2) = "gorfo"
       lvnames(2) = 5
       err = dbputqv(dbid, "f", 1, name, lname, 2, vnames, lvnames,
-     .          f, dims, ndims, DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
+     .          f, ndims, dimcnt, DB_F77NULL, 0, DB_FLOAT, DB_NODECENT,
      .          optlistid, varid)
 
-      buildquad = meshid
-
+C...End of function buildquad
       return
       end
 
