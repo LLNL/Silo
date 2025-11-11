@@ -11,6 +11,7 @@ concurrency:
 
 jobs:
   rpmbuild:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     continue-on-error: ${{ matrix.config.continue-on-error == 'true' }}
     strategy:
       matrix:
