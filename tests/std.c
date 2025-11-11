@@ -96,6 +96,7 @@ if (!strncmp(tok, #A, strlen(#A)))			\
 }
 
 
+static int const skip_retval = 17;
 static DBoptlist *driver_opts[] = {0,0,0,0,0,0,0,0,0,0};
 static int driver_opts_ids[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static int driver_ints[100];
