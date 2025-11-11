@@ -69,7 +69,7 @@ int
 main(int argc, char *argv[])
 {
     int            driver = DB_PDB, driverType = DB_PDB;
-    int            i, err = 0;
+    int            i;
     DBfile        *dbfile;
     int            show_all_errors = FALSE;
     char           filename[256];
@@ -112,7 +112,9 @@ main(int argc, char *argv[])
     obj_names[11] = "../mesh1";
     obj_names[12] = "../block11/u";
 
-    DBSortObjectsByOffset(dbfile, 13, (DBCAS_t) obj_names, ordering);
+    if (DBSortObjectsByOffset(dbfile, 13, (DBCAS_t) obj_names, ordering) < 0)
+        return skip_retval;
+    
     printf("UNsorted objects...\n");
     for (i = 0; i < 13; i++)
         printf("\t\"%s\"\n", obj_names[i]);
@@ -122,5 +124,5 @@ main(int argc, char *argv[])
 
     DBClose(dbfile);
 
-    return err;
+    return 0;
 }
