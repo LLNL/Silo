@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 {
     DBfile		*dbfile;
     int			i, nerrors=0,  driver=DB_PDB;
-    char		*filename="newsami-test.sami";
+    char const		*filename="newsami-test.sami";
     int                 show_all_errors = FALSE;
     int                 arch_g = DB_LOCAL;
     int                 seed = 0;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 
     /* Write the coordinate data */
     int nnodes = coords[0].size();
-    char *cnames[3] = {"x", "y", "z"};
+    char const *cnames[3] = {"x", "y", "z"};
     for (i = 0; i < 3; i++)
         DBWrite(dbfile, cnames[i], &coords[i][0], &nnodes, 1, DB_DOUBLE);
 
