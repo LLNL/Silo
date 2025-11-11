@@ -466,37 +466,32 @@ Finally, Silo also supports the specification of expressions representing derive
   So, they are the *reverse* of each other.
   But, this is only an artifact of the way we specify the *dimensions* of multidimensional arrays in programming languages such as C or Fortran versus the *contents* of a single dimensional array holding the *sizes* of those dimensions.
 
-  To see how dimensions are handled for a working example in C, see...
+  To see how dimensions are handled for a working example in C, see the [majorder.c]({{ "../tests/majorder.c" | relative_url }}) test code...
 
   ```{literalinclude} ../tests/majorder.c
   :start-at: "main(int argc, char *argv[])"
   :end-at: "    CleanupDriverStuff();"
   ```
 
-  For a working example in Fortran, see...
+  For a working example in Fortran, see the [quadf77.f]({{ "../tests/quadf77.f" | relative_url }}) test code...
 
   ```{literalinclude} ../tests/quadf77.f
   :start-at: "      parameter  (NX     = 4)"
   :end-at: "C...End of function buildquad"
   ```
   
-  Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
-  For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
-  However, this function can also be used to define a surface of quadrilaterals embedded in 3-space or a path of line segments embedded in 2- or 3-space.
+  Typically, the number of geometric dimensions (e.g. size of the coordinate tuple) and topological dimensions (e.g. element shapes comprising the mesh) agree.
+  For example, this function is typically used to define a 3D arrangement of 3D hexahedra or a 2D arrangement of 2D quadrilaterals.
+  However, this function can also be used to define a 2D surface of 2D quadrilaterals embedded in 3D or a 1D path of 1D line segments embedded in 2D or 3D.
   In these less common cases, the topological dimension is lower than the geometric dimension.
-  The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent *extra* dimensions to one.
-  For example, to specify a mesh of quadrilaterals in 3-space, set `ndims` to 3 but set dims[2] to 1.
-  To specify a mesh of lines defining a path embedded in 3-space, `ndims` would again be 3 but dims[1] and dims[2] would both be 1.
+  The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent the *extra* dimensions to one.
+  For example, to specify a mesh of quadrilaterals in 3D, set `ndims` to 3 but set `dims[2]` to 1.
+  Doing so would define an arrangement of XY quadrilaterals in 3D.
+  If, however, an arrangement of XZ or YZ quadrilaterals was needed, then set `dims[1]=1` or `dims[0]=1` respectively.
+  To specify a 1D mesh of lines defining a path embedded in 3D, `ndims` would again be 3 but `dims[1]` and `dims[2]` would both be 1.
+
   In fact, this works in general.
-  Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
-  For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
-  However, this function can also be used to define a surface of quadrilaterals embedded in 3-space or a path of line segments embedded in 2- or 3-space.
-  In these less common cases, the topological dimension is lower than the geometric dimension.
-  The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent *extra* dimensions to one.
-  For example, to specify a mesh of quadrilaterals in 3-space, set `ndims` to 3 but set dims[2] to 1.
-  To specify a mesh of lines defining a path embedded in 3-space, `ndims` would again be 3 but dims[1] and dims[2] would both be 1.
-  In fact, this works in general.
-  For N geometric dimensions and N-k topological dimensions, set ndims=N and dims[N-1-k]...dims[N-1] to 1.
+  For `N` geometric dimensions and `N-k` topological dimensions, set `ndims=N` and `dims[N-1-k]`...`dims[N-1]` to 1.
   An example of doing this can be found in some [VisIt test data](https://github.com/visit-dav/visit/blob/31e345e285a75a18a483d07643c30cc3ee58bcac/src/tools/data/datagen/quad_disk.C#L189)
 
   When writing multidimensional data from Fortran codes, consider the `DB_MAJORORDER` optlist option.
