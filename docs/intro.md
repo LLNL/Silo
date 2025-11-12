@@ -92,6 +92,7 @@ Default values are specified with `=<value>` for each option.
 
 `SILO_QT6_DIR:PATH=`
 : Tell Silo's CMake where to find a Qt6 installation if it is not in *standard* places CMake looks for it.
+  The specified path must be to a directory holding the `Qt6Config.cmake` file.
 
 `SILO_ENABLE_HDF5:BOOL=ON`
 : Enable the HDF5 driver using CMake's `find_package()`.
