@@ -88,7 +88,9 @@ if(NOT HDF5_FOUND)
             INTERFACE_INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
     endif()
     
-elseif(HDF5_FOUND)
+endif()
+
+#if(HDF5_FOUND)
     # needed for config.h
     set(HAVE_HDF5_H 1)
     set(HAVE_HDF5_DRIVER 1)
