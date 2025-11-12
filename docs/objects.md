@@ -473,28 +473,29 @@ Finally, Silo also supports the specification of expressions representing derive
   :end-at: "    CleanupDriverStuff();"
   ```
 
-  For a working example in Fortran, see the [quadf77.f](https://raw.githubusercontent.com/LLNL/Silo/refs/heads/main/tests/quadf77.f) test code...
+  For a working example in Fortran, see the [quadf77.f](https://raw.githubusercontent.com/LLNL/Silo/refs/heads/main/tests/quadf77.f) test code...]
+  When writing multidimensional data from Fortran codes, consider the `DB_MAJORORDER` optlist option.
+  Take note of its use in the example below.
 
   ```{literalinclude} ../tests/quadf77.f
   :start-at: "      parameter  (NX     = 4)"
   :end-at: "C...End of function buildquad"
   ```
+
+  **Geometric dimensionality vs. topological dimensionality**
   
-  Typically, the number of geometric dimensions (e.g. size of the coordinate tuple) and topological dimensions (e.g. element shapes comprising the mesh) agree.
-  For example, this function is typically used to define a 3D arrangement of 3D hexahedra or a 2D arrangement of 2D quadrilaterals.
-  However, this function can also be used to define a 2D surface of 2D quadrilaterals embedded in 3D or a 1D path of 1D line segments embedded in 2D or 3D.
-  In these less common cases, the topological dimension is lower than the geometric dimension.
+  Typically, the number of geometric dimensions (e.g. size of the coordinate tuple) and topological dimensions (e.g. element shapes comprising the mesh) are the same.
+  For example, `DBPutQuadmesh()` is typically used to define a 3D arrangement of 3D hexahedra or a 2D arrangement of 2D quadrilaterals.
+  However, this function can also be used to define a 2D surface of 2D quadrilaterals (e.g. a surface of quadrilaterals) embedded in 3D or even a 1D path of 1D line segments embedded in 2D or 3D.
+  
+  In these less common cases, the topological dimension is *lower* than the geometric dimension.
   The correct way to use this function to define such meshes is to use the `ndims` argument to specify the number of geometric dimensions and then to set those entries in the `dims` array that represent the *extra* dimensions to one.
-  For example, to specify a mesh of quadrilaterals in 3D, set `ndims` to 3 but set `dims[2]` to 1.
+  
+  For example, to specify a mesh of 2D quadrilaterals in 3D, set `ndims` to 3 but set `dims[2]` to 1.
   Doing so would define an arrangement of XY quadrilaterals in 3D.
   If, however, an arrangement of XZ or YZ quadrilaterals was needed, then set `dims[1]=1` or `dims[0]=1` respectively.
   To specify a 1D mesh of lines defining a path embedded in 3D, `ndims` would again be 3 but `dims[1]` and `dims[2]` would both be 1.
-
-  In fact, this works in general.
-  For `N` geometric dimensions and `N-k` topological dimensions, set `ndims=N` and `dims[N-1-k]`...`dims[N-1]` to 1.
-  An example of doing this can be found in some [VisIt test data](https://github.com/visit-dav/visit/blob/31e345e285a75a18a483d07643c30cc3ee58bcac/src/tools/data/datagen/quad_disk.C#L189)
-
-  When writing multidimensional data from Fortran codes, consider the `DB_MAJORORDER` optlist option.
+  Examples of doing this can be found in some [VisIt test data](https://github.com/visit-dav/visit/blob/31e345e285a75a18a483d07643c30cc3ee58bcac/src/tools/data/datagen/quad_disk.C#L189-L218)
 
   The following table describes the options accepted by this function.
   See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
