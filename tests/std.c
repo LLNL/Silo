@@ -95,7 +95,7 @@ if (!strncmp(tok, #A, strlen(#A)))			\
     got_it = 1;						\
 }
 
-
+/* If you change 17 here, change SKIP_RETURN_VALUE in CMakeLists.txt too */
 static int const skip_retval = 17;
 static DBoptlist *driver_opts[] = {0,0,0,0,0,0,0,0,0,0};
 static int driver_opts_ids[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
