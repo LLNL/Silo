@@ -90,7 +90,7 @@ if(NOT HDF5_FOUND)
     
 endif()
 
-#if(HDF5_FOUND)
+if(HDF5_FOUND)
     # needed for config.h
     set(HAVE_HDF5_H 1)
     set(HAVE_HDF5_DRIVER 1)
