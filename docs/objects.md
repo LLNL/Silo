@@ -466,14 +466,14 @@ Finally, Silo also supports the specification of expressions representing derive
   So, they are the *reverse* of each other.
   But, this is only an artifact of the way we specify the *dimensions* of multidimensional arrays in programming languages such as C or Fortran versus the *contents* of a single dimensional array holding the *sizes* of those dimensions.
 
-  To see how dimensions are handled for a working example in C, see the [majorder.c]({{ "/../tests/majorder.c" | relative_url }}) test code...
+  To see how dimensions are handled for a working example in C, see the [majorder.c](https://raw.githubusercontent.com/LLNL/Silo/refs/heads/main/tests/majorder.c) test code...
 
   ```{literalinclude} ../tests/majorder.c
   :start-at: "main(int argc, char *argv[])"
   :end-at: "    CleanupDriverStuff();"
   ```
 
-  For a working example in Fortran, see the [quadf77.f]({{ "/../tests/quadf77.f" | relative_url }}) test code...
+  For a working example in Fortran, see the [quadf77.f](https://raw.githubusercontent.com/LLNL/Silo/refs/heads/main/tests/quadf77.f) test code...
 
   ```{literalinclude} ../tests/quadf77.f
   :start-at: "      parameter  (NX     = 4)"
