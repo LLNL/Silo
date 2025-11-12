@@ -60,7 +60,7 @@
 
 if(DEFINED SILO_QT6_DIR AND EXISTS ${SILO_QT6_DIR})
     # set the variable needed for CMake to find this version of Qt
-    set(Qt6_DIR ${SILO_QT6_DIR})
+    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${SILO_QT6_DIR}/lib/cmake)
 endif()
 
 find_package(Qt6 COMPONENTS Core Gui Widgets CONFIG)
