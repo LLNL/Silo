@@ -64,6 +64,32 @@ endif()
 
 find_package(HDF5)
 
+if(NOT HDF5_FOUND)
+    include(FindPackageHandleStandardArgs)
+    
+    set(_hints)
+    if(DEFINED SILO_HDF5_DIR AND EXISTS ${SILO_HDF5_DIR})
+        set(_hints HINTS ${SILO_HDF5_DIR}/include ${SILO_HDF5_DIR}/lib ${SILO_HDF5_DIR}/lib64)
+    endif()
+    
+    find_path(HDF5_INCLUDE_DIR NAMES hdf5.h ${_hints} PATH_SUFFIXES hdf5)
+    find_library(HDF5_LIBRARY NAMES hdf5 ${_hints} PATH_SUFFIXES hdf5)
+    
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(HDF5 REQUIRED_VARS HDF5_LIBRARY HDF5_INCLUDE_DIR)
+    
+    if(HDF5_FOUND AND NOT TARGET HDF5::HDF5)
+        set(HDF5_LIBRARIES ${HDF5_LIBRARY})
+        set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
+        set(HDF5_C_LIBRARIES ${HDF5_LIBRARY})
+        
+        add_library(HDF5::HDF5 UNKNOWN IMPORTED)
+        set_target_properties(HDF5::HDF5 PROPERTIES
+            IMPORTED_LOCATION "${HDF5_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
+    endif()
+    
+endif()
+
 if(HDF5_FOUND)
     # needed for config.h
     set(HAVE_HDF5_H 1)
