@@ -131,7 +131,7 @@ main(int argc, char *argv[])
     
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "test major order on quad meshes and vars", driver);
 
-    /* Silo's default is to assume row-major. So, not optlist options needed. */
+    /* Silo's default is to assume row-major. So, no optlist options needed. */
     coords[0] = row_maj_x_data;
     coords[1] = row_maj_y_data;
     DBPutQuadmesh(dbfile, "row_major_mesh", 0, coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, 0);
