@@ -656,8 +656,7 @@ if(SILO_ENABLE_SILOCK)
     endif()
 endif()
 
-# There is a bug in HDF5-1.14.6 that causes this test to fail
-if(SILO_ENABLE_HDF5 AND HDF5_FOUND AND (NOT HDF5_VERSION VERSION_EQUAL "1.14.6"))
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     add_custom_target(checksums ALL)
     add_custom_command(TARGET checksums POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -670,6 +669,10 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND AND (NOT HDF5_VERSION VERSION_EQUAL "1.14.6")
         "${silo_test_output_dir}/checksums")
     set_tests_properties(checksums PROPERTIES DEPENDS multi_test-hdf5)
     set_tests_properties(checksums PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
+    # There is a bug in HDF5-1.14.6 that causes this test to fail
+    if(HDF5_VERSION VERSION_EQUAL "1.14.6")
+        set_tests_properties(checksums PROPERTIES DISABLED TRUE)
+    endif()
 endif()
 
 #
@@ -725,34 +728,4 @@ if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
         set_tests_properties(testonehex-hdf5 PROPERTIES LABELS "python")
     endif()
 
-endif()
-
-###-----------------------------------------------------------------------------------------
-# Create check target that calls SiloMakeCheckRunner.
-# SiloMakeCheckRunner will run each test, check its output status and write the results.
-#
-# Any CMAKE vars or other information needs to be passed as -D defines
-#
-#  WD working directory
-#  HDF5 Use hdf5 driver for tests
-#  PY Python executable
-#  PYPATH  what to use for PYTHONPATH env var
-#  ADD_FORT  add fortran tests
-#
-# To run, call 'make check'
-###-----------------------------------------------------------------------------------------
-
-add_custom_target(check
-        COMMAND ${CMAKE_COMMAND}
-          -DWD=${silo_test_output_dir}
-          -DHDF5=${SILO_ENABLE_HDF5}
-          -DPY=${Python_EXECUTABLE}
-          -DPYPATH=$<TARGET_FILE_DIR:silo>
-          -DADD_FORT=${SILO_ENABLE_FORTRAN}
-          -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
-        WORKING_DIRECTORY ${silo_test_output_dir}
-        COMMENT "Running makecheck")
-add_dependencies(check copy_test_data)
-if(WIN32)
-    add_dependencies(check copy_test_deps)
 endif()
