@@ -23,6 +23,15 @@
     #define S_IWUSR _S_IWRITE
   #endif
 #endif
+
+#ifndef S_IRUSR
+  #ifdef S_IREAD
+    #define S_IRUSR S_IREAD
+  #else
+    #define S_IRUSR _S_IREAD
+  #endif
+#endif
+
 #ifndef S_ISREG
   #define S_ISREG(x) (((x) & S_IFMT) == S_IFREG)
 #endif

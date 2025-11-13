@@ -6875,7 +6875,9 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
+#ifndef _MSC_VER
 #warning FIXME
+#endif
 #if 0
         /* We don't know what name to pass to DBInqVarExists here because it
            is the driver that knows how to construct component names */
