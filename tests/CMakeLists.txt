@@ -68,15 +68,16 @@
 #   Sometimes both runs touch the same file name so HDF5 tests set to
 #   DEPEND on PDB tests when both are active.
 #
-#   Things get more complicated for these cases...
+#   Things get more complicated for cases if...
 #
 #       * A test works only on HDF5 or only on PDB driver
-#       * A test is defined only for certain options
+#       * A test is defined only for certain build options
 #       * A test needs special command-line arguments
-#       * A test is run many different ways producing the same file(s)
-#       * A test requires the data produced by another
+#       * A test client is used to run many different ways
+#         producing different files but with the same names
+#       * A test requires the data produced by another test
 #       * A test involves a shell or python script
-#       * A test involves multiple source files 
+#       * A test involves multiple source files
 #
 #   The C_TEST_SOURCES, CXX_TEST_SOURCES and F_TEST_SOURCES are the main
 #   file globbed list of C, C++ and Fortran source files. There are some
@@ -92,7 +93,7 @@
 #
 #   CMake's RESOURCE_LOCK property is used in some cases but maybe it
 #   should be used more liberally. We should probably use REQUIRED_FILES
-#   more. There may be some logic errors here where we wind up overriding
+#   more too. There may be some logic errors here where we wind up overriding
 #   a test's properties.
 #
 # Notes on how to do valgrind testing...
@@ -174,6 +175,13 @@ if(WIN32)
     endif()
 
 endif()
+
+###-------------------------------------------------------------------------------------
+# Scan skip return value from std.c.
+# Tests return this value if logic decides the config does not allow it to run properly.
+###-------------------------------------------------------------------------------------
+file(STRINGS "std.c" _skip_retval_line REGEX "SKIP_RETURN_VALUE")
+string(REGEX MATCH "([0-9]+)" _silo_test_skip_retval "${_skip_retval_line}")
 
 ###-------------------------------------------------------------------------------------
 # Copy data files needed for testing to test output dir.
@@ -397,21 +405,21 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
     if(srcFile IN_LIST HDF5_ONLY_SOURCES)
         add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
         set_tests_properties(${base}-hdf5 PROPERTIES LABELS "hdf5")
-        set_tests_properties(${base}-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+        set_tests_properties(${base}-hdf5 PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
         if(src IN_LIST F_TEST_SOURCES)
             set_tests_properties(${base}-hdf5 PROPERTIES LABELS "fortran")
         endif()
     elseif(srcFile IN_LIST PDB_ONLY_SOURCES)
         add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
         set_tests_properties(${base} PROPERTIES LABELS "pdb")
-        set_tests_properties(${base} PROPERTIES SKIP_RETURN_CODE 17)
+        set_tests_properties(${base} PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
         if(src IN_LIST F_TEST_SOURCES)
             set_tests_properties(${base} PROPERTIES LABELS "fortran")
         endif()
     else()
         add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
         set_tests_properties(${base} PROPERTIES LABELS "pdb")
-        set_tests_properties(${base} PROPERTIES SKIP_RETURN_CODE 17)
+        set_tests_properties(${base} PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
         if(src IN_LIST F_TEST_SOURCES)
             set_tests_properties(${base} PROPERTIES LABELS "fortran")
         endif()
@@ -419,7 +427,7 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
             add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
             set_tests_properties(${base}-hdf5 PROPERTIES DEPENDS ${base})
             set_tests_properties(${base}-hdf5 PROPERTIES LABELS "hdf5")
-            set_tests_properties(${base}-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+            set_tests_properties(${base}-hdf5 PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
             if(src IN_LIST F_TEST_SOURCES)
                 set_tests_properties(${base}-hdf5 PROPERTIES LABELS "fortran")
             endif()
@@ -648,7 +656,8 @@ if(SILO_ENABLE_SILOCK)
     endif()
 endif()
 
-if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+# There is a bug in HDF5-1.14.6 that causes this test to fail
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND AND (NOT HDF5_VERSION VERSION_EQUAL "1.14.6"))
     add_custom_target(checksums ALL)
     add_custom_command(TARGET checksums POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -656,9 +665,11 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         ${silo_test_output_dir})
     add_test(NAME checksums
         COMMAND ${CMAKE_COMMAND} -E env
+        PATH=${_sh_path}
         ASAN_OPTIONS=detect_leaks=0
         "${silo_test_output_dir}/checksums")
-    set_tests_properties(multi_test-hdf5 PROPERTIES DEPENDS checksums)
+    set_tests_properties(checksums PROPERTIES DEPENDS multi_test-hdf5)
+    set_tests_properties(checksums PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
 endif()
 
 #
