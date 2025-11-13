@@ -98,7 +98,6 @@ C...Create file.
      .               "file info", 9, driver, dbid)
 
       err = buildquad (dbid, "quad", 4)
-C     err = buildquad (dbid, "quad2", 5)
 
       call testdb (dbid)
 
@@ -158,6 +157,18 @@ C----------------------------------------------------------------------
       character*(*) name
       integer lname
 
+C...Mesh node and zone organization...
+C...    (Y)
+C...     2  1-----2-----3-----4
+C...        |     |     |     |
+C...        |  1  |  2  |  3  |
+C...     1  5-----6-----7-----8
+C...        |     |     |     |
+C...        |  4  |  5  |  6  |
+C...     0  9----10----11----12
+C...
+C...        0     1     2     3 (X)
+
       parameter  (NX     = 4)
       parameter  (NY     = 3)
       parameter  (NX1    = 3)
@@ -170,14 +181,14 @@ C----------------------------------------------------------------------
       integer    i, dummyid, varid
       integer    tcycle, mixlen, optlistid
       integer    ndims(2), zdims(2), dimcnt
+C...2D array nodal coordinate vars, x, y and zonal var, d
       real       x(NX,NY), y(NX,NY), d(NX-1,NY-1)
-C...vector variable
+C...2D array nodal, vector variable, f
       real       f(NX,NY,2) 
       real       ttime
       double precision dttime
       character*1024 vnames(2)
       integer lvnames(2)
-
 
 C...Initializations.
 
@@ -195,9 +206,11 @@ C...Initializations.
      .    1.1, 1.2, 1.3,
      .    2.1, 2.2, 2.3/
       data  f/
+C...first component
      .    1., 2., 3., 4.,
      .    1., 2., 3., 4.,
      .    1., 2., 3., 4.,
+C...second component
      .    3., 3., 3., 3.,
      .    2., 2., 2., 2.,
      .    1., 1., 1., 1./
@@ -218,7 +231,7 @@ C...to this option list in future function invocations.
       ierr = dbadddopt   (optlistid, DBOPT_DTIME, dttime)  ! double
       ierr = dbaddiopt   (optlistid, DBOPT_MAJORORDER, DB_COLMAJOR)
 
-C...Write simple 2-D quad mesh. Dims defines number of NODES.
+C...Write simple 2-D quad mesh. ndims defines number of NODES.
 
       err = dbputqm(dbid, name, lname,
      .              "X", 1, "Y", 1, DB_F77NULLSTRING, 0,
@@ -226,7 +239,7 @@ C...Write simple 2-D quad mesh. Dims defines number of NODES.
      .              optlistid, dummyid)
 
 
-C...Write quad variable. Dims defines number of ZONES (since zone-centered).
+C...Write quad variable. zdims defines number of ZONES (since zone-centered).
 C...Possible values for centering are: DB_ZONECENT, DB_NODECENT, DB_NOTCENT.
 
       if (lname .eq. 4) err = dbputqv1 (dbid, "d", 1, name,
@@ -234,9 +247,7 @@ C...Possible values for centering are: DB_ZONECENT, DB_NODECENT, DB_NOTCENT.
      .                DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
      .                optlistid, varid)
 
-C...As of 10Nov25, VisIt does not handle the case below correctly. It
-C...fails to deal with major order correctly. The problem is in the
-C...Silo plugin's CopyAndPadPointOrQuadVectorVar. Issue #662
+C...Write quad vector variable (2 components), node centered
       vnames(1) = "FooBar"
       lvnames(1) = 6
       vnames(2) = "gorfo"
@@ -269,18 +280,13 @@ C************************************************************
       namebase = 'abcdefgh'
       ilen     = 10
 
-
+C...Test just some generic data writes
       ierr = dbwrite ( dbid, "namebase", 8, namebase, 8, 1, DB_CHAR )
       ierr = dbwrite ( dbid, "ilen",     4, ilen,     1, 1, DB_INT )
-
-C                       write integer hydro common to dump
       ialen = 10
       ierr = dbwrite ( dbid, "hcom2", 5, ihfirst, ialen, 1, DB_INT )
-
-C                       write real hydro common to dump
       ialen = 15
       ierr = dbwrite ( dbid, "hcom3", 5, rhfirst, ialen, 1,DB_DOUBLE)
-
 
       return
       end
