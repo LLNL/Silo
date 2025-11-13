@@ -111,20 +111,22 @@ Default values are specified with `=<value>` for each option.
 : Tell Silo's CMake where to find a ZLIB installation if it is not in *standard* places CMake looks for it.
   Sometimes, an HDF5 installation has a dependence on ZLIB and getting Silo to link to that HDF5 installation then also requires telling it where to find ZLIB.
 
-`SILO_ENABLE_ZFP:BOOL=ON` (if HDF5 is enabled)
-: Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features.
-  This requires HDF5 to also be enabled.
-  If HDF5 is enabled, ZFP is also enabled by default.
-
 `SILO_ENABLE_FPZIP:BOOL=OFF`
-: Enable [fpzip](https://computing.llnl.gov/projects/fpzip) compression features
+: Enable [fpzip](https://computing.llnl.gov/projects/fpzip) compression features including a built-in version of the fpzip library.
   Even if HDF5 is enabled, fpzip is off by default because fpzip is not BSD licensed.
   To enable fpzip, you also have to disable a BSD only build. 
+  Although more recent versions of fpzip are available under BSD license, the version built-in with Silo is version 1.0.2 and was not released as BSD licensed open source.
 
 `SILO_ENABLE_HZIP:BOOL=OFF`
-: Enable [hzip](https://computing.llnl.gov/projects/hzip) compression features.
+: Enable [hzip](https://computing.llnl.gov/projects/hzip) compression features including a built-in version of the hzip library.
   Even if HDF5 is enabled, hzip is off by default because hzip is not BSD licensed.
-  To enable hzip, you also have to disable a BSD only build. 
+  To enable hzip, you also have to disable a BSD only build.
+
+`SILO_ENABLE_ZFP:BOOL=ON` (if HDF5 is enabled)
+: Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features including a built-in version of the zfp library.
+  This requires HDF5 to also be enabled.
+  If HDF5 is enabled, ZFP is enabled by default.
+  While the zfp library that comes *built-in* with Silo has been properly name-mangled to avoid any conflicts with any released version of zfp, unfortunately neither the hzip or fpzip libaries have been.
 
 Below is an example of a CMake command-line used to build Silo.
 After untaring the release distribution, cd into `silo-4.12.0` and make a `build` directory.
