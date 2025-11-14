@@ -7,10 +7,11 @@ permalink: /more/
 * [Silo API Reference Manual](https://silo.readthedocs.io/#major-sections-of-the-user-s-manual)
 * [VisIt's Silo Tutorial](https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/data_into_visit/SiloFormat.html#the-silo-file-format)
 * Silo Block-Based [Virtual File Driver](https://docs.hdfgroup.org/hdf5/develop/_v_f_l.html) (VFD) for [Dawn](https://www.osti.gov/servlets/purl/971777/) [design outline](assets/llnl_pres_428015.pdf) and [performance assessement](assets/llnl_pres_428059.pdf).
+* [LLNL Computing Platforms](https://hpc.llnl.gov/hardware/compute-platforms)
 * Some History
   * [A brief history](history.md)
   * From XFiles to SAF: The early pedigree of HDF5 ([video](https://youtu.be/0oCWg5UD6iE?si=IHPF1J3dmoujvFFw) / [slides](https://www.hdfgroup.org/wp-content/uploads/2023/08/hdf5_history_Mark_Miller.pdf))
-* Research Computing & Engineering (RCE) [Discussion about Silo](assets/20RCE-silo.mp3) (2009)
+  * Research Computing & Engineering (RCE) [Discussion about Silo](assets/20RCE-silo.mp3) (2009)
 * Related technologies (data structure objects - arrays, lists, trees)
   * [PDBLib](http://dx.doi.org/10.1063/1.4823180)
   * [HDF5](https://support.hdfgroup.org/documentation/hdf5/latest/)

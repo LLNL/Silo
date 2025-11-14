@@ -92,7 +92,7 @@ browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/bro
 # Ensure we have HDF5's 'h5stat' tool in PATH
 #
 if ! command -v h5stat >/dev/null 2>&1; then
-    echo "HDF5's 'h5stat' tool is required and not found."
+    echo "HDF5's 'h5stat' tool is required in PATH and not found."
     exit 1
 fi
 h5stat=$(command -v h5stat)

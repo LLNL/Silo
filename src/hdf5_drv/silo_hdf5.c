@@ -16786,6 +16786,9 @@ SILO_CALLBACK int
 db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     char const *const *const names, int *ordering)
 {
+
+#if HDF5_VERSION_GE(1,12,0) /* [ */
+
     static char *me = "db_hdf5_SortObjectsByOffset";
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     index_offset_pair_t *iop = (index_offset_pair_t*)
@@ -16835,6 +16838,12 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     free(iop);
 
     return 0;
+
+#else /* ] HDF5_VERSION_GE(1,12,0) [ */
+
+    return -1;
+
+#endif /* ] HDF5_VERSION_GE(1,12,0) */
 }
 
 #if HDF5_VERSION_GE(1,8,9) /* [ */

@@ -60,20 +60,51 @@ product endorsement purposes.
 #include <std.c>
 
 /*
- * 2 rows and 3 columns of variable data...
+ * 2 rows and 3 columns of zonal variable data...
  *
  *     1 2 3
  *     4 5 6
+ *
+ * which is really 3 rows and 4 columns of coordinate (nodal) data.    
  */
 
-int row_maj_v_data[] = {1,2,3,4,5,6};
-int col_maj_v_data[] = {1,4,2,5,3,6};
+/* Row major arrays */
+float row_maj_x_data[3][4] = {
+        {-5,  5, 10, 10},
+        {-5,  0,  5,  5},
+        {-5, -1,  0,  0}
+};
+float row_maj_y_data[3][4] = {
+        {10, 10,  5, -5},
+        { 5,  5,  0, -5},
+        { 0,  0, -1, -5}
+};
 
-float row_maj_x_data[] = {-5, 5, 10, 10, -5, 0, 5, 5, -5, -1, 0, 0};
-float row_maj_y_data[] = {10, 10, 5, -5, 5, 5, 0, -5, 0, 0, -1, -5};
+int row_maj_v_data[2][3] = {
+        {1,2,3},
+        {4,5,6}
+};
 
-float col_maj_x_data[] = {-5, -5, -5, 5, 0, -1, 10, 5, 0, 10, 5, 0};
-float col_maj_y_data[] = {10, 5, 0, 10, 5, 0, 5, 0, -1, -5, -5, -5};
+
+/* Col major arrays */
+float col_maj_x_data[4][3] = {
+        {-5, -5, -5},
+        { 5,  0, -1},
+        {10,  5,  0},
+        {10,  5,  0}
+};
+float col_maj_y_data[4][3] = {
+        {10,  5,  0},
+        {10,  5,  0},
+        { 5,  0, -1},
+        {-5, -5, -5}
+};
+
+int col_maj_v_data[3][2] = {
+        {1,4},
+        {2,5},
+        {3,6}
+};
 
 int
 main(int argc, char *argv[])
@@ -100,11 +131,14 @@ main(int argc, char *argv[])
     
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "test major order on quad meshes and vars", driver);
 
+    /* Silo's default is to assume row-major. So, no optlist options needed. */
     coords[0] = row_maj_x_data;
     coords[1] = row_maj_y_data;
     DBPutQuadmesh(dbfile, "row_major_mesh", 0, coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, 0);
     DBPutQuadvar1(dbfile, "row_major_var", "row_major_mesh", row_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, 0);
 
+    /* To handle col-major ordering, no need to transpose arrays.
+     * Just annotatate the data as col-major with an optlist option. */
     optlist = DBMakeOptlist(1);
     DBAddOption(optlist, DBOPT_MAJORORDER, &colmajor);
     coords[0] = col_maj_x_data;

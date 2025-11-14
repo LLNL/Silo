@@ -780,11 +780,22 @@ WriteAllFormats(int argc, char **argv)
 
             if (dname.find("rocket_") == string::npos)
                 continue;
-            if (dname.rfind(".so") == string::npos)
+
+            string fmtname, pname;
+            if (dname.rfind(".so") != string::npos)
+            {
+                fmtname = dname.substr(7,dname.size()-10);
+                pname = string(dirs[d])+"/"+dname;
+            }
+            else if (dname.rfind(".o") != string::npos)
+            {
+                fmtname = dname.substr(7,dname.size()-9);
+                pname = string(dirs[d])+"/"+dname;
+            }
+            else
+            {
                 continue;
-    
-            string fmtname = dname.substr(7,dname.size()-10);
-            string pname = string(dirs[d])+"/"+dname;
+            }
 
             void *dlhandle = dlopen(pname.c_str(), RTLD_LAZY);
             if (!dlhandle)
