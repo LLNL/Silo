@@ -256,7 +256,6 @@ typedef char const * const * DBCAS_t;
  * reason they DO NOT APPEAR there inspite of the fact that DO NOT HAVE the
  * 'NO_FORTRAN_DEFINE' text appearing on each line is that the mkinc script
  * requires an underscore in the symbol name for it to appear in silo.inc. */
-#define DBAll                     0xffffffffffffffffULL
 #define DBNone                    0x0000000000000000ULL
 #define DBCalc                    0x0000000000000001ULL
 #define DBMatMatnos               0x0000000000000002ULL
@@ -293,6 +292,41 @@ typedef char const * const * DBCAS_t;
 #define DBZonelistGhostZoneLabels 0x0000000100000000ULL
 #define DBMBNamesAndTypes         0x0000000200000000ULL
 #define DBMBOptions               0x0000000400000000ULL
+#define DBAll (DBCalc |\
+               DBMatMatnos |\
+               DBMatMatlist |\
+               DBMatMixList |\
+               DBCurveArrays |\
+               DBPMCoords |\
+               DBPVData |\
+               DBQMCoords |\
+               DBQVData |\
+               DBUMCoords |\
+               DBUMFacelist |\
+               DBUMZonelist |\
+               DBUVData |\
+               DBFacelistInfo |\
+               DBZonelistInfo |\
+               DBMatMatnames |\
+               DBUMGlobNodeNo |\
+               DBZonelistGlobZoneNo |\
+               DBMatMatcolors |\
+               DBCSGMBoundaryInfo |\
+               DBCSGMZonelist |\
+               DBCSGMBoundaryNames |\
+               DBCSGVData |\
+               DBCSGZonelistZoneNames |\
+               DBCSGZonelistRegNames |\
+               DBMMADJNodelists |\
+               DBMMADJZonelists |\
+               DBPMGlobNodeNo |\
+               DBPMGhostNodeLabels |\
+               DBQMGhostNodeLabels |\
+               DBQMGhostZoneLabels |\
+               DBUMGhostNodeLabels |\
+               DBZonelistGhostZoneLabels |\
+               DBMBNamesAndTypes |\
+               DBMBOptions)
 
 /* Definitions for COORD_TYPE */
 /* Placed before DBObjectType enum because the
