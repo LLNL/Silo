@@ -64,3 +64,11 @@ add_executable(test_install test_install.c)
 target_include_directories(test_install PRIVATE ${SILO_INCLUDE_DIR})
 target_link_libraries(test_install PRIVATE silo)
 add_test(NAME test_install COMMAND $<TARGET_FILE:test_install>)
+
+# Test the following
+#   - C Silo program (PDB and HDF5 driver - when enabled)
+#   - Fortran Silo program - when enabled
+#   - C++ Silo program
+#   - Python - when enabled
+#   - PDB Lite - when enabled
+#   - Json - when enabled
