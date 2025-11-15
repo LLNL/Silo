@@ -53,22 +53,68 @@
 ##############################################################################
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
+#
+# This whole project is to test whether `make install` installs Silo correctly
+#
 project(SiloInstallTest)
 
 include(CTest)
 
 find_package(Silo CONFIG REQUIRED)
-#find_package(hdf5 CONFIG REQUIRED COMPONENTS C)
 
-add_executable(test_install test_install.c)
-target_include_directories(test_install PRIVATE ${SILO_INCLUDE_DIR})
-target_link_libraries(test_install PRIVATE silo)
-add_test(NAME test_install COMMAND $<TARGET_FILE:test_install>)
+if(SILO_ENABLE_INSTALL_LITE_HEADERS)
+    add_executable(pdb_lite_test pdb_lite_test.c)
+    target_compile_definitions(pdb_lite_test PRIVATE PDB_LITE)
+    target_include_directories(pdb_lite_test PRIVATE ${SILO_INCLUDE_DIR})
+    target_link_libraries(pdb_lite_test PRIVATE silo)
+    add_test(NAME pdb_lite_test COMMAND $<TARGET_FILE:pdb_lite_test>)
+endif()
+
+#
+# C Test for both PDB and HDF5 drivers
+# If HDF5 driver not present, test will be logged as skipped by CTest
+#
+add_executable(c_test c_test.c)
+target_include_directories(c_test PRIVATE ${SILO_INCLUDE_DIR})
+target_link_libraries(c_test PRIVATE silo)
+add_test(NAME c_test COMMAND $<TARGET_FILE:c_test>)
+add_test(NAME c_test-hdf5 COMMAND $<TARGET_FILE:c_test> DB_HDF5)
+set_tests_properties(c_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+
+#
+# Cxx Test for both PDB and HDF5 drivers
+# If HDF5 driver not present, test will be logged as skipped by CTest
+#
+add_executable(cxx_test cxx_test.cxx)
+target_include_directories(cxx_test PRIVATE ${SILO_INCLUDE_DIR})
+target_link_libraries(cxx_test PRIVATE silo)
+add_test(NAME cxx_test COMMAND $<TARGET_FILE:cxx_test>)
+add_test(NAME cxx_test-hdf5 COMMAND $<TARGET_FILE:cxx_test> DB_HDF5)
+set_tests_properties(cxx_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+
+if(SILO_ENABLE_FORTRAN)
+    enable_language(Fortran)
+
+    add_executable(f77_test f77_test.f)
+    target_include_directories(f77_test PRIVATE ${SILO_INCLUDE_DIR})
+    target_link_libraries(f77_test PRIVATE silo)
+    add_test(NAME f77_test COMMAND $<TARGET_FILE:f77_test>)
+    add_test(NAME f77_test-hdf5 COMMAND $<TARGET_FILE:f77_test> DB_HDF5)
+    set_tests_properties(f77_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+
+    add_executable(f90_test f90_test.f90)
+    target_include_directories(f90_test PRIVATE ${SILO_INCLUDE_DIR})
+    target_link_libraries(f90_test PRIVATE silo)
+    add_test(NAME f90_test COMMAND $<TARGET_FILE:f90_test>)
+    add_test(NAME f90_test-hdf5 COMMAND $<TARGET_FILE:f90_test> DB_HDF5)
+    set_tests_properties(f90_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+endif()
+
+if(SILO_ENABLE_PYTHON_MODULE)
+    add_test(NAME py_test COMMAND ${Python_EXECUTABLE} py_test.py)
+    set_tests_properties(py_test PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>")
+endif()
 
 # Test the following
-#   - C Silo program (PDB and HDF5 driver - when enabled)
-#   - Fortran Silo program - when enabled
-#   - C++ Silo program
 #   - Python - when enabled
-#   - PDB Lite - when enabled
 #   - Json - when enabled

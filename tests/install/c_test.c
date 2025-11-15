@@ -52,54 +52,108 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
 
-#include <stdlib.h>
+#include "silo.h"               /*include public silo           */
+
+#include <math.h>
 #include <string.h>
-#include "silo.h"
-#include <std.c>
 
-extern int build_quad(DBfile *dbfile, char *name);
+#define NNODES 12
+#define NZONES 2
+#define NFACES 11
 
+
+/*-------------------------------------------------------------------------
+ * Function:        main
+ *
+ * Purpose:        Test writing a polyhedral zonelist
+ *
+ *                 Writes two hexes sharing a common face using a 
+ *                 polyhedral zonelist
+ *
+ * Return:        0
+ *
+ * Programmer:        Mark C. Miller, July 27, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
 int
-main (int argc, char *argv[])
+main(int argc, char *argv[])
 {
+    
+    int            i, driver=DB_PDB;
+    char          *filename="polyzl.pdb";
     DBfile        *dbfile;
-    int		  i, driver=DB_PDB;
-    static char	  *filename="quad.pdb";
-    int            show_all_errors = FALSE;
-    int            nmesh = 1;
-    int            meshtypes[1] = {DB_QUAD_RECT};
-    char const    *meshnames[1] = {"quadmesh"};
 
+    DBoptlist     *optlist;
+
+    char *xname = "xcoords";
+    char *yname = "ycoords";
+    char *zname = "zcoords";
+
+    float x[NNODES] = {0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0};
+    float y[NNODES] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    float z[NNODES] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+
+    int nodecnt[NFACES] = {4,4,4,4,4,4,4,4,4,4,4};
+    int lnodelist = 4 * NFACES;
+    int nodelist[4*NFACES] = {0,1,7,6,    1,2,8,7,    1,0,3,4,
+                              2,1,4,5,    4,3,9,10,   5,4,10,11, 
+                              6,7,10,9,   7,8,11,10,  0,6,9,3,
+                              1,7,10,4,   2,5,11,8};
+
+    int facecnt[NZONES] = {6,6};
+    int lfacelist = 6 * NZONES;
+    int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
+
+    float *coords[3];
+    char *coordnames[3];
+    int show_all_errors = FALSE;
+
+    coords[0] = x;
+    coords[1] = y;
+    coords[2] = z;
+
+    coordnames[0] = xname;
+    coordnames[1] = yname;
+    coordnames[2] = zname;
+
+    /* Parse command-line */
     for (i=1; i<argc; i++) {
-	if (!strncmp(argv[i], "DB_PDB", 6)) {
-	    driver = StringToDriver(argv[i]);
-	    filename = "quad.pdb";
-	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
-            driver = StringToDriver(argv[i]);
-	    filename = "quad.h5";
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = DB_PDB;
+            filename = "polyzl.pdb";
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = DB_HDF5;
+            filename = "polyzl.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
-	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
-	}
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
     }
+    
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
+    DBForceSingle(1);
 
-    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
+    printf("Creating file: `%s'\n", filename);
+    dbfile = DBCreate(filename,0,DB_LOCAL,"Polyhedral Zonelist Test",driver);
+    if (!dbfile && DBErrno() == E_NOHDF5)
+        return(17);
 
-    dbfile = DBCreate(filename, 0, DB_LOCAL, "quad test file", driver);
-    printf("Creating file: '%s'...\n", filename);
+    optlist = DBMakeOptlist(3);
+    DBAddOption(optlist, DBOPT_PHZONELIST, (char *) "polyzl");
 
-    DBMkDir (dbfile, "/dir1");
-    DBSetDir (dbfile, "/dir1");
-    build_quad (dbfile, "quadmesh");
+    DBPutUcdmesh(dbfile, "ucdmesh", 3, (DBCAS_t) coordnames,
+        coords, NNODES, NZONES, NULL, NULL, DB_FLOAT, optlist);
 
-    DBMkDir (dbfile, "/dir2");
-    DBSetDir (dbfile, "/dir2");
-    build_quad (dbfile, "quadmesh");
-
-    DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames, meshtypes, NULL);
+    DBPutPHZonelist(dbfile, "polyzl",
+        NFACES, nodecnt, lnodelist, nodelist, NULL,
+        NZONES, facecnt, lfacelist, facelist, 
+        0, 0, NZONES-1, NULL);
 
     DBClose(dbfile);
-    CleanupDriverStuff();
-    exit(EXIT_SUCCESS);
+
+    DBFreeOptlist(optlist);
+
+    return (0);
 }
