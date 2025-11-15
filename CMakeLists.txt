@@ -343,8 +343,13 @@ if(SILO_VERS_PAT)
     string(APPEND SILO_VERS_TAG "_${SILO_VERS_PAT}")
 endif()
 
-# Bump if API changes
-set(SILO_SOVERSION 4)
+#
+# Historically, ABI compatability in Silo is across changes only
+# in the last (patch) digit. Minor version changes can cause ABI
+# compatibility failures. If that policy is changed in the future
+# this SOVERSIONing scheme should be adjusted.
+#
+set(SILO_SOVERSION ${Silo_VERSION_MAJOR}${Silo_VERSION_MINOR})
 
 configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
                ${silo_build_include_dir}/silo.h)
@@ -593,7 +598,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 add_library(silo ${silo_library_sources})
-set_target_properties(silo PROPERTIES SOVERSION ${SILO_SOVERSION})
+set_target_properties(silo PROPERTIES VERSION ${SILO_VERSION} SOVERSION ${SILO_SOVERSION})
 
 if(UNIX)
     target_link_libraries(silo m)
