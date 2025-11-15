@@ -400,7 +400,7 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
     endif()
 
     #
-    # Add default tests for both PDB or HDF5 or BOTH 
+    # Add default tests for HDF5 or PDB drivers or BOTH 
     #
     if(srcFile IN_LIST HDF5_ONLY_SOURCES)
         add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
