@@ -155,6 +155,8 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array co
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE;SILO_ENABLE_HDF5" OFF)
 
+
+
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
 ##
@@ -347,6 +349,11 @@ set(SILO_SOVERSION 4)
 configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
                ${silo_build_include_dir}/silo.h)
 
+
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+list(APPEND CMAKE_INSTALL_RPATH "${HDF5_LIBDIR}")
+list(REMOVE_DUPLICATES CMAKE_INSTALL_RPATH)
 
 ###-----------------------------------------------------------------------------
 # Define and populate CMAKE_INSTALL_*DIR variables
@@ -768,6 +775,25 @@ if(BUILD_TESTING)
         get_filename_component(_h5stat_dir "${_h5stat_exe}" DIRECTORY)
         set(_sh_path "${_h5stat_dir}${_envvar_path_sep}$ENV{PATH}")
     endif()
+
+    #
+    # Define a test for testing the installation itself
+    #
+    set(INSTALL_TEST_BINARY_DIR "${CMAKE_BINARY_DIR}/install-tests")
+
+    add_custom_target(installcheck
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "${INSTALL_TEST_BINARY_DIR}"
+      COMMAND ${CMAKE_COMMAND}
+              -S "${CMAKE_SOURCE_DIR}/tests/install"
+              -B "${INSTALL_TEST_BINARY_DIR}"
+              -DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX}/lib/cmake;${HDF5_ROOT};${HDF5_DIR};${SILO_HDF5_DIR}"
+              -DSilo_DIR="${CMAKE_INSTALL_PREFIX}/lib/cmake/Silo"
+              -Dhdf5_DIR="${HDF5_DIR}"
+      COMMAND ${CMAKE_COMMAND} --build "${INSTALL_TEST_BINARY_DIR}"
+      COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+              --test-dir "${INSTALL_TEST_BINARY_DIR}"
+      COMMENT "Configuring, building, and running tests against *installed* Silo"
+    )
 
     add_subdirectory(tests)
 
