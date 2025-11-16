@@ -16826,7 +16826,7 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
         else
         {
             hid_t objid;
- 	    H5O_info2_t oinfo;
+            H5O_info2_t oinfo;
             char *objtokstr = 0;
             unsigned long long offset;
 

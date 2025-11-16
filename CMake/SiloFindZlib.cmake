@@ -58,12 +58,11 @@
 #   If SILO_ZLIB_DIR is defined, uses it to tell CMake where to look.
 #   Use CONFIG version of find_package if zlib-config.cmake exists.
 ###
-
-if(DEFINED SILO_ZLIB_DIR AND EXISTS ${SILO_ZLIB_DIR}/zlib-config.cmake)
+if(SILO_ZLIB_DIR AND EXISTS ${SILO_ZLIB_DIR}/cmake/zlib-config.cmake)
     # this works for zlib with CMake
     find_package(ZLIB PATHS ${SILO_ZLIB_DIR} CONFIG NO_DEFAULT_PATH)
 else()
-    if(DEFINED SILO_ZLIB_DIR AND EXISTS ${SILO_ZLIB_DIR})
+    if(SILO_ZLIB_DIR AND EXISTS ${SILO_ZLIB_DIR})
         # help CMake find the specified zlib
         set(ZLIB_ROOT ${SILO_ZLIB_DIR})
     endif()
