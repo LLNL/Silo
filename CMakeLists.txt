@@ -141,7 +141,7 @@ include(CMakeDependentOption)
 # only turn on the visibility of SILO_ENABLE_ZFP if SILO_ENABLE_HDF5 is ON
 # in which case SILO_ENABLE_ZFP defaults to ON
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON
-                       SILO_ENABLE_HDF5 OFF)
+                       "SILO_ENABLE_HDF5; NOT WIN32" OFF)
 
 # only turn on the visibility of SILO_ENABLE_FPZIP if
 # SILO_BUILD_FOR_BSD is OFF AND SILO_ENABLE_HDF5 is ON
@@ -199,6 +199,13 @@ if(WIN32 AND (SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER))
     add_custom_target(copy_deps ALL)
     set_target_properties(copy_deps PROPERTIES FOLDER utility)
 endif()
+
+###-----------------------------------------------------------------------------
+# Define and populate CMAKE_INSTALL_*DIR variables
+# Needs to be before the inclusion of SiloFind modules, as some of them may
+# attempt to use the variables set.
+###-----------------------------------------------------------------------------
+include(GNUInstallDirs)
 
 ###---------------------------------------------------------------------------
 # Find necessary packages

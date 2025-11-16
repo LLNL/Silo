@@ -17,13 +17,13 @@ docutils==0.19
     # via
     #   myst-parser
     #   sphinx
-idna==3.4
+idna>=3.7
     # via requests
 imagesize==1.4.1
     # via sphinx
 importlib-metadata==6.8.0
     # via sphinx
-jinja2==3.1.5
+jinja2>=3.1.6
     # via
     #   myst-parser
     #   sphinx
@@ -65,8 +65,8 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-urllib3==2.0.3
+urllib3>=2.5.0
     # via requests
-zipp==3.15.0
+zipp>=3.19.1
     # via importlib-metadata
 sphinx-rtd-theme==2.0.0
