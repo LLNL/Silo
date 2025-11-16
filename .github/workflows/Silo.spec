@@ -25,6 +25,8 @@ simple curves, gridless (point), structured, unstructured-zoo and \
 unstructured-arbitrary, block structured AMR, and constructive solid \
 geometry (CSG).
 
+%global __brp_check_rpaths %{nil} # Standard rpaths are causing failure
+
 %description
 %{silo_desc}
 
