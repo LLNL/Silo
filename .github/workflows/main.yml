@@ -45,16 +45,18 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
               -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF \
               -DSILO_ENABLE_HDF5:BOOL=ON \
-              -DSILO_ENABLE_FPZIP:BOOL=ON \
-              -DBUILD_TESTING:BOOL=ON \
               -DSILO_HDF5_DIR:PATH=`pwd`/../hdf5-1.14.4-3 \
+              -DSILO_ENABLE_FPZIP:BOOL=ON \
+              -DSILO_ENABLE_HZIP:BOOL=ON \
+              -DSILO_ENABLE_ZFP:BOOL=ON \
+              -DBUILD_TESTING:BOOL=ON \
               -DSILO_ENABLE_SILOCK:BOOL=ON \
               -DCMAKE_BUILD_TYPE:STRING=Release \
               -DSILO_ENABLE_PYTHON_MODULE:BOOL=ON \
               -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
               ..
         make -j 8 install
-        make installcheck
+        env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/../hdf5-1.14.4-3/lib make installcheck
 
     - name: Build Silo CMake with ASAN
       run: |
