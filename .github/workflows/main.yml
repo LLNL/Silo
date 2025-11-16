@@ -54,6 +54,7 @@ jobs:
               -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
               ..
         make -j 8 install
+        make installcheck
 
     - name: Build Silo CMake with ASAN
       run: |

@@ -2,7 +2,6 @@ name: rpmbuild
 on:
   push:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
       - '[0-9].[0-9]RC'
