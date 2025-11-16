@@ -781,31 +781,34 @@ if(BUILD_TESTING)
         set(_sh_path "${_h5stat_dir}${_envvar_path_sep}$ENV{PATH}")
     endif()
 
-    #
-    # Define a test for testing the installation itself
-    #
-    set(INSTALL_TEST_BINARY_DIR "${CMAKE_BINARY_DIR}/install-tests")
-
-    add_custom_target(installcheck
-      COMMAND ${CMAKE_COMMAND} -E rm -rf "${INSTALL_TEST_BINARY_DIR}"
-      COMMAND ${CMAKE_COMMAND}
-              -S "${CMAKE_SOURCE_DIR}/tests/install"
-              -B "${INSTALL_TEST_BINARY_DIR}"
-              -DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX}/lib/cmake;${HDF5_ROOT};${HDF5_DIR};${SILO_HDF5_DIR}"
-              -DSilo_DIR="${CMAKE_INSTALL_PREFIX}/lib/cmake/Silo"
-              -Dhdf5_DIR="${HDF5_DIR}"
-              -DSILO_ENABLE_FORTRAN=${SILO_ENABLE_FORTRAN}
-              -DSILO_ENABLE_INSTALL_LITE_HEADERS=${SILO_ENABLE_INSTALL_LITE_HEADERS}
-              -DSILO_ENABLE_PYTHON_MODULE=${SILO_ENABLE_PYTHON_MODULE}
-      COMMAND ${CMAKE_COMMAND} --build "${INSTALL_TEST_BINARY_DIR}"
-      COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-              --test-dir "${INSTALL_TEST_BINARY_DIR}"
-      COMMENT "Configuring, building, and running tests against *installed* Silo"
-    )
-
     add_subdirectory(tests)
 
 endif()
+
+#
+# Define a target for testing the installation itself
+# We do this regardless of whether BUILD_TESTING is enabled because
+# it is a quick way to actually test `make install` has installed
+# all the pieces that are needed.
+#
+set(INSTALL_TEST_BINARY_DIR "${CMAKE_BINARY_DIR}/install-tests")
+
+add_custom_target(installcheck
+  COMMAND ${CMAKE_COMMAND} -E rm -rf "${INSTALL_TEST_BINARY_DIR}"
+  COMMAND ${CMAKE_COMMAND}
+          -S "${CMAKE_SOURCE_DIR}/tests/install"
+          -B "${INSTALL_TEST_BINARY_DIR}"
+          -DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX}/lib/cmake;${HDF5_ROOT};${HDF5_DIR};${SILO_HDF5_DIR}"
+          -DSilo_DIR="${CMAKE_INSTALL_PREFIX}/lib/cmake/Silo"
+          -Dhdf5_DIR="${HDF5_DIR}"
+          -DSILO_ENABLE_FORTRAN=${SILO_ENABLE_FORTRAN}
+          -DSILO_ENABLE_INSTALL_LITE_HEADERS=${SILO_ENABLE_INSTALL_LITE_HEADERS}
+          -DSILO_ENABLE_PYTHON_MODULE=${SILO_ENABLE_PYTHON_MODULE}
+  COMMAND ${CMAKE_COMMAND} --build "${INSTALL_TEST_BINARY_DIR}"
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+          --test-dir "${INSTALL_TEST_BINARY_DIR}"
+  COMMENT "Configuring, building, and running tests against *installed* Silo"
+)
 
 ###-----------------------------------------------------------------------------
 # Create config.h from config.h.in

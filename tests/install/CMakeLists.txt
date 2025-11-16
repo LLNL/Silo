@@ -111,10 +111,7 @@ if(SILO_ENABLE_FORTRAN)
 endif()
 
 if(SILO_ENABLE_PYTHON_MODULE)
-    add_test(NAME py_test COMMAND ${Python_EXECUTABLE} py_test.py)
+    find_package(Python REQUIRED COMPONENTS Interpreter)
+    add_test(NAME py_test COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/py_test.py")
     set_tests_properties(py_test PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>")
 endif()
-
-# Test the following
-#   - Python - when enabled
-#   - Json - when enabled
