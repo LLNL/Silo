@@ -155,7 +155,12 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array co
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE;SILO_ENABLE_HDF5" OFF)
 
-
+#
+# Conflicting option settings
+#
+if(NOT SILO_ENABLE_SHARED AND SILO_ENABLE_PYTHON_MODULE)
+    message(FATAL "Python module requires SILO_ENABLE_SHARED=ON")
+endif()
 
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
