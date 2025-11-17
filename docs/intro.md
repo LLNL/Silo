@@ -155,13 +155,16 @@ cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
 Immediately after the release of version 4.12.0 of Silo, the Spack recipe to build Silo was updated to use CMake.
 Spack will retain the ability to build older versions of Silo with Autotools but will use only CMake for versions of Silo *after* 4.12.0.
 For version 4.12.0 only, Spack will support either Autotools or CMake builds of Silo.
+
 The `+mpi` variant for Silo is deprecated for versions of Silo 4.12.0 and newer.
 The presence of the `+mpi` variant for Silo 4.12.0 and newer will not cause any error and will simply be ignored.
 Support for a `+zfp` variant was added.
+
 License support was also added with two options; `bsdonly` and `llnllegacy`.
 A `bsdonly` license build is the default.
 Spack builds using a `bsdonly` license will conflict with `+hzip` and `+fpzip` variants.
 The CMake build of Silo will build both `silock` and `browser` tools and install PDB Lite headers by fiat; no Spack variants will be made available to control these behaviors.
+
 Also starting in version 4.12.0, the `silex` Qt-GUI browsing tool requires Qt6.
 Be aware that in Spack, Qt6 variants are handled somewhat differently than Qt5.
 For Qt5, the variant is `+qt` whereas for Qt6, there is a main variant, `+qt-base`, and a number of commonly used additional variants for key Qt6 components such as `+widgets` and/or `+gui`.
