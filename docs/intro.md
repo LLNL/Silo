@@ -42,6 +42,10 @@ Default values are specified with `=<value>` for each option.
   Silo has a large number of test clients.
   Enabling testing probably doubles the total build time for Silo (e.g. from 1-2 mins to 2-4 mins).
 
+`SILO_ENABLE_SHARED:BOOL=ON`
+: Build Silo as a shared library.
+  This is *required* for the python module.
+
 `SILO_BUILD_FOR_ASAN:BOOL=OFF`
 : Build to run testing with GNU/Clang address sanitizer enabled.
   Currently works only for newish GCC compilers.
@@ -146,7 +150,23 @@ cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
       ..
 ```
 
-### Where to Find Example Code
+### Installing with [Spack](https://spack.io/)
+
+Immediately after the release of version 4.12.0 of Silo, the Spack recipe to build Silo was updated to use CMake.
+Spack will retain the ability to build older versions of Silo with Autotools but will use only CMake for versions of Silo *after* 4.12.0.
+For version 4.12.0 only, Spack will support either Autotools or CMake builds of Silo.
+The `+mpi` variant for Silo is deprecated for versions of Silo 4.12.0 and newer.
+The presence of the `+mpi` variant for Silo 4.12.0 and newer will not cause any error and will simply be ignored.
+Support for a `+zfp` variant was added.
+License support was also added with two options; `bsdonly` and `llnllegacy`.
+A `bsdonly` license build is the default.
+Spack builds using a `bsdonly` license will conflict with `+hzip` and `+fpzip` variants.
+The CMake build of Silo will build both `silock` and `browser` tools and install PDB Lite headers by fiat; no Spack variants will be made available to control these behaviors.
+Also starting in version 4.12.0, the `silex` Qt-GUI browsing tool requires Qt6.
+Be aware that in Spack, Qt6 variants are handled somewhat differently than Qt5.
+For Qt5, the variant is `+qt` whereas for Qt6, there is a main variant, `+qt-base`, and a number of commonly used additional variants for key Qt6 components such as `+widgets` and/or `+gui`.
+
+## Where to Find Example Code
 
 In the [`tests`](https://github.com/LLNL/Silo/tree/main/tests) directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
 There are not as many examples of reading the data there.
