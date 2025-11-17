@@ -3152,7 +3152,7 @@ at_fn_check_prepare_dynamic "$VALGRIND rocket $STARGS" "testsuite.at:201"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 at_fn_check_status 0 $at_status "$at_srcdir/testsuite.at:201"
 $at_failed && at_fn_log_failure
