@@ -62,9 +62,12 @@ Default values are specified with `=<value>` for each option.
   Many Silo customers have come to rely on PDB Lite for PDB-only applications.
   For those customers, the option of *installing* PDB Lite headers is provided so that PDB-only applications can compile and link against Silo.
   However, PDB Lite headers are NOT required simply to use Silo's PDB driver to read and write Silo/PDB files.
-  In a GNU Autotools build, Silo has had the ability to also link to the most recent relase of PACT/PDB using the `--with-pdb-proper=<path-to-PACT-PDB>` configuration option.
-  This creates a new, separate PDB driver identified with the `DB_PDBP` (note the trailing `P` for **PDB Proper**) driver id that produces Silo/PDB files using the newest PDB Library available instead of the PDB Lite library from 1996.
-  Currently, in a CMake build, the option to create the PDB Proper driver is not available.
+
+`SILO_PACT_DIR:PATH=`
+  Silo has the ability to also link to the most recent relase of PACT/PDB.
+  This creates a second, separate PDB driver identified with the `DB_PDBP` (note the trailing `P` for **PDB Proper**) driver id that produces Silo/PDB files using the newest PDB Library available in PACT instead of the PDB Lite library frozen into Silo back in 1996.
+  The specified path is the directory holding `bin`, `lib` and `include` sub-directories of a PACT installation.
+  This functionality and CMake variable is likely relevant only to LLNL customers.
 
 `SILO_ENABLE_FORTRAN:BOOL=ON`
 : Enable Fortran interface using CMake's `enable_language()` feature.

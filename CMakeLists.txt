@@ -504,6 +504,20 @@ set(silo_library_include_dirs
 
 set(SILO_COMPILE_DEFINES SILO_EXPORTS LITE_EXPORTS)
 
+#
+# Handle PDB "Proper" source file if enabled. We have to be careful with ordering
+# of this source file relative to PDB Lite source files. Basically, we use the PDB
+# driver implementation a second time, except mapping all the lite_ symbols back to
+# their "proper" equivalents. This means this source file, when enabled, must come
+# ahead of any PDB Lite source files.
+#
+if(SILO_PACT_DIR)
+    list(FIND silo_library_sources ${Silo_SOURCE_DIR}/src/pdb/pdb.c _first_pdb_src_idx)
+    list(INSERT silo_library_sources ${_first_pdb_src_idx} ${Silo_SOURCE_DIR}/src/pdbp_drv/silo_pdbp.c)
+    list(APPEND SILO_COMPILE_DEFINES DB_PDBP)
+    set_source_files_properties(${Silo_SOURCE_DIR}/src/pdbp_drv/silo_pdbp.c PROPERTIES INCLUDE_DIRECTORIES "${SILO_PACT_DIR}/include")
+    set(HAVE_PDBP_DRIVER 1)
+endif()
 
 ##
 # Add hdf5 support
@@ -612,11 +626,6 @@ endif()
 add_library(silo ${silo_library_sources})
 set_target_properties(silo PROPERTIES VERSION ${SILO_VERSION} SOVERSION ${SILO_SOVERSION})
 
-if(UNIX)
-    target_link_libraries(silo m)
-endif()
-
-target_link_libraries(silo ${CMAKE_DL_LIBS})
 target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
 target_include_directories(silo PRIVATE ${silo_library_include_dirs})
@@ -642,6 +651,31 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
         ${Silo_SOURCE_DIR}/src/silo/silo.inc
         ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc)
 endif()
+
+##
+# Add PACT/PDB Proper support
+##
+if(SILO_PACT_DIR)
+    if((EXISTS ${SILO_PACT_DIR}/lib/libpdb.a OR
+        EXISTS ${SILO_PACT_DIR}/lib/libpdb.so OR
+        EXISTS ${SILO_PACT_DIR}/lib/libpdb.dylib) AND
+        EXISTS ${SILO_PACT_DIR}/include/pdb.h AND
+        EXISTS ${SILO_PACT_DIR}/include/score.h)
+
+        find_library(PDB_LIB   NAMES pdb   HINTS "${SILO_PACT_DIR}/lib")
+        find_library(PML_LIB   NAMES pml   HINTS "${SILO_PACT_DIR}/lib")
+        find_library(SCORE_LIB NAMES score HINTS "${SILO_PACT_DIR}/lib")
+
+        if(NOT PDB_LIB OR NOT PML_LIB OR NOT SCORE_LIB)
+          message(FATAL_ERROR "PACT libs not found under ${SILO_PACT_DIR}/lib")
+        endif()
+
+        target_link_directories(silo PRIVATE "${SILO_PACT_DIR}/lib")
+        target_link_libraries(silo ${PDB_LIB} ${PML_LIB} ${SCORE_LIB})
+    endif()
+endif()
+
+target_link_libraries(silo ${CMAKE_DL_LIBS})
 
 if(WIN32)
     list(APPEND silo_public_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
@@ -690,7 +724,6 @@ install(TARGETS silo EXPORT ${silo_targets_name}
 ##
 # silex
 ##
-
 if(SILO_ENABLE_SILEX)
     add_subdirectory(tools/silex)
 endif()
@@ -698,11 +731,9 @@ endif()
 ##
 # browser
 ##
-
 if(SILO_ENABLE_BROWSER)
     add_subdirectory(tools/browser)
 endif()
-
 
 ##
 # silock
