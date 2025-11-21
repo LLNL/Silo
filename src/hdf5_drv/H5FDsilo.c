@@ -1845,16 +1845,16 @@ H5FD_silo_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
      */
-    if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))<0) return -1;
-    if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) return 1;
+    if(memcmp(&(f1->device),&(f2->device),sizeof(dev_t))<0) return -1;
+    if(memcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) return 1;
 #endif /* H5_DEV_T_IS_SCALAR */
 
 #ifndef H5_VMS
     if (f1->inode < f2->inode) return -1;
     if (f1->inode > f2->inode) return 1;
 #else
-    if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))<0) return -1;
-    if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) return 1;
+    if(memcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))<0) return -1;
+    if(memcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) return 1;
 #endif /*H5_VMS*/
 
 #endif
