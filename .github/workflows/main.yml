@@ -21,25 +21,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install HDF5
+    - name: Install HDF5 and json-c
       run: |
-        wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.4/bin/unix/hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
-        mkdir hdf5-1.14.4-3
-        tar -xf hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
-        tar -xf hdf5/HDF5-1.14.4.3-Linux.tar.gz --strip-components=4 -C hdf5-1.14.4-3
-        rm -rf hdf5
+        sudo apt-get update
+        sudo apt-get install libhdf5-dev libjson-c-dev
 
     - name: Build Silo Autotools
       run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         mkdir build
         cd build
-        env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
+        ../configure --with-hdf5=/usr/include,/usr/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
         make -j 8 install
 
     - name: Build Silo CMake
       run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         mkdir cmake_build
         cd cmake_build
         cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
@@ -79,7 +74,6 @@ jobs:
 
     - name: Build Tests Autotools
       run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build/tests
         make -j 8 tests
 
@@ -87,7 +81,6 @@ jobs:
       id: makecheck-autotools
       continue-on-error: true
       run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd build
         make -j 8 check
 
@@ -95,7 +88,6 @@ jobs:
       id: makecheck-cmake
       continue-on-error: true
       run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
         cd cmake_build
         ctest --output-log ctest.log
 
