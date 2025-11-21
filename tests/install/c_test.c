@@ -53,76 +53,107 @@ be used for advertising or product endorsement purposes.
 */
 
 #include "silo.h"               /*include public silo           */
-#include "std.c"
 
+#include <math.h>
+#include <string.h>
+
+#define NNODES 12
+#define NZONES 2
+#define NFACES 11
+
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:        main
  *
- * Purpose: Test various read operations.	
+ * Purpose:        Test writing a polyhedral zonelist
  *
- * Return:	0
+ *                 Writes two hexes sharing a common face using a 
+ *                 polyhedral zonelist
  *
- * Programmer:Mark C. Miller, Thu Jul 15 08:23:56 PDT 2010
+ * Return:        0
+ *
+ * Programmer:        Mark C. Miller, July 27, 2004
+ *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, char *argv[])
 {
-    int            driver = DB_PDB, driverType = DB_PDB;
-    int            i;
+    
+    int            i, driver=DB_PDB;
+    char          *filename="polyzl.pdb";
     DBfile        *dbfile;
-    int            show_all_errors = FALSE;
-    char           filename[256];
-    char          *obj_names[13];
-    int            ordering[13];
+
+    DBoptlist     *optlist;
+
+    char *xname = "xcoords";
+    char *yname = "ycoords";
+    char *zname = "zcoords";
+
+    float x[NNODES] = {0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0};
+    float y[NNODES] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    float z[NNODES] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+
+    int nodecnt[NFACES] = {4,4,4,4,4,4,4,4,4,4,4};
+    int lnodelist = 4 * NFACES;
+    int nodelist[4*NFACES] = {0,1,7,6,    1,2,8,7,    1,0,3,4,
+                              2,1,4,5,    4,3,9,10,   5,4,10,11, 
+                              6,7,10,9,   7,8,11,10,  0,6,9,3,
+                              1,7,10,4,   2,5,11,8};
+
+    int facecnt[NZONES] = {6,6};
+    int lfacelist = 6 * NZONES;
+    int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
+
+    float *coords[3];
+    char *coordnames[3];
+    int show_all_errors = FALSE;
+
+    coords[0] = x;
+    coords[1] = y;
+    coords[2] = z;
+
+    coordnames[0] = xname;
+    coordnames[1] = yname;
+    coordnames[2] = zname;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
-            driver = StringToDriver(argv[i]);
-            driverType = DB_PDB;
+            driver = DB_PDB;
+            filename = "polyzl.pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
-            driver = StringToDriver(argv[i]);
-            driverType = DB_HDF5;
+            driver = DB_HDF5;
+            filename = "polyzl.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
-	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
-	}
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
     }
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
     DBForceSingle(1);
 
-    sprintf(filename, "multi_rect2d.%s", driverType==DB_PDB?"pdb":"h5");
-    dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ);
-    DBSetDir(dbfile, "block7");
+    printf("Creating file: `%s'\n", filename);
+    dbfile = DBCreate(filename,0,DB_LOCAL,"Polyhedral Zonelist Test",driver);
+    if (!dbfile && DBErrno() == E_NOHDF5)
+        return(17);
 
-    obj_names[0] = "cycle";
-    obj_names[1] = "d";
-    obj_names[2] = "../_fileinfo";
-    obj_names[3] = "otherfile:block7/u";
-    obj_names[4] = "v";
-    obj_names[5] = "u";
-    obj_names[6] = "/.silo/#000005";
-    obj_names[7] = "../block7/d";
-    obj_names[8] = "../block9/d";
-    obj_names[9] = "../block4/d";
-    obj_names[10] = "../mesh1_hidden";
-    obj_names[11] = "../mesh1";
-    obj_names[12] = "../block11/u";
+    optlist = DBMakeOptlist(3);
+    DBAddOption(optlist, DBOPT_PHZONELIST, (char *) "polyzl");
 
-    if (DBSortObjectsByOffset(dbfile, 13, (DBCAS_t) obj_names, ordering) < 0)
-        return skip_retval;
-    
-    printf("UNsorted objects...\n");
-    for (i = 0; i < 13; i++)
-        printf("\t\"%s\"\n", obj_names[i]);
-    printf("Sorted objects...\n");
-    for (i = 0; i < 13; i++)
-        printf("\t\"%s\"\n", obj_names[ordering[i]]);
+    DBPutUcdmesh(dbfile, "ucdmesh", 3, (DBCAS_t) coordnames,
+        coords, NNODES, NZONES, NULL, NULL, DB_FLOAT, optlist);
+
+    DBPutPHZonelist(dbfile, "polyzl",
+        NFACES, nodecnt, lnodelist, nodelist, NULL,
+        NZONES, facecnt, lfacelist, facelist, 
+        0, 0, NZONES-1, NULL);
 
     DBClose(dbfile);
 
-    return 0;
+    DBFreeOptlist(optlist);
+
+    return (0);
 }

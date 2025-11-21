@@ -13864,7 +13864,7 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
     DBmultimeshadj      *mmadj=NULL;
     char                *typestring = NULL;
     int                 i, j, tmpnmesh, _objtype;
-    int                 *offsetmap, *offsetmapn=0, *offsetmapz=0, lneighbors, tmpoff;
+    int                 *offsetmap=0, *offsetmapn=0, *offsetmapz=0, lneighbors, tmpoff;
 
     PROTECT {
         /* Open object and make sure it's a multimesh */
@@ -13903,45 +13903,55 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
         mmadj->nneighbors = (int *)db_hdf5_comprd(dbfile, m.nneighbors, 1);
         mmadj->neighbors = (int *)db_hdf5_comprd(dbfile, m.neighbors, 1);
         mmadj->back = (int *)db_hdf5_comprd(dbfile, m.back, 1);
-        mmadj->lnodelists = (int *)db_hdf5_comprd(dbfile, m.lnodelists, 1);
-        mmadj->lzonelists = (int *)db_hdf5_comprd(dbfile, m.lzonelists, 1);
 
-        offsetmap = ALLOC_N(int, mmadj->nblocks);
-        lneighbors = 0;
-        for (i = 0; (i < mmadj->nblocks) && mmadj->nneighbors; i++)
-        {
-            offsetmap[i] = lneighbors;
-            lneighbors += mmadj->nneighbors[i];
-        }
- 
-        if (offsetmap && mmadj->lnodelists && mmadj->nneighbors &&
-            (DBGetDataReadMask2File(_dbfile) & DBMMADJNodelists))
-        {
-           mmadj->nodelists = ALLOC_N(int *, lneighbors); 
-           offsetmapn = ALLOC_N(int, mmadj->nblocks);
-           tmpoff = 0;
-           for (i = 0; i < mmadj->nblocks; i++)
-           {
-               offsetmapn[i] = tmpoff;
-               for (j = 0; j < mmadj->nneighbors[i]; j++)
-                  tmpoff += mmadj->lnodelists[offsetmap[i]+j];
-           }
-           mmadj->totlnodelists = m.totlnodelists;
-        }
- 
-        if (offsetmap && mmadj->lzonelists && mmadj->nneighbors &&
+        if ((DBGetDataReadMask2File(_dbfile) & DBMMADJNodelists) ||
             (DBGetDataReadMask2File(_dbfile) & DBMMADJZonelists))
         {
-           mmadj->zonelists = ALLOC_N(int *, lneighbors); 
-           offsetmapz = ALLOC_N(int, mmadj->nblocks);
-           tmpoff = 0;
-           for (i = 0; i < mmadj->nblocks; i++)
+            offsetmap = ALLOC_N(int, mmadj->nblocks);
+            lneighbors = 0;
+            for (i = 0; (i < mmadj->nblocks) && mmadj->nneighbors; i++)
+            {
+                offsetmap[i] = lneighbors;
+                lneighbors += mmadj->nneighbors[i];
+            }
+        }
+ 
+        if (offsetmap && mmadj->nneighbors &&
+            (DBGetDataReadMask2File(_dbfile) & DBMMADJNodelists))
+        {
+           mmadj->lnodelists = (int *)db_hdf5_comprd(dbfile, m.lnodelists, 1);
+           if (mmadj->lnodelists)
            {
-               offsetmapz[i] = tmpoff;
-               for (j = 0; j < mmadj->nneighbors[i]; j++)
-                  tmpoff += mmadj->lzonelists[offsetmap[i]+j];
+               mmadj->nodelists = ALLOC_N(int *, lneighbors); 
+               offsetmapn = ALLOC_N(int, mmadj->nblocks);
+               tmpoff = 0;
+               for (i = 0; i < mmadj->nblocks; i++)
+               {
+                   offsetmapn[i] = tmpoff;
+                   for (j = 0; j < mmadj->nneighbors[i]; j++)
+                      tmpoff += mmadj->lnodelists[offsetmap[i]+j];
+               }
+               mmadj->totlnodelists = m.totlnodelists;
            }
-           mmadj->totlzonelists = m.totlzonelists;
+        }
+ 
+        if (offsetmap && mmadj->nneighbors &&
+            (DBGetDataReadMask2File(_dbfile) & DBMMADJZonelists))
+        {
+           mmadj->lzonelists = (int *)db_hdf5_comprd(dbfile, m.lzonelists, 1);
+           if (mmadj->lzonelists)
+           {
+               mmadj->zonelists = ALLOC_N(int *, lneighbors); 
+               offsetmapz = ALLOC_N(int, mmadj->nblocks);
+               tmpoff = 0;
+               for (i = 0; i < mmadj->nblocks; i++)
+               {
+                   offsetmapz[i] = tmpoff;
+                   for (j = 0; j < mmadj->nneighbors[i]; j++)
+                      tmpoff += mmadj->lzonelists[offsetmap[i]+j];
+               }
+               mmadj->totlzonelists = m.totlzonelists;
+            }
         }
         
         tmpnmesh = nmesh;
@@ -14661,14 +14671,21 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         mm->guihide = m.guihide;
         mm->nmatnos = m.nmatnos;
         mm->mmesh_name = OPTDUP(m.mmesh_name);
+        mm->matnos = (int *)db_hdf5_comprd(dbfile, m.matnos, 1);
 
         /* Read the raw data */
-        mm->mixlens = (int *)db_hdf5_comprd(dbfile, m.mixlens, 1);
-        mm->matcounts = (int *)db_hdf5_comprd(dbfile, m.matcounts, 1);
-        mm->matlists = (int *)db_hdf5_comprd(dbfile, m.matlists, 1);
-        mm->matnos = (int *)db_hdf5_comprd(dbfile, m.matnos, 1);
-        matnames = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
-        db_StringListToStringArrayMBOpt(matnames, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
+        if (mm->nmats>0 && (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes))
+        {
+            matnames = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
+            db_StringListToStringArrayMBOpt(matnames, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
+        }
+
+        if (mm->nmats>0 && (DBGetDataReadMask2File(_dbfile) & DBMBOptions))
+        {
+            mm->mixlens = (int *)db_hdf5_comprd(dbfile, m.mixlens, 1);
+            mm->matcounts = (int *)db_hdf5_comprd(dbfile, m.matcounts, 1);
+            mm->matlists = (int *)db_hdf5_comprd(dbfile, m.matlists, 1);
+        }
 
         if (m.nmatnos > 0) {
             char *tmpmaterial_names = (char *)db_hdf5_comprd(dbfile, m.material_names, 1);
@@ -14947,8 +14964,11 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
         mm->nmatspec = (int *)db_hdf5_comprd(dbfile, m.nmatspec, 1);
 
         /* Read the raw data */
-        specnames = (char *)db_hdf5_comprd(dbfile, m.specnames, 1);
-        db_StringListToStringArrayMBOpt(specnames, &(mm->specnames), &(mm->specnames_alloc), m.nspec);
+        if (mm->nspec>0 && (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes))
+        {
+            specnames = (char *)db_hdf5_comprd(dbfile, m.specnames, 1);
+            db_StringListToStringArrayMBOpt(specnames, &(mm->specnames), &(mm->specnames_alloc), m.nspec);
+        }
         
         if (mm->nmat > 0 && mm->nmatspec) {
             char *tmpspecies_names = (char *)db_hdf5_comprd(dbfile, m.species_names, 1);
@@ -16786,6 +16806,9 @@ SILO_CALLBACK int
 db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     char const *const *const names, int *ordering)
 {
+
+#if HDF5_VERSION_GE(1,12,0) /* [ */
+
     static char *me = "db_hdf5_SortObjectsByOffset";
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     index_offset_pair_t *iop = (index_offset_pair_t*)
@@ -16835,6 +16858,12 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     free(iop);
 
     return 0;
+
+#else /* ] HDF5_VERSION_GE(1,12,0) [ */
+
+    return -1;
+
+#endif /* ] HDF5_VERSION_GE(1,12,0) */
 }
 
 #if HDF5_VERSION_GE(1,8,9) /* [ */

@@ -561,7 +561,7 @@ However, a file's settings can be adjusted independently from the library's glob
 ## `DBSetDataReadMask2()`
 ## `DBSetDataReadMask2File()`
 
-* **Summary:** Set the data read mask
+* **Summary:** Selectively disable read of problem-sized parts of objects
 
 * **C Signature:**
 
@@ -591,17 +591,17 @@ However, a file's settings can be adjusted independently from the library's glob
 
   `DBSetDataReadMask2` replaces the now obsolete `DBSetDataReadMask`.
 
-  The `DBSetDataReadMask2` allows the user to set the `mask` that's used to read various large data components within Silo objects.
+  The `DBSetDataReadMask2` allows the user to set the `mask` that's used to read various large (e.g. problem-sized) data components within Silo objects.
 
   Most Silo objects involve a combination of (small) metadata portion and a (potentially very large) data portion.
   The data portion is that part of the object that consists of pointers to potentially large arrays of data.
-  These arrays are typically problem-sized but in any event require additional I/O to read.
-  By default, the read `mask` is set to `DBAll`.
+  These arrays are typically problem-sized but in any event require (a lot) of additional I/O and memory to read.
+  By default, the read `mask` is set to `DBAll` meaning that *everything* is read on every object.
 
   Setting the data read `mask` allows for a `DBGetXxx()` call to return only part of the associated object's data.
-  With the data read `mask` set to `DBAll`, subsequent calls to `DBGetXxx()` functions return all of the information.
+  With the data read `mask` set to `DBAll`, subsequent calls to `DBGetXxx()` functions return all data.
   With the data read `mask` set to `DBNone`, they return only the metadata.
-  The `mask` is a bit vector specifying which part of the potentially problem-sized data should be read.
+  The `mask` is a bit vector specifying which parts of the potentially problem-sized object should be read.
 
   A special case is found in the `DBCalc` flag.
   Sometimes data is not stored in the file, but is instead calculated from other information.
@@ -648,6 +648,8 @@ However, a file's settings can be adjusted independently from the library's glob
   `DBQMGhostZoneLabels`|Ghost zone labels read by `DBGetQuadmesh`
   `DBUMGhostNodeLabels`|Ghost node labels read by `DBGetUcdmesh`
   `DBZonelistGhostZoneLabels`|Ghost zone labels read by `DBGetUcdmesh` and/or `DBGetZonelist`
+  `DBMBNamesAndTypes`|Block names and types arrays in multi-block object get calls (`DBGetMultixxx()`). 
+  `DBMBOptions`|Optional, block-count sized arrays read by multi-block get calls (`DBGetMultixxx()`.
 
   Use the `DBGetDataReadMask2` call to retrieve the current data read `mask` without setting one.
 

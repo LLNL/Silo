@@ -155,6 +155,13 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array co
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE;SILO_ENABLE_HDF5" OFF)
 
+#
+# Conflicting option settings
+#
+if(NOT SILO_ENABLE_SHARED AND SILO_ENABLE_PYTHON_MODULE)
+    message(FATAL "Python module requires SILO_ENABLE_SHARED=ON")
+endif()
+
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
 ##
@@ -348,13 +355,28 @@ if(SILO_VERS_PAT)
     string(APPEND SILO_VERS_TAG "_${SILO_VERS_PAT}")
 endif()
 
-# Bump if API changes
-set(SILO_SOVERSION 4)
+#
+# Historically, ABI compatability in Silo is across changes only
+# in the last (patch) digit. Minor version changes can cause ABI
+# compatibility failures. If that policy is changed in the future
+# this SOVERSIONing scheme should be adjusted.
+#
+set(SILO_SOVERSION ${Silo_VERSION_MAJOR}${Silo_VERSION_MINOR})
 
 configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
                ${silo_build_include_dir}/silo.h)
 
 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib64")
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+list(APPEND CMAKE_INSTALL_RPATH "${HDF5_LIBDIR}")
+list(REMOVE_DUPLICATES CMAKE_INSTALL_RPATH)
+
+###-----------------------------------------------------------------------------
+# Define and populate CMAKE_INSTALL_*DIR variables
+###-----------------------------------------------------------------------------
+include(GNUInstallDirs)
 
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
@@ -483,6 +505,20 @@ set(silo_library_include_dirs
 
 set(SILO_COMPILE_DEFINES SILO_EXPORTS LITE_EXPORTS)
 
+#
+# Handle PDB "Proper" source file if enabled. We have to be careful with ordering
+# of this source file relative to PDB Lite source files. Basically, we use the PDB
+# driver implementation a second time, except mapping all the lite_ symbols back to
+# their "proper" equivalents. This means this source file, when enabled, must come
+# ahead of any PDB Lite source files.
+#
+if(SILO_PACT_DIR)
+    list(FIND silo_library_sources ${Silo_SOURCE_DIR}/src/pdb/pdb.c _first_pdb_src_idx)
+    list(INSERT silo_library_sources ${_first_pdb_src_idx} ${Silo_SOURCE_DIR}/src/pdbp_drv/silo_pdbp.c)
+    list(APPEND SILO_COMPILE_DEFINES DB_PDBP)
+    set_source_files_properties(${Silo_SOURCE_DIR}/src/pdbp_drv/silo_pdbp.c PROPERTIES INCLUDE_DIRECTORIES "${SILO_PACT_DIR}/include")
+    set(HAVE_PDBP_DRIVER 1)
+endif()
 
 ##
 # Add hdf5 support
@@ -589,13 +625,8 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 add_library(silo ${silo_library_sources})
-set_target_properties(silo PROPERTIES SOVERSION ${SILO_SOVERSION})
+set_target_properties(silo PROPERTIES VERSION ${SILO_VERSION} SOVERSION ${SILO_SOVERSION})
 
-if(UNIX)
-    target_link_libraries(silo m)
-endif()
-
-target_link_libraries(silo ${CMAKE_DL_LIBS})
 target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
 target_include_directories(silo PRIVATE ${silo_library_include_dirs})
@@ -621,6 +652,31 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
         ${Silo_SOURCE_DIR}/src/silo/silo.inc
         ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc)
 endif()
+
+##
+# Add PACT/PDB Proper support
+##
+if(SILO_PACT_DIR)
+    if((EXISTS ${SILO_PACT_DIR}/lib/libpdb.a OR
+        EXISTS ${SILO_PACT_DIR}/lib/libpdb.so OR
+        EXISTS ${SILO_PACT_DIR}/lib/libpdb.dylib) AND
+        EXISTS ${SILO_PACT_DIR}/include/pdb.h AND
+        EXISTS ${SILO_PACT_DIR}/include/score.h)
+
+        find_library(PDB_LIB   NAMES pdb   HINTS "${SILO_PACT_DIR}/lib")
+        find_library(PML_LIB   NAMES pml   HINTS "${SILO_PACT_DIR}/lib")
+        find_library(SCORE_LIB NAMES score HINTS "${SILO_PACT_DIR}/lib")
+
+        if(NOT PDB_LIB OR NOT PML_LIB OR NOT SCORE_LIB)
+          message(FATAL_ERROR "PACT libs not found under ${SILO_PACT_DIR}/lib")
+        endif()
+
+        target_link_directories(silo PRIVATE "${SILO_PACT_DIR}/lib")
+        target_link_libraries(silo ${PDB_LIB} ${PML_LIB} ${SCORE_LIB})
+    endif()
+endif()
+
+target_link_libraries(silo ${CMAKE_DL_LIBS})
 
 if(WIN32)
     list(APPEND silo_public_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
@@ -669,7 +725,6 @@ install(TARGETS silo EXPORT ${silo_targets_name}
 ##
 # silex
 ##
-
 if(SILO_ENABLE_SILEX)
     add_subdirectory(tools/silex)
 endif()
@@ -677,11 +732,9 @@ endif()
 ##
 # browser
 ##
-
 if(SILO_ENABLE_BROWSER)
     add_subdirectory(tools/browser)
 endif()
-
 
 ##
 # silock
@@ -775,6 +828,31 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 
 endif()
+
+#
+# Define a target for testing the installation itself
+# We do this regardless of whether BUILD_TESTING is enabled because
+# it is a quick way to actually test `make install` has installed
+# all the pieces that are needed.
+#
+set(INSTALL_TEST_BINARY_DIR "${CMAKE_BINARY_DIR}/install-tests")
+
+add_custom_target(installcheck
+  COMMAND ${CMAKE_COMMAND} -E rm -rf "${INSTALL_TEST_BINARY_DIR}"
+  COMMAND ${CMAKE_COMMAND}
+          -S "${CMAKE_SOURCE_DIR}/tests/install"
+          -B "${INSTALL_TEST_BINARY_DIR}"
+          -DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX}/lib/cmake;${HDF5_ROOT};${HDF5_DIR};${SILO_HDF5_DIR}"
+          -DSilo_DIR="${CMAKE_INSTALL_PREFIX}/lib/cmake/Silo"
+          -Dhdf5_DIR="${HDF5_DIR}"
+          -DSILO_ENABLE_FORTRAN=${SILO_ENABLE_FORTRAN}
+          -DSILO_ENABLE_INSTALL_LITE_HEADERS=${SILO_ENABLE_INSTALL_LITE_HEADERS}
+          -DSILO_ENABLE_PYTHON_MODULE=${SILO_ENABLE_PYTHON_MODULE}
+  COMMAND ${CMAKE_COMMAND} --build "${INSTALL_TEST_BINARY_DIR}"
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+          --test-dir "${INSTALL_TEST_BINARY_DIR}"
+  COMMENT "Configuring, building, and running tests against *installed* Silo"
+)
 
 ###-----------------------------------------------------------------------------
 # Create config.h from config.h.in

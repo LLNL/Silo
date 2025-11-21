@@ -51,60 +51,67 @@
 # be used for advertising or product endorsement purposes.
 #
 ##############################################################################
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-#-----------------------------------------------------------------------------
-# SILO Config file
-#-----------------------------------------------------------------------------
-@PACKAGE_INIT@
+#
+# This whole project is to test whether `make install` installs Silo correctly
+#
+project(SiloInstallTest)
 
-string(TOUPPER @SILO_NAME@ SILO_PACKAGE_NAME)
+include(CTest)
 
+find_package(Silo CONFIG REQUIRED)
 
-#-----------------------------------------------------------------------------
-# User Options
-#-----------------------------------------------------------------------------
-# Should compiler information used for the build be provided?
-
-set(SILO_ENABLE_SHARED    @SILO_ENABLE_SHARED@)
-
-set(SILO_ENABLE_SILEX @SILO_ENABLE_SILEX@)
-set(SILO_ENABLE_BROWSER @SILO_ENABLE_BROWSER@)
-set(SILO_ENABLE_FORTRAN @SILO_ENABLE_FORTRAN@)
-set(SILO_ENABLE_HDF5 @SILO_ENABLE_HDF5@)
-set(SILO_ENABLE_JSON @SILO_ENABLE_JSON@)
-set(SILO_ENABLE_PYTHON_MODULE @SILO_ENABLE_PYTHON_MODULE@)
-set(SILO_ENABLE_TESTS @SILO_ENABLE_TESTS@)
-set(SILO_BUILD_FOR_BSD_LICENSE @SILO_BUILD_FOR_BSD_LICENSE@)
-set(SILO_ENABLE_ZFP @SILO_ENABLE_ZFP@)
-
-if(NOT SILO_BUILD_FOR_BSD_LICENSE)
-  set(SILO_ENABLE_FPZIP @SILO_ENABLE_FPZIP@)
-  set(SILO_ENABLE_HZIP @SILO_ENABLE_HZIP@)
+if(SILO_ENABLE_INSTALL_LITE_HEADERS)
+    add_executable(pdb_lite_test pdb_lite_test.c)
+    target_compile_definitions(pdb_lite_test PRIVATE PDB_LITE)
+    target_include_directories(pdb_lite_test PRIVATE ${SILO_INCLUDE_DIR})
+    target_link_libraries(pdb_lite_test PRIVATE silo)
+    add_test(NAME pdb_lite_test COMMAND $<TARGET_FILE:pdb_lite_test>)
 endif()
 
-#-----------------------------------------------------------------------------
-# Directories
-#-----------------------------------------------------------------------------
-set(${SILO_PACKAGE_NAME}_INCLUDE_DIR @PACKAGE_INCLUDE_INSTALL_DIR@)
+#
+# C Test for both PDB and HDF5 drivers
+# If HDF5 driver not present, test will be logged as skipped by CTest
+#
+add_executable(c_test c_test.c)
+target_include_directories(c_test PRIVATE ${SILO_INCLUDE_DIR})
+target_link_libraries(c_test PRIVATE silo)
+add_test(NAME c_test COMMAND $<TARGET_FILE:c_test>)
+add_test(NAME c_test-hdf5 COMMAND $<TARGET_FILE:c_test> DB_HDF5)
+set_tests_properties(c_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
 
-#-----------------------------------------------------------------------------
-# Version Strings
-#-----------------------------------------------------------------------------
-set(${SILO_PACKAGE_NAME}_VERSION_STRING @SILO_VERSION@)
-set(${SILO_PACKAGE_NAME}_VERSION_MAJOR  @Silo_VERSION_MAJOR@)
-set(${SILO_PACKAGE_NAME}_VERSION_MINOR  @Silo_VERSION_MINOR@)
+#
+# Cxx Test for both PDB and HDF5 drivers
+# If HDF5 driver not present, test will be logged as skipped by CTest
+#
+add_executable(cxx_test cxx_test.cxx)
+target_include_directories(cxx_test PRIVATE ${SILO_INCLUDE_DIR})
+target_link_libraries(cxx_test PRIVATE silo)
+add_test(NAME cxx_test COMMAND $<TARGET_FILE:cxx_test>)
+add_test(NAME cxx_test-hdf5 COMMAND $<TARGET_FILE:cxx_test> DB_HDF5)
+set_tests_properties(cxx_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
 
-#-----------------------------------------------------------------------------
-# Don't include targets if this file is being picked up by another
-# project which has already built SILO as a subproject
-#-----------------------------------------------------------------------------
-if(NOT TARGET @SILO_NAME@)
-  include (${PACKAGE_PREFIX_DIR}/lib/cmake/Silo/@silo_targets_name@.cmake)
+if(SILO_ENABLE_FORTRAN)
+    enable_language(Fortran)
 
-  if(SILO_ENABLE_HDF5)
-      include(CMakeFindDependencyMacro)
-      find_dependency(hdf5 @HDF5_VERSION@ PATHS ${HDF5_DIR})
-  endif()
+    add_executable(f77_test f77_test.f)
+    target_include_directories(f77_test PRIVATE ${SILO_INCLUDE_DIR})
+    target_link_libraries(f77_test PRIVATE silo)
+    add_test(NAME f77_test COMMAND $<TARGET_FILE:f77_test>)
+    add_test(NAME f77_test-hdf5 COMMAND $<TARGET_FILE:f77_test> DB_HDF5)
+    set_tests_properties(f77_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
+
+    add_executable(f90_test f90_test.f90)
+    target_include_directories(f90_test PRIVATE ${SILO_INCLUDE_DIR})
+    target_link_libraries(f90_test PRIVATE silo)
+    add_test(NAME f90_test COMMAND $<TARGET_FILE:f90_test>)
+    add_test(NAME f90_test-hdf5 COMMAND $<TARGET_FILE:f90_test> DB_HDF5)
+    set_tests_properties(f90_test-hdf5 PROPERTIES SKIP_RETURN_CODE 17)
 endif()
 
-
+if(SILO_ENABLE_PYTHON_MODULE)
+    find_package(Python REQUIRED COMPONENTS Interpreter)
+    add_test(NAME py_test COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/py_test.py")
+    set_tests_properties(py_test PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>")
+endif()

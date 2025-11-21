@@ -42,6 +42,10 @@ Default values are specified with `=<value>` for each option.
   Silo has a large number of test clients.
   Enabling testing probably doubles the total build time for Silo (e.g. from 1-2 mins to 2-4 mins).
 
+`SILO_ENABLE_SHARED:BOOL=ON`
+: Build Silo as a shared library.
+  This is *required* for the python module.
+
 `SILO_BUILD_FOR_ASAN:BOOL=OFF`
 : Build to run testing with GNU/Clang address sanitizer enabled.
   Currently works only for newish GCC compilers.
@@ -58,9 +62,13 @@ Default values are specified with `=<value>` for each option.
   Many Silo customers have come to rely on PDB Lite for PDB-only applications.
   For those customers, the option of *installing* PDB Lite headers is provided so that PDB-only applications can compile and link against Silo.
   However, PDB Lite headers are NOT required simply to use Silo's PDB driver to read and write Silo/PDB files.
-  In a GNU Autotools build, Silo has had the ability to also link to the most recent relase of PACT/PDB using the `--with-pdb-proper=<path-to-PACT-PDB>` configuration option.
-  This creates a new, separate PDB driver identified with the `DB_PDBP` (note the trailing `P` for **PDB Proper**) driver id that produces Silo/PDB files using the newest PDB Library available instead of the PDB Lite library from 1996.
-  Currently, in a CMake build, the option to create the PDB Proper driver is not available.
+
+`SILO_PACT_DIR:PATH=`
+: Silo has the ability to also link to the most recent relase of PACT/PDB.
+  This creates a second, separate PDB driver identified with the `DB_PDBP` (note the trailing `P` for **PDB Proper**) driver id.
+  This driver produces Silo/PDB files using the newest PDB Library available in PACT instead of the PDB Lite library frozen into Silo back in 1996.
+  The specified path is the directory holding `bin`, `lib` and `include` sub-directories of a PACT installation.
+  This functionality and CMake variable is likely relevant only to LLNL customers.
 
 `SILO_ENABLE_FORTRAN:BOOL=ON`
 : Enable Fortran interface using CMake's `enable_language()` feature.
@@ -92,6 +100,7 @@ Default values are specified with `=<value>` for each option.
 
 `SILO_QT6_DIR:PATH=`
 : Tell Silo's CMake where to find a Qt6 installation if it is not in *standard* places CMake looks for it.
+  The specified path must be to a directory holding the `Qt6Config.cmake` file.
 
 `SILO_ENABLE_HDF5:BOOL=ON`
 : Enable the HDF5 driver using CMake's `find_package()`.
@@ -110,20 +119,22 @@ Default values are specified with `=<value>` for each option.
 : Tell Silo's CMake where to find a ZLIB installation if it is not in *standard* places CMake looks for it.
   Sometimes, an HDF5 installation has a dependence on ZLIB and getting Silo to link to that HDF5 installation then also requires telling it where to find ZLIB.
 
-`SILO_ENABLE_ZFP:BOOL=ON` (if HDF5 is enabled)
-: Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features.
-  This requires HDF5 to also be enabled.
-  If HDF5 is enabled, ZFP is also enabled by default.
-
 `SILO_ENABLE_FPZIP:BOOL=OFF`
-: Enable [fpzip](https://computing.llnl.gov/projects/fpzip) compression features
+: Enable [fpzip](https://computing.llnl.gov/projects/fpzip) compression features including a built-in version of the fpzip library.
   Even if HDF5 is enabled, fpzip is off by default because fpzip is not BSD licensed.
   To enable fpzip, you also have to disable a BSD only build. 
+  Although more recent versions of fpzip are available under BSD license, the version built-in with Silo is version 1.0.2 and was not released as BSD licensed open source.
 
 `SILO_ENABLE_HZIP:BOOL=OFF`
-: Enable [hzip](https://computing.llnl.gov/projects/hzip) compression features.
+: Enable [hzip](https://computing.llnl.gov/projects/hzip) compression features including a built-in version of the hzip library.
   Even if HDF5 is enabled, hzip is off by default because hzip is not BSD licensed.
-  To enable hzip, you also have to disable a BSD only build. 
+  To enable hzip, you also have to disable a BSD only build.
+
+`SILO_ENABLE_ZFP:BOOL=ON` (if HDF5 is enabled)
+: Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features including a built-in version of the zfp library.
+  This requires HDF5 to also be enabled.
+  If HDF5 is enabled, ZFP is enabled by default.
+  While the zfp library that comes *built-in* with Silo has been properly name-mangled to avoid any conflicts with any released version of zfp, unfortunately neither the hzip or fpzip libaries have been.
 
 Below is an example of a CMake command-line used to build Silo.
 After untaring the release distribution, cd into `silo-4.12.0` and make a `build` directory.
@@ -143,7 +154,26 @@ cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
       ..
 ```
 
-### Where to Find Example Code
+### Installing with [Spack](https://spack.io/)
+
+Immediately after the release of version 4.12.0 of Silo, the Spack recipe to build Silo was updated to use CMake.
+Spack will retain the ability to build older versions of Silo with Autotools but will use only CMake for versions of Silo *after* 4.12.0.
+For version 4.12.0 only, Spack will support either Autotools or CMake builds of Silo.
+
+The `+mpi` variant for Silo is deprecated for versions of Silo 4.12.0 and newer.
+The presence of the `+mpi` variant for Silo 4.12.0 and newer will not cause any error and will simply be ignored.
+Support for a `+zfp` variant was added.
+
+License support was also added with two options; `bsdonly` and `llnllegacy`.
+A `bsdonly` license build is the default.
+Spack builds using a `bsdonly` license will conflict with `+hzip` and `+fpzip` variants.
+The CMake build of Silo will build both `silock` and `browser` tools and install PDB Lite headers by fiat; no Spack variants will be made available to control these behaviors.
+
+Also starting in version 4.12.0, the `silex` Qt-GUI browsing tool requires Qt6.
+Be aware that in Spack, Qt6 variants are handled somewhat differently than Qt5.
+For Qt5, the variant is `+qt` whereas for Qt6, there is a main variant, `+qt-base`, and a number of commonly used additional variants for key Qt6 components such as `+widgets` and/or `+gui`.
+
+## Where to Find Example Code
 
 In the [`tests`](https://github.com/LLNL/Silo/tree/main/tests) directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
 There are not as many examples of reading the data there.

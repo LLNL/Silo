@@ -198,7 +198,7 @@ AT_SETUP(csg)
 AT_CHECK($VALGRIND csg $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(rocket)
-AT_CHECK($VALGRIND rocket $STARGS,,ignore)
+AT_CHECK($VALGRIND rocket $STARGS,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(mmadjacency)
 AT_CHECK($VALGRIND mmadjacency $STARGS,,ignore)

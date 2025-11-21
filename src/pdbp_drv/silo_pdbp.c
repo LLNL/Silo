@@ -55,14 +55,19 @@ product endorsement purposes.
 #define db_pdb_ForceSingle(STATUS) db_pdbp_ForceSingle(STATUS)
 
 /* Use C pre-processor to map all 'lite' PDB symbols to PDB proper symbols */
+#define lite_DEF_STD X86_64_STD
 #define lite_CRAY_STD CRAY_STD
-#define lite_IEEEA_STD IEEEA_STD
-#define lite_INTELA_ALIGNMENT INTELA_ALIGNMENT
-#define lite_M68000_ALIGNMENT M68000_ALIGNMENT
-#define lite_MIPS_ALIGNMENT MIPS_ALIGNMENT
-#define lite_RS6000_ALIGNMENT RS6000_ALIGNMENT
-#define lite_SPARC_ALIGNMENT SPARC_ALIGNMENT
-#define lite_UNICOS_ALIGNMENT UNICOS_ALIGNMENT
+#define lite_VAX_STD VAX_STD
+#define lite_IEEEA_STD X86_64A_STD
+#define lite_INTELA_STD X86_64A_STD
+#define lite_IEEEB_STD X86_64_STD
+
+#define lite_INTELA_ALIGNMENT GNU4_X86_64_ALIGNMENT
+#define lite_M68000_ALIGNMENT WORD4_ALIGNMENT
+#define lite_MIPS_ALIGNMENT WORD4_ALIGNMENT
+#define lite_RS6000_ALIGNMENT WORD4_ALIGNMENT
+#define lite_SPARC_ALIGNMENT WORD2_ALIGNMENT
+#define lite_UNICOS_ALIGNMENT WORD8_ALIGNMENT
 #define lite_LAST LAST
 
 #define lite_PD_cd PD_cd
@@ -84,6 +89,7 @@ product endorsement purposes.
 #define lite_PD_target PD_target
 #define lite_PD_write PD_write
 #define lite_PD_write_alt PD_write_alt
+#define lite_PD_flush PD_flush
 
 #define lite_SC_alloc SC_alloc
 #define lite_SC_arrlen SC_arrlen

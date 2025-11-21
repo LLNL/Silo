@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
@@ -49,94 +47,66 @@
 # reflect those  of the United  States Government or  Lawrence Livermore
 # National  Security, LLC,  and shall  not  be used  for advertising  or
 # product endorsement purposes.
+import Silo
 
-# -----------------------------------------------------------------------------
-# Test hzip compression capability in silo by generating compressed data
-# file, copying it, re-generating w/o compression and then diffing it with
-# browser against the original.
-#
-# Programmer: Mark C. Miller
-# Creation:   July 21, 2008
-#
-# Modifications:
-#   Mark C. Miller, Wed Feb  4 20:58:34 PST 2009
-#   Made it more lenient about the compressed file size being larger. That
-#   can happen for toy datasets.
-# -----------------------------------------------------------------------------
-#
-# Find dir where this script lives and source the shell utils script there.
-#
-# dirname -- "$0" gets the script’s directory even if this script is run via a
-#     relative path like ../../foo/bar/gorfo.sh.
-# The CDPATH= nulls that env. variable and prevents cd from printing anything
-#     if CDPATH is set in the environment.
-# pwd gives the absolute path after the cd has occurred. This all happens in
-#     a subshell so the cwd of the current script is unchanged.
-#
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-. $script_dir/silo_sh_utils.sh
+db = Silo.Create("onehexpy.silo", "This is a test to see how well this string displays in Qt widget in Silex\nThis is a test to see how well this string displays in Qt widget in Silex\nThis is a test to see how well this string displays in Qt widget in Silex\nThis is a test to see how well this string displays in Qt widget in Silex\n")
 
-#
-# Ensure the multi_test executable is available
-#
-multi_test=$(find_file -x tests/bin/multi_test tests/multi_test ./multi_test ../../multi_test)
-[ $? -eq 0 ] || exit 1
+# coordinate arrays for the mesh
+coord0 = (0, 0.707107, 0, -0.707107, 0, 0.707107, 0, -0.707107)
+coord1 = (0, 0.5, 1, 0.5, 0.707107, 1.20711, 1.70711, 1.20711)
+coord2 = (0, 0.5, 1, 0.5, -0.707107, -0.207107, 0.292893, -0.207107)
+min_extents = (-0.707107, 0, -0.707107)
+max_extents = (0.707107, 1.70711, 1)
 
-#
-# Ensure we have Silo's 'browser' tool available
-#
-browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/browser)
-[ $? -eq 0 ] || exit 1
+# the ucd mesh object
+mesh = {"name":"hex",\
+        "type":"DBucdmesh",\
+        "coord0":coord0,\
+        "coord1":coord1,\
+        "coord2":coord2,\
+        "min_extents":min_extents,\
+        "max_extents":max_extents,\
+        "zonelist":"zonelist",\
+        "ndims":3,\
+        "nnodes":8,\
+        "nzones":1,\
+        "facetype":100,\
+        "cycle":0,\
+        "coord_sys":Silo.DB_OTHER,\
+        "datatype":Silo.DB_DOUBLE,\
+        "origin":0}
+db.WriteObject("hex", mesh)
 
-#
-# Ensure we have HDF5's 'h5stat' tool in PATH
-#
-if ! command -v h5stat >/dev/null 2>&1; then
-    echo "HDF5's 'h5stat' tool is required in PATH and not found."
-    exit 1
-fi
-h5stat=$(command -v h5stat)
+# nodelist and shape arrays for the zonelist
+nodelist = (0, 1, 2, 3, 4, 5, 6, 7)
+shapecnt = (1,)
+shapesize = (8,)
 
-#
-# Create data with compression (only on HDF5 driver) and save files
-#
-$multi_test DB_HDF5 hzip 1>/dev/null 2>&1
-rm -rf h5_hzip_files
-mkdir h5_hzip_files
-mv multi_*d.h5 h5_hzip_files/.
+# zonelist object
+zonelist = {"name":"zonelist",\
+            "type":"DBzonelist",\
+            "ndims":3,\
+            "nzones":1,\
+            "nshapes":1,\
+            "shapecnt":shapecnt,\
+            "shapesize":shapesize,\
+            "lnodelist":len(nodelist),\
+            "nodelist":nodelist}
+db.WriteObject("zonelist", zonelist)
 
-#
-# Create data without compression 
-#
-$multi_test DB_HDF5 1>/dev/null 2>&1
-[ $? -eq 0 ] || exit 1
+# variable array
+value0 = (0, 0.957107, 1, -0.457107, -0.5, 0.457107, 0.5, -0.957107)
 
-#
-# Now, run browser and make sure we don't get any errors in the diff
-#
-result=0
-for df in multi_*.h5; do
-    # confirm compressed files are smaller (or at least not too much bigger)
-    hzip_raw_data_size=$($h5stat -d h5_hzip_files/$df | grep 'Total raw data size' | tr -d '\t ' | cut -d':' -f2)
-    orig_raw_data_size=$($h5stat -d $df | grep 'Total raw data size' | tr -d '\t ' | cut -d':' -f2)
-    if [ -z "$orig_raw_data_size" ] || [ -z "$hzip_raw_data_size" ] ||
-       [ $orig_raw_data_size -lt $hzip_raw_data_size ]; then
-        result=1
-        break
-    fi
-    # do a diff on the files and confirm contents match
-    rm -f testhzip.out
-    $browser --proper-exit-code -q -e diff $df h5_hzip_files/$df 1>testhzip.out 2>&1
-    if [ $? -ne 0 ] || [ -s testhzip.out ]; then
-        result=1
-        break
-    fi
-done
+# variable object
+v = {"name":"v",\
+     "type":"DBucdvar",\
+     "meshid":"hex",\
+     "datatype":Silo.DB_DOUBLE,\
+     "nels":len(value0),\
+     "nvals":1,\
+     "ndims":3,\
+     "centering":Silo.DB_NODECENT,\
+     "value0":value0}
+db.WriteObject("v", v)
 
-#
-# Cleanup
-#
-rm -rf h5_hzip_files
-rm -f testhzip.out
-
-exit $result 
+db.Close()

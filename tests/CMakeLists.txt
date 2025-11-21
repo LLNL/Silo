@@ -68,15 +68,16 @@
 #   Sometimes both runs touch the same file name so HDF5 tests set to
 #   DEPEND on PDB tests when both are active.
 #
-#   Things get more complicated for these cases...
+#   Things get more complicated for cases if...
 #
 #       * A test works only on HDF5 or only on PDB driver
-#       * A test is defined only for certain options
+#       * A test is defined only for certain build options
 #       * A test needs special command-line arguments
-#       * A test is run many different ways producing the same file(s)
-#       * A test requires the data produced by another
+#       * A test client is used to run many different ways
+#         producing different files but with the same names
+#       * A test requires the data produced by another test
 #       * A test involves a shell or python script
-#       * A test involves multiple source files 
+#       * A test involves multiple source files
 #
 #   The C_TEST_SOURCES, CXX_TEST_SOURCES and F_TEST_SOURCES are the main
 #   file globbed list of C, C++ and Fortran source files. There are some
@@ -92,7 +93,7 @@
 #
 #   CMake's RESOURCE_LOCK property is used in some cases but maybe it
 #   should be used more liberally. We should probably use REQUIRED_FILES
-#   more. There may be some logic errors here where we wind up overriding
+#   more too. There may be some logic errors here where we wind up overriding
 #   a test's properties.
 #
 # Notes on how to do valgrind testing...
@@ -174,6 +175,13 @@ if(WIN32)
     endif()
 
 endif()
+
+###-------------------------------------------------------------------------------------
+# Scan skip return value from std.c.
+# Tests return this value if logic decides the config does not allow it to run properly.
+###-------------------------------------------------------------------------------------
+file(STRINGS "std.c" _skip_retval_line REGEX "SKIP_RETURN_VALUE")
+string(REGEX MATCH "([0-9]+)" _silo_test_skip_retval "${_skip_retval_line}")
 
 ###-------------------------------------------------------------------------------------
 # Copy data files needed for testing to test output dir.
@@ -392,23 +400,34 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
     endif()
 
     #
-    # Add default tests for both PDB or HDF5 or BOTH 
+    # Add default tests for HDF5 or PDB drivers or BOTH 
     #
     if(srcFile IN_LIST HDF5_ONLY_SOURCES)
         add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
         set_tests_properties(${base}-hdf5 PROPERTIES LABELS "hdf5")
+        set_tests_properties(${base}-hdf5 PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
         if(src IN_LIST F_TEST_SOURCES)
             set_tests_properties(${base}-hdf5 PROPERTIES LABELS "fortran")
         endif()
     elseif(srcFile IN_LIST PDB_ONLY_SOURCES)
         add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
         set_tests_properties(${base} PROPERTIES LABELS "pdb")
+        set_tests_properties(${base} PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
         if(src IN_LIST F_TEST_SOURCES)
             set_tests_properties(${base} PROPERTIES LABELS "fortran")
         endif()
     else()
         add_test(NAME ${base} COMMAND $<TARGET_FILE:${base}>)
         set_tests_properties(${base} PROPERTIES LABELS "pdb")
+        set_tests_properties(${base} PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
+        if(SILO_PACT_DIR)
+            add_test(NAME ${base}-pdbp COMMAND $<TARGET_FILE:${base}> DB_PDBP)
+            set_tests_properties(${base}-pdbp PROPERTIES LABELS "pdb-proper")
+            set_tests_properties(${base}-pdbp PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
+            if(src IN_LIST F_TEST_SOURCES)
+                set_tests_properties(${base}-pdbp PROPERTIES LABELS "fortran")
+            endif()
+        endif()
         if(src IN_LIST F_TEST_SOURCES)
             set_tests_properties(${base} PROPERTIES LABELS "fortran")
         endif()
@@ -416,6 +435,7 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
             add_test(NAME ${base}-hdf5 COMMAND $<TARGET_FILE:${base}> DB_HDF5)
             set_tests_properties(${base}-hdf5 PROPERTIES DEPENDS ${base})
             set_tests_properties(${base}-hdf5 PROPERTIES LABELS "hdf5")
+            set_tests_properties(${base}-hdf5 PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
             if(src IN_LIST F_TEST_SOURCES)
                 set_tests_properties(${base}-hdf5 PROPERTIES LABELS "fortran")
             endif()
@@ -652,9 +672,15 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         ${silo_test_output_dir})
     add_test(NAME checksums
         COMMAND ${CMAKE_COMMAND} -E env
+        PATH=${_sh_path}
         ASAN_OPTIONS=detect_leaks=0
         "${silo_test_output_dir}/checksums")
-    set_tests_properties(multi_test-hdf5 PROPERTIES DEPENDS checksums)
+    set_tests_properties(checksums PROPERTIES DEPENDS multi_test-hdf5)
+    set_tests_properties(checksums PROPERTIES SKIP_RETURN_CODE ${_silo_test_skip_retval})
+    # There is a bug in HDF5-1.14.6 that causes this test to fail
+    if(HDF5_VERSION VERSION_EQUAL "1.14.6")
+        set_tests_properties(checksums PROPERTIES DISABLED TRUE)
+    endif()
 endif()
 
 #
@@ -672,7 +698,7 @@ if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
         set_tests_properties(test-write-py-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
         set_tests_properties(test-write-py-hdf5 PROPERTIES DEPENDS sami-hdf5 REQUIRED_FILES sami.silo)
         set_tests_properties(test-write-py-hdf5 PROPERTIES RESOURCE_LOCK "sami.silo")
-        set_tests_properties(test-write-py-hdf5 PROPERTIES LABELS "python")
+        set_tests_properties(test-write-py-hdf5 PROPERTIES LABELS "python;hdf5")
     endif()
 
     add_test(NAME multi_file-reset COMMAND $<TARGET_FILE:multi_test>)
@@ -690,7 +716,7 @@ if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
        set_tests_properties(test-read-py-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH}")
        set_tests_properties(test-read-py-hdf5 PROPERTIES DEPENDS multi_file-hdf-friendly)
        set_tests_properties(test-read-py-hdf5 PROPERTIES RESOURCE_LOCK "multi_file_tests")
-       set_tests_properties(test-read-py-hdf5 PROPERTIES LABELS "python")
+       set_tests_properties(test-read-py-hdf5 PROPERTIES LABELS "python;hdf5")
     endif()
 
     add_test(NAME test-error-py COMMAND ${Python_EXECUTABLE} "${silo_test_output_dir}/test_error.py")
@@ -702,42 +728,14 @@ if(SILO_ENABLE_PYTHON_MODULE AND Python_EXECUTABLE)
     set_tests_properties(testonehex PROPERTIES DEPENDS onehex)
     set_tests_properties(testonehex PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH};ASAN_OPTIONS=detect_leaks=0")
     set_tests_properties(testonehex PROPERTIES LABELS "python")
+    set_tests_properties(testonehex onehex PROPERTIES RESOURCE_LOCK "onehex.silo")
 
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         add_test(NAME testonehex-hdf5 COMMAND ${CMAKE_COMMAND} -E env "${silo_test_output_dir}/testonehex")
         set_tests_properties(testonehex-hdf5 PROPERTIES DEPENDS onehex-hdf5)
         set_tests_properties(testonehex-hdf5 PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:SiloPy>${_envvar_path_sep}$ENV{PYTHONPATH};LD_PRELOAD=${SILO_LIBASAN_PATH}:${SILO_LIBUBSAN_PATH};ASAN_OPTIONS=detect_leaks=0")
-        set_tests_properties(testonehex-hdf5 PROPERTIES LABELS "python")
+        set_tests_properties(testonehex-hdf5 PROPERTIES LABELS "python;hdf5")
+        set_tests_properties(testonehex-hdf5 onehex-hdf5 PROPERTIES RESOURCE_LOCK "onehex.silo")
     endif()
 
-endif()
-
-###-----------------------------------------------------------------------------------------
-# Create check target that calls SiloMakeCheckRunner.
-# SiloMakeCheckRunner will run each test, check its output status and write the results.
-#
-# Any CMAKE vars or other information needs to be passed as -D defines
-#
-#  WD working directory
-#  HDF5 Use hdf5 driver for tests
-#  PY Python executable
-#  PYPATH  what to use for PYTHONPATH env var
-#  ADD_FORT  add fortran tests
-#
-# To run, call 'make check'
-###-----------------------------------------------------------------------------------------
-
-add_custom_target(check
-        COMMAND ${CMAKE_COMMAND}
-          -DWD=${silo_test_output_dir}
-          -DHDF5=${SILO_ENABLE_HDF5}
-          -DPY=${Python_EXECUTABLE}
-          -DPYPATH=$<TARGET_FILE_DIR:silo>
-          -DADD_FORT=${SILO_ENABLE_FORTRAN}
-          -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
-        WORKING_DIRECTORY ${silo_test_output_dir}
-        COMMENT "Running makecheck")
-add_dependencies(check copy_test_data)
-if(WIN32)
-    add_dependencies(check copy_test_deps)
 endif()

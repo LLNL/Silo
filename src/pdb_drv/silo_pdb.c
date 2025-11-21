@@ -3975,13 +3975,19 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
       DEFINE_OBJ("grouporigin", &tmpmm.grouporigin, DB_INT);
       DEFINE_OBJ("guihide", &tmpmm.guihide, DB_INT);
       DEFALL_OBJ("meshids", &tmpmm.meshids, DB_INT);
-      DEFALL_OBJ("meshtypes", &tmpmm.meshtypes, DB_INT);
-      DEFALL_OBJ("meshnames", &tmpnames, DB_CHAR);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
+      {
+          DEFALL_OBJ("meshtypes", &tmpmm.meshtypes, DB_INT);
+          DEFALL_OBJ("meshnames", &tmpnames, DB_CHAR);
+      }
       DEFALL_OBJ("meshdirs", &tmpmm.dirids, DB_INT);
-      DEFINE_OBJ("extentssize", &tmpmm.extentssize, DB_INT);
-      DEFALL_OBJ("extents", &tmpmm.extents, DB_DOUBLE);
-      DEFALL_OBJ("zonecounts", &tmpmm.zonecounts, DB_INT);
-      DEFALL_OBJ("has_external_zones", &tmpmm.has_external_zones, DB_INT);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBOptions)
+      {
+          DEFINE_OBJ("extentssize", &tmpmm.extentssize, DB_INT);
+          DEFALL_OBJ("extents", &tmpmm.extents, DB_DOUBLE);
+          DEFALL_OBJ("zonecounts", &tmpmm.zonecounts, DB_INT);
+          DEFALL_OBJ("has_external_zones", &tmpmm.has_external_zones, DB_INT);
+      }
       DEFINE_OBJ("lgroupings", &tmpmm.lgroupings, DB_INT);
       DEFALL_OBJ("groupings", &tmpmm.groupings, DB_INT);
       DEFALL_OBJ("groupnames", &tmpgnames, DB_CHAR);
@@ -4260,13 +4266,19 @@ db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
       /* Read multi-block object */
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nvars", &tmpmv.nvars, DB_INT);
-      DEFALL_OBJ("vartypes", &tmpmv.vartypes, DB_INT);
-      DEFALL_OBJ("varnames", &tmpnames, DB_CHAR);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
+      {
+          DEFALL_OBJ("vartypes", &tmpmv.vartypes, DB_INT);
+          DEFALL_OBJ("varnames", &tmpnames, DB_CHAR);
+      }
       DEFINE_OBJ("ngroups", &tmpmv.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmv.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmv.grouporigin, DB_INT);
-      DEFINE_OBJ("extentssize", &tmpmv.extentssize, DB_INT);
-      DEFALL_OBJ("extents", &tmpmv.extents, DB_DOUBLE);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBOptions)
+      {
+          DEFINE_OBJ("extentssize", &tmpmv.extentssize, DB_INT);
+          DEFALL_OBJ("extents", &tmpmv.extents, DB_DOUBLE);
+      }
       DEFINE_OBJ("guihide", &tmpmv.guihide, DB_INT);
       DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
       DEFINE_OBJ("tensor_rank", &tmpmv.tensor_rank, DB_INT);
@@ -4400,15 +4412,19 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
       /* Read multi-block object */
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nmats", &tmpmt.nmats, DB_INT);
-      DEFALL_OBJ("matnames", &tmpnames, DB_CHAR);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
+          DEFALL_OBJ("matnames", &tmpnames, DB_CHAR);
       DEFINE_OBJ("ngroups", &tmpmt.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmt.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmt.grouporigin, DB_INT);
       DEFINE_OBJ("nmatnos", &tmpmt.nmatnos, DB_INT);
-      DEFALL_OBJ("matnos", &tmpmt.matnos, DB_INT);
-      DEFALL_OBJ("mixlens", &tmpmt.mixlens, DB_INT);
-      DEFALL_OBJ("matcounts", &tmpmt.matcounts, DB_INT);
-      DEFALL_OBJ("matlists", &tmpmt.matlists, DB_INT);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBOptions)
+      {
+          DEFALL_OBJ("matnos", &tmpmt.matnos, DB_INT);
+          DEFALL_OBJ("mixlens", &tmpmt.mixlens, DB_INT);
+          DEFALL_OBJ("matcounts", &tmpmt.matcounts, DB_INT);
+          DEFALL_OBJ("matlists", &tmpmt.matlists, DB_INT);
+      }
       DEFINE_OBJ("guihide", &tmpmt.guihide, DB_INT);
       DEFINE_OBJ("allowmat0", &tmpmt.allowmat0, DB_INT);
       DEFALL_OBJ("material_names", &tmpmaterial_names, DB_CHAR);
@@ -4523,7 +4539,8 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       /* Read multi-block object */
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nspec", &tmpmms.nspec, DB_INT);
-      DEFALL_OBJ("specnames", &tmpnames, DB_CHAR);
+      if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
+          DEFALL_OBJ("specnames", &tmpnames, DB_CHAR);
       DEFINE_OBJ("ngroups", &tmpmms.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmms.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmms.grouporigin, DB_INT);

@@ -53,8 +53,6 @@ be used for advertising or product endorsement purposes.
 */
 
 #include <silo.h>
-#include <std.c>
-
 #include <cstdlib>
 #include <cstring>
 #include <map>
@@ -239,8 +237,10 @@ int main(int argc, char *argv[])
 	    arch_g = DB_RS6000;
 	} else if (!strcmp(argv[i], "DB_CRAY")) {
 	    arch_g = DB_CRAY;
-	} else if (!strncmp(argv[i], "DB_",3)) {
-            driver = StringToDriver(argv[i]);
+	} else if (!strncmp(argv[i], "DB_PDB",6)) {
+            driver = DB_PDB;
+	} else if (!strncmp(argv[i], "DB_HDF5",7)) {
+            driver = DB_HDF5;
 	} else if (!strncmp(argv[i], "nhexes=", 7)) {
             nhexes = (int) strtol(argv[i]+7,0,10);
 	} else if (!strncmp(argv[i], "nmats=", 6)) {
@@ -271,6 +271,8 @@ int main(int argc, char *argv[])
     puts("=== Creating file ===");
     if (NULL==(dbfile=DBCreate(filename, DB_CLOBBER, arch_g,
 			       "testing SAMI HDF5 silo driver", driver))) {
+        if (DBErrno() == E_NOHDF5)
+            return(17);
 	puts("DBCreate() failed");
 	nerrors++;
     }
@@ -308,6 +310,6 @@ int main(int argc, char *argv[])
     } else {
 	puts("All sami tests passed.");
     }
-    CleanupDriverStuff();
-    return nerrors?1:0;
+
+    return(nerrors?1:0);
 }

@@ -66,6 +66,9 @@ main (int argc, char *argv[])
     int		  i, driver=DB_PDB;
     static char	  *filename="quad.pdb";
     int            show_all_errors = FALSE;
+    int            nmesh = 1;
+    int            meshtypes[1] = {DB_QUAD_RECT};
+    char const    *meshnames[1] = {"quadmesh"};
 
     for (i=1; i<argc; i++) {
 	if (!strncmp(argv[i], "DB_PDB", 6)) {
@@ -83,30 +86,18 @@ main (int argc, char *argv[])
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
-
-#if 1
-    dbfile = DBCreate(filename, 0, DB_LOCAL,
-                      "quad test file", driver);
+    dbfile = DBCreate(filename, 0, DB_LOCAL, "quad test file", driver);
     printf("Creating file: '%s'...\n", filename);
-#endif
 
     DBMkDir (dbfile, "/dir1");
     DBSetDir (dbfile, "/dir1");
-    (void)build_quad (dbfile, "quadmesh");
+    build_quad (dbfile, "quadmesh");
 
     DBMkDir (dbfile, "/dir2");
     DBSetDir (dbfile, "/dir2");
-    (void)build_quad (dbfile, "quadmesh");
+    build_quad (dbfile, "quadmesh");
 
-    
-#if 0
-    meshtypes[0] = DB_QUAD_RECT;
-    meshnames[0] = "quadmesh";
-    nmesh = 1;
-
-    mmid = DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames,
-                          meshtypes, NULL);
-#endif
+    DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames, meshtypes, NULL);
 
     DBClose(dbfile);
     CleanupDriverStuff();

@@ -95,7 +95,7 @@ if (!strncmp(tok, #A, strlen(#A)))			\
     got_it = 1;						\
 }
 
-
+static int const skip_retval = 17; /* Used as CMake's SKIP_RETURN_VALUE */
 static DBoptlist *driver_opts[] = {0,0,0,0,0,0,0,0,0,0};
 static int driver_opts_ids[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static int driver_ints[100];
