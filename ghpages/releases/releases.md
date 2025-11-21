@@ -2,15 +2,17 @@
 title: Releases
 ---
 
-Silo source code is released under two different licenses; a *legacy* license and a BSD license.
+Silo source code is released under the BSD 3-clause license.
 
-The BSD licensed releases do not contain the [fpzip](https://computing.llnl.gov/projects/fpzip) or hzip compression libraries.
+Two compression libraries, [fpzip](https://computing.llnl.gov/projects/fpzip) and [hzip](https://computing.llnl.gov/projects/hzip) which are part of the release artifact and can be built-in to Silo, are not BSD licensed.
+As of version 4.12.0, whether a BSD licensed or LLNL legacy licensed version is built can be specified by the `-DSILO_BUILD_FOR_BSD_LICENSE:BOOL` CMake option.
+
 For details, see the [BSD_LICENSE_README](https://raw.githubusercontent.com/LLNL/Silo/main/BSD_LICENSE_README) file.
-
 <br>
 
 Date | Version | Sources | Documentation
 :--- | ---:    | :---        | ---
+Nov 2025 | 4.12.0 | [Legacy+BSD][4120] | [Release notes][badlink] / [User Manual][4120um]
 Sep 2023 | 4.11.1 | [Legacy][4111] / [BSD][4111b] | [Release notes][4111rn] / [User Manual][4111um]
 Sep 2022 | 4.11 | [Legacy][411] / [BSD][411b] | [Release notes][411rn]
 Feb 2016 | 4.10.2 | [Legacy][4102] / [BSD][4102b] | [See 4.10.1 Release notes][4102rn]
@@ -27,6 +29,8 @@ Oct 2007 | 4.6.1 | [Legacy][461] | [User Manual][46um]
 
 <!-- release asset links -->
 
+[4120um]: https://silo.readthedocs.io/4.12.0/
+[4120]: https://github.com/LLNL/Silo/releases/tag/4.12.0 "Legacy+BSD License"
 [4111]: https://github.com/LLNL/Silo/releases/download/4.11.1/silo-4.11.1.tar.xz "Legacy License but includes all features"
 [4111b]: https://github.com/LLNL/Silo/releases/download/4.11.1/silo-4.11.1-bsd.tar.xz "BSD License, fpzip/hzip compressors removed"
 [4111rn]: https://github.com/LLNL/Silo/releases/tag/4.11.1
