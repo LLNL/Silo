@@ -1004,7 +1004,7 @@ Execution tuning:
 _ATEOF
 cat <<_ATEOF || at_write_fail=1
 
-Report bugs to <visit-users@elist.ornl.gov>.
+Report bugs to <https://github.com/LLNL/Silo/issues>.
 _ATEOF
   exit $at_write_fail
 fi
@@ -1012,7 +1012,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF || at_write_fail=1
-silo 4.12.0-pre2 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS" test groups:
+silo 4.12.0 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS" test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -1053,7 +1053,7 @@ _ATEOF
   exit $at_write_fail
 fi
 if $at_version_p; then
-  printf "%s\n" "$as_me (silo 4.12.0-pre2)" &&
+  printf "%s\n" "$as_me (silo 4.12.0)" &&
   cat <<\_ATEOF || at_write_fail=1
 
 Copyright (C) 2021 Free Software Foundation, Inc.
@@ -1265,11 +1265,11 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
-## silo 4.12.0-pre2 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
+## silo 4.12.0 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
 _ASBOX
 {
   sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
-## silo 4.12.0-pre2 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
+## silo 4.12.0 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
 _ASBOX
   echo
 
@@ -1663,7 +1663,7 @@ at_fn_group_postprocess ()
     sed "s/^ */$as_me: WARNING: /" <<_ATEOF
       A failure happened in a test group before any test could be
       run. This means that test suite is improperly designed.  Please
-      report this failure to <visit-users@elist.ornl.gov>.
+      report this failure to <https://github.com/LLNL/Silo/issues>.
 _ATEOF
     printf "%s\n" "$at_setup_line" >"$at_check_line_file"
     at_status=99
@@ -2085,8 +2085,8 @@ _ASBOX
 
   printf "%s\n" "Please send $at_msg and all information you think might help:
 
-   To: <visit-users@elist.ornl.gov>
-   Subject: [silo 4.12.0-pre2] $as_me: $at_msg1$at_msg2
+   To: <https://github.com/LLNL/Silo/issues>
+   Subject: [silo 4.12.0] $as_me: $at_msg1$at_msg2
 
 You may investigate any problem if you feel able to do so, in which
 case the test suite provides a good starting point.  Its output may
@@ -2113,15 +2113,15 @@ This version of the Silo library is greater than or equal to 4
 This version of the Silo library is NOT greater than or equal to 9
 This version of the Silo library is greater than or equal to 4.6
 This version of the Silo library is NOT greater than or equal to 90.5.2
-DBVersion() returns "4.12.0-pre2"
+DBVersion() returns "4.12.0"
 DBVersionGE(4,6,0) returns 1
 DBVersionGE(90,5,2) returns 0
 On file handle returned from DBCreate...
-    DBFileVersion() returns "4.12.0-pre2"
+    DBFileVersion() returns "4.12.0"
     DBFileVersionGE(4,6,0) returns 1
     DBFileVersionGE(90,5,2) returns 0
 On file handle returned from DBOpen...
-    DBFileVersion() returns "4.12.0-pre2"
+    DBFileVersion() returns "4.12.0"
     DBFileVersionGE(4,6,0) returns 1
     DBFileVersionGE(90,5,2) returns 0
 On old silo file handle returned from DBOpen...
