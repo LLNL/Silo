@@ -1889,7 +1889,7 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
  */
 PRIVATE hid_t
 db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
-                  int size[3]/*out*/)
+                  hsize_t size[3]/*out*/)
 {
     hid_t       type;
 
@@ -1897,12 +1897,10 @@ db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
     
 #if (H5_VERS_MAJOR==1 && H5_VERS_MINOR>=4) || H5_VERS_MAJOR>1
     if (H5T_ARRAY==H5Tget_class(type)) {
-        hsize_t bigdims[3];
         int i;
         *ndims = H5Tget_array_ndims(type);
         assert(*ndims<=3);
-        H5Tget_array_dims(type, bigdims);
-        for (i=0; i<*ndims; i++) size[i] = bigdims[i];
+        H5Tget_array_dims(type, size);
         type = H5Tget_super(type);
     } else {
         *ndims = 0;
@@ -1931,16 +1929,14 @@ db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
  */
 PRIVATE int
 db_hdf5_put_cmemb(hid_t compound_type, char const *name, size_t offset,
-                  int ndims, int const *dim, hid_t type)
+                  int ndims, hsize_t const *dim, hid_t type)
 {
     int         retval;
     
 #if (H5_VERS_MAJOR==1 && H5_VERS_MINOR>=4) || H5_VERS_MAJOR>1
     if (ndims) {
-        hsize_t bigdims[16];
         int i;
-        for (i=0; i<ndims; i++) bigdims[i] = dim[i];
-        type = H5Tarray_create(type, ndims, bigdims);
+        type = H5Tarray_create(type, ndims, dim);
     }
     retval = H5Tinsert(compound_type, name, offset, type);
     if (ndims) H5Tclose(type);
@@ -3805,10 +3801,11 @@ db_hdf5_get_comp_var(DBfile *_dbfile, char const *name, hsize_t *nelmts,
                 break;
             case H5T_ARRAY:
                 {
-                    int i, ndims, size[3], len = 1;
+                    int i, ndims, len = 1;
+                    hsize_t size[3];
                     comptype = db_hdf5_get_cmemb(stypeid, membno, &ndims, size);
                     for (i = 0; i < ndims; i++)
-                        len *= size[i];
+                        len *= (int) size[i];
                     numvals = len;
                     break;
                 }
@@ -6616,7 +6613,8 @@ copy_obj(hid_t hobj, char const *name, void *op_data)
         s1024 = H5Tcopy(H5T_C_S1);
         H5Tset_size(s1024, 1024);
         for (i=0; i<nmembs; i++) {
-            int ndims, j, memb_size[4];
+            int ndims, j;
+            hsize_t memb_size[4];
             hid_t member_type = db_hdf5_get_cmemb(atype, i, &ndims, memb_size);
             
             if (H5Tget_class(member_type) == H5T_STRING)
@@ -7075,7 +7073,8 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_GetComponent";
     hid_t       o=-1, attr=-1, atype=-1, ftype=-1, mtype=-1, dset=-1;
-    int         datatype, mno, n, ndims, i, dim[3], mult, complen, mnof=-1, mnofidx=-1;
+    int         datatype, mno, n, ndims, i, mult, complen, mnof=-1, mnofidx=-1;
+    hsize_t     dim[3];
     char        *mnofname=0;
     void        *retval=NULL;
     
@@ -7185,7 +7184,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
                 UNWIND();
             }
 
-            for (i=0, mult=1; i<ndims; i++) mult *= dim[i];
+            for (i=0, mult=1; i<ndims; i++) mult *= (int) dim[i];
 
             if (just_get_datatype == 0)
             {
@@ -8821,7 +8820,8 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
     hid_t       o=-1, attr=-1, atype=-1, h5str=-1;
     char        *file_value=NULL, *mem_value=NULL, *bkg=NULL, bigname[1024];
     DBObjectType objtype;
-    int         _objtype, nmembs, i, j, memb_size[4];
+    int         _objtype, nmembs, i, j;
+    hsize_t     memb_size[4];
     DBobject    *obj=NULL;
     size_t      asize, nelmts, msize;
 
