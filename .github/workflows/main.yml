@@ -29,14 +29,6 @@ jobs:
         tar -xf hdf5/HDF5-1.14.4.3-Linux.tar.gz --strip-components=4 -C hdf5-1.14.4-3
         rm -rf hdf5
 
-    - name: Build Silo Autotools
-      run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
-        mkdir build
-        cd build
-        env LDFLAGS=-Wl,-rpath,`pwd`/../hdf5-1.14.4-3/lib FFLAGS=-fallow-argument-mismatch FCFLAGS=-fallow-argument-mismatch ../configure --with-hdf5=`pwd`/../hdf5-1.14.4-3/include,`pwd`/../hdf5-1.14.4-3/lib --enable-pythonmodule --enable-json --prefix=`pwd`/myinstall
-        make -j 8 install
-
     - name: Build Silo CMake
       run: |
         export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
@@ -77,20 +69,6 @@ jobs:
               ..
         make -j 8 install
 
-    - name: Build Tests Autotools
-      run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
-        cd build/tests
-        make -j 8 tests
-
-    - name: Check Silo Autotools
-      id: makecheck-autotools
-      continue-on-error: true
-      run: |
-        export PATH="$PWD/hdf5-1.14.4-3/bin:$PATH"
-        cd build
-        make -j 8 check
-
     - name: Check Silo CTest
       id: makecheck-cmake
       continue-on-error: true
@@ -107,13 +85,6 @@ jobs:
         cd cmake_asan_build
         ctest --output-log ctest.log
 
-    - name: Package Artifact Autotools
-      id: pack-autotools
-      if: ${{ steps.makecheck-autotools.outcome == 'failure' }}
-      run: |
-        cd build/tests
-        tar -cJf testsuite.dir.tar.xz testsuite.dir testsuite.log
-
     - name: Package Artifact CMake
       id: pack-cmake
       if: ${{ steps.makecheck-cmake.outcome == 'failure' }}
@@ -129,7 +100,7 @@ jobs:
         tar -cJf ctest.tar.xz Testing/Temporary ctest.log
 
     - name: Upload artifacts
-      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' || steps.makecheck-cmake-asan.outcome == 'failure' }}
+      if: ${{ steps.makecheck-cmake.outcome == 'failure' || steps.makecheck-cmake-asan.outcome == 'failure' }}
       uses: actions/upload-artifact@v4
       with:
         name: silo-test-artifacts
@@ -142,5 +113,5 @@ jobs:
 
     # Re-signal the failure so the job ends red.
     - name: Fail job if make check failed
-      if: ${{ steps.makecheck-autotools.outcome == 'failure' || steps.makecheck-cmake.outcome == 'failure' || steps.makecheck-cmake-asan.outcome == 'failure' }}
+      if: ${{ steps.makecheck-cmake.outcome == 'failure' || steps.makecheck-cmake-asan.outcome == 'failure' }}
       run: exit 1
