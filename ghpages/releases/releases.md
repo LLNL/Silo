@@ -12,7 +12,7 @@ For details, see the [BSD_LICENSE_README](https://raw.githubusercontent.com/LLNL
 
 Date | Version | Sources | Documentation
 :--- | ---:    | :---        | ---
-Nov 2025 | 4.12.0 | [Legacy+BSD][4120] | [Release notes][badlink] / [User Manual][4120um]
+Nov 2025 | 4.12.0 | [Legacy+BSD][4120] | [Release notes][4120] / [User Manual][4120um]
 Sep 2023 | 4.11.1 | [Legacy][4111] / [BSD][4111b] | [Release notes][4111rn] / [User Manual][4111um]
 Sep 2022 | 4.11 | [Legacy][411] / [BSD][411b] | [Release notes][411rn]
 Feb 2016 | 4.10.2 | [Legacy][4102] / [BSD][4102b] | [See 4.10.1 Release notes][4102rn]

@@ -484,10 +484,10 @@ db_taur_NewToc(DBfile *_dbfile)
                 toc->dir_names[i] = ALLOC_N(char, 12);
 
                 if (taurus->nstates < 100) {
-                    snprintf(toc->dir_names[i], 12, "state%02d", i);
+                    snprintf(toc->dir_names[i], 12, "state%02d", i%100);
                 }
                 else {
-                    snprintf(toc->dir_names[i], 12, "state%03d", i);
+                    snprintf(toc->dir_names[i], 12, "state%03d", i%1000);
                 }
             }
             toc->ndir = taurus->nstates;
@@ -1455,9 +1455,9 @@ db_taur_InqMeshname(DBfile *_dbfile, char const *var_name, char *mesh_name)
              */
             if (strcmp(var_name, "mat1") == 0) {
                 if (taurus->nstates < 100)
-                    snprintf(mesh_name, 14, "/state%02d/mesh1", taurus->state);
+                    snprintf(mesh_name, 16, "/state%02d/mesh1", taurus->state%100);
                 else
-                    snprintf(mesh_name, 15, "/state%03d/mesh1", taurus->state);
+                    snprintf(mesh_name, 17, "/state%03d/mesh1", taurus->state%1000);
                 return (0);
             }
         }
@@ -1776,7 +1776,7 @@ db_taur_cd(TAURUSfile *taurus, char const *path)
     int            state;
     char          *dir;
     char           opath[160];
-    char           npath[160];
+    char           npath[256];
 
     /*
      * Form the new path.
@@ -1786,7 +1786,7 @@ db_taur_cd(TAURUSfile *taurus, char const *path)
     }
     else {
         db_taur_pwd(taurus, opath);
-        snprintf(npath, 256, "%s/%s", opath, path);
+        snprintf(npath, 256, "%.160s/%.95s", opath, path);
     }
     reduce_path(npath);
 
@@ -1873,19 +1873,19 @@ db_taur_pwd(TAURUSfile *taurus, char *path)
     else {
         if (taurus->idir == -1) {
             if (taurus->nstates < 100) {
-                snprintf(path, 7, "/state%02d", taurus->state);
+                snprintf(path, 10, "/state%02d", taurus->state%100);
             }
             else {
-                snprintf(path, 8, "/state%03d", taurus->state);
+                snprintf(path, 11, "/state%03d", taurus->state%1000);
             }
         }
         else {
             if (taurus->nstates < 100) {
-                snprintf(path, 256, "/state%02d/%s", taurus->state,
+                snprintf(path, 256, "/state%02d/%.245s", taurus->state%100,
                         dir_names[taurus->idir]);
             }
             else {
-                snprintf(path, 256, "/state%03d/%s", taurus->state,
+                snprintf(path, 256, "/state%03d/%.244s", taurus->state%1000,
                         dir_names[taurus->idir]);
             }
         }

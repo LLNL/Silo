@@ -74,6 +74,7 @@ be used for advertising or product endorsement purposes.
  *
  */
 
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1415,6 +1416,7 @@ build_rect3d(DBfile * dbfile, int size, int order)
     double         dist;
 
     int            binf;
+    ssize_t        wrsz;
 
     switch (size) {
         case 1:
@@ -1645,11 +1647,13 @@ build_rect3d(DBfile * dbfile, int size, int order)
 
     DBPutQuadvar1(dbfile, var1name, meshname, d, zdims, ndims, NULL, 0,
                   DB_FLOAT, DB_ZONECENT, optlist);
-    write(binf, d, zdims[0]*zdims[1]*zdims[2]*sizeof(float));
+    wrsz = write(binf, d, zdims[0]*zdims[1]*zdims[2]*sizeof(float));
+    assert(wrsz==zdims[0]*zdims[1]*zdims[2]*sizeof(float));
 
     DBPutQuadvar1(dbfile, var2name, meshname, p, zdims, ndims, NULL, 0,
                   DB_FLOAT, DB_ZONECENT, optlist);
-    write(binf, p, zdims[0]*zdims[1]*zdims[2]*sizeof(float));
+    wrsz = write(binf, p, zdims[0]*zdims[1]*zdims[2]*sizeof(float));
+    assert(wrsz==zdims[0]*zdims[1]*zdims[2]*sizeof(float));
     close(binf);
     printf("zsize = nz=%d, ny=%d, nx=%d\n", zdims[2], zdims[1], zdims[0]);
 
@@ -1661,31 +1665,18 @@ build_rect3d(DBfile * dbfile, int size, int order)
 
     DBPutQuadvar1(dbfile, var3name, meshname, u, dims, ndims, NULL, 0,
                   DB_FLOAT, DB_NODECENT, optlist);
-    write(binf, u, dims[0]*dims[1]*dims[2]*sizeof(float));
+    wrsz = write(binf, u, dims[0]*dims[1]*dims[2]*sizeof(float));
+    assert(wrsz==dims[0]*dims[1]*dims[2]*sizeof(float));
 
     DBPutQuadvar1(dbfile, var4name, meshname, v, dims, ndims, NULL, 0,
                   DB_FLOAT, DB_NODECENT, optlist);
-    /*write(binf, v, dims[0]*dims[1]*dims[2]*sizeof(float));*/
+    wrsz = write(binf, v, dims[0]*dims[1]*dims[2]*sizeof(float));
+    assert(wrsz==dims[0]*dims[1]*dims[2]*sizeof(float));
 
     DBPutQuadvar1(dbfile, var5name, meshname, w, dims, ndims, NULL, 0,
                   DB_FLOAT, DB_NODECENT, optlist);
-    /*write(binf, w, dims[0]*dims[1]*dims[2]*sizeof(float));*/
-#if 0
-    { int i, j, k;
-        for (k = 0; k < dims[2]; k++)
-        {
-            for (j = 0; j < dims[1]; j++)
-            {
-                for (i = 0; i < dims[0]; i++)
-                {
-                    write(binf, &u[k*dims[1]*dims[0]+j*dims[0]+i], sizeof(float));
-                    write(binf, &v[k*dims[1]*dims[0]+j*dims[0]+i], sizeof(float));
-                    write(binf, &w[k*dims[1]*dims[0]+j*dims[0]+i], sizeof(float));
-                }
-            }
-        }
-    }
-#endif
+    wrsz = write(binf, w, dims[0]*dims[1]*dims[2]*sizeof(float));
+    assert(wrsz==dims[0]*dims[1]*dims[2]*sizeof(float));
     close(binf);
     printf("size = nz=%d, ny=%d, nx=%d\n", dims[2], dims[1], dims[0]);
 
