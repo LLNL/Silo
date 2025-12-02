@@ -163,21 +163,16 @@ main(int argc, char *argv[])
         json_object_put(file_obj);
     }
 
-#if 0
-    binary_obj_strA = json_object_to_json_string_ext(jsilo_obj, JSON_C_TO_STRING_EXTPTR_AS_BINARY);
-    printf("binary object is of size %d\n", printbuf_length(jsilo_obj->_pb));
-    fd = open("onehex-A.bson", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
-    write(fd, binary_obj_strA, printbuf_length(jsilo_obj->_pb));
-    close(fd);
-#endif
-
     /* Example of creating a serialized, binary buffer of a Silo json object and then
        writing it to a binary file. */
     { void *buf; int len;
     struct json_object *bobj;
+    ssize_t nbyt = 0;
     json_object_to_binary_buf(jsilo_obj, 0, &buf, &len);
     fd = open("onehex-B.bson", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
-    write(fd, buf, len);
+    nbyt = write(fd, buf, len);
+    if (nbyt < 0 || nbyt > len)
+        return 1;
     close(fd);
 
     /* Example of re-constituting a Silo json object from a binary buffer
