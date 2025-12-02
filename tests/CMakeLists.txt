@@ -295,7 +295,7 @@ set(SKIP_TEST_SOURCES
     testlib.c
 )
 
-if(NOT SILO_ENABLE_JSON AND JSONC_FOUND)
+if(NOT SILO_ENABLE_JSON)
     list(APPEND SKIP_TEST_SOURCES json.c)
     list(APPEND SKIP_TEST_SOURCES json_curve.c)
 endif()
@@ -460,7 +460,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(listtypes-hdf5 PROPERTIES LABELS "hdf5")
 endif()
 
-if(SILO_ENABLE_JSON)
+if(SILO_ENABLE_JSON AND JSONC_FOUND)
     set_tests_properties(json PROPERTIES DEPENDS onehex REQUIRED_FILES onehex.silo)
     set_tests_properties(json PROPERTIES DEPENDS multi_test REQUIRED_FILES onehex.silo)
     set_tests_properties(json PROPERTIES LABELS "pdb")

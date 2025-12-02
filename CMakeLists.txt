@@ -493,13 +493,12 @@ if(SILO_ENABLE_JSON)
     endif()
 
     if(JSONC_FOUND)
-        message(STATUS "Found json-c")
+        message(STATUS "Found json-c at ${JSONC_LIBRARY}")
+        list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
+        set_source_files_properties(${Silo_SOURCE_DIR}/src/silo/silo_json.c PROPERTIES COMPILE_FLAGS "-I${JSONC_INCLUDE_DIR}")
     else()
         message(FATAL_ERROR "json-c not found")
     endif()
-
-    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
-    set_source_files_properties(${Silo_SOURCE_DIR}/src/silo/silo_json.c PROPERTIES COMPILE_FLAGS "-I${JSONC_INCLUDE_DIR}")
 endif()
 
 set(silo_library_include_dirs
