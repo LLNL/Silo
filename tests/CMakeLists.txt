@@ -472,7 +472,7 @@ if(SILO_ENABLE_JSON AND JSONC_FOUND)
         set_tests_properties(json_curve-hdf5 PROPERTIES LABELS "pdb;json")
     endif()
     set_tests_properties(json;json-hdf5 PROPERTIES RESOURCE_LOCK onehex.silo)
-    set_tests_properties(json_curve;json_curve-hdf5 PROPERTIES RESOURCE_LOCK curve.pdb;curve.h5)
+    set_tests_properties(json_curve;json_curve-hdf5 PROPERTIES RESOURCE_LOCK "curve.pdb;curve.h5")
 endif()
 
 #
