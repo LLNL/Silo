@@ -297,6 +297,7 @@ set(SKIP_TEST_SOURCES
 
 if(NOT SILO_ENABLE_JSON AND JSONC_FOUND)
     list(APPEND SKIP_TEST_SOURCES json.c)
+    list(APPEND SKIP_TEST_SOURCES json_curve.c)
 endif()
 
 #
