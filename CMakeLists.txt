@@ -52,7 +52,7 @@
 #
 ##############################################################################
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
 ###
 # grab the version string
@@ -486,9 +486,20 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
 endif()
 
 if(SILO_ENABLE_JSON)
-# Does the json source need to be untarred and compiled?
-# Or is a call to find_package(json ...) require?
-#    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
+    find_path(JSONC_INCLUDE_DIR json-c/json.h PATH_SUFFIXES json-c)
+    find_library(JSONC_LIBRARY NAMES json-c)
+    if(JSONC_INCLUDE_DIR AND JSONC_LIBRARY)
+        set(JSONC_FOUND TRUE)
+    endif()
+
+    if(JSONC_FOUND)
+        message(STATUS "Found json-c")
+    else()
+        message(FATAL_ERROR "json-c not found")
+    endif()
+
+    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
+    set_source_files_properties(${Silo_SOURCE_DIR}/src/silo/silo_json.c PROPERTIES COMPILE_FLAGS "-I${JSONC_INCLUDE_DIR}")
 endif()
 
 set(silo_library_include_dirs
@@ -712,6 +723,10 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_target_properties(silo PROPERTIES OUTPUT_NAME siloh5)
     target_link_libraries(silo ${HDF5_C_LIBRARIES})
     target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})
+endif()
+
+if(SILO_ENABLE_JSON AND JSONC_FOUND)
+    target_link_libraries(silo ${JSONC_LIBRARY})
 endif()
 
 # setting up for installing Silo CMake config files

@@ -62,9 +62,9 @@ be used for advertising or product endorsement purposes.
 #include <silo_private.h>
 
 #include <silo_json.h>
-#include <json/json.h>
-#include <json/json_object_private.h>
-#include <json/printbuf.h>
+#include <json-c/json.h>
+#include <json_object_private.h>
+#include <json-c/printbuf.h>
 
 #define EXTPTR_HDRSTR "\":{\"ptr\":\"0x"
 
@@ -76,11 +76,13 @@ static void indent(struct printbuf *pb, int level, int flags)
     }
 }
 
+#if 0
 static int json_object_object_length(struct json_object *o)
 {
     struct lh_table *t = json_object_get_object(o);
     return t->count;
 }
+#endif
 
 static int json_object_object_get_member_count(struct json_object *o)
 {
@@ -93,27 +95,25 @@ static int json_object_object_get_member_count(struct json_object *o)
     return n;
 }
 
+#if 0
 static void json_object_set_serializer(json_object *jso,
     json_object_to_json_string_fn to_string_func,
     void * userdata, json_object_delete_fn * user_delete)
 {
     jso->_to_json_string = to_string_func;
 }
-
-static void json_object_set_deleter(json_object *jso,
-    json_object_delete_fn delete_func)
-{
-    jso->_delete = delete_func;
-}
+#endif
 
 void
-json_object_extptr_delete(struct json_object *jso)
+json_object_extptr_delete(struct json_object *jso, void *p)
 {
     void *extptr = json_object_get_strptr(jso);
     if (extptr) free(extptr);
+#if 0
     free(jso->o.c_string.str);
     printbuf_free(jso->_pb);
     free(jso);
+#endif
 }
 
 static int
@@ -250,7 +250,7 @@ json_object_new_strptr(void *p)
         snprintf(tmp, sizeof(tmp), "0x%016llx", (unsigned long long) p);
 
     retval = json_object_new_string(tmp);
-    json_object_set_deleter(retval, json_object_extptr_delete);
+    json_object_set_userdata(retval, p, json_object_extptr_delete);
     return retval;
 }
 

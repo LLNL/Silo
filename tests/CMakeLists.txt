@@ -286,7 +286,6 @@ set(SKIP_TEST_SOURCES
     ioperf_hdf5.c
     ioperf_sec2.c
     ioperf_stdio.c
-    json.c
     largefile_netcdf.c
     listtypes_main.c
     rocket_silo.cxx
@@ -295,6 +294,10 @@ set(SKIP_TEST_SOURCES
     std.c
     testlib.c
 )
+
+if(NOT SILO_ENABLE_JSON AND JSONC_FOUND)
+    list(APPEND SKIP_TEST_SOURCES json.c)
+endif()
 
 #
 # This test has problems with ASAN.
