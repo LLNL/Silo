@@ -295,11 +295,6 @@ set(SKIP_TEST_SOURCES
     testlib.c
 )
 
-if(NOT SILO_ENABLE_JSON)
-    list(APPEND SKIP_TEST_SOURCES json.c)
-    list(APPEND SKIP_TEST_SOURCES json_curve.c)
-endif()
-
 #
 # This test has problems with ASAN.
 # There are a handful of others that trigger leaks that we
@@ -326,6 +321,16 @@ set(TESTLIB_SOURCES
     dir.c
     quad.c
 )
+
+set(JSON_C_TEST_SOURCES
+    json.c
+    json_curve.c
+)
+
+if(NOT SILO_ENABLE_JSON)
+    list(APPEND SKIP_TEST_SOURCES ${JSON_C_TEST_SOURCES})
+endif()
+
 
 add_library(rocket_silo MODULE rocket_silo.cxx)
 add_dependencies(rocket_silo silo)
@@ -393,6 +398,11 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         target_link_libraries(${base} ${HDF5_C_LIBRARIES})
         target_include_directories(${base} PRIVATE ${HDF5_INCLUDE_DIRS})
+    endif()
+
+    if(SILO_ENABLE_JSON AND JSONC_FOUND)
+        target_link_libraries(${base} ${JSONC_LIBRARY})
+        target_include_directories(${base} PRIVATE ${JSONC_INCLUDE_DIR})
     endif()
 
     #
