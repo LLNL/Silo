@@ -98,14 +98,14 @@ jobs:
       id: pack-cmake
       if: ${{ steps.makecheck-cmake.outcome == 'failure' }}
       run: |
-        cd cmake_build/tests
+        cd cmake_build
         tar -cJf ctest.tar.xz Testing/Temporary ctest.log
 
     - name: Package Artifact CMake-Asan
       id: pack-cmake-asan
       if: ${{ steps.makecheck-cmake-asan.outcome == 'failure' }}
       run: |
-        cd cmake_asan_build/tests
+        cd cmake_asan_build
         tar -cJf ctest.tar.xz Testing/Temporary ctest.log
 
     - name: Upload artifacts
