@@ -228,7 +228,12 @@ int main(int argc, char **argv)
       dbfile = DBCreate("curve_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", driver);
       DBWriteJsonObject(dbfile, jsilo_curve);
       DBClose(dbfile);
+
+      /* Both curve and jsilo_curve are currently sharing curve->x and curve->y data */
+      curve->x = 0;
+      curve->y = 0;
       DBFreeCurve(curve);
+      json_object_put(jsilo_curve);
     }
 
   return 0;
