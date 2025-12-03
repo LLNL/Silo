@@ -199,7 +199,7 @@ int main(int argc, char **argv)
   {
       char tmp[32];
       char *filename = driver==DB_PDB?"curve.pdb":"curve.h5\0";
-      DBfile *dbfile = DBOpen(filename, driver, DB_READ);
+      DBfile *dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ);
       DBcurve *curve = DBGetCurve(dbfile, "sincurve");
 
       jsilo_curve = json_object_new_object();
@@ -225,7 +225,7 @@ int main(int argc, char **argv)
       DBClose(dbfile);
       printf("jsilo_object.to_string()=%s\n", json_object_to_json_string(jsilo_curve));
 
-      dbfile = DBCreate("curve_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", DB_PDB);
+      dbfile = DBCreate("curve_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", driver);
       DBWriteJsonObject(dbfile, jsilo_curve);
       DBClose(dbfile);
       DBFreeCurve(curve);

@@ -107,8 +107,16 @@ main(int argc, char *argv[])
     }
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
-    dbfile = DBOpen("../../onehex.silo", driver, DB_READ);
-    if (!dbfile) dbfile = DBOpen("onehex.silo", driver, DB_READ);
+    if (driver == DB_PDB)
+    {
+        dbfile = DBOpen("../../onehex.pdb", driver, DB_READ);
+        if (!dbfile) dbfile = DBOpen("onehex.pdb", driver, DB_READ);
+    }
+    else if (driver = DB_HDF5)
+    {
+        dbfile = DBOpen("../../onehex.h5", driver, DB_READ);
+        if (!dbfile) dbfile = DBOpen("onehex.h5", driver, DB_READ);
+    }
 
     /* Example of getting a Silo object from a silo file as a json object */
     jsilo_obj = DBGetJsonObject(dbfile, "hex");
