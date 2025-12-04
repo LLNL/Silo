@@ -286,7 +286,6 @@ set(SKIP_TEST_SOURCES
     ioperf_hdf5.c
     ioperf_sec2.c
     ioperf_stdio.c
-    json.c
     largefile_netcdf.c
     listtypes_main.c
     rocket_silo.cxx
@@ -322,6 +321,16 @@ set(TESTLIB_SOURCES
     dir.c
     quad.c
 )
+
+set(JSON_C_TEST_SOURCES
+    json.c
+    json_curve.c
+)
+
+if(NOT SILO_ENABLE_JSON)
+    list(APPEND SKIP_TEST_SOURCES ${JSON_C_TEST_SOURCES})
+endif()
+
 
 add_library(rocket_silo MODULE rocket_silo.cxx)
 add_dependencies(rocket_silo silo)
@@ -391,6 +400,11 @@ foreach(src IN LISTS C_TEST_SOURCES CXX_TEST_SOURCES F_TEST_SOURCES)
         target_include_directories(${base} PRIVATE ${HDF5_INCLUDE_DIRS})
     endif()
 
+    if(SILO_ENABLE_JSON AND JSONC_FOUND)
+        target_link_libraries(${base} ${JSONC_LIBRARY})
+        target_include_directories(${base} PRIVATE ${JSONC_INCLUDE_DIR})
+    endif()
+
     #
     # Do not add default test cases for special tests. Those are
     # handled with specific logic below
@@ -456,17 +470,22 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     set_tests_properties(listtypes-hdf5 PROPERTIES LABELS "hdf5")
 endif()
 
-if(SILO_ENABLE_JSON)
-    set_tests_properties(json PROPERTIES DEPENDS onehex REQUIRED_FILES onehex.silo)
-    set_tests_properties(json PROPERTIES DEPENDS multi_test REQUIRED_FILES onehex.silo)
-    set_tests_properties(json PROPERTIES LABELS "pdb")
-    set_tests_properties(json PROPERTIES LABELS "json")
+if(SILO_ENABLE_JSON AND JSONC_FOUND)
+    add_test(NAME onehexA COMMAND $<TARGET_FILE:onehex> fname=onehex.pdb)
+    set_tests_properties(json PROPERTIES DEPENDS onehexA REQUIRED_FILES onehex.pdb)
+    set_tests_properties(json PROPERTIES LABELS "pdb;json")
+    set_tests_properties(json_curve PROPERTIES DEPENDS testall REQUIRED_FILES curve.pdb)
+    set_tests_properties(json_curve PROPERTIES LABELS "pdb;json")
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-        set_tests_properties(json-hdf5 PROPERTIES DEPENDS onehex-hdf5 REQUIRED_FILES onehex.silo)
-        set_tests_properties(json-hdf5 PROPERTIES LABELS "hdf5")
-        set_tests_properties(json-hdf5 PROPERTIES LABELS "json")
+        add_test(NAME onehexB COMMAND $<TARGET_FILE:onehex> DB_HDF5 fname=onehex.h5)
+        set_tests_properties(json-hdf5 PROPERTIES DEPENDS onehexB REQUIRED_FILES onehex.h5)
+        set_tests_properties(json-hdf5 PROPERTIES LABELS "hdf5;json")
+        set_tests_properties(json_curve-hdf5 PROPERTIES DEPENDS testall-hdf5 REQUIRED_FILES curve.h5)
+        set_tests_properties(json_curve-hdf5 PROPERTIES LABELS "hdf5;json")
     endif()
-    set_tests_properties(json;json-hdf5 PROPERTIES RESOURCE_LOCK onehex.silo)
+    set_tests_properties(onehexA;json PROPERTIES RESOURCE_LOCK onehex.pdb)
+    set_tests_properties(onehexB;json-hdf5 PROPERTIES RESOURCE_LOCK onehex.h5)
+    set_tests_properties(json_curve;json_curve-hdf5 PROPERTIES RESOURCE_LOCK "curve.pdb;curve.h5")
 endif()
 
 #

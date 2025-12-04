@@ -12,9 +12,10 @@ BuildRequires:  cmake >= 3.12
 BuildRequires:  hdf5-devel
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  python3-devel
+BuildRequires:  json-c-devel
 
 %global silo_desc \
-Silo is a C/Fortran API for reading and writing a wide variety of \
+Silo is a C/Fortran/Python API for reading and writing a wide variety of \
 scientific data to binary files. Silo files can be easily shared and \
 exchanged between wholly independently developed applications running \
 on disparate computing platforms. Consequently, Silo facilitates the \
@@ -51,7 +52,7 @@ This package contains the development files of %{name}.
   -DSILO_ENABLE_BROWSER=ON \
   -DSILO_ENABLE_FORTRAN=ON \
   -DSILO_ENABLE_HDF5=ON \
-  -DSILO_ENABLE_JSON=OFF \
+  -DSILO_ENABLE_JSON=ON \
   -DSILO_ENABLE_PYTHON_MODULE=ON \
   -DSILO_ENABLE_TESTS=ON \
   -DSILO_ENABLE_INSTALL_LITE_HEADERS=ON \
