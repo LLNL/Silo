@@ -112,7 +112,7 @@ main(int argc, char *argv[])
         dbfile = DBOpen("../../onehex.pdb", driver, DB_READ);
         if (!dbfile) dbfile = DBOpen("onehex.pdb", driver, DB_READ);
     }
-    else if (driver = DB_HDF5)
+    else if (driver == DB_HDF5)
     {
         dbfile = DBOpen("../../onehex.h5", driver, DB_READ);
         if (!dbfile) dbfile = DBOpen("onehex.h5", driver, DB_READ);
