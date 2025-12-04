@@ -5,7 +5,7 @@ title: Examples
 Each item below is an example of the use of Silo to represent a different kind of scientific data.
 Each example shows a picture of the data (visualized with [VisIt](https://visit.llnl.gov), describes some of the key concepts the example demonstrates, lists a set of key Silo functions the example uses and provides links to both C or C++ source code used to generate the data as well as the resulting Silo data file.
 
-All of the examples here use some common Silo functions such as [DBCreate] and [DBClose] or functions to manage [option lists](https://silo.readthedocs.io//optlists.html) such as [DBMakeOptlist] or [DBAddOption].
+All of the examples here use some common Silo functions such as [DBCreate] and [DBClose] or functions to manage [option lists](https://silo.readthedocs.io/latest/optlists.html) such as [DBMakeOptlist] or [DBAddOption].
 So, those functions are not explicitly mentioned.
 
 ### Constructive Solid Geometry
@@ -67,38 +67,38 @@ A [`pmpio.h`](https://github.com/LLNL/Silo/blob/main/src/silo/pmpio.h) header fi
   The Silo file examples provided here contain two multi-block representations of the meshes, one without an Mrgtree and one with, so you can understand the difference and what the Mrgtree information is doing.
 * **Silo functions**: [DBMkMrgtree], [DBAddRegion], [DBAddRegionArray], [DBPutMrgtree], [DBPutGroupelmap], [DBPutMrgvar].
 
-[DBMkMrgtree]: https://silo.readthedocs.io//subsets.html#dbmakemrgtree
-[DBAddRegion]: https://silo.readthedocs.io//subsets.html#dbaddregion
-[DBAddRegionArray]: https://silo.readthedocs.io//subsets.html#dbaddregionarray
-[DBPutMrgtree]: https://silo.readthedocs.io//subsets.html#dbputmrgtree
-[DBPutGroupelmap]: https://silo.readthedocs.io//subsets.html#dbputgrupelmap
-[DBPutMrgvar]: https://silo.readthedocs.io//subsets.html#dbputmrgvar
+[DBMkMrgtree]: https://silo.readthedocs.io/latest/subsets.html#dbmakemrgtree
+[DBAddRegion]: https://silo.readthedocs.io/latest/subsets.html#dbaddregion
+[DBAddRegionArray]: https://silo.readthedocs.io/latest/subsets.html#dbaddregionarray
+[DBPutMrgtree]: https://silo.readthedocs.io/latest/subsets.html#dbputmrgtree
+[DBPutGroupelmap]: https://silo.readthedocs.io/latest/subsets.html#dbputgrupelmap
+[DBPutMrgvar]: https://silo.readthedocs.io/latest/subsets.html#dbputmrgvar
 
-[DBCreate]: https://silo.readthedocs.io//files.html#dbcreate
-[DBClose]: https://silo.readthedocs.io//files.html#dbclose
-[DBMakeOptlist]: https://silo.readthedocs.io//optlists.html#dbmakeoptlist
-[DBAddOption]: https://silo.readthedocs.io//optlists.html#dbaddoption
-[DBFreeOptlist]: https://silo.readthedocs.io//optlists.html#dbfreeoptlist
+[DBCreate]: https://silo.readthedocs.io/latest/files.html#dbcreate
+[DBClose]: https://silo.readthedocs.io/latest/files.html#dbclose
+[DBMakeOptlist]: https://silo.readthedocs.io/latest/optlists.html#dbmakeoptlist
+[DBAddOption]: https://silo.readthedocs.io/latest/optlists.html#dbaddoption
+[DBFreeOptlist]: https://silo.readthedocs.io/latest/optlists.html#dbfreeoptlist
 
-[DBPutMultimat]: https://silo.readthedocs.io//parallel.html#dbputmultimat
-[DBPutMultimesh]: https://silo.readthedocs.io//parallel.html#dbputmultimesh
-[DBPutMultivar]: https://silo.readthedocs.io//parallel.html#dbputmultivar
+[DBPutMultimat]: https://silo.readthedocs.io/latest/parallel.html#dbputmultimat
+[DBPutMultimesh]: https://silo.readthedocs.io/latest/parallel.html#dbputmultimesh
+[DBPutMultivar]: https://silo.readthedocs.io/latest/parallel.html#dbputmultivar
 
-[DBMkDir]: https://silo.readthedocs.io//files.html#dbmkdir
-[DBSetDir]: https://silo.readthedocs.io//files.html#dbsetdir
-[DBPutCSGZonelist]: https://silo.readthedocs.io//objects.html#dbputcsgzonelist
-[DBPutZonelist]: https://silo.readthedocs.io//objects.html#dbputzonelist
-[DBPutFacelist]: https://silo.readthedocs.io//objects.html#dbputfacelist
-[DBPutCsgmesh]: https://silo.readthedocs.io//objects.html#dbputcsgmesh
-[DBPutQuadmesh]: https://silo.readthedocs.io//objects.html#dbputquadmesh
-[DBPutQuadvar]: https://silo.readthedocs.io//objects.html#dbputquadvar
-[DBPutUcdmesh]: https://silo.readthedocs.io//objects.html#dbputucdmesh
-[DBPutUcdvar]: https://silo.readthedocs.io//objects.html#dbputucdvar
-[DBPutPointmesh]: https://silo.readthedocs.io//objects.html#dbputpointmesh
-[DBPutCsgvar]: https://silo.readthedocs.io//objects.html#dbputcsgvar
-[DBPutMaterial]: https://silo.readthedocs.io//objects.html#dbputmaterial
-[DBPutMatspecies]: https://silo.readthedocs.io//objects.html#dbputmatspecies
-[DBShowErrors]: https://silo.readthedocs.io//globals.html#dbshowerrors
-[DBCalcExternalFacelist]: https://silo.readthedocs.io//utility.html#dbcalcexternalfacelist2
+[DBMkDir]: https://silo.readthedocs.io/latest/files.html#dbmkdir
+[DBSetDir]: https://silo.readthedocs.io/latest/files.html#dbsetdir
+[DBPutCSGZonelist]: https://silo.readthedocs.io/latest/objects.html#dbputcsgzonelist
+[DBPutZonelist]: https://silo.readthedocs.io/latest/objects.html#dbputzonelist
+[DBPutFacelist]: https://silo.readthedocs.io/latest/objects.html#dbputfacelist
+[DBPutCsgmesh]: https://silo.readthedocs.io/latest/objects.html#dbputcsgmesh
+[DBPutQuadmesh]: https://silo.readthedocs.io/latest/objects.html#dbputquadmesh
+[DBPutQuadvar]: https://silo.readthedocs.io/latest/objects.html#dbputquadvar
+[DBPutUcdmesh]: https://silo.readthedocs.io/latest/objects.html#dbputucdmesh
+[DBPutUcdvar]: https://silo.readthedocs.io/latest/objects.html#dbputucdvar
+[DBPutPointmesh]: https://silo.readthedocs.io/latest/objects.html#dbputpointmesh
+[DBPutCsgvar]: https://silo.readthedocs.io/latest/objects.html#dbputcsgvar
+[DBPutMaterial]: https://silo.readthedocs.io/latest/objects.html#dbputmaterial
+[DBPutMatspecies]: https://silo.readthedocs.io/latest/objects.html#dbputmatspecies
+[DBShowErrors]: https://silo.readthedocs.io/latest/globals.html#dbshowerrors
+[DBCalcExternalFacelist]: https://silo.readthedocs.io/latest/utility.html#dbcalcexternalfacelist2
 
-[DBWrite]: https://silo.readthedocs.io//generic.html#dbwrite
+[DBWrite]: https://silo.readthedocs.io/latest/generic.html#dbwrite
