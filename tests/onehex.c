@@ -141,7 +141,8 @@ main(int argc, char *argv[])
     int		    driver = DB_PDB;
     int             setinf = 0;
     int             setnan = 0;
-    char 	    *filename = "onehex.silo";
+    char            *default_filename = "onehex.silo";
+    char 	    *filename = default_filename;
     int             show_all_errors = FALSE;
     int             append = FALSE;
 
@@ -233,6 +234,8 @@ main(int argc, char *argv[])
 
             driver = DB_HDF5_OPTS(custom_opts_id);
 #endif
+        } else if (!strncmp(argv[i], "fname=", 6)) {
+            filename = strdup(&argv[i][6]);
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
@@ -374,6 +377,9 @@ main(int argc, char *argv[])
     DBClose(dbfile);
 
     CleanupDriverStuff();
+
+    if (filename != default_filename)
+        free(filename);
 
     return 0;
 }

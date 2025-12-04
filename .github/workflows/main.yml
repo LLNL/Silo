@@ -21,6 +21,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install json-c
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libjson-c-dev
+
     - name: Install HDF5
       run: |
         wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.4/bin/unix/hdf5-1.14.4-3-ubuntu-2204_gcc.tar.gz
@@ -38,6 +43,7 @@ jobs:
               -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF \
               -DSILO_ENABLE_HDF5:BOOL=ON \
               -DSILO_HDF5_DIR:PATH=`pwd`/../hdf5-1.14.4-3 \
+              -DSILO_ENABLE_JSON:BOOL=ON \
               -DSILO_ENABLE_FPZIP:BOOL=ON \
               -DSILO_ENABLE_HZIP:BOOL=ON \
               -DSILO_ENABLE_ZFP:BOOL=ON \
@@ -58,9 +64,12 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=`pwd`/my_install \
               -DSILO_BUILD_FOR_BSD_LICENSE:BOOL=OFF \
               -DSILO_ENABLE_HDF5:BOOL=ON \
-              -DSILO_ENABLE_FPZIP:BOOL=ON \
-              -DBUILD_TESTING:BOOL=ON \
               -DSILO_HDF5_DIR:PATH=`pwd`/../hdf5-1.14.4-3 \
+              -DSILO_ENABLE_JSON:BOOL=ON \
+              -DSILO_ENABLE_FPZIP:BOOL=ON \
+              -DSILO_ENABLE_HZIP:BOOL=ON \
+              -DSILO_ENABLE_ZFP:BOOL=ON \
+              -DBUILD_TESTING:BOOL=ON \
               -DSILO_ENABLE_SILOCK:BOOL=ON \
               -DCMAKE_BUILD_TYPE:STRING=Debug \
               -DSILO_BUILD_FOR_ASAN:BOOL=ON \
@@ -89,14 +98,14 @@ jobs:
       id: pack-cmake
       if: ${{ steps.makecheck-cmake.outcome == 'failure' }}
       run: |
-        cd cmake_build/tests
+        cd cmake_build
         tar -cJf ctest.tar.xz Testing/Temporary ctest.log
 
     - name: Package Artifact CMake-Asan
       id: pack-cmake-asan
       if: ${{ steps.makecheck-cmake-asan.outcome == 'failure' }}
       run: |
-        cd cmake_asan_build/tests
+        cd cmake_asan_build
         tar -cJf ctest.tar.xz Testing/Temporary ctest.log
 
     - name: Upload artifacts

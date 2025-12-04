@@ -54,7 +54,7 @@ be used for advertising or product endorsement purposes.
 #ifndef SILO_JSON_H
 #define SILO_JSON_H
 
-#include <json/json.h>
+#include <json-c/json.h>
 
 #include <silo_exports.h>
 
@@ -87,7 +87,7 @@ SILO_API extern void *               json_object_get_strptr(struct json_object *
  * that represent an array of data externally referenced from
  * the json object. */
 SILO_API extern struct json_object * json_object_new_extptr(void *p, int ndims, int const *dims, int datatype);
-SILO_API extern void                 json_object_extptr_delete(struct json_object *jso);
+SILO_API extern void                 json_object_extptr_delete(struct json_object *jso, void *p);
 
 /* Inspect members of an extptr object */
 SILO_API extern int                  json_object_is_extptr(struct json_object *obj);

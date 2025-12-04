@@ -83,6 +83,12 @@ Default values are specified with `=<value>` for each option.
 `SILO_PYTHON_DIR:PATH=`
 : Tell Silo's CMake where to find a Python installation if it is not in *standard* places CMake looks for it.
 
+`SILO_ENABLE_JSON:BOOL=OFF`
+: Enable the Json interface for Silo, based on the [`json-c`](https://github.com/json-c/json-c/wiki) library, using CMake's `find_path()` and `find_library()` for `json-c`.
+  Silo's CMake will look for `json-c` library and header files in the standard places CMake looks for it.
+  There is no companion `SILO_JSON_DIR` CMake variable to tell CMake where to look for `json-c`.
+  If you wish to use a `json-c` installed in a non-standard place, add the path to `CMAKE_PREFIX_PATH`.
+
 `SILO_INSTALL_PYTHONDIR:PATH=${CMAKE_INSTALL_LIBDIR}`
 : Specify a separate installation dir for the python module.
 
@@ -130,11 +136,11 @@ Default values are specified with `=<value>` for each option.
   Even if HDF5 is enabled, hzip is off by default because hzip is not BSD licensed.
   To enable hzip, you also have to disable a BSD only build.
 
-`SILO_ENABLE_ZFP:BOOL=ON` (if HDF5 is enabled)
+`SILO_ENABLE_ZFP:BOOL=ON`
 : Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features including a built-in version of the zfp library.
   This requires HDF5 to also be enabled.
   If HDF5 is enabled, ZFP is enabled by default.
-  While the zfp library that comes *built-in* with Silo has been properly name-mangled to avoid any conflicts with any released version of zfp, unfortunately neither the hzip or fpzip libaries have been.
+  While the zfp library that comes *built-in* with Silo has been properly name-mangled to avoid any conflicts with any released version of zfp, unfortunately neither the hzip or fpzip libraries built-in to Silo have been.
 
 Below is an example of a CMake command-line used to build Silo.
 After untaring the release distribution, cd into `silo-4.12.0` and make a `build` directory.
