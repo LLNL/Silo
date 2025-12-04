@@ -140,7 +140,7 @@ Default values are specified with `=<value>` for each option.
 : Enable [zfp](https://computing.llnl.gov/projects/zfp) compression features including a built-in version of the zfp library.
   This requires HDF5 to also be enabled.
   If HDF5 is enabled, ZFP is enabled by default.
-  While the zfp library that comes *built-in* with Silo has been properly name-mangled to avoid any conflicts with any released version of zfp, unfortunately neither the hzip or fpzip libaries built-in to Silo have been.
+  While the zfp library that comes *built-in* with Silo has been properly name-mangled to avoid any conflicts with any released version of zfp, unfortunately neither the hzip or fpzip libraries built-in to Silo have been.
 
 Below is an example of a CMake command-line used to build Silo.
 After untaring the release distribution, cd into `silo-4.12.0` and make a `build` directory.
