@@ -4,27 +4,11 @@
 Silo's python interface is designed to compile and work with either Python 2 or Python 3
 :::
 
-Silo's configure logic looks for `python`, not `python3`.
-If you need it to look instead for `python3`, this works...
-
-```
-env PYTHON=python3 PYTHON_CPPFLAGS=-I<path-to-python-headers> ./configure --enable-pythonmodule
-```
-
-where `path-to-python-headers` can often be obtained by...
-
-```
-% python3
-Python 3.8.9 (default, May 17 2022, 12:55:41) 
-[Clang 13.1.6 (clang-1316.0.21.2.5)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>> import sysconfig
->>> sysconfig.get_config_var("INCLUDEPY")
-'/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.8/Headers'
-```
+Silo's CMake logic looks for `python3` first.
+If it cannot find `python3`, then it looks for `python`.
 
 :::{warning}
-Configuring with `--disable-shared` or `--enable-shared=no` will disable the python module
+CMake'ing with `-DSILO_ENABLE_SHARED:BOOL=OFF` will disable the python module.
 :::
 
 It is probably easiest to understand the Python interface to Silo by examining some examples and tests.
