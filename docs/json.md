@@ -2,7 +2,7 @@
 
 :::{warning}
 JSON support in Silo is experimental.
-Silo must be configured with `--enable-json` to enable JSON support.
+Silo must be CMake'd with `SILO_ENABLE_JSON` to enable JSON support.
 :::
 
 The interface may be dramatically re-worked, eliminated or replaced with something like [Conduit](https://llnl-conduit.readthedocs.io/en/latest/).

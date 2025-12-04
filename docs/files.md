@@ -277,7 +277,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Silo supports two underlying drivers for storing named arrays and objects of machine independent data.
   One is called the Portable DataBase Library ([PDBLib](https://pubs.aip.org/aip/cip/article/7/3/304/281673/Software-for-Portable-Scientific-Data-Management) or just PDB), and the other is Hierarchical Data Format, Version 5 ([HDF5](https://www.hdfgroup.org/solutions/hdf5/))
 
-  When Silo is configured with the `--with-pdb-proper=<path-to-PACT-PDB>` option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as *PDB Lite*) identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a *current* PACT installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing `P` for *PDB Proper*).
+  When Silo is CMake'd with the `-DSILO_PACT_DIR=<path-to-PACT-PDB>` CMake variable, the Silo library supports both the PDB library that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as *PDB Lite*) identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a *current* PACT installation with a `filetype` of `DB_PDBP` (Note the trailing `P` for *PDB Proper*).
   PDB Proper is known to give far superior performance than PDB Lite on BG/P and BG/L class systems and so is recommended when using PDB driver on such systems.
 
   For the HDF5 library, there are many more available options for fine tuned control of the underlying I/O through the use of HDF5's Virtual File Drivers (VFDs).
