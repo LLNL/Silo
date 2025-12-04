@@ -179,7 +179,7 @@ main(int argc, char *argv[])
     json_object_to_binary_buf(jsilo_obj, 0, &buf, &len);
     fd = open("onehex-B.bson", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
     nbyt = write(fd, buf, len);
-    if (nbyt < 0 || nbyt > len)
+    if (nbyt != len)
         return 1;
     close(fd);
 
