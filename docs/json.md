@@ -6,7 +6,7 @@ Silo must be configured with `--enable-json` to enable JSON support.
 :::
 
 The interface may be dramatically re-worked, eliminated or replaced with something like [Conduit](https://llnl-conduit.readthedocs.io/en/latest/).
-In addition, applications using Silo's JSON interface will have to us the [`json-c`](https://github.com/json-c/json-c/wiki) library.
+In addition, applications using Silo's JSON interface will have to use the [`json-c`](https://github.com/json-c/json-c/wiki) library.
 
 JSON stands for [JavaScript Object Notation](https://json.org).
 The [`json-c`](https://github.com/json-c/json-c/wiki) library is a C implementation of JSON.
