@@ -13818,21 +13818,21 @@ DBFreeStringArray(char **strArray, int n)
 }
 
 INTERNAL int 
-db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_flag, int nblocks)
+db_StringListToStringArrayMBOpt(char *strList, int strListSize, char ***retArray, char **alloc_flag, int nblocks)
 {
-    int i=0, s=0, n=0, hasColon=0, nearlyDone = 0, completelyDone = 0, slashCharsToSwap[128];
+    int i=0, s=0, n=0, hasColon=0, completelyDone = 0, slashCharsToSwap[128];
     char **strArray;
     static char const *me = "DBStringListToStringArrayMBOpt";
 
     if (!strList) return 0;
 
-    if (nblocks <= 0)
-        return db_perror("nblocks", E_BADARGS, me);
+    if (nblocks <= 0) return -1;
 
     strArray = (char **) malloc(nblocks * sizeof(char*));
     if (strList[0] == ';')
         i = 1;
     strArray[n++] = &strList[i];
+    if (n == nblocks) completelyDone = 1;
     while (!completelyDone)
     {
         switch (strList[i])
@@ -13857,6 +13857,7 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
                 }
                 s = 0;
                 hasColon = 0;
+                if (n == nblocks) completelyDone = 1;
                 break;
             }
 #if !defined(_WIN32) /* linux case */
@@ -13886,16 +13887,26 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
         {
             if (strList[i] != '\0')
                 i++;
-            if (strList[i] == '\0')
-                nearlyDone = 1;
         }
+        if (i >= strListSize)
+            completelyDone = 1;
     }
 
+    /* fail if we don't find all strings we expect */
     if (n != nblocks)
     {
         free(strArray);
-        /*return db_perror("incorrect number of block names", E_INTERNAL, me);*/
         return -1;
+    }
+
+    /* fail if we don't consume all strings in input */
+    for (int j = i; j < strListSize; j++)
+    {
+        if (strList[j] == ';')
+        {
+            free(strArray);
+            return -1;
+        }
     }
 
     /* ensure we store the originally allocated pointer for later free's */

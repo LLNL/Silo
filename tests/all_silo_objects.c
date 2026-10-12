@@ -65,7 +65,7 @@ put_misc_arrs(DBfile *db)
     int ints[SZ];
     float flts[SZ];
     double dbls[SZ];
-    char strs[] = "bat;bet;bit;bot;but;byt;pat;pet;pit;pot;put\0";
+    char strs[] = "bat;bet;bit;bot;but;byt;pat;pet;pit;pot;put";
     int nvals;
 
     for (int i = 0; i < sizeof(chars)/sizeof(chars[0]); i++)

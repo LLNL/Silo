@@ -4270,7 +4270,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
        *----------------------------------------*/
 
       if (tmpnames != NULL) {
-          if (db_StringListToStringArrayMBOpt(tmpnames, &(mm->meshnames), &(mm->meshnames_alloc), mm->nblocks) < 0)
+          if (db_StringListToStringArrayMBOpt(tmpnames, meshnames_size, &(mm->meshnames), &(mm->meshnames_alloc), mm->nblocks) < 0)
           {
               DBFreeMultimesh(mm);
               FREE(tmpnames);
@@ -4603,7 +4603,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
    static char   *me = "db_pdb_GetMultivar";
    char          *rpnames = NULL;
    PJcomplist    *_tcl;
-   int            vartypes_size = 0, extents_size = 0, empty_size = 0;
+   int            varnames_size = 0, vartypes_size = 0, extents_size = 0, empty_size = 0;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, sizeof(tmp), &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4619,7 +4619,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
       if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
       {
           DEFALL_OBN("vartypes", &tmpmv.vartypes, DB_INT, &vartypes_size);
-          DEFALL_OBJ("varnames", &tmpnames, DB_CHAR);
+          DEFALL_OBN("varnames", &tmpnames, DB_CHAR, &varnames_size);
       }
       DEFINE_OBJ("ngroups", &tmpmv.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmv.blockorigin, DB_INT);
@@ -4675,7 +4675,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
 
       if (tmpnames != NULL) {
          if (mv->nvars > 0 &&
-             db_StringListToStringArrayMBOpt(tmpnames, &(mv->varnames),
+             db_StringListToStringArrayMBOpt(tmpnames, varnames_size, &(mv->varnames),
                                              &(mv->varnames_alloc), mv->nvars) < 0)
          {
              DBFreeMultivar(mv);
@@ -4772,7 +4772,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
    static char   *me = "db_pdb_GetMultimat";
    PJcomplist    *_tcl;
    int            matnos_size = 0, mixlens_size = 0, matcounts_size = 0;
-   int            matlists_size = 0, empty_size = 0;
+   int            matnames_size = 0, matlists_size = 0, empty_size = 0;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, sizeof(tmp), &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4786,7 +4786,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nmats", &tmpmt.nmats, DB_INT);
       if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
-          DEFALL_OBJ("matnames", &tmpnames, DB_CHAR);
+          DEFALL_OBN("matnames", &tmpnames, DB_CHAR, &matnames_size);
       DEFINE_OBJ("ngroups", &tmpmt.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmt.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmt.grouporigin, DB_INT);
@@ -4867,8 +4867,18 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
 
       if (tmpnames != NULL) {
           if (mt->nmats > 0)
-              db_StringListToStringArrayMBOpt(tmpnames, &(mt->matnames), &(mt->matnames_alloc), mt->nmats);
-        /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
+          {
+              if (db_StringListToStringArrayMBOpt(tmpnames, matnames_size, &(mt->matnames), &(mt->matnames_alloc), mt->nmats) < 0)
+              {
+                  DBFreeMultimat(mt);
+                  FREE(tmpnames);
+                  FREE(tmpmaterial_names);
+                  FREE(tmpmatcolors);
+                  db_perror(objname, E_MALFORMED, me);
+                  return NULL;
+              }
+         /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
+         }
       }
 
       if (tmpmaterial_names && mt->nmatnos > 0)
@@ -4940,7 +4950,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
    PJcomplist         tmp_obj;
    static char       *me = "db_pdb_GetMultimatspecies";
    PJcomplist    *_tcl;
-   int                nmatspec_size = 0, empty_size = 0;
+   int                specnames_size = 0, nmatspec_size = 0, empty_size = 0;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, sizeof(tmp), &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4954,7 +4964,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nspec", &tmpmms.nspec, DB_INT);
       if (DBGetDataReadMask2File(_dbfile) & DBMBNamesAndTypes)
-          DEFALL_OBJ("specnames", &tmpnames, DB_CHAR);
+          DEFALL_OBN("specnames", &tmpnames, DB_CHAR, &specnames_size);
       DEFINE_OBJ("ngroups", &tmpmms.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmms.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmms.grouporigin, DB_INT);
@@ -5003,8 +5013,18 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       if (tmpnames != NULL)
       {
           if (mms->nspec > 0)
-              db_StringListToStringArrayMBOpt(tmpnames, &(mms->specnames), &(mms->specnames_alloc), mms->nspec);
+          {
+              if (db_StringListToStringArrayMBOpt(tmpnames, specnames_size, &(mms->specnames), &(mms->specnames_alloc), mms->nspec) < 0)
+              {
+                  DBFreeMultimatspecies(mms);
+                  FREE(tmpnames);
+                  FREE(tmpspecnames);
+                  FREE(tmpcolors);
+                  db_perror(objname, E_MALFORMED, me);
+                  return NULL;
+              }
           /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
+          }
       }
 
       if (tmpspecnames != NULL)
