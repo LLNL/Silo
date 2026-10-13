@@ -6305,6 +6305,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
    static char *me = "db_pdb_GetCsgmesh";
    DBcsgmesh tmpcsgm;
    PJcomplist    *_tcl;
+   int            tf_size, bndids_size;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -6338,8 +6339,8 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
 
    if (DBGetDataReadMask2File(_dbfile) & DBCSGMBoundaryInfo)
    {
-       DEFALL_OBJ("typeflags", &tmpcsgm.typeflags, DB_INT);
-       DEFALL_OBJ("bndids", &tmpcsgm.bndids, DB_INT);
+       DEFALL_OBN("typeflags", &tmpcsgm.typeflags, DB_INT, &tf_size);
+       DEFALL_OBN("bndids", &tmpcsgm.bndids, DB_INT, &bndids_size);
    }
 
    /* Optional boundary names */
@@ -6358,23 +6359,53 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
       return NULL;
    }
 
+   if ((tmpcsgm.typeflags && tf_size != tmpcsgm.nbounds) ||
+       (tmpcsgm.bndids && bndids_size != tmpcsgm.nbounds)) {
+      FREE(zlname);
+      FREE(tmpbndnames);
+      FREE(tmpcsgm.typeflags);
+      FREE(tmpcsgm.bndids);
+      db_perror(meshname, E_MALFORMED, me);
+      return NULL;
+   }
+
     /* now that we know the object's data type, we can correctly
        read the coeffs */
     if ((DBGetDataReadMask2File(_dbfile) & DBCSGMBoundaryInfo) && (tmpcsgm.lcoeffs > 0))
     {
+        int coeffs_size;
+        int lcoeffs = tmpcsgm.lcoeffs;
         INIT_OBJ(&tmp_obj);
         if (DB_DOUBLE == tmpcsgm.datatype && PJ_InqForceSingle()) {
            tmpcsgm.datatype = DB_FLOAT;
         }
 
-        DEFALL_OBJ("coeffs", &tmpcsgm.coeffs, tmpcsgm.datatype);
+        DEFALL_OBN("coeffs", &tmpcsgm.coeffs, tmpcsgm.datatype, &coeffs_size);
         PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, 0);
+        if (tmpcsgm.coeffs && coeffs_size != lcoeffs) {
+           FREE(zlname);
+           FREE(tmpbndnames);
+           FREE(tmpcsgm.typeflags);
+           FREE(tmpcsgm.bndids);
+           FREE(tmpcsgm.coeffs);
+           db_perror(meshname, E_MALFORMED, me);
+           return NULL;
+        }
     }
 
     if ((tmpbndnames != NULL) && (tmpcsgm.nbounds > 0))
     {
-        tmpcsgm.bndnames = DBStringListToStringArray(tmpbndnames, &tmpcsgm.nbounds, !skipFirstSemicolon);
+        int cnt = -1;
+        tmpcsgm.bndnames = DBStringListToStringArray(tmpbndnames, &cnt, !skipFirstSemicolon);
         FREE(tmpbndnames);
+        if (tmpcsgm.bndnames && cnt != tmpcsgm.nbounds) {
+           FREE(zlname);
+           FREE(tmpcsgm.typeflags);
+           FREE(tmpcsgm.bndids);
+           FREE(tmpcsgm.coeffs);
+           db_perror(meshname, E_MALFORMED, me);
+           return NULL;
+        }
     }
 
    tmpcsgm.name = STRDUP(meshname);
@@ -6858,11 +6889,17 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
     /* optional global zone numbers */
     phzl->gnznodtype = phzl->gnznodtype?phzl->gnznodtype:DB_INT;
     if (DBGetDataReadMask2File(_dbfile) & DBZonelistGlobZoneNo) {
+       int gzoneno_size;
        INIT_OBJ(&tmp_obj);
-       DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, phzl->gnznodtype);
+       DEFALL_OBN("gzoneno", &tmpphzl.gzoneno, phzl->gnznodtype, &gzoneno_size);
        phzl->gzoneno = 0;
        if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0)>=0)
            phzl->gzoneno = tmpphzl.gzoneno;
+       if (phzl->gzoneno && gzoneno_size != phzl->nzones) {
+          DBFreePHZonelist(phzl);
+          db_perror(objname, E_MALFORMED, me);
+          return NULL;
+       }
     }
 
     return phzl;
@@ -6897,6 +6934,7 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
     static char        *me = "db_pdb_GetCSGZonelist";
     DBcsgzonelist       tmpzl;
     PJcomplist         *_tcl;
+    int                 tf_size, lids_size, rids_size, zl_size;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
@@ -6914,10 +6952,10 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
 
     if (DBGetDataReadMask2File(_dbfile) & DBZonelistInfo)
     {
-        DEFALL_OBJ("typeflags", &tmpzl.typeflags, DB_INT);
-        DEFALL_OBJ("leftids", &tmpzl.leftids, DB_INT);
-        DEFALL_OBJ("rightids", &tmpzl.rightids, DB_INT);
-        DEFALL_OBJ("zonelist", &tmpzl.zonelist, DB_INT);
+        DEFALL_OBN("typeflags", &tmpzl.typeflags, DB_INT, &tf_size);
+        DEFALL_OBN("leftids", &tmpzl.leftids, DB_INT, &lids_size);
+        DEFALL_OBN("rightids", &tmpzl.rightids, DB_INT, &rids_size);
+        DEFALL_OBN("zonelist", &tmpzl.zonelist, DB_INT, &zl_size);
     }
     if (DBGetDataReadMask2File(_dbfile) & DBCSGZonelistRegNames)
         DEFALL_OBJ("regnames", &tmprnames, DB_CHAR);
@@ -6941,29 +6979,69 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
        return NULL;
     }
 
+    if ((zl->leftids && lids_size != zl->nregs) ||
+        (zl->rightids && rids_size != zl->nregs) ||
+        (zl->typeflags && tf_size != zl->nregs) ||
+        (zl->zonelist && zl_size != zl->nzones))
+    {
+       FREE(tmprnames);
+       FREE(tmpznames);
+       FREE(tmpaznums);
+       DBFreeCSGZonelist(zl);
+       db_perror(objname, E_MALFORMED, me);
+       return NULL;
+    }
+
     /* now that we know the object's data type, we can correctly
        read the xforms */
     if ((DBGetDataReadMask2File(_dbfile) & DBZonelistInfo) && (zl->lxform > 0))
     {
+        int xform_size;
         INIT_OBJ(&tmp_obj);
         if (DB_DOUBLE == zl->datatype && PJ_InqForceSingle()) {
            zl->datatype = DB_FLOAT;
         }
 
-        DEFALL_OBJ("xform", &zl->xform, zl->datatype);
+        DEFALL_OBN("xform", &zl->xform, zl->datatype, &xform_size);
         PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0);
+        if (zl->xform && xform_size != zl->lxform)
+        {
+            FREE(tmprnames);
+            FREE(tmpznames);
+            FREE(tmpaznums);
+            DBFreeCSGZonelist(zl);
+            db_perror(objname, E_MALFORMED, me);
+            return NULL;
+        }
     }
 
     if ((tmprnames != NULL) && (zl->nregs > 0))
     {
-        zl->regnames = DBStringListToStringArray(tmprnames, &zl->nregs, !skipFirstSemicolon);
+        int cnt = -1;
+        zl->regnames = DBStringListToStringArray(tmprnames, &cnt, !skipFirstSemicolon);
         FREE(tmprnames);
+        if (zl->regnames && cnt != zl->nregs)
+        {
+            FREE(tmpznames);
+            FREE(tmpaznums);
+            DBFreeCSGZonelist(zl);
+            db_perror(objname, E_MALFORMED, me);
+            return NULL;
+        }
     }
 
     if ((tmpznames != NULL) && (zl->nzones > 0))
     {
-        zl->zonenames = DBStringListToStringArray(tmpznames, &zl->nzones, !skipFirstSemicolon);
+        int cnt = -1;
+        zl->zonenames = DBStringListToStringArray(tmpznames, &cnt, !skipFirstSemicolon);
         FREE(tmpznames);
+        if (zl->zonenames && cnt != zl->nzones)
+        {
+            FREE(tmpaznums);
+            DBFreeCSGZonelist(zl);
+            db_perror(objname, E_MALFORMED, me);
+            return NULL;
+        }
     }
 
     if (tmpaznums != NULL)
@@ -8101,7 +8179,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
     if (gm->num_segments < 0)
     {
-        DBFreeGroupelmap(gm);
+        /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
@@ -8113,7 +8191,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         gm->num_segments != segids_size ||
         (fraclens_size > 0 && gm->num_segments != fraclens_size))
     {
-        DBFreeGroupelmap(gm);
+        /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
@@ -8128,7 +8206,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
         if (sl < 0 || sl > segdata_size - tot_len)
         {
-            DBFreeGroupelmap(gm);
+            /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
             FREE(segData);
             FREE(fracLengths);
             FREE(fracsArray);
@@ -8142,7 +8220,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
     if (segdata_size > 0 && tot_len != segdata_size)
     {
-        DBFreeGroupelmap(gm);
+        /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
@@ -8175,7 +8253,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
             if (sl < 0 || sl > fraclens_size - tot_len)
             {
-                DBFreeGroupelmap(gm);
+                /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
                 FREE(segData);
                 FREE(fracLengths);
                 FREE(fracsArray);
@@ -8188,7 +8266,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
         if (segfracs_size > 0 && tot_len != segfracs_size)
         {
-            DBFreeGroupelmap(gm);
+            /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
             FREE(segData);
             FREE(fracLengths);
             FREE(fracsArray);
@@ -11514,6 +11592,22 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
 
    if (_csgm._disjoint_mode)
        DBAddIntComponent(obj, "disjoint_mode", _csgm._disjoint_mode);
+
+   if (_csgm._bndnames != NULL) {
+       int len; long llen; char *tmpstr = 0;
+       DBStringArrayToStringList((char const * const *)_csgm._bndnames, nbounds, &tmpstr, &len);
+       llen = (long) len;
+       DBWriteComponent(dbfile, obj, "bndnames", name, "char", tmpstr, 1, &llen);
+       FREE(tmpstr);
+   }
+
+   if (_csgm._alt_nodenum_vars != NULL) {
+       int nvars=-1, len; long llen; char *tmpstr = 0;
+       DBStringArrayToStringList((char const * const *)_csgm._alt_nodenum_vars, nvars, &tmpstr, &len);
+       llen = (long) len;
+       DBWriteComponent(dbfile, obj, "alt_nodenum_vars", name, "char", tmpstr, 1, &llen);
+       FREE(tmpstr);
+   }
 
    /*-------------------------------------------------------------
     *  Write csg-mesh object to output file.
