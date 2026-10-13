@@ -189,7 +189,11 @@ check_malformed mult_objs multimat matlists='"/arrs/intsB"' || exit 1
 check_malformed mult_objs multimat empty_list='"/arrs/intsB"' || exit 1
 check_malformed mult_objs multimat matnames='"/arrs/strsB"' || exit 1
 # NOTE: mat_colors/matcolors confusion in DBmultimats
-check_malformed mult_objs multimat mat_colors='"/arrs/strsB"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed mult_objs multimat matcolors='"/arrs/strsB"' || exit 1
+else
+    check_malformed mult_objs multimat mat_colors='"/arrs/strsB"' || exit 1
+fi
 check_malformed mult_objs multimatspecies nspec=-1 || exit 1
 check_malformed mult_objs multimatspecies nspec=99 || exit 1
 check_malformed mult_objs multimatspecies nmat=99 || exit 1
@@ -206,13 +210,16 @@ check_malformed point_objs pointmesh gnodeno='"/arrs/intsA"' || exit 1
 check_malformed point_objs pointmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed point_objs pointvar nvals=99 || exit 1
 check_malformed quad_objs quadmesh ndims=5 || exit 1
-check_malformed quad_objs quadmesh min_index={-1,-1,-1} || exit 1
-check_malformed quad_objs quadmesh max_index={99,99,99} || exit 1
 check_malformed quad_objs quadmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed quad_objs quadmesh ghost_zone_labels='"/arrs/chrsB"' || exit 1
+# odd issue in PDB driver with max index names
 if [ "$ext" = "pdb" ]; then
+    check_malformed quad_objs quadmesh min_index={-1,-1} subarr || exit 1
+    check_malformed quad_objs quadmesh max_index_n={99,99} subarr || exit 1
     check_malformed quad_objs quadmesh dims={2,3} subarr || exit 1
 else
+    check_malformed quad_objs quadmesh min_index={-1,-1,-1} || exit 1
+    check_malformed quad_objs quadmesh max_index={99,99,99} || exit 1
     check_malformed quad_objs quadmesh dims={2,3,0} || exit 1
 fi
 check_malformed quad_objs quadvar nvals=99 || exit 1

@@ -3409,12 +3409,12 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
      * semicolons. */
     if (tmpnames)
     {
-        int cnt = mm->nmat;
+        int cnt = -1;
 
         mm->matnames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
         FREE(tmpnames);
 
-        if (!mm->matnames || cnt != mm->nmat)
+        if (mm->matnames && cnt != mm->nmat)
         {
             DBFreeMaterial(mm);
             FREE(tmpcolors);
@@ -3424,11 +3424,11 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     }
     if (tmpcolors)
     {
-        int cnt = mm->nmat;
+        int cnt = -1;
         mm->matcolors = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
         FREE(tmpcolors);
 
-        if (!mm->matcolors || cnt != mm->nmat)
+        if (mm->matcolors && cnt != mm->nmat)
         {
             DBFreeMaterial(mm);
             db_perror(name, E_MALFORMED, me);
@@ -3616,9 +3616,8 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    }
    if (tmpnames != NULL)
    {
-       int cnt = nstrs;
-       if (cnt > 0)
-          mm->specnames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
+       int cnt = -1;
+       mm->specnames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
        FREE(tmpnames);
        if (cnt != nstrs)
        {
@@ -3630,9 +3629,8 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    }
    if (tmpcolors != NULL)
    {
-       int cnt = nstrs;
-       if (cnt > 0)
-          mm->speccolors = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
+       int cnt = -1;
+       mm->speccolors = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
        FREE(tmpcolors);
        if (cnt != nstrs)
        {
@@ -3672,7 +3670,7 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
 SILO_CALLBACK DBcompoundarray *
 db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
 {
-   int            i, elemlengths_size = 0, values_size = 0, nsum = 0;
+   int            i, namevec_size, elemlengths_size = 0, values_size = 0, nsum = 0;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    DBcompoundarray *ca = NULL;
    char          *s, delim[2], *name_vector = NULL;
@@ -3689,7 +3687,7 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
    DEFINE_OBJ("nelems", &tmpca.nelems, DB_INT);
    DEFINE_OBJ("nvalues", &tmpca.nvalues, DB_INT);
    DEFINE_OBJ("datatype", &tmpca.datatype, DB_INT);
-   DEFALL_OBJ("elemnames", &name_vector, DB_CHAR);
+   DEFALL_OBN("elemnames", &name_vector, DB_CHAR, &namevec_size);
    DEFALL_OBN("elemlengths", &tmpca.elemlengths, DB_INT, &elemlengths_size);
    if (PJ_GetObject(dbfile->pdb, array_name, &tmp_obj, DB_ARRAY) < 0)
        return NULL;
@@ -3725,12 +3723,13 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
    }
 
    /*
-    *  Internally, the meshnames are stored in a single character
+    *  Internally, the element names are stored in a single character
     *  string as a delimited set of names. Here we break them into
     *  separate names.  The delimiter is the first character of the
     *  name vector.
     */
    if (name_vector && ca->nelems > 0) {
+      int lensum = 0;
       ca->elemnames = ALLOC_N(char *, ca->nelems);
 
       delim[0] = name_vector[0];
@@ -3745,8 +3744,14 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
             return NULL;
          }
          ca->elemnames[i] = STRDUP(s);
+         lensum += strlen(ca->elemnames[i]);
       }
       FREE(name_vector);
+      if (lensum + ca->nelems + 1 != namevec_size) {
+         DBFreeCompoundarray(ca);
+         db_perror(array_name, E_MALFORMED, me);
+         return NULL;
+      }
    }
 
    /*
@@ -3995,7 +4000,7 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
            DBFreeDefvars(defv);
            FREE(tmpnames);
            FREE(tmpdefns);
-           db_perror("ndefs<0", E_MALFORMED, me);
+           db_perror(objname, E_MALFORMED, me);
            return NULL;
        }
 
@@ -4007,22 +4012,37 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
            DBFreeDefvars(defv);
            FREE(tmpnames);
            FREE(tmpdefns);
-           db_perror("array size != ndefs", E_MALFORMED, me);
+           db_perror(objname, E_MALFORMED, me);
            return NULL;
        }
 
        if (tmpnames != NULL)
        {
+           int cnt = -1;
            if (defv->ndefs > 0)
-               defv->names = DBStringListToStringArray(tmpnames, &(defv->ndefs), !skipFirstSemicolon);
+               defv->names = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
            FREE(tmpnames);
+           if (defv->names && cnt != defv->ndefs)
+           {
+               DBFreeDefvars(defv);
+               FREE(tmpdefns);
+               db_perror(objname, E_MALFORMED, me);
+               return NULL;
+           }
        }
 
        if (tmpdefns != NULL)
        {
+           int cnt = -1;
            if (defv->ndefs > 0)
-               defv->defns = DBStringListToStringArray(tmpdefns, &(defv->ndefs), !skipFirstSemicolon);
+               defv->defns = DBStringListToStringArray(tmpdefns, &cnt, !skipFirstSemicolon);
            FREE(tmpdefns);
+           if (defv->defns && cnt != defv->ndefs)
+           {
+               DBFreeDefvars(defv);
+               db_perror(objname, E_MALFORMED, me);
+               return NULL;
+           }
        }
    }
 
@@ -4281,7 +4301,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
        /*FREE(tmpnames); We don't free this here because the MBOpt routine creates pointers into it. */
       }
       if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
-         int cnt = mm->lgroupings;
+         int cnt = -1;
          mm->groupnames = DBStringListToStringArray(tmpgnames, &cnt, !skipFirstSemicolon);
          if (!mm->groupnames || cnt != mm->lgroupings)
          {
@@ -4413,6 +4433,8 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
                tmpoff += len;
             }
          }
+         if (tmpoff != mmadj->totlnodelists)
+             goto fail;
       }
 
       if (mmadj->lzonelists && (DBGetDataReadMask2File(_dbfile) & DBMMADJZonelists))
@@ -4443,6 +4465,8 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
                tmpoff += len;
             }
          }
+         if (tmpoff != mmadj->totlzonelists)
+             goto fail;
       }
 
       tmpnmesh = nmesh;
@@ -4532,7 +4556,9 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
 
       FREE(offsetmap);
       FREE(offsetmapn);
-      FREE(offsetmapz);   }
+      FREE(offsetmapz);
+
+   }
 
    return (mmadj);
 
@@ -4540,8 +4566,10 @@ fail:
    FREE(offsetmap);
    FREE(offsetmapn);
    FREE(offsetmapz);
-   DBFreeMultimeshadj(mmadj);
-   db_perror("malformed multimeshadj object", E_MALFORMED, me);
+   /* We cannot reliably, safely free the object here because it is malformed.
+      Our only option is to leak it. */
+   /*DBFreeMultimeshadj(mmadj);*/
+   db_perror(objname, E_MALFORMED, me);
    return NULL;
 }
 
@@ -4883,15 +4911,28 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
 
       if (tmpmaterial_names && mt->nmatnos > 0)
       {
-          mt->material_names = DBStringListToStringArray(tmpmaterial_names,
-              &(mt->nmatnos), !skipFirstSemicolon);
+          int cnt = -1;
+          mt->material_names = DBStringListToStringArray(tmpmaterial_names, &cnt, !skipFirstSemicolon);
           FREE(tmpmaterial_names);
+          if (mt->material_names && cnt != mt->nmatnos)
+          {
+              DBFreeMultimat(mt);
+              FREE(tmpmatcolors);
+              db_perror(objname, E_MALFORMED, me);
+              return NULL;
+          }
       }
       if (tmpmatcolors && mt->nmatnos > 0)
       {
-          mt->matcolors = DBStringListToStringArray(tmpmatcolors,
-              &(mt->nmatnos), !skipFirstSemicolon);
+          int cnt = -1;
+          mt->matcolors = DBStringListToStringArray(tmpmatcolors, &cnt, !skipFirstSemicolon);
           FREE(tmpmatcolors);
+          if (mt->matcolors && cnt != mt->nmatnos)
+          {
+              DBFreeMultimat(mt);
+              db_perror(objname, E_MALFORMED, me);
+              return NULL;
+          }
       }
    }
 
@@ -5121,6 +5162,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    DBpointmesh tmppm;
    PJcomplist    *_tcl;
    char          *tmpannums = 0;
+   int           coords_size[3], gnl_size, gnodeno_size;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -5147,9 +5189,9 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
 
    if (DBGetDataReadMask2File(_dbfile) & DBPMCoords)
    {
-       DEFALL_OBJ("coord0", &tmppm.coords[0], DB_FLOAT);
-       DEFALL_OBJ("coord1", &tmppm.coords[1], DB_FLOAT);
-       DEFALL_OBJ("coord2", &tmppm.coords[2], DB_FLOAT);
+       DEFALL_OBN("coord0", &tmppm.coords[0], DB_FLOAT, &coords_size[0]);
+       DEFALL_OBN("coord1", &tmppm.coords[1], DB_FLOAT, &coords_size[1]);
+       DEFALL_OBN("coord2", &tmppm.coords[2], DB_FLOAT, &coords_size[2]);
    }
 
    DEFALL_OBJ("label0", &tmppm.labels[0], DB_CHAR);
@@ -5160,7 +5202,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    DEFALL_OBJ("units2", &tmppm.units[2], DB_CHAR);
 
    if (DBGetDataReadMask2File(_dbfile) & DBPMGhostNodeLabels)
-       DEFALL_OBJ("ghost_node_labels", &tmppm.ghost_node_labels, DB_CHAR);
+       DEFALL_OBN("ghost_node_labels", &tmppm.ghost_node_labels, DB_CHAR, &gnl_size);
    DEFALL_OBJ("alt_nodenum_vars",  &tmpannums,  DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_POINTMESH) < 0)
@@ -5170,6 +5212,17 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    *pm = tmppm;
 
    if (pm->ndims < 0 || pm->ndims > NELMTS(pm->coords) || pm->nels < 0)
+   {
+      DBFreePointmesh(pm);
+      FREE(tmpannums);
+      db_perror(objname, E_MALFORMED, me);
+      return NULL;
+   }
+
+   if ((pm->coords[0] && coords_size[0] != pm->nels) ||
+       (pm->coords[1] && coords_size[1] != pm->nels) ||
+       (pm->coords[2] && coords_size[2] != pm->nels) ||
+       (pm->ghost_node_labels && gnl_size != pm->nels))
    {
       DBFreePointmesh(pm);
       FREE(tmpannums);
@@ -5190,10 +5243,16 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    pm->gnznodtype = tmppm.gnznodtype?tmppm.gnznodtype:DB_INT;
    if (DBGetDataReadMask2File(_dbfile) & DBPMGlobNodeNo) {
       INIT_OBJ(&tmp_obj);
-      DEFALL_OBJ("gnodeno", &tmppm.gnodeno, pm->gnznodtype);
+      DEFALL_OBN("gnodeno", &tmppm.gnodeno, pm->gnznodtype, &gnodeno_size);
       pm->gnodeno = 0;
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0)>=0)
           pm->gnodeno = tmppm.gnodeno;
+      if (pm->gnodeno && gnodeno_size != pm->nels)
+      {
+         DBFreePointmesh(pm);
+         db_perror(objname, E_MALFORMED, me);
+         return NULL;
+      }
    }
 
    pm->id = 0;
@@ -5313,7 +5372,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
         mv->nels < 0 || mv->ndims < 0 || mv->ndims > 3)
     {
         DBFreeMeshvar(mv);
-        db_perror("nvals", E_MALFORMED, me);
+        db_perror(objname, E_MALFORMED, me);
         return NULL;
     }
 
@@ -5429,7 +5488,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     DBquadmesh tmpqm;
     PJcomplist    *_tcl;
     char           *tmpannum = 0, *tmpaznum = 0;
-    int            coords_size[3];
+    int            coords_size[3], gnl_size, gzl_size;
     int            nnodes, nzones, valid;
 
     memset(&tmpqm, 0, sizeof(DBquadmesh));
@@ -5479,9 +5538,9 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     DEFALL_OBJ("mrgtree_name", &tmpqm.mrgtree_name, DB_CHAR);
 
     if (DBGetDataReadMask2File(_dbfile) & DBQMGhostNodeLabels)
-        DEFALL_OBJ("ghost_node_labels", &tmpqm.ghost_node_labels, DB_CHAR);
+        DEFALL_OBN("ghost_node_labels", &tmpqm.ghost_node_labels, DB_CHAR, &gnl_size);
     if (DBGetDataReadMask2File(_dbfile) & DBQMGhostZoneLabels)
-        DEFALL_OBJ("ghost_zone_labels", &tmpqm.ghost_zone_labels, DB_CHAR);
+        DEFALL_OBN("ghost_zone_labels", &tmpqm.ghost_zone_labels, DB_CHAR, &gzl_size);
     DEFALL_OBJ("alt_nodenum_vars", &tmpannum, DB_CHAR);
     DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
@@ -5507,6 +5566,14 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     {
         nnodes *= qm->dims[i];
         nzones *= (qm->dims[i]>0?qm->dims[i]-1:0);
+        if (qm->min_index[i] < 0 || qm->min_index[i] >= qm->dims[i] ||
+            qm->max_index[i] < 0 || qm->max_index[i] >= qm->dims[i]) {
+            DBFreeQuadmesh(qm);
+            FREE(tmpannum);
+            FREE(tmpaznum);
+            db_perror(objname, E_MALFORMED, me);
+            return NULL;
+        }  
     }
 
     valid = E_NOERROR;
@@ -5526,6 +5593,11 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
                 valid = E_MALFORMED;
         }
     }
+
+    if ((qm->ghost_node_labels && gnl_size != nnodes) ||
+        (qm->ghost_zone_labels && gzl_size != nzones))
+        valid = E_MALFORMED;
+
     if (valid != E_NOERROR)
     {
         DBFreeQuadmesh(qm);
@@ -5681,7 +5753,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 
    if (tmpqv.ndims < 0 || tmpqv.ndims > NELMTS(tmpqv.dims))
    {
-       db_perror("ndims", E_MALFORMED, me);
+       db_perror(objname, E_MALFORMED, me);
        return NULL;
    }
 
@@ -5697,7 +5769,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
        qv->nels < 0 || qv->mixlen < 0)
    {
        DBFreeQuadvar(qv);
-       db_perror("nvals", E_MALFORMED, me);
+       db_perror(objname, E_MALFORMED, me);
        return NULL;
    }
 
@@ -5832,7 +5904,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    DBucdmesh tmpum;
    PJcomplist    *_tcl;
    char          *tmpannum = 0;
-   int           c0size, c1size, c2size;
+   int           c0size, c1size, c2size, gnl_size;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -5883,7 +5955,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    DEFINE_OBJ("disjoint_mode", &tmpum.disjoint_mode, DB_INT);
 
    if (DBGetDataReadMask2File(_dbfile) & DBUMGhostNodeLabels)
-       DEFALL_OBJ("ghost_node_labels", &tmpum.ghost_node_labels, DB_CHAR);
+       DEFALL_OBN("ghost_node_labels", &tmpum.ghost_node_labels, DB_CHAR, &gnl_size);
    DEFALL_OBJ("alt_nodenum_vars", &tmpannum, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, DB_UCDMESH) < 0)
@@ -5893,9 +5965,10 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    *um = tmpum;
 
    if ((um->ndims < 0 || um->ndims > NELMTS(um->coords) || um->nnodes < 0) ||
-       (um->coords[0] && (c0size != um->nnodes)) ||
-       (um->coords[1] && (c1size != um->nnodes)) ||
-       (um->coords[2] && (c2size != um->nnodes)))
+       (um->coords[0] && c0size != um->nnodes) ||
+       (um->coords[1] && c1size != um->nnodes) ||
+       (um->coords[2] && c2size != um->nnodes) ||
+       (um->ghost_node_labels && gnl_size != um->nnodes))
    {
       DBFreeUcdmesh(um);
       FREE(flname);
@@ -5933,11 +6006,21 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    /* Optional global node number */
    um->gnznodtype = um->gnznodtype?um->gnznodtype:DB_INT;
    if (um->nnodes>0 && (DBGetDataReadMask2File(_dbfile) & DBUMGlobNodeNo)) {
+      int gnodeno_size;
       INIT_OBJ(&tmp_obj);
-      DEFALL_OBJ("gnodeno", &tmpum.gnodeno, um->gnznodtype);
+      DEFALL_OBN("gnodeno", &tmpum.gnodeno, um->gnznodtype, &gnodeno_size);
       um->gnodeno = 0;
       if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, 0)>=0)
           um->gnodeno = tmpum.gnodeno;
+      if (um->gnodeno && gnodeno_size != um->nnodes) {
+         DBFreeUcdmesh(um);
+         FREE(flname);
+         FREE(zlname);
+         FREE(elname);
+         FREE(phzlname);
+         db_perror(meshname, E_MALFORMED, me);
+         return NULL;
+      }
    }
 
    /* Read facelist, zonelist, and edgelist */
@@ -6125,7 +6208,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
        uv->nels < 0 || uv->mixlen < 0 || uv->ndims < 0 || uv->ndims > 3)
    {
        DBFreeUcdvar(uv);
-       db_perror("nvals", E_MALFORMED, me);
+       db_perror(objname, E_MALFORMED, me);
        return NULL;
    }
 
@@ -6170,7 +6253,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
               (uv->mixvals && uv->mixvals[i] && size2[i] != uv->mixlen))
           {
              DBFreeUcdvar(uv);
-             db_perror("nvals", E_MALFORMED, me);
+             db_perror(objname, E_MALFORMED, me);
              return NULL;
           }
       }
@@ -6369,7 +6452,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
    if (csgv->nvals < 0 || csgv->nvals > NELMTS(_valstr) || csgv->nels < 0)
    {
        DBFreeCsgvar(csgv);
-       db_perror("nvals", E_MALFORMED, me);
+       db_perror(objname, E_MALFORMED, me);
        return NULL;
    }
 
@@ -6555,6 +6638,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
     PJcomplist          *_tcl;
     char                *tmpaznum = 0;
     int                 lo_offset = 0, hi_offset = 0;
+    int                 shcnt_size, shsize_size, shtype_size, nl_size, zoneno_size, gzl_size;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
@@ -6575,15 +6659,15 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
 
     if (DBGetDataReadMask2File(_dbfile) & DBZonelistInfo)
     {
-        DEFALL_OBJ("shapecnt", &tmpzl.shapecnt, DB_INT);
-        DEFALL_OBJ("shapesize", &tmpzl.shapesize, DB_INT);
-        DEFALL_OBJ("shapetype", &tmpzl.shapetype, DB_INT);
-        DEFALL_OBJ("nodelist", &tmpzl.nodelist, DB_INT);
-        DEFALL_OBJ("zoneno", &tmpzl.zoneno, DB_INT);
+        DEFALL_OBN("shapecnt", &tmpzl.shapecnt, DB_INT, &shcnt_size);
+        DEFALL_OBN("shapesize", &tmpzl.shapesize, DB_INT, &shsize_size);
+        DEFALL_OBN("shapetype", &tmpzl.shapetype, DB_INT, &shtype_size);
+        DEFALL_OBN("nodelist", &tmpzl.nodelist, DB_INT, &nl_size);
+        DEFALL_OBN("zoneno", &tmpzl.zoneno, DB_INT, &zoneno_size);
     }
 
     if (DBGetDataReadMask2File(_dbfile) & DBZonelistGhostZoneLabels)
-        DEFALL_OBJ("ghost_zone_labels", &tmpzl.ghost_zone_labels, DB_CHAR);
+        DEFALL_OBN("ghost_zone_labels", &tmpzl.ghost_zone_labels, DB_CHAR, &gzl_size);
     DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_ZONELIST) < 0)
@@ -6601,6 +6685,19 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
         return NULL;
     }
 
+    if ((zl->shapecnt && shcnt_size != zl->nshapes) ||
+        (zl->shapesize && shsize_size != zl->nshapes) ||
+        (zl->shapetype && shtype_size != zl->nshapes) ||
+        (zl->nodelist && nl_size != zl->lnodelist) ||
+        (zl->zoneno && zoneno_size != zl->nzones) ||
+        (zl->ghost_zone_labels && gzl_size != zl->nzones))
+    {
+        DBFreeZonelist(zl);
+        FREE(tmpaznum);
+        db_perror(objname, E_MALFORMED, me);
+        return NULL;
+    }
+
     if (tmpaznum)
     {
         zl->alt_zonenum_vars = DBStringListToStringArray(tmpaznum, 0, !skipFirstSemicolon);
@@ -6610,11 +6707,17 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
     /* optional global zone numbers */
     zl->gnznodtype = zl->gnznodtype?zl->gnznodtype:DB_INT;
     if (DBGetDataReadMask2File(_dbfile) & DBZonelistGlobZoneNo) {
+       int gzoneno_size;
        INIT_OBJ(&tmp_obj);
-       DEFALL_OBJ("gzoneno", &tmpzl.gzoneno, zl->gnznodtype);
+       DEFALL_OBN("gzoneno", &tmpzl.gzoneno, zl->gnznodtype, &gzoneno_size);
        zl->gzoneno = 0;
        if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0)>=0)
            zl->gzoneno = tmpzl.gzoneno; 
+       if (zl->gzoneno && gzoneno_size != zl->nzones) {
+          DBFreeZonelist(zl);
+          db_perror(objname, E_MALFORMED, me);
+          return NULL;
+       }
     }
 
     zl->min_index = lo_offset;
@@ -8002,7 +8105,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
-        db_perror("num_segments<0", E_MALFORMED, me);
+        db_perror(name, E_MALFORMED, me);
         return NULL;
     }
 
@@ -8014,7 +8117,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
-        db_perror("array size != num_segements", E_MALFORMED, me);
+        db_perror(name, E_MALFORMED, me);
         return NULL;
     }
 
@@ -8029,7 +8132,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
             FREE(segData);
             FREE(fracLengths);
             FREE(fracsArray);
-            db_perror("segment_lengths out of range", E_MALFORMED, me);
+            db_perror(name, E_MALFORMED, me);
             return NULL;
         }
 
@@ -8043,7 +8146,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
-        db_perror("seg_data size not sum of segment_lengths", E_MALFORMED, me);
+        db_perror(name, E_MALFORMED, me);
         return NULL;
     }
 
@@ -8076,7 +8179,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
                 FREE(segData);
                 FREE(fracLengths);
                 FREE(fracsArray);
-                db_perror("frac_lengths out of range", E_MALFORMED, me);
+                db_perror(name, E_MALFORMED, me);
                 return NULL;
             }
 
@@ -8089,7 +8192,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
             FREE(segData);
             FREE(fracLengths);
             FREE(fracsArray);
-            db_perror("seg_fracs size not sum of frac_lengths", E_MALFORMED, me);
+            db_perror(name, E_MALFORMED, me);
             return NULL;
         }
 
@@ -8186,7 +8289,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
        FREE(cnames);
        FREE(rpnames);
        DBFreeMrgvar(mrgv);
-       db_perror("ncomps", E_MALFORMED, me);
+       db_perror(objname, E_MALFORMED, me);
        return NULL;
    }
 
@@ -8215,7 +8318,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
        FREE(cnames);
        FREE(rpnames);
        DBFreeMrgvar(mrgv);
-       db_perror("ncomps", E_MALFORMED, me);
+       db_perror(objname, E_MALFORMED, me);
        return NULL;
    }
 
