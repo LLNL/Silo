@@ -13871,7 +13871,6 @@ db_StringListToStringArrayMBOpt(char *strList, int strListSize, char ***retArray
                 slashCharsToSwap[s++] = i;
                 if (s == sizeof(slashCharsToSwap)/sizeof(slashCharsToSwap[0]))
                 {
-                    free(strList);
                     free(strArray);
                     return db_perror("exceeded slashCharsToSwap size", E_INTERNAL, me);
                 }
@@ -13900,9 +13899,9 @@ db_StringListToStringArrayMBOpt(char *strList, int strListSize, char ***retArray
     }
 
     /* fail if we don't consume all strings in input */
-    for (int j = i; j < strListSize; j++)
+    for (int j = i; j < strListSize-1; j++)
     {
-        if (strList[j] == ';')
+        if (strList[j] == ';' && strList[j+1] != '\0')
         {
             free(strArray);
             return -1;
