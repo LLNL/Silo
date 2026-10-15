@@ -3747,7 +3747,10 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
          lensum += strlen(ca->elemnames[i]);
       }
       FREE(name_vector);
-      if (lensum + ca->nelems + 1 != namevec_size) {
+      /* Every substring in name_vector string has a ';' after it.
+         There is also a leading ';' and namevec_size includes trailing '\0'
+         which accounts for the + 2 */
+      if (lensum + ca->nelems + 2 != namevec_size) {
          DBFreeCompoundarray(ca);
          db_perror(array_name, E_MALFORMED, me);
          return NULL;
@@ -3970,7 +3973,7 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetDefvars";
-   int            types_size, guihides_size, names_size, defns_size;
+   int            types_size, guihides_size;
 
    db_pdb_getobjinfo(dbfile->pdb, (char *) objname, tmp, sizeof(tmp), &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -3986,8 +3989,8 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
        DEFINE_OBJ("ndefs",   &tmpdefv.ndefs,    DB_INT);
        DEFALL_OBN("types",   &tmpdefv.types,    DB_INT, &types_size);
        DEFALL_OBN("guihide", &tmpdefv.guihides, DB_INT, &guihides_size);
-       DEFALL_OBN("names",   &tmpnames,         DB_CHAR, &names_size);
-       DEFALL_OBN("defns",   &tmpdefns,         DB_CHAR, &defns_size);
+       DEFALL_OBJ("names",   &tmpnames,         DB_CHAR);
+       DEFALL_OBJ("defns",   &tmpdefns,         DB_CHAR);
 
        if (PJ_GetObject(dbfile->pdb, (char *) objname, &tmp_obj, DB_DEFVARS) < 0)
            return NULL;
@@ -4004,10 +4007,7 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
            return NULL;
        }
 
-       if (defv->ndefs != types_size ||
-           defv->ndefs != names_size ||
-           defv->ndefs != defns_size ||
-           (guihides_size > 0 && defv->ndefs != guihides_size))
+       if (defv->ndefs != types_size || (guihides_size > 0 && defv->ndefs != guihides_size))
        {
            DBFreeDefvars(defv);
            FREE(tmpnames);
@@ -4016,33 +4016,35 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
            return NULL;
        }
 
-       if (tmpnames != NULL)
+       if (tmpnames != NULL && defv->ndefs > 0)
        {
            int cnt = -1;
-           if (defv->ndefs > 0)
-               defv->names = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
+           char **strArray = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
            FREE(tmpnames);
-           if (defv->names && cnt != defv->ndefs)
+           if (strArray && cnt != defv->ndefs)
            {
+               DBFreeStringArray(strArray, cnt);
                DBFreeDefvars(defv);
                FREE(tmpdefns);
                db_perror(objname, E_MALFORMED, me);
                return NULL;
            }
+           defv->names = strArray;
        }
 
-       if (tmpdefns != NULL)
+       if (tmpdefns != NULL && defv->ndefs > 0)
        {
            int cnt = -1;
-           if (defv->ndefs > 0)
-               defv->defns = DBStringListToStringArray(tmpdefns, &cnt, !skipFirstSemicolon);
+           char **strArray = DBStringListToStringArray(tmpdefns, &cnt, !skipFirstSemicolon);
            FREE(tmpdefns);
-           if (defv->defns && cnt != defv->ndefs)
+           if (strArray && cnt != defv->ndefs)
            {
+               DBFreeStringArray(strArray, cnt);
                DBFreeDefvars(defv);
                db_perror(objname, E_MALFORMED, me);
                return NULL;
            }
+           defv->defns = strArray;
        }
    }
 
@@ -5068,43 +5070,47 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
           }
       }
 
-      if (tmpspecnames != NULL)
+      for (i = 0, nstrs = 0; i < mms->nmat; i++)
       {
-          for (i = 0; i < mms->nmat; i++)
+          if (mms->nmatspec[i] < 0 || nstrs > INT_MAX - mms->nmatspec[i])
           {
-              if (mms->nmatspec[i] < 0 || nstrs > INT_MAX - mms->nmatspec[i])
-              {
-                  DBFreeMultimatspecies(mms);
-                  FREE(tmpspecnames);
-                  FREE(tmpcolors);
-                  db_perror(objname, E_MALFORMED, me);
-                  return NULL;
-              }
-              nstrs += mms->nmatspec[i];
+              DBFreeMultimatspecies(mms);
+              FREE(tmpspecnames);
+              FREE(tmpcolors);
+              db_perror(objname, E_MALFORMED, me);
+              return NULL;
           }
-          if (nstrs > 0)
-              mms->species_names = DBStringListToStringArray(tmpspecnames, &nstrs, !skipFirstSemicolon);
+          nstrs += mms->nmatspec[i];
+      }
+
+      if (tmpspecnames != NULL && nstrs > 0)
+      {
+          int cnt = -1;
+          char **strArr = DBStringListToStringArray(tmpspecnames, &cnt, !skipFirstSemicolon);
           FREE(tmpspecnames);
+          if (strArr && cnt != nstrs)
+          {
+              DBFreeStringArray(strArr, cnt);
+              DBFreeMultimatspecies(mms);
+              FREE(tmpcolors);
+              db_perror(objname, E_MALFORMED, me);
+              return NULL;
+          }
+          mms->species_names = strArr;
       }
       if (tmpcolors != NULL)
       {
-          if (nstrs == 0)
-          {
-              for (i = 0; i < mms->nmat; i++)
-              {
-                  if (mms->nmatspec[i] < 0 || nstrs > INT_MAX - mms->nmatspec[i])
-                  {
-                      DBFreeMultimatspecies(mms);
-                      FREE(tmpcolors);
-                      db_perror(objname, E_MALFORMED, me);
-                      return NULL;
-                  }
-                  nstrs += mms->nmatspec[i];
-              }
-          }
-          if (nstrs > 0)
-              mms->speccolors = DBStringListToStringArray(tmpcolors, &nstrs, !skipFirstSemicolon);
+          int cnt = -1;
+          char **strArr = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
           FREE(tmpcolors);
+          if (strArr && cnt != nstrs)
+          {
+              DBFreeStringArray(strArr, cnt);
+              DBFreeMultimatspecies(mms);
+              db_perror(objname, E_MALFORMED, me);
+              return NULL;
+          }
+          mms->speccolors = strArr;
       }
    }
 
@@ -8157,7 +8163,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
     void *fracsArray = NULL;
     DBgroupelmap tmpgm;
     PJcomplist *_tcl;
-    int seglens_size, segids_size, segdata_size, fraclens_size, segfracs_size;
+    int seglens_size=0, segids_size=0, segdata_size=0, fraclens_size=0, segfracs_size=0;
     int tot_len;
 
     memset(&tmpgm, 0, sizeof(DBgroupelmap));
@@ -8177,21 +8183,12 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
     gm = (DBgroupelmap*) calloc(1,sizeof(DBgroupelmap));
     *gm = tmpgm;
 
-    if (gm->num_segments < 0)
-    {
-        /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
-        FREE(segData);
-        FREE(fracLengths);
-        FREE(fracsArray);
-        db_perror(name, E_MALFORMED, me);
-        return NULL;
-    }
-
-    if (gm->num_segments != seglens_size ||
+    if (seglens_size < 0 || segids_size < 0 || segdata_size < 0 || fraclens_size < 0 ||
+        segfracs_size < 0 || gm->num_segments < 0 || gm->num_segments != seglens_size ||
         gm->num_segments != segids_size ||
         (fraclens_size > 0 && gm->num_segments != fraclens_size))
     {
-        /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
+        free(gm); /* DBFreeGroupelmap(gm) not safe here. A bit of leak ok. */
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
@@ -8199,14 +8196,13 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         return NULL;
     }
 
-    tot_len = 0;
-    for (i = 0; i < gm->num_segments; i++)
+    for (i = 0, tot_len = 0; i < gm->num_segments; i++)
     {
         int sl = gm->segment_lengths[i];
 
         if (sl < 0 || sl > segdata_size - tot_len)
         {
-            /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
+            free(gm); /* DBFreeGroupelmap(gm) not safe here. A bit of leak ok. */
             FREE(segData);
             FREE(fracLengths);
             FREE(fracsArray);
@@ -8217,10 +8213,9 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         tot_len += sl;
     }
 
-
     if (segdata_size > 0 && tot_len != segdata_size)
     {
-        /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
+        free(gm); /* DBFreeGroupelmap(gm) not safe here. A bit of leak ok. */
         FREE(segData);
         FREE(fracLengths);
         FREE(fracsArray);
@@ -8230,8 +8225,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
     /* unflatten the segment data */
     gm->segment_data = (int **) calloc(gm->num_segments, sizeof(int*));
-    n = 0;
-    for (i = 0; i < gm->num_segments; i++)
+    for (i = 0, n = 0; i < gm->num_segments; i++)
     {
         int sl = gm->segment_lengths[i];
         if (sl > 0)
@@ -8251,10 +8245,9 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
         {
             int sl = fracLengths[i];
 
-            if (sl < 0 || sl > fraclens_size - tot_len)
+            if (sl < 0 || sl > segfracs_size - tot_len)
             {
-                /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
-                FREE(segData);
+                free(gm); /* DBFreeGroupelmap(gm) not safe here. A bit of leak ok. */
                 FREE(fracLengths);
                 FREE(fracsArray);
                 db_perror(name, E_MALFORMED, me);
@@ -8266,7 +8259,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 
         if (segfracs_size > 0 && tot_len != segfracs_size)
         {
-            /*DBFreeGroupelmap(gm); we can't safely free this complex object b4 verifying its entirety */
+            free(gm); /* DBFreeGroupelmap(gm) not safe here. A bit of leak ok. */
             FREE(segData);
             FREE(fracLengths);
             FREE(fracsArray);
