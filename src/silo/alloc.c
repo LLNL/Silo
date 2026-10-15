@@ -423,14 +423,14 @@ DBFreeDefvars(DBdefvars *defv)
         return;
 
     for (i = 0; i < defv->ndefs; i++) {
-        FREE(defv->names[i]);
-        FREE(defv->defns[i]);
+        if (defv->names) FREE(defv->names[i]);
+        if (defv->defns) FREE(defv->defns[i]);
     }
 
-    FREE(defv->names);
     FREE(defv->types);
-    FREE(defv->defns);
     FREE(defv->guihides);
+    FREE(defv->names);
+    FREE(defv->defns);
     FREE(defv);
 }
 
@@ -520,7 +520,7 @@ DBFreeMultimeshadj(DBmultimeshadj *mshadj)
         return;
 
     /* compute how long various arrays are */
-    for (i = 0; i < mshadj->nblocks; i++)
+    for (i = 0; mshadj->nneighbors && i < mshadj->nblocks; i++)
         lneighbors += mshadj->nneighbors[i];
 
     if (mshadj->nodelists) {
@@ -715,7 +715,7 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
      if (spec == NULL)
           return;
 
-     if (spec->species_names)
+     if (spec->species_names && spec->nmatspec)
      {
          for(i=0,k=0;i<spec->nmat;i++)
          {
@@ -725,7 +725,7 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
          FREE(spec->species_names);
      }
 
-     if (spec->speccolors)
+     if (spec->speccolors && spec->nmatspec)
      {
          for(i=0,k=0;i<spec->nmat;i++)
          {
@@ -752,6 +752,7 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
      FREE(spec->file_ns);
      FREE(spec->block_ns);
      FREE(spec->empty_list);
+     FREE(spec->matname);
      FREE(spec);
 }
 
@@ -821,6 +822,13 @@ DBFreeCsgmesh(DBcsgmesh *msh)
     {
         for (i = 0; i < msh->nbounds; i++)
             FREE(msh->bndnames[i]);
+    }
+
+    if (msh->alt_nodenum_vars)
+    {
+        for (i = 0; msh->alt_nodenum_vars[i]; i++)
+            FREE(msh->alt_nodenum_vars[i]);
+        FREE(msh->alt_nodenum_vars);
     }
 
     FREE(msh->typeflags);
@@ -902,8 +910,24 @@ DBFreeQuadmesh(DBquadmesh *msh)
         FREE(msh->units[i]);
     }
 
+    if (msh->alt_nodenum_vars)
+    {
+        for (i = 0; msh->alt_nodenum_vars[i]; i++)
+            FREE(msh->alt_nodenum_vars[i]);
+        FREE(msh->alt_nodenum_vars);
+    }
+
+    if (msh->alt_zonenum_vars)
+    {
+        for (i = 0; msh->alt_zonenum_vars[i]; i++)
+            FREE(msh->alt_zonenum_vars[i]);
+        FREE(msh->alt_zonenum_vars);
+    }
+
     FREE(msh->name);
     FREE(msh->mrgtree_name);
+    FREE(msh->ghost_node_labels);
+    FREE(msh->ghost_zone_labels);
     FREE(msh);
 }
 
@@ -982,7 +1006,15 @@ DBFreePointmesh(DBpointmesh *msh)
         FREE(msh->units[i]);
     }
 
+    if (msh->alt_nodenum_vars)
+    {
+        for (i = 0; msh->alt_nodenum_vars[i]; i++)
+            FREE(msh->alt_nodenum_vars[i]);
+        FREE(msh->alt_nodenum_vars);
+    }
+
     FREE(msh->gnodeno);
+    FREE(msh->ghost_node_labels);
     FREE(msh->name);
     FREE(msh->title);
     FREE(msh->mrgtree_name);
@@ -1166,11 +1198,20 @@ DBFreeUcdmesh(DBucdmesh *msh)
     DBFreeEdgelist(msh->edges);
     DBFreePHZonelist(msh->phzones);
 
+    if (msh->alt_nodenum_vars)
+    {
+        for (i = 0; msh->alt_nodenum_vars[i]; i++)
+            FREE(msh->alt_nodenum_vars[i]);
+        FREE(msh->alt_nodenum_vars);
+    }
+
     FREE(msh->nodeno);
     FREE(msh->gnodeno);
     FREE(msh->name);
     FREE(msh->mrgtree_name);
+    FREE(msh->ghost_node_labels);
     FREE(msh);
+
 }
 
 PUBLIC int
@@ -1588,12 +1629,20 @@ DBFreeZonelist(DBzonelist *list)
     if (list == NULL)
         return;
 
+    if (list->alt_zonenum_vars)
+    {
+        for (int i = 0; list->alt_zonenum_vars[i]; i++)
+            FREE(list->alt_zonenum_vars[i]);
+        FREE(list->alt_zonenum_vars);
+    }
+
     FREE(list->shapecnt);
     FREE(list->shapesize);
     FREE(list->shapetype);
     FREE(list->nodelist);
     FREE(list->zoneno);
     FREE(list->gzoneno);
+    FREE(list->ghost_zone_labels);
     FREE(list);
 }
 
@@ -1611,6 +1660,13 @@ DBFreePHZonelist(DBphzonelist *list)
     if (list == NULL)
         return;
 
+    if (list->alt_zonenum_vars)
+    {
+        for (int i = 0; list->alt_zonenum_vars[i]; i++)
+            FREE(list->alt_zonenum_vars[i]);
+        FREE(list->alt_zonenum_vars);
+    }
+
     FREE(list->nodecnt);
     FREE(list->nodelist);
     FREE(list->extface);
@@ -1618,6 +1674,7 @@ DBFreePHZonelist(DBphzonelist *list)
     FREE(list->facelist);
     FREE(list->zoneno);
     FREE(list->gzoneno);
+    FREE(list->ghost_zone_labels);
     FREE(list);
 }
 
@@ -1637,16 +1694,22 @@ DBFreeCSGZonelist(DBcsgzonelist *list)
 
     if (list->zonenames && list->nzones)
     {
-        int i;
-        for (i = 0; i < list->nzones; i++)
+        for (int i = 0; i < list->nzones; i++)
             FREE(list->zonenames[i]);
     }
 
     if (list->regnames && list->nregs)
     {
-        int i;
-        for (i = 0; i < list->nregs; i++)
+        for (int i = 0; i < list->nregs; i++)
             FREE(list->regnames[i]);
+    }
+
+    if (list->alt_zonenum_vars)
+    {
+        for (int i = 0; list->alt_zonenum_vars[i]; i++)
+            FREE(list->alt_zonenum_vars[i]);
+        FREE(list->alt_zonenum_vars);
+
     }
 
     FREE(list->typeflags);
@@ -1901,7 +1964,7 @@ DBFreeMatspecies(DBmatspecies *species)
     if (species == NULL)
         return;
 
-    if (species->specnames)
+    if (species->specnames && species->nmatspec)
     {
         for(i=0,k=0;i<species->nmat;i++)
         {
@@ -1911,7 +1974,7 @@ DBFreeMatspecies(DBmatspecies *species)
         FREE(species->specnames);
     }
 
-    if (species->speccolors)
+    if (species->speccolors && species->nmatspec)
     {
         for(i=0,k=0;i<species->nmat;i++)
         {
@@ -2069,6 +2132,7 @@ DBFreeCurve (DBcurve *cu)
 
    if (cu) {
       FREE (cu->title) ;
+      FREE (cu->reference) ;
       FREE (cu->xvarname) ;
       FREE (cu->yvarname) ;
       FREE (cu->xlabel) ;
@@ -2094,9 +2158,12 @@ DBFreeGroupelmap(DBgroupelmap *map)
     FREE(map->segment_lengths);
     FREE(map->segment_ids);
 
-    for (i = 0; i < map->num_segments; i++)
-        FREE(map->segment_data[i]);
-    FREE(map->segment_data);
+    if (map->segment_data)
+    {
+        for (i = 0; i < map->num_segments; i++)
+            FREE(map->segment_data[i]);
+        FREE(map->segment_data);
+    }
 
     if (map->segment_fracs)
     {
@@ -2104,6 +2171,7 @@ DBFreeGroupelmap(DBgroupelmap *map)
             FREE(map->segment_fracs[i]);
         FREE(map->segment_fracs);
     }
+
     FREE(map);
 }
 
@@ -2126,7 +2194,7 @@ DBFreeMrgvar(DBmrgvar *mrgv)
 
     if (mrgv->reg_pnames)
     {
-        if (strchr(mrgv->reg_pnames[0], '%') == 0)
+        if (mrgv->reg_pnames[0] && strchr(mrgv->reg_pnames[0], '%') == 0)
         {
             for (i = 0; i < mrgv->nregns; i++)
                 FREE(mrgv->reg_pnames[i]);
