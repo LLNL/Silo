@@ -2816,6 +2816,8 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
      */
     if (!strchr(orig, '/')) {
         for (i=0; i<toc->narray; i++) {
+            /* skip any compound arrays that match the obj name */
+            if (!strcmp(orig, toc->array_names[i])) continue;
             DBcompoundarray *ca = DBGetCompoundarray(file, toc->array_names[i]);
             if (ca) {
                 for (j=0; j<ca->nelems; j++) {
