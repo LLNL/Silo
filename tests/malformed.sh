@@ -115,18 +115,34 @@ check_malformed()
         sep="_"
     fi
 
-    # Create temp file to corrupt and then corrupt the specific object
+    # Create temp file to corrupt
     cp $all_objs_file malformed.$ext || return 1
+
+    echo "\n\n\n******************************************************************" >&2
+    echo "Working on $dirname/$objname for $cname_assign" >&2
+    echo "******************************************************************" >&2
+
+    # Confirm we can read the object fine as is
+    echo "\nConfirm read of valid object..." >&2
+    $browser -q --proper-exit-code -e "cd $dirname" -e "$objname" malformed.$ext >&2
+    [ $? -eq 0 ] || {
+        echo "ERROR: expected valid read for $dirname/$objname before corrupting with $cname_assign" >&2
+        return 1
+    }
+
+    # Corrupt the specific object
+    echo "\nCorrupt the object..." >&2
     $browser --proper-exit-code -q -W -l 1 -e "cd $dirname" -e "${objname}${sep}${cname_assign}" malformed.$ext
     [ $? -eq 0 ] || {
-        echo "Attempted corruption of $dirname/$objname with $cname_assign failed" >&2
+        echo "ERROR: Attempted corruption of $dirname/$objname with $cname_assign failed" >&2
         return 1
     }
 
     # Now, try to display that corrupted object in a new browser instance
+    echo "\nConfirm malformed error triggered on corrupted object..." >&2
     $browser -q --proper-exit-code -e "cd $dirname" -e "$objname" malformed.$ext
     [ $? -eq $e_malformed_code ] || {
-        echo "expected E_MALFORMED for $dirname/$objname after $cname_assign" >&2
+        echo "ERROR: expected E_MALFORMED for $dirname/$objname after $cname_assign" >&2
         return 1
     }
 }
@@ -147,8 +163,13 @@ check_malformed mat_objs matspecies nmat=-1 || exit 1
 check_malformed misc_objs curve npts=-1 || exit 1
 check_malformed misc_objs curve npts=6 || exit 1
 check_malformed misc_objs compound nelems=-1 || exit 1
+check_malformed misc_objs compound nelems=99 || exit 1
 check_malformed misc_objs compound nvalues=-1 || exit 1
+check_malformed misc_objs compound nvalues=99 || exit 1
 check_malformed misc_objs defvars ndefs=-1 || exit 1
+check_malformed misc_objs defvars types='"/arrs/intsB"' || exit 1
+check_malformed misc_objs defvars names='"/arrs/strsA"' || exit 1
+check_malformed misc_objs defvars defns='"/arrs/strsB"' || exit 1
 
 # Multi-block objects.
 check_malformed mult_objs multimesh nblocks=-1 || exit 1
