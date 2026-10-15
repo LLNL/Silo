@@ -122,11 +122,17 @@ check_malformed()
     echo "Working on $dirname/$objname for $cname_assign" >&2
     echo "******************************************************************" >&2
 
-    # Confirm we can read the object fine as is
+    # Confirm we can read the object fine as is. Read it "normally" and with lowlevel 1 (-l 1)
     echo "\nConfirm read of valid object..." >&2
     $browser -q --proper-exit-code -e "cd $dirname" -e "$objname" malformed.$ext >&2
     [ $? -eq 0 ] || {
         echo "ERROR: expected valid read for $dirname/$objname before corrupting with $cname_assign" >&2
+        return 1
+    }
+    echo "Lowlevel read of valid object..." >&2
+    $browser -q --proper-exit-code -l 1 -e "cd $dirname" -e "$objname" malformed.$ext >&2
+    [ $? -eq 0 ] || {
+        echo "ERROR: expected valid lowlevel read for $dirname/$objname before corrupting with $cname_assign" >&2
         return 1
     }
 
@@ -160,12 +166,23 @@ check_malformed mat_objs material_names_colors matcolors='"/arrs/strsB"' || exit
 # Material species and simple objects.
 check_malformed mat_objs matspecies ndims=5 || exit 1
 check_malformed mat_objs matspecies nmat=-1 || exit 1
+check_malformed mat_objs matspecies nmatspec='"/arrs/intsA"' || exit 1
+check_malformed mat_objs matspecies speccolors='"/arrs/strsA"' || exit 1
+# diff in component name between pdb and hdf5
+if [ "$ext" = "pdb" ]; then
+    check_malformed mat_objs matspecies species_names='"/arrs/strsA"' || exit 1
+else
+    check_malformed mat_objs matspecies specnames='"/arrs/strsA"' || exit 1
+fi
 check_malformed misc_objs curve npts=-1 || exit 1
 check_malformed misc_objs curve npts=6 || exit 1
 check_malformed misc_objs compound nelems=-1 || exit 1
 check_malformed misc_objs compound nelems=99 || exit 1
 check_malformed misc_objs compound nvalues=-1 || exit 1
 check_malformed misc_objs compound nvalues=99 || exit 1
+check_malformed misc_objs compound elemnames='"/arrs/strsA"' || exit 1
+check_malformed misc_objs compound elemlengths='"/arrs/intsB"' || exit 1
+check_malformed misc_objs compound values='"/arrs/intsB"' || exit 1
 check_malformed misc_objs defvars ndefs=-1 || exit 1
 check_malformed misc_objs defvars types='"/arrs/intsB"' || exit 1
 check_malformed misc_objs defvars names='"/arrs/strsA"' || exit 1

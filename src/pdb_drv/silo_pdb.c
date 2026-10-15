@@ -3410,30 +3410,31 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     if (tmpnames)
     {
         int cnt = -1;
-
-        mm->matnames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
+        char **strArray = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
         FREE(tmpnames);
-
-        if (mm->matnames && cnt != mm->nmat)
+        if (strArray && cnt != mm->nmat)
         {
+            DBFreeStringArray(strArray, cnt);
             DBFreeMaterial(mm);
             FREE(tmpcolors);
             db_perror(name, E_MALFORMED, me);
             return NULL;
         }
+        mm->matnames = strArray;
     }
     if (tmpcolors)
     {
         int cnt = -1;
-        mm->matcolors = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
+        char **strArray = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
         FREE(tmpcolors);
-
-        if (mm->matcolors && cnt != mm->nmat)
+        if (strArray && cnt != mm->nmat)
         {
+            DBFreeStringArray(strArray, cnt);
             DBFreeMaterial(mm);
             db_perror(name, E_MALFORMED, me);
             return NULL;
         }
+        mm->matcolors = strArray;
     }
 
     mm->id = 0;
@@ -3617,27 +3618,31 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    if (tmpnames != NULL)
    {
        int cnt = -1;
-       mm->specnames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
+       char **strArr = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
        FREE(tmpnames);
        if (cnt != nstrs)
        {
+          DBFreeStringArray(strArr, cnt);
           DBFreeMatspecies(mm);
           FREE(tmpcolors);
           db_perror(objname, E_MALFORMED, me);
           return NULL;
        }
+       mm->specnames = strArr;
    }
    if (tmpcolors != NULL)
    {
        int cnt = -1;
-       mm->speccolors = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
+       char **strArr = DBStringListToStringArray(tmpcolors, &cnt, !skipFirstSemicolon);
        FREE(tmpcolors);
        if (cnt != nstrs)
        {
+          DBFreeStringArray(strArr, cnt);
           DBFreeMatspecies(mm);
           db_perror(objname, E_MALFORMED, me);
           return NULL;
        }
+       mm->speccolors = strArr;
    }
 
    return (mm);
@@ -4304,16 +4309,18 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
       }
       if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
          int cnt = -1;
-         mm->groupnames = DBStringListToStringArray(tmpgnames, &cnt, !skipFirstSemicolon);
-         if (!mm->groupnames || cnt != mm->lgroupings)
+         char **strArray = DBStringListToStringArray(tmpgnames, &cnt, !skipFirstSemicolon);
+         FREE(tmpgnames);
+         if (strArray && cnt != mm->lgroupings)
          {
+             DBFreeStringArray(strArray, cnt);
              DBFreeMultimesh(mm);
              FREE(tmpnames);
              FREE(tmpgnames);
              db_perror(objname, E_MALFORMED, me);
              return NULL;
          }
-         FREE(tmpgnames);
+         mm->groupnames = strArray;
       }
    }
 
@@ -4914,27 +4921,31 @@ db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
       if (tmpmaterial_names && mt->nmatnos > 0)
       {
           int cnt = -1;
-          mt->material_names = DBStringListToStringArray(tmpmaterial_names, &cnt, !skipFirstSemicolon);
+          char **strArray = DBStringListToStringArray(tmpmaterial_names, &cnt, !skipFirstSemicolon);
           FREE(tmpmaterial_names);
-          if (mt->material_names && cnt != mt->nmatnos)
+          if (strArray && cnt != mt->nmatnos)
           {
+              DBFreeStringArray(strArray, cnt);
               DBFreeMultimat(mt);
               FREE(tmpmatcolors);
               db_perror(objname, E_MALFORMED, me);
               return NULL;
           }
+          mt->material_names = strArray;
       }
       if (tmpmatcolors && mt->nmatnos > 0)
       {
           int cnt = -1;
-          mt->matcolors = DBStringListToStringArray(tmpmatcolors, &cnt, !skipFirstSemicolon);
+          char **strArray = DBStringListToStringArray(tmpmatcolors, &cnt, !skipFirstSemicolon);
           FREE(tmpmatcolors);
-          if (mt->matcolors && cnt != mt->nmatnos)
+          if (strArray && cnt != mt->nmatnos)
           {
+              DBFreeStringArray(strArray, cnt);
               DBFreeMultimat(mt);
               db_perror(objname, E_MALFORMED, me);
               return NULL;
           }
+          mt->matcolors = strArray;
       }
    }
 
@@ -6402,9 +6413,10 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
     if ((tmpbndnames != NULL) && (tmpcsgm.nbounds > 0))
     {
         int cnt = -1;
-        tmpcsgm.bndnames = DBStringListToStringArray(tmpbndnames, &cnt, !skipFirstSemicolon);
+        char **strArray = DBStringListToStringArray(tmpbndnames, &cnt, !skipFirstSemicolon);
         FREE(tmpbndnames);
-        if (tmpcsgm.bndnames && cnt != tmpcsgm.nbounds) {
+        if (strArray && cnt != tmpcsgm.nbounds) {
+           DBFreeStringArray(strArray, cnt);
            FREE(zlname);
            FREE(tmpcsgm.typeflags);
            FREE(tmpcsgm.bndids);
@@ -6412,6 +6424,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
            db_perror(meshname, E_MALFORMED, me);
            return NULL;
         }
+        tmpcsgm.bndnames = strArray;
     }
 
    tmpcsgm.name = STRDUP(meshname);
@@ -7024,30 +7037,34 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
     if ((tmprnames != NULL) && (zl->nregs > 0))
     {
         int cnt = -1;
-        zl->regnames = DBStringListToStringArray(tmprnames, &cnt, !skipFirstSemicolon);
+        char **strArray = DBStringListToStringArray(tmprnames, &cnt, !skipFirstSemicolon);
         FREE(tmprnames);
-        if (zl->regnames && cnt != zl->nregs)
+        if (strArray && cnt != zl->nregs)
         {
+            DBFreeStringArray(strArray, cnt);
             FREE(tmpznames);
             FREE(tmpaznums);
             DBFreeCSGZonelist(zl);
             db_perror(objname, E_MALFORMED, me);
             return NULL;
         }
+        zl->regnames = strArray;
     }
 
     if ((tmpznames != NULL) && (zl->nzones > 0))
     {
         int cnt = -1;
-        zl->zonenames = DBStringListToStringArray(tmpznames, &cnt, !skipFirstSemicolon);
+        char **strArray = DBStringListToStringArray(tmpznames, &cnt, !skipFirstSemicolon);
         FREE(tmpznames);
-        if (zl->zonenames && cnt != zl->nzones)
+        if (strArray && cnt != zl->nzones)
         {
+            DBFreeStringArray(strArray, cnt);
             FREE(tmpaznums);
             DBFreeCSGZonelist(zl);
             db_perror(objname, E_MALFORMED, me);
             return NULL;
         }
+        zl->zonenames = strArray;
     }
 
     if (tmpaznums != NULL)
@@ -7958,7 +7975,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        int cnt = num_nodes;
        strArray = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
        FREE(s);
-       if (cnt != num_nodes)
+       if (strArray && cnt != num_nodes)
        {
            DBFreeMrgtree(tree);
            FREE(mrgv_onames);
@@ -7978,7 +7995,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    if (s)
    {
-       int cnt = num_nodes;
+       int cnt = -1;
        strArray = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
        FREE(s);
        for (i = 0, n = 0; i < num_nodes && n < cnt; i++)
@@ -8017,7 +8034,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    if (s)
    {
-       int cnt = num_nodes;
+       int cnt = -1;
        strArray = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
        FREE(s);
        if (cnt != num_nodes)

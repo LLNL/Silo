@@ -72,7 +72,7 @@ put_misc_arrs(DBfile *db)
     {
         int const base = 901;
         chars[i] = (char)i;
-        ints[i] = base+i;
+        ints[i] = (base + i) * (i%2?1:-1);
         flts[i] = (float) ints[i];
         dbls[i] = (double) ints[i];
     }
@@ -304,7 +304,7 @@ put_material_objects(DBfile *db)
     PUT(DBPutMaterial(db, "material_names_colors", "quadmesh",
                       2, matnos, matlist, dims, 2,
                       NULL,NULL,NULL,NULL,0,DB_FLOAT,ol));
-    DBFreeOptlist(ol);
+    DBClearOptlist(ol);
 
     /*
      * Two materials; first has 1 species, second has 2.
@@ -314,11 +314,17 @@ put_material_objects(DBfile *db)
         int nmatspec[2] = {1,2};
         int speclist[4] = {1,2,1,2};
         float species_mf[3] = {1.0f, 0.25f, 0.75f};
+        char *specnames[3] = {"Iron", "Copper", "Zinc"};
+        char *speccolors[3] = {"red", "yellow", "blue"};
 
+        DBAddOption(ol, DBOPT_SPECNAMES, specnames);
+        DBAddOption(ol, DBOPT_SPECCOLORS, speccolors);
         PUT(DBPutMatspecies(db, "matspecies", "material",
                             2, nmatspec, speclist, dims, 2,
-                            3, species_mf, NULL, 0, DB_FLOAT, NULL));
+                            3, species_mf, NULL, 0, DB_FLOAT, ol));
     }
+
+    DBFreeOptlist(ol);
 }
 
 /* ---------------------------------------------------------------------- */

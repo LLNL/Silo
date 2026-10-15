@@ -9708,13 +9708,15 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name)
             if (tmpbndnames)
             {
                 int cnt = -1;
-                csgm->bndnames = DBStringListToStringArray(tmpbndnames, &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpbndnames, &cnt, !skipFirstSemicolon);
                 FREE(tmpbndnames);
-                if (csgm->bndnames && cnt != csgm->nbounds)
+                if (strArr && cnt != csgm->nbounds)
                 {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                csgm->bndnames = strArr;
             }
         }
 
@@ -10182,13 +10184,15 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
             char *tmpnames = (char *)db_hdf5_comprd(dbfile, m.regnames, 1);
             if (tmpnames) {
                 int cnt = -1;
-                zl->regnames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
                 FREE(tmpnames);
-                if (cnt != zl->nregs)
+                if (strArr && cnt != zl->nregs)
                 {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                zl->regnames = strArr;
             }
         }
 
@@ -10197,13 +10201,15 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
             char *tmpnames = (char *)db_hdf5_comprd(dbfile, m.zonenames, 1);
             if (tmpnames) {
                 int cnt = -1;
-                zl->zonenames = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpnames, &cnt, !skipFirstSemicolon);
                 FREE(tmpnames);
-                if (cnt != zl->nzones)
+                if (strArr && cnt != zl->nzones)
                 {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                zl->zonenames = strArr;
             }
         }
 
@@ -10401,13 +10407,15 @@ db_hdf5_GetDefvars(DBfile *_dbfile, char const *name)
         if (s)
         {
             int cnt = -1;
-            defv->names = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
-            if (cnt != defv->ndefs)
+            char **strArr = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
+            FREE(s);
+            if (strArr && cnt != defv->ndefs)
             {
-                FREE(s);
+                DBFreeStringArray(strArr, cnt);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
+            defv->names = strArr;
         }
         FREE(s);
 
@@ -10422,13 +10430,15 @@ db_hdf5_GetDefvars(DBfile *_dbfile, char const *name)
         if (s)
         {
             int cnt = -1;
-            defv->defns = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
-            if (cnt != defv->ndefs)
+            char **strArr = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
+            FREE(s);
+            if (strArr && cnt != defv->ndefs)
             {
-                FREE(s);
+                DBFreeStringArray(strArr, cnt);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
+            defv->defns = strArr;
         }
         FREE(s);
 
@@ -13520,27 +13530,33 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
         if (DBGetDataReadMask2File(_dbfile) & DBMatMatnames)
         {
             int cnt = -1;
+            char **strArr = 0;
             s = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
-            if (s) ma->matnames = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
-            if (ma->matnames && cnt != ma->nmat)
+            if (s) strArr = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
+            FREE(s);
+            if (strArr && cnt != ma->nmat)
             {
+                DBFreeStringArray(strArr, cnt);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
-            FREE(s);
+            ma->matnames = strArr;
         }
 
         if (DBGetDataReadMask2File(_dbfile) & DBMatMatcolors)
         {
             int cnt = -1;
+            char **strArr = 0;
             s = (char *)db_hdf5_comprd(dbfile, m.matcolors, 1);
-            if (s) ma->matcolors = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
-            if (ma->matcolors && cnt != ma->nmat)
+            if (s) strArr = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
+            FREE(s);
+            if (strArr && cnt != ma->nmat)
             {
+                DBFreeStringArray(strArr, cnt);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
-            FREE(s);
+            ma->matcolors = strArr;
         }
 
         H5Tclose(o);
@@ -13813,26 +13829,32 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name)
         if (ms->nmatspec && (DBGetDataReadMask2File(_dbfile) & DBMatMatnames))
         {
             int cnt = -1;
+            char **strArr = 0;
             s = (char *)db_hdf5_comprd(dbfile, m.specnames, 1);
-            if (s) ms->specnames = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
+            if (s) strArr = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
             FREE(s);
-            if (ms->specnames && cnt != nstrs)
+            if (strArr && cnt != nstrs)
             {
+                DBFreeStringArray(strArr, cnt);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
+            ms->specnames = strArr;
         }
         if (ms->nmatspec && (DBGetDataReadMask2File(_dbfile) & DBMatMatcolors))
         {
             int cnt = -1;
+            char **strArr = 0;
             s = (char *)db_hdf5_comprd(dbfile, m.speccolors, 1);
-            if (s) ms->speccolors = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
+            if (s) strArr = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
             FREE(s);
-            if (ms->speccolors && cnt != nstrs)
+            if (strArr && cnt != nstrs)
             {
+                DBFreeStringArray(strArr, cnt);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
+            ms->speccolors = strArr;
         }
 
         H5Aclose(attr);
@@ -14611,7 +14633,8 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
         mmadj->neighbors = (int *)_db_hdf5_comprd(dbfile, m.neighbors, 1, &neighbors_size);
         mmadj->back = (int *)_db_hdf5_comprd(dbfile, m.back, 1, &back_size);
         if ((mmadj->meshtypes && meshtypes_size != m.nblocks) ||
-            (mmadj->nneighbors && nneighbors_size != m.nblocks))
+            (mmadj->nneighbors && nneighbors_size != m.nblocks) ||
+            (mmadj->neighbors && neighbors_size != m.lneighbors))
         {
             db_perror(name, E_MALFORMED, me);
             UNWIND();
@@ -14626,7 +14649,7 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
             {
                 if (mmadj->nneighbors[i] < 0 ||
                     lneighbors > INT_MAX - mmadj->nneighbors[i]) {
-                    db_perror(name, E_CALLFAIL, me);
+                    db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
                 offsetmap[i] = lneighbors;
@@ -14661,7 +14684,7 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                    for (j = 0; j < mmadj->nneighbors[i]; j++) {
                       int len = mmadj->lnodelists[offsetmap[i]+j];
                       if (len < 0 || tmpoff > INT_MAX - len) {
-                          db_perror(name, E_CALLFAIL, me);
+                          db_perror(name, E_MALFORMED, me);
                           UNWIND();
                       }
                       tmpoff += len;
@@ -14695,7 +14718,7 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                    for (j = 0; j < mmadj->nneighbors[i]; j++) {
                       int len = mmadj->lzonelists[offsetmap[i]+j];
                       if (len < 0 || tmpoff > INT_MAX - len) {
-                          db_perror(name, E_CALLFAIL, me);
+                          db_perror(name, E_MALFORMED, me);
                           UNWIND();
                       }
                       tmpoff += len;
@@ -15538,23 +15561,25 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
             char *tmpmat_colors = (char *)db_hdf5_comprd(dbfile, m.mat_colors, 1);
             if (tmpmaterial_names) {
                 int cnt = -1;
-                mm->material_names = DBStringListToStringArray(tmpmaterial_names,
-                    &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpmaterial_names, &cnt, !skipFirstSemicolon);
                 FREE(tmpmaterial_names);
-                if (mm->material_names && cnt != m.nmatnos) {
+                if (strArr && cnt != m.nmatnos) {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                mm->material_names = strArr;
             }
             if (tmpmat_colors) {
                 int cnt = -1;
-                mm->matcolors = DBStringListToStringArray(tmpmat_colors,
-                    &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpmat_colors, &cnt, !skipFirstSemicolon);
                 FREE(tmpmat_colors);
-                if (mm->matcolors && cnt != m.nmatnos) {
+                if (strArr && cnt != m.nmatnos) {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                mm->matcolors = strArr;
             }
         }
 
@@ -15867,21 +15892,25 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
 
             if (tmpspecies_names) {
                 int cnt = -1;
-                mm->species_names = DBStringListToStringArray(tmpspecies_names, &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpspecies_names, &cnt, !skipFirstSemicolon);
                 FREE(tmpspecies_names);
-                if (cnt != nstrs) {
+                if (strArr && cnt != nstrs) {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                mm->species_names = strArr;
             }
             if (tmpspeccolors) {
                 int cnt = -1;
-                mm->speccolors = DBStringListToStringArray(tmpspeccolors, &cnt, !skipFirstSemicolon);
+                char **strArr = DBStringListToStringArray(tmpspeccolors, &cnt, !skipFirstSemicolon);
                 FREE(tmpspeccolors);
-                if (cnt != nstrs) {
+                if (strArr && cnt != nstrs) {
+                    DBFreeStringArray(strArr, cnt);
                     db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
+                mm->speccolors = strArr;
             }
         }
 
@@ -17834,11 +17863,13 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, char const *name)
         s = (char *)db_hdf5_comprd(dbfile, m.compnames, 1);
         if (s) {
             int nnames = -1;
-            mrgv->compnames = DBStringListToStringArray(s, &nnames, !skipFirstSemicolon);
-            if (nnames != mrgv->ncomps) {
+            char **strArr = DBStringListToStringArray(s, &nnames, !skipFirstSemicolon);
+            if (strArr && nnames != mrgv->ncomps) {
+                DBFreeStringArray(strArr, nnames);
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
             }
+            mrgv->compnames = strArr;
         }
         FREE(s);
 
