@@ -155,13 +155,21 @@ check_malformed()
 
 # Existing material coverage.
 check_malformed mat_objs material ndims=5 || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed mat_objs material dims='"/arrs/intsA"' || exit 1
+else
+    check_malformed mat_objs material dims={3,4,5} || exit 1
+fi
 check_malformed mat_objs material nmat=7 || exit 1
-check_malformed mat_objs material_mix mixlen=4495 || exit 1
 check_malformed mat_objs material matnos='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material matlist='"/arrs/intsB"' || exit 1
-check_malformed mat_objs material_mix mix_next='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material_names_colors matnames='"/arrs/strsB"' || exit 1
 check_malformed mat_objs material_names_colors matcolors='"/arrs/strsB"' || exit 1
+check_malformed mat_objs material_mix mixlen=4495 || exit 1
+check_malformed mat_objs material_mix mix_next='"/arrs/intsB"' || exit 1
+check_malformed mat_objs material_mix mix_vf='"/arrs/fltsA"' || exit 1
+check_malformed mat_objs material_mix mix_mat='"/arrs/intsA"' || exit 1
+check_malformed mat_objs material_mix mix_zone='"/arrs/intsB"' || exit 1
 
 # Material species and simple objects.
 check_malformed mat_objs matspecies ndims=5 || exit 1
