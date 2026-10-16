@@ -3978,7 +3978,7 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetDefvars";
-   int            types_size, guihides_size;
+   int            types_size = 0, guihides_size = 0;
 
    db_pdb_getobjinfo(dbfile->pdb, (char *) objname, tmp, sizeof(tmp), &ncomps);
    type = DBGetObjtypeTag(tmp);
