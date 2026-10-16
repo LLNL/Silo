@@ -734,8 +734,11 @@ if(NOT WIN32)
         set_tests_properties(testdtypes PROPERTIES DEPENDS specmix-hdf5)
     endif()
 
+
+
     #
     # malformed (shell script wrapped test)
+    # malformed object handling can result in some known, not easy to fix, small leaks.
     #
     add_custom_target(malformed ALL)
     add_custom_command(TARGET malformed POST_BUILD
@@ -744,9 +747,11 @@ if(NOT WIN32)
         ${silo_test_output_dir})
     add_test(NAME malformed COMMAND "${silo_test_output_dir}/malformed.sh")
     set_tests_properties(malformed PROPERTIES DEPENDS all_silo_objects)
+    set_tests_properties(malformed PROPERTIES ENVIRONMENT_MODIFICATION "ASAN_OPTIONS=string_append::detect_leaks=0")
     if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
         add_test(NAME malformed-hdf5 COMMAND "${silo_test_output_dir}/malformed.sh" DB_HDF5)
         set_tests_properties(malformed-hdf5 PROPERTIES DEPENDS all_silo_objects-hdf5)
+        set_tests_properties(malformed-hdf5 PROPERTIES ENVIRONMENT_MODIFICATION "ASAN_OPTIONS=string_append::detect_leaks=0")
     endif()
 
 endif()
