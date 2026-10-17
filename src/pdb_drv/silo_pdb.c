@@ -5400,8 +5400,10 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
 
    if (mv->ndims>0 && mv->nels>0 && mv->nvals>0 && (DBGetDataReadMask2File(_dbfile) & DBPVData)) {
       INIT_OBJ(&tmp_obj);
+      int *sizes;
 
       mv->vals = ALLOC_N(void*, mv->nvals);
+      sizes = ALLOC_N(int, mv->nvals);
 
       if (mv->datatype == 0) {
           if(mv->nvals == 1)
@@ -5423,17 +5425,41 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
 
       if(mv->nvals == 1)
       {
-          DEFALL_OBJ("_data", &mv->vals[0], DB_FLOAT);
+          DEFALL_OBN("_data", &mv->vals[0], DB_FLOAT, &sizes[0]);
       }
       else
       {
           for (i = 0; i < mv->nvals; i++)
           {
-              DEFALL_OBJ(_ptvalstr[i], &mv->vals[i], DB_FLOAT);
+              DEFALL_OBN(_ptvalstr[i], &mv->vals[i], DB_FLOAT, &sizes[i]);
           }
       }
 
       PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
+
+      if(mv->nvals == 1)
+      {
+          if (mv->vals[0] && sizes[0] != mv->nels) {
+             free(sizes);
+             DBFreeMeshvar(mv);
+             db_perror(objname, E_MALFORMED, me);
+             return NULL;
+          }
+      }
+      else
+      {
+          for (i = 0; i < mv->nvals; i++)
+          {
+              if (mv->vals[i] && sizes[i] != mv->nels) {
+                 free(sizes);
+                 DBFreeMeshvar(mv);
+                 db_perror(objname, E_MALFORMED, me);
+                 return NULL;
+              }
+          }
+      }
+
+      free(sizes);
    }
 
    if (rpnames != NULL)
@@ -5797,8 +5823,12 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 
    if ((qv->ndims>0) && (qv->nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBQVData)) {
       INIT_OBJ(&tmp_obj);
+      int *sizes;
+      int *mix_sizes;
 
       qv->vals = ALLOC_N(void*, qv->nvals);
+      sizes = ALLOC_N(int, qv->nvals);
+      mix_sizes = ALLOC_N(int, qv->nvals);
 
       if (qv->mixlen > 0) {
          qv->mixvals = ALLOC_N(void*, qv->nvals);
@@ -5817,14 +5847,27 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
          qv->datatype = DB_FLOAT;
 
       for (i = 0; i < qv->nvals; i++) {
-         DEFALL_OBJ(_valstr[i], &qv->vals[i], DB_FLOAT);
-
+         DEFALL_OBN(_valstr[i], &qv->vals[i], DB_FLOAT, &sizes[i]);
          if (qv->mixlen > 0) {
-            DEFALL_OBJ(_mixvalstr[i], &qv->mixvals[i], DB_FLOAT);
+            DEFALL_OBN(_mixvalstr[i], &qv->mixvals[i], DB_FLOAT, &mix_sizes[i]);
          }
       }
 
       PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
+
+      for (i = 0; i < qv->nvals; i++) {
+         if ((qv->vals[i] && sizes[i] != qv->nels) ||
+             (qv->mixvals[i] && mix_sizes[i] != qv->mixlen)) {
+                free(sizes);
+                free(mix_sizes);
+                DBFreeQuadvar(qv);
+                db_perror(objname, E_MALFORMED, me);
+                return NULL;
+         }
+      }
+
+      free(sizes);
+      free(mix_sizes);
    }
 
    if (rpnames != NULL)

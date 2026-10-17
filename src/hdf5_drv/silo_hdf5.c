@@ -11249,6 +11249,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
     int                 _objtype, stride, i;
     DBquadvar_mt        m;
     DBquadvar           *qv=NULL;
+    int                 nvals=1;
     
     PROTECT {
         /* Open object and make sure it's a quadvar */
@@ -11313,13 +11314,14 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
             qv->min_index[i] = m.min_index[i];
             qv->max_index[i] = m.max_index[i];
             qv->align[i] = m.align[i];
+            nvals *= (m.dims[i]>0?m.dims[i]:1);
         }
 
         PrepareForQuadvarDecompression(dbfile, name, qv);
 
         /* Read the raw data */
-        if (m.nvals>MAX_VARS) {
-            db_perror(name, E_CALLFAIL, me);
+        if ((m.nvals > MAX_VARS || nvals != qv->nels)) {
+            db_perror(name, E_MALFORMED, me);
             UNWIND();
         }
         if ((DBGetDataReadMask2File(_dbfile) & DBQVData) && m.nvals && m.ndims>0)
@@ -11330,13 +11332,13 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
                 int size1;
                 qv->vals[i] = _db_hdf5_comprd(dbfile, m.value[i], 0, &size1);
                 if (qv->vals[i] && size1 != qv->nels) {
-                    db_perror(name, E_CALLFAIL, me);
+                    db_perror(name, E_MALFORMED, me);
                     UNWIND();
                 }
                 if (m.mixlen && m.mixed_value[i][0]) {
                     qv->mixvals[i] = _db_hdf5_comprd(dbfile, m.mixed_value[i], 0, &size1);
                     if (qv->mixvals[i] && size1 != qv->mixlen) {
-                        db_perror(name, E_CALLFAIL, me);
+                        db_perror(name, E_MALFORMED, me);
                         UNWIND();
                     }
                 }

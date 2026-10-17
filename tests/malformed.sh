@@ -87,6 +87,8 @@ browser=$(find_file -x bin/browser tools/browser/browser tools/browser/.libs/bro
 silo_header=$(find_file -r ./src/silo/silo.h.in ../src/silo/silo.h.in ../../src/silo/silo.h.in)
 e_malformed_code=$(grep E_MALFORMED $silo_header | tr -s ' ' | cut -d' ' -f3)
 [ $? -eq 0 ] || exit 1
+e_callfail_code=$(grep E_CALLFAIL $silo_header | tr -s ' ' | cut -d' ' -f3)
+[ $? -eq 0 ] || exit 1
 
 #
 # Find text executable to generate data and then resulting data file
@@ -109,11 +111,16 @@ check_malformed()
     objname=$2
     cname_assign=$3
     subarr=$4
+    ecode=$5
 
     sep="."
     if [ $ext = "pdb" ] && [ -n "$subarr" ]; then
         sep="_"
     fi
+
+    if [ -z "$ecode" ]; then
+        ecode=$e_malformed_code
+    fi    
 
     # Create temp file to corrupt
     cp $all_objs_file malformed.$ext || return 1
@@ -147,8 +154,9 @@ check_malformed()
     # Now, try to display that corrupted object in a new browser instance
     echo "\nConfirm malformed error triggered on corrupted object..." >&2
     $browser -q --proper-exit-code -e "cd $dirname" -e "$objname" malformed.$ext
-    [ $? -eq $e_malformed_code ] || {
-        echo "ERROR: expected E_MALFORMED for $dirname/$objname after $cname_assign" >&2
+    result=$?
+    [ $result -eq $ecode ] || {
+        echo "ERROR: expected E_MALFORMED ($e_malformed_code) but got $result for $dirname/$objname after $cname_assign" >&2
         return 1
     }
 }
@@ -158,7 +166,7 @@ check_malformed mat_objs material ndims=5 || exit 1
 if [ "$ext" = "pdb" ]; then
     check_malformed mat_objs material dims='"/arrs/intsA"' || exit 1
 else
-    check_malformed mat_objs material dims={3,4,5} || exit 1
+    check_malformed mat_objs material dims=\{3,4,5\} || exit 1
 fi
 check_malformed mat_objs material nmat=7 || exit 1
 check_malformed mat_objs material matnos='"/arrs/intsB"' || exit 1
@@ -184,7 +192,7 @@ if [ "$ext" = "pdb" ]; then
     check_malformed mat_objs matspecies dims='"/arrs/intsA"' || exit 1
 else
     check_malformed mat_objs matspecies specnames='"/arrs/strsA"' || exit 1
-    check_malformed mat_objs matspecies dims={3,4,5} || exit 1
+    check_malformed mat_objs matspecies dims=\{3,4,5\} || exit 1
 fi
 
 # Various corruptions of Curve objects
@@ -235,7 +243,9 @@ check_malformed mult_objs multimeshadj nneighbors='"/arrs/intsA"' || exit 1
 check_malformed mult_objs multimeshadj neighbors='"/arrs/intsB"' || exit 1
 check_malformed mult_objs multimeshadj back='"/arrs/intsB"' || exit 1
 check_malformed mult_objs multimeshadj lnodelists='"/arrs/intsA"' || exit 1
-# We cannot reasonably test corruption of the actual nodelists or zonelists contents
+# We cannot reasonably test corruption of the actual nodelists or zonelists
+# content because that requies the read methods to do problem sized work.
+# But, testing corruption of "content" of those arrays is also not necessary.
 #check_malformed mult_objs multimeshadj nodelists='"/arrs/intsB"' || exit 1
 check_malformed mult_objs multimeshadj lzonelists='"/arrs/intsA"' || exit 1
 #check_malformed mult_objs multimeshadj zonelists='"/arrs/intsB"' || exit 1
@@ -288,6 +298,16 @@ check_malformed point_objs pointmesh ghost_node_labels='"/arrs/intsA"' || exit 1
 
 # Various corruptions of pointvar objects
 check_malformed point_objs pointvar nvals=99 || exit 1
+check_malformed point_objs pointvar nels=3 || exit 1
+# Funky browser syntax issue parsing component names beginning with number
+# requires us to quote args slightly differently for PDB driver.
+if [ "$ext" = "pdb" ]; then
+    check_malformed point_objs pointvar "'0_data'='/arrs/fltsB'" || exit 1
+    check_malformed point_objs pointvar "'1_data'='/arrs/fltsA'" || exit 1
+else
+    check_malformed point_objs pointvar data0='"/arrs/fltsB"' || exit 1
+    check_malformed point_objs pointvar data1='"/arrs/fltsA"' || exit 1
+fi
 
 # Various corruptions of quadmesh objects
 check_malformed quad_objs quadmesh ndims=5 || exit 1
@@ -295,17 +315,31 @@ check_malformed quad_objs quadmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed quad_objs quadmesh ghost_zone_labels='"/arrs/chrsB"' || exit 1
 # odd issue in PDB driver with max index names
 if [ "$ext" = "pdb" ]; then
-    check_malformed quad_objs quadmesh min_index={-1,-1} subarr || exit 1
-    check_malformed quad_objs quadmesh max_index_n={99,99} subarr || exit 1
-    check_malformed quad_objs quadmesh dims={2,3} subarr || exit 1
+    check_malformed quad_objs quadmesh min_index=\{-1,-1\} subarr || exit 1
+    check_malformed quad_objs quadmesh max_index_n=\{99,99\} subarr || exit 1
+    check_malformed quad_objs quadmesh dims=\{2,3\} subarr || exit 1
 else
-    check_malformed quad_objs quadmesh min_index={-1,-1,-1} || exit 1
-    check_malformed quad_objs quadmesh max_index={99,99,99} || exit 1
-    check_malformed quad_objs quadmesh dims={2,3,0} || exit 1
+    check_malformed quad_objs quadmesh min_index=\{-1,-1,-1\} || exit 1
+    check_malformed quad_objs quadmesh max_index=\{99,99,99\} || exit 1
+    check_malformed quad_objs quadmesh dims=\{2,3,0\} || exit 1
 fi
 
 # Various corruptions of quadvar objects
 check_malformed quad_objs quadvar nvals=99 || exit 1
+check_malformed quad_objs quadvar nels=3 || exit 1
+check_malformed quad_objs quadvar ndims=5 || exit 1
+check_malformed quad_objs quadvar mixlen=5 || exit 1
+# On PDB, this fails in PJ_ReadVariable 
+if [ "$ext" = "pdb" ]; then
+    check_malformed quad_objs quadvar dims='"/arrs/intsB"' "" $e_callfail_code || exit 1
+    check_malformed quad_objs quadvar align='"/arrs/fltsB"' "" $e_callfail_code || exit 1
+else
+    check_malformed quad_objs quadvar dims=\{5,7,3\} || exit 1
+fi
+check_malformed quad_objs quadvar value0='"/arrs/fltsA"' || exit 1
+check_malformed quad_objs quadvar value1='"/arrs/fltsA"' || exit 1
+check_malformed quad_objs quadvar mixed_value0='"/arrs/fltsA"' || exit 1
+check_malformed quad_objs quadvar mixed_value1='"/arrs/fltsA"' || exit 1
 
 # Various corruptions of ucdmesh objects
 check_malformed ucd_objs ucdmesh ndims=5 || exit 1

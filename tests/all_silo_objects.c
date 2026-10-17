@@ -132,6 +132,11 @@ put_quad_objects(DBfile *db)
     char znum[4] = {0x00, 0x01, 0x02, 0x03};
     int baseindex[3] = {5, 10, 0};
 
+    int mixlen = 8;
+    float qv0m[8] = {19.f, 29.f, 39.f, 49.f, 59.f,69.f, 79.f, 89.f};
+    float qv1m[8] = {89.f, 79.f, 69.f, 59.f, 49.f, 39.f, 29.f, 29.f};
+    void *qmvals[2] = {qv0m, qv1m};
+
     DBoptlist *ol = DBMakeOptlist(20);
     DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, nnum);
     DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, znum);
@@ -147,7 +152,7 @@ put_quad_objects(DBfile *db)
 
     PUT(DBPutQuadvar(db, "quadvar", "quadmesh", 2,
                      (DBCAS_t)qnames, qvals, dims_zones, 2,
-                     NULL, 0, DB_FLOAT, DB_ZONECENT, NULL));
+                     qmvals, mixlen, DB_FLOAT, DB_ZONECENT, NULL));
 
     PUT(DBPutQuadvar1(db, "quadvar_one", "quadmesh",
                       qone, dims_zones, 2, NULL, 0,
