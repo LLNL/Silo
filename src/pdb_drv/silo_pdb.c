@@ -5856,8 +5856,8 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
       PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
 
       for (i = 0; i < qv->nvals; i++) {
-         if ((qv->vals[i] && sizes[i] != qv->nels) ||
-             (qv->mixvals[i] && mix_sizes[i] != qv->mixlen)) {
+         if ((qv->vals && qv->vals[i] && sizes[i] != qv->nels) ||
+             (qv->mixvals && qv->mixvals[i] && mix_sizes[i] != qv->mixlen)) {
                 free(sizes);
                 free(mix_sizes);
                 DBFreeQuadvar(qv);
