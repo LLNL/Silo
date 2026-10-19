@@ -212,7 +212,7 @@ put_ucd_objects(DBfile *db)
 
     PUT(DBPutZonelist2(db, "zl2",
                        4, 2, nodelist, 16, 0,
-                       0, 0, shapetype, shapesize, shapecnt, 1, ol));
+                       1, 2, shapetype, shapesize, shapecnt, 1, ol));
 
     DBClearOptlist(ol);
     DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gnl);
@@ -415,7 +415,7 @@ put_phzonelist(DBfile *db)
     PUT(DBPutPHZonelist(db, "phzl",
                         12, nodecnt, 48, nodelist, NULL,
                         2, facecnt, 12, facelist,
-                        0, 0, 1, ol));
+                        1, 1, 1, ol));
 
     DBFreeOptlist(ol);
 }

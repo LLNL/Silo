@@ -6555,8 +6555,10 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
     */
    if ((csgv->nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBCSGVData)) {
       INIT_OBJ(&tmp_obj);
+      int *sizes;
 
       csgv->vals = ALLOC_N(void *, csgv->nvals);
+      sizes = ALLOC_N(int, csgv->nvals);
 
       if (csgv->datatype == 0) {
           strcpy(tmp, objname);
@@ -6571,10 +6573,20 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
           csgv->datatype = DB_FLOAT;
 
       for (i = 0; i < csgv->nvals; i++) {
-         DEFALL_OBJ(_valstr[i], &csgv->vals[i], csgv->datatype);
+         DEFALL_OBN(_valstr[i], &csgv->vals[i], csgv->datatype, &sizes[i]);
       }
 
       PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0);
+
+      for (i = 0; i < csgv->nvals; i++) {
+         if (csgv->vals[i] && sizes[i] != csgv->nels) {
+            free(sizes);
+            DBFreeCsgvar(csgv);
+            db_perror(objname, E_MALFORMED, me);
+            return NULL;
+         }
+      }
+      free(sizes);
    }
 
    if (rpnames != NULL)
@@ -6816,6 +6828,14 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
     zl->min_index = lo_offset;
     zl->max_index = zl->nzones - hi_offset - 1;
 
+    if (zl->min_index < 0 || zl->min_index >= zl->nzones ||
+        zl->max_index < 0 || zl->max_index >= zl->nzones)
+    {
+        DBFreeZonelist(zl);
+        db_perror(objname, E_MALFORMED, me);
+        return NULL;
+    }
+
     /* We should really do this splitting operation here. But,
      historically Silo only did this split operation when the
      zonelist was being obtained as part of a DBGetUcdmesh call.
@@ -6920,7 +6940,9 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
     *phzl = tmpphzl;
 
     if (phzl->nfaces < 0 || phzl->lnodelist < 0 ||
-        phzl->nzones < 0 || phzl->lfacelist < 0)
+        phzl->nzones < 0 || phzl->lfacelist < 0 ||
+        phzl->lo_offset < 0 || phzl->lo_offset >= phzl->nzones ||
+        phzl->hi_offset < 0 || phzl->hi_offset >= phzl->nzones)
     {
         DBFreePHZonelist(phzl);
         FREE(tmpaznum);
@@ -8015,12 +8037,14 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    if (s)
    {
-       int cnt = num_nodes;
+       int cnt = -1;
        strArray = DBStringListToStringArray(s, &cnt, !skipFirstSemicolon);
        FREE(s);
        if (strArray && cnt != num_nodes)
        {
-           DBFreeMrgtree(tree);
+           free(tree); /* DBFreeMrgtree(tree) not safe to call */
+           for (i = 0; i < num_nodes; i++) free(ltree[i]);
+           free(ltree);
            FREE(mrgv_onames);
            FREE(mrgv_rnames);
            DBFreeStringArray(strArray, cnt);
@@ -8049,7 +8073,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
            if (strchr(strArray[n], '%') == 0)
            {
                ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*));
-               for (j = 0; j < ltree[i]->narray; j++, n++)
+               for (j = 0; j < ltree[i]->narray && n < cnt; j++, n++)
                    ltree[i]->names[j] = strArray[n];
            }
            else
@@ -8061,7 +8085,9 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        }
        if (n != cnt)
        {
-           DBFreeMrgtree(tree);
+           free(tree); /* DBFreeMrgtree(tree) not safe to call */
+           for (i = 0; i < num_nodes; i++) free(ltree[i]);
+           free(ltree);
            FREE(mrgv_onames);
            FREE(mrgv_rnames);
            DBFreeStringArray(strArray, cnt);
@@ -8082,7 +8108,9 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        FREE(s);
        if (cnt != num_nodes)
        {
-           DBFreeMrgtree(tree);
+           free(tree); /* DBFreeMrgtree(tree) not safe to call */
+           for (i = 0; i < num_nodes; i++) free(ltree[i]);
+           free(ltree);
            FREE(mrgv_onames);
            FREE(mrgv_rnames);
            DBFreeStringArray(strArray, cnt);
@@ -8104,7 +8132,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        if (ns > 0)
        {
            ltree[i]->seg_ids = (int*) malloc(ns * sizeof(int));
-           for (j = 0; j < ns; j++)
+           for (j = 0; j < ns && n < seg_ids_size; j++)
                ltree[i]->seg_ids[j] = intArray[n++];
        }
    }
@@ -8125,7 +8153,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        if (ns > 0)
        {
            ltree[i]->seg_lens = (int*) malloc(ns * sizeof(int));
-           for (j = 0; j < ns; j++)
+           for (j = 0; j < ns && n < seg_lens_size; j++)
                ltree[i]->seg_lens[j] = intArray[n++];
        }
    }
@@ -8146,7 +8174,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        if (ns > 0)
        {
            ltree[i]->seg_types = (int*) malloc(ns * sizeof(int));
-           for (j = 0; j < ns; j++)
+           for (j = 0; j < ns && n < seg_types_size; j++)
                ltree[i]->seg_types[j] = intArray[n++];
        }
    }
@@ -8167,8 +8195,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
        if (nc > 0)
        {
            ltree[i]->children = (DBmrgtnode**) malloc(nc * sizeof(DBmrgtnode*));
-           for (j = 0; j < nc; j++)
-               ltree[i]->children[j] = ltree[intArray[n++]];
+           for (j = 0; j < nc && n < children_size && intArray[n] >= 0 && intArray[n] < num_nodes; j++, n++)
+               ltree[i]->children[j] = ltree[intArray[n]];
        }
    }
    FREE(intArray);
@@ -8223,14 +8251,14 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
     void *fracsArray = NULL;
     DBgroupelmap tmpgm;
     PJcomplist *_tcl;
-    int seglens_size=0, segids_size=0, segdata_size=0, fraclens_size=0, segfracs_size=0;
+    int seglens_size=0, segids_size=0, segdata_size=0, fraclens_size=0, segfracs_size=0, grptypes_size;
     int tot_len;
 
     memset(&tmpgm, 0, sizeof(DBgroupelmap));
     INIT_OBJ(&tmp_obj);
     DEFINE_OBJ("num_segments",    &tmpgm.num_segments,    DB_INT);
     DEFINE_OBJ("fracs_data_type", &tmpgm.fracs_data_type, DB_INT);
-    DEFALL_OBJ("groupel_types",   &tmpgm.groupel_types,   DB_INT);
+    DEFALL_OBN("groupel_types",   &tmpgm.groupel_types,   DB_INT,   &grptypes_size);
     DEFALL_OBN("segment_lengths", &tmpgm.segment_lengths, DB_INT,   &seglens_size);
     DEFALL_OBN("segment_ids",     &tmpgm.segment_ids,     DB_INT,   &segids_size);
     DEFALL_OBN("segment_data",    &segData,               DB_INT,   &segdata_size);
@@ -8244,7 +8272,9 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
     *gm = tmpgm;
 
     if (seglens_size < 0 || segids_size < 0 || segdata_size < 0 || fraclens_size < 0 ||
-        segfracs_size < 0 || gm->num_segments < 0 || gm->num_segments != seglens_size ||
+        segfracs_size < 0 || gm->num_segments < 0 || 
+        gm->num_segments != grptypes_size ||
+        gm->num_segments != seglens_size ||
         gm->num_segments != segids_size ||
         (fraclens_size > 0 && gm->num_segments != fraclens_size))
     {
@@ -8395,6 +8425,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
    char          *cnames = NULL;
    DBmrgvar       tmpmrgv;
    PJcomplist    *_tcl;
+   int           *sizes = 0;         
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -8427,6 +8458,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
    INIT_OBJ(&tmp_obj);
 
    mrgv->data = ALLOC_N(void *, mrgv->ncomps);
+   sizes = ALLOC_N(int, mrgv->ncomps);
 
    if (mrgv->datatype == 0) {
       strcpy(tmp, objname);
@@ -8441,22 +8473,36 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
       mrgv->datatype = DB_FLOAT;
 
    for (i = 0; i < mrgv->ncomps; i++) {
-      DEFALL_OBJ(_valstr[i], &mrgv->data[i], DB_FLOAT);
+      DEFALL_OBN(_valstr[i], &mrgv->data[i], DB_FLOAT, &sizes[i]);
    }
 
    if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, 0) < 0)
-   {
-       FREE(cnames);
-       FREE(rpnames);
-       DBFreeMrgvar(mrgv);
-       db_perror(objname, E_MALFORMED, me);
        return NULL;
+
+   for (i = 0; i < mrgv->ncomps; i++) {
+      if (mrgv->data[i] && sizes[i] != mrgv->nregns) {
+         FREE(sizes);
+         FREE(cnames);
+         FREE(rpnames);
+         free(mrgv); /* DBFreeMrgvar(mrgv) not safe */
+         db_perror(objname, E_MALFORMED, me);
+         return NULL;
+      }
    }
+
+   FREE(sizes);
 
    if (cnames != NULL)
    {
-      mrgv->compnames = DBStringListToStringArray(cnames, &(mrgv->ncomps), !skipFirstSemicolon);
+      int cnt = -1;
+      mrgv->compnames = DBStringListToStringArray(cnames, &cnt, !skipFirstSemicolon);
       FREE(cnames);
+      if (mrgv->compnames && cnt != mrgv->ncomps) {
+         FREE(rpnames);
+         free(mrgv); /* DBFreeMrgvar(mrgv) not safe */
+         db_perror(objname, E_MALFORMED, me);
+         return NULL;
+      }
    }
 
    if (rpnames != NULL)

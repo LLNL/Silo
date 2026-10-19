@@ -13203,7 +13203,9 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char const *name)
                 (phzl->nodelist && nlsize != phzl->lnodelist) ||
                 (phzl->extface && efsize != phzl->nfaces) ||
                 (phzl->facecnt && fcntsize != phzl->nzones) ||
-                (phzl->facelist && flsize != phzl->lfacelist))
+                (phzl->facelist && flsize != phzl->lfacelist) ||
+                (phzl->lo_offset < 0 || phzl->lo_offset >= phzl->nzones ||
+                 phzl->hi_offset < 0 || phzl->hi_offset >= phzl->nzones))
             {
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
@@ -17204,8 +17206,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
             }
         }
 
-        /* allocate all the nodes of the tree and a linear list of pointers
-           to them */
+        /* allocate all the nodes of the tree and a linear list of pointers to them */
         ltree = (DBmrgtnode **) malloc(num_nodes * sizeof(DBmrgtnode*));
         for (i = 0; i < num_nodes; i++)
             ltree[i] = (DBmrgtnode *) calloc(1,sizeof(DBmrgtnode));
@@ -17249,7 +17250,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
                 if (strchr(strArray[n], '%') == 0)
                 {
                     ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*));
-                    for (j = 0; j < ltree[i]->narray; j++, n++)
+                    for (j = 0; j < ltree[i]->narray && n < nStrArray; j++, n++)
                         ltree[i]->names[j] = strArray[n];
                 }
                 else
@@ -17277,7 +17278,6 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
             db_perror(name, E_MALFORMED, me);
             UNWIND();
         }
-
         for (i = 0; i < num_nodes; i++)
             ltree[i]->maps_name = strArray[i];
         FREE(s);
@@ -17293,7 +17293,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
                 if (ns > 0)
                 {
                     ltree[i]->seg_ids = (int*) malloc(ns * sizeof(int));
-                    for (j = 0; j < ns; j++)
+                    for (j = 0; j < ns && n < seg_ids_size; j++)
                         ltree[i]->seg_ids[j] = intArray[n++];
                 }
             }
@@ -17315,12 +17315,12 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
                 if (ns > 0)
                 {
                     ltree[i]->seg_lens = (int*) malloc(ns * sizeof(int));
-                    for (j = 0; j < ns; j++)
+                    for (j = 0; j < ns && n < seg_lens_size; j++)
                         ltree[i]->seg_lens[j] = intArray[n++];
                 }
             }
             FREE(intArray);
-            if (n != seg_ids_size)
+            if (n != seg_lens_size)
             {
                 db_perror(name, E_MALFORMED, me);
                 UNWIND();
@@ -17337,7 +17337,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
                 if (ns > 0)
                 {
                     ltree[i]->seg_types = (int*) malloc(ns * sizeof(int));
-                    for (j = 0; j < ns; j++)
+                    for (j = 0; j < ns && n < seg_types_size; j++)
                         ltree[i]->seg_types[j] = intArray[n++];
                 }
             }
@@ -17359,8 +17359,8 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
                 if (nc > 0)
                 {
                     ltree[i]->children = (DBmrgtnode**) malloc(nc * sizeof(DBmrgtnode*));
-                    for (j = 0; j < nc; j++)
-                        ltree[i]->children[j] = ltree[intArray[n++]];
+                    for (j = 0; j < nc && n < child_ids_size && intArray[n] >= 0 && intArray[n] < num_nodes; j++, n++)
+                        ltree[i]->children[j] = ltree[intArray[n]];
                 }
             }
             FREE(intArray);
@@ -17628,7 +17628,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
                     if (n >= intArray_size)
                     {
                         FREE(intArray);
-                        DBFreeGroupelmap(gm);
+                        free(gm); /* DBFreeGroupelmap(gm) not safely callable */
                         db_perror(name, E_MALFORMED, me);
                         return NULL;
                     }
@@ -17660,7 +17660,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
                     {
                         FREE(intArray);
                         FREE(fracsArray);
-                        DBFreeGroupelmap(gm);
+                        free(gm); /* DBFreeGroupelmap(gm) not safely callable */
                         db_perror(name, E_MALFORMED, me);
                         return NULL;
                     }

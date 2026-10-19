@@ -344,59 +344,134 @@ check_malformed quad_objs quadvar mixed_value1='"/arrs/fltsA"' || exit 1
 # Various corruptions of ucdmesh objects
 check_malformed ucd_objs ucdmesh ndims=5 || exit 1
 check_malformed ucd_objs ucdmesh nnodes=8 || exit 1
+check_malformed ucd_objs ucdmesh coord0='"/arrs/dblsA"' || exit 1
+check_malformed ucd_objs ucdmesh coord1='"/arrs/dblsA"' || exit 1
 check_malformed ucd_objs ucdmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed ucd_objs ucdmesh gnodeno='"/arrs/intsA"' || exit 1
+# Extents arrays are clamped in size in both drivers in different ways
+#check_malformed ucd_objs ucdmesh min_extents='"/arrs/dblsA"' || exit 1
+#check_malformed ucd_objs ucdmesh max_extents='"/arrs/dblsA"' || exit 1
 
 # Various corruptions of ucdvar objects
+check_malformed ucd_objs ucdvar ndims=-1 || exit 1
 check_malformed ucd_objs ucdvar nvals=99 || exit 1
 check_malformed ucd_objs ucdvar nels=9999 || exit 1
-check_malformed ucd_objs ucdvar_mix mixlen=5 || exit 1
+check_malformed ucd_objs ucdvar_mix mixlen=2 || exit 1
+check_malformed ucd_objs ucdvar_mix value0='"/arrs/fltsA"' || exit 1
+check_malformed ucd_objs ucdvar_mix mixed_value0='"/arrs/fltsA"' || exit 1
 
 # Various corruptions of facelist objects
 check_malformed list_objs facelist nfaces=-1 || exit 1
 check_malformed list_objs facelist nfaces=99 || exit 1
 check_malformed list_objs facelist nshapes=99 || exit 1
 check_malformed list_objs facelist lnodelist=99 || exit 1
+check_malformed list_objs facelist nodelist='"/arrs/intsA"' || exit 1
+check_malformed list_objs facelist shapecnt='"/arrs/intsA"' || exit 1
+check_malformed list_objs facelist shapesize='"/arrs/intsA"' || exit 1
+check_malformed list_objs facelist zoneno='"/arrs/intsA"' || exit 1
 
 # Various corruptions of zonelist objects
 check_malformed ucd_objs zl2 nzones=-1 || exit 1
 check_malformed ucd_objs zl2 nzones=99 || exit 1
 check_malformed ucd_objs zl2 nshapes=99 || exit 1
+check_malformed ucd_objs zl2 lo_offset=99 || exit 1
+check_malformed ucd_objs zl2 hi_offset=-1 || exit 1
 check_malformed ucd_objs zl2 lnodelist=99 || exit 1
 check_malformed ucd_objs zl2 ghost_zone_labels='"/arrs/chrsB"' || exit 1
 check_malformed ucd_objs zl2 gzoneno='"/arrs/intsB"' || exit 1
+check_malformed ucd_objs zl2 nodelist='"/arrs/intsA"' || exit 1
+check_malformed ucd_objs zl2 shapecnt='"/arrs/intsB"' || exit 1
+check_malformed ucd_objs zl2 shapesize='"/arrs/intsB"' || exit 1
+check_malformed ucd_objs zl2 shapetype='"/arrs/intsB"' || exit 1
 
 # Various corruptions of polyhedral zonelist objects
 check_malformed list_objs phzl nfaces=-1 || exit 1
-check_malformed list_objs phzl lnodelist=999 || exit 1
-check_malformed list_objs phzl lfacelist=999 || exit 1
-check_malformed list_objs phzl nzones=999 || exit 1
+check_malformed list_objs phzl nfaces=1 || exit 1
+check_malformed list_objs phzl nzones=1 || exit 1
+check_malformed list_objs phzl lnodelist=2 || exit 1
+check_malformed list_objs phzl lfacelist=3 || exit 1
+check_malformed list_objs phzl lo_offset=5 || exit 1
+check_malformed list_objs phzl hi_offset=-1 || exit 1
+check_malformed list_objs phzl nodecnt='"/arrs/intsB"' || exit 1
+check_malformed list_objs phzl nodelist='"/arrs/intsA"' || exit 1
+check_malformed list_objs phzl facecnt='"/arrs/intsB"' || exit 1
+check_malformed list_objs phzl facelist='"/arrs/intsA"' || exit 1
 check_malformed list_objs phzl ghost_zone_labels='"/arrs/chrsB"' || exit 1
 check_malformed list_objs phzl gzoneno='"/arrs/intsB"' || exit 1
 
 # Various corruptions of csgmesh objects
 check_malformed csg_objs csgmesh ndims=5 || exit 1
+check_malformed csg_objs csgmesh nbounds=2 || exit 1
+check_malformed csg_objs csgmesh lcoeffs=2 || exit 1
+check_malformed csg_objs csgmesh coeffs='"/arrs/intsA"' || exit 1
+check_malformed csg_objs csgmesh typeflags='"/arrs/intsA"' || exit 1
 check_malformed csg_objs csgmesh bndnames='"/arrs/strsA"' || exit 1
+#check_malformed csg_objs csgmesh min_extents='"/arrs/dblsB"' || exit 1
+#check_malformed csg_objs csgmesh max_extents='"/arrs/dblsB"' || exit 1
 
 # Various corruptions of csg zonelist objects
 check_malformed csg_objs csgzl nregs=-1 || exit 1
+check_malformed csg_objs csgzl nregs=99 || exit 1
+check_malformed csg_objs csgzl nzones=-1 || exit 1
+check_malformed csg_objs csgzl nzones=99 || exit 1
 check_malformed csg_objs csgzl regnames='"/arrs/strsB"' || exit 1
 check_malformed csg_objs csgzl zonenames='"/arrs/strsB"' || exit 1
+check_malformed csg_objs csgzl typeflags='"/arrs/intsA"' || exit 1
+check_malformed csg_objs csgzl leftids='"/arrs/intsA"' || exit 1
+check_malformed csg_objs csgzl rightids='"/arrs/intsA"' || exit 1
+check_malformed csg_objs csgzl zonelist='"/arrs/intsA"' || exit 1
 
 # Various corruptions of csgvar objects
 check_malformed csg_objs csgvar nvals=99 || exit 1
+check_malformed csg_objs csgvar nels=2 || exit 1
+# Component naming difference between drivers
+if [ "$ext" = "pdb" ]; then
+    check_malformed csg_objs csgvar value0='"/arrs/fltsA"' || exit 1
+else
+    check_malformed csg_objs csgvar vals0='"/arrs/fltsA"' || exit 1
+fi
 
 # Various corruptions of groupelmap objects
 check_malformed mrg_objs groupelmap num_segments=-1 || exit 1
-check_malformed mrg_objs groupelmap num_segments=99 || exit 1
+check_malformed mrg_objs groupelmap num_segments=2 || exit 1
+check_malformed mrg_objs groupelmap groupel_types='"/arrs/intsA"' || exit 1
+check_malformed mrg_objs groupelmap segment_lengths='"/arrs/intsA"' || exit 1
+check_malformed mrg_objs groupelmap segment_ids='"/arrs/intsA"' || exit 1
+check_malformed mrg_objs groupelmap segment_data='"/arrs/intsA"' || exit 1
+check_malformed mrg_objs groupelmap frac_lengths='"/arrs/intsA"' || exit 1
+check_malformed mrg_objs groupelmap segment_fracs='"/arrs/fltsA"' || exit 1
 
 # Various corruptions of mrgtree objects
 check_malformed mrg_objs mrgtree num_nodes=-1 || exit 1
 check_malformed mrg_objs mrgtree num_nodes=99 || exit 1
+check_malformed mrg_objs mrgtree root=-1 || exit 1
+check_malformed mrg_objs mrgtree root=5 || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed mrg_objs mrgtree seg_types='"/arrs/intsB"'|| exit 1
+    check_malformed mrg_objs mrgtree seg_lens='"/arrs/intsB"'|| exit 1
+    check_malformed mrg_objs mrgtree seg_ids='"/arrs/intsB"'|| exit 1
+    check_malformed mrg_objs mrgtree scalars='"/arrs/intsA"'|| exit 1
+    check_malformed mrg_objs mrgtree children='"/arrs/intsA"'|| exit 1
+    check_malformed mrg_objs mrgtree maps_name='"/arrs/strsB"'|| exit 1
+else
+    check_malformed mrg_objs mrgtree n_seg_types='"/arrs/intsB"'|| exit 1
+    check_malformed mrg_objs mrgtree n_seg_lens='"/arrs/intsB"'|| exit 1
+    check_malformed mrg_objs mrgtree n_seg_ids='"/arrs/intsB"'|| exit 1
+    check_malformed mrg_objs mrgtree n_scalars='"/arrs/intsA"'|| exit 1
+    check_malformed mrg_objs mrgtree n_children='"/arrs/intsA"'|| exit 1
+    check_malformed mrg_objs mrgtree n_maps_name='"/arrs/strsB"'|| exit 1
+fi
 
 # Various corruptions of mrgvar objects
 check_malformed mrg_objs mrgvar ncomps=-1 || exit 1
 check_malformed mrg_objs mrgvar ncomps=99 || exit 1
+check_malformed mrg_objs mrgvar nregns=2 || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed mrg_objs mrgvar value0='"/arrs/fltsA"' || exit 1
+else
+    check_malformed mrg_objs mrgvar data0='"/arrs/fltsA"' || exit 1
+fi
+check_malformed mrg_objs mrgvar compnames='"/arrs/strsB"' || exit 1
 
 #
 # Cleanup
