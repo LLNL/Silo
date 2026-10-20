@@ -112,29 +112,29 @@ put_quad_objects(DBfile *db)
 {
     int dims_nodes[2] = {3, 3};
     int dims_zones[2] = {2, 2};
-    float x[3] = {0.f, 1.f, 2.f};
-    float y[3] = {0.f, 1.f, 2.f};
+    double x[3] = {0.f, 1.f, 2.f};
+    double y[3] = {0.f, 1.f, 2.f};
     void *coords[2] = {x, y};
-    float x2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
-    float y2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
+    double x2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
+    double y2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
     void *coords2[2] = {x2, y2};
     char *coordnames[2] = {"qx", "qy"};
     char *coordnames2[2] = {"qx", "qy"};
 
-    float qv0[4] = {1.f, 2.f, 3.f, 4.f};
-    float qv1[4] = {5.f, 6.f, 7.f, 8.f};
-    float qv2[9] = {50.f, 51.f, 52.f, 53.f, 54.f, 55.f, 56.f, 57.f, 58.f};
+    double qv0[4] = {1.f, 2.f, 3.f, 4.f};
+    double qv1[4] = {5.f, 6.f, 7.f, 8.f};
+    double qv2[9] = {50.f, 51.f, 52.f, 53.f, 54.f, 55.f, 56.f, 57.f, 58.f};
     void *qvals[2] = {qv0, qv1};
     char *qnames[2] = {"qcomp0", "qcomp1"};
-    float qone[4] = {11.f, 12.f, 13.f, 14.f};
+    double qone[4] = {11.f, 12.f, 13.f, 14.f};
 
     char nnum[9] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
     char znum[4] = {0x00, 0x01, 0x02, 0x03};
     int baseindex[3] = {5, 10, 0};
 
     int mixlen = 8;
-    float qv0m[8] = {19.f, 29.f, 39.f, 49.f, 59.f,69.f, 79.f, 89.f};
-    float qv1m[8] = {89.f, 79.f, 69.f, 59.f, 49.f, 39.f, 29.f, 29.f};
+    double qv0m[8] = {19.f, 29.f, 39.f, 49.f, 59.f,69.f, 79.f, 89.f};
+    double qv1m[8] = {89.f, 79.f, 69.f, 59.f, 49.f, 39.f, 29.f, 29.f};
     void *qmvals[2] = {qv0m, qv1m};
 
     DBoptlist *ol = DBMakeOptlist(20);
@@ -144,23 +144,23 @@ put_quad_objects(DBfile *db)
 
     PUT(DBPutQuadmesh(db, "quadmesh",
                       (DBCAS_t)coordnames, coords, dims_nodes, 2,
-                      DB_FLOAT, DB_COLLINEAR, ol));
+                      DB_DOUBLE, DB_COLLINEAR, ol));
 
     PUT(DBPutQuadmesh(db, "quadmesh2",
                       (DBCAS_t)coordnames2, coords2, dims_nodes, 2,
-                      DB_FLOAT, DB_NONCOLLINEAR, ol));
+                      DB_DOUBLE, DB_NONCOLLINEAR, ol));
 
     PUT(DBPutQuadvar(db, "quadvar", "quadmesh", 2,
                      (DBCAS_t)qnames, qvals, dims_zones, 2,
-                     qmvals, mixlen, DB_FLOAT, DB_ZONECENT, NULL));
+                     qmvals, mixlen, DB_DOUBLE, DB_ZONECENT, NULL));
 
     PUT(DBPutQuadvar1(db, "quadvar_one", "quadmesh",
                       qone, dims_zones, 2, NULL, 0,
-                      DB_FLOAT, DB_ZONECENT, NULL));
+                      DB_DOUBLE, DB_ZONECENT, NULL));
 
     PUT(DBPutQuadvar1(db, "quadvar_two", "quadmesh2",
                       qv2, dims_nodes, 2, NULL, 0,
-                      DB_FLOAT, DB_NODECENT, NULL));
+                      DB_DOUBLE, DB_NODECENT, NULL));
 
     DBFreeOptlist(ol);
 }

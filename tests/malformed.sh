@@ -89,6 +89,8 @@ e_malformed_code=$(grep E_MALFORMED $silo_header | tr -s ' ' | cut -d' ' -f3)
 [ $? -eq 0 ] || exit 1
 e_callfail_code=$(grep E_CALLFAIL $silo_header | tr -s ' ' | cut -d' ' -f3)
 [ $? -eq 0 ] || exit 1
+db_short_val=$(grep DB_SHORT $silo_header | tr -s ' ' | cut -d'=' -f2 | tr -d ',')
+[ $? -eq 0 ] || exit 1
 
 #
 # Find text executable to generate data and then resulting data file
@@ -161,6 +163,25 @@ check_malformed()
     }
 }
 
+#
+# Regarding malformed issues involving 'datatype' member of various objects...
+# PDB and HDF5 drivers deal with datatype totally differently.
+#
+# In PDB driver, we store datatype information as metadata and return that stored
+# metadata on read. So, it is important there during read to ensure the datatype
+# metadata is consistent with the void* data of the object being read and issue
+# E_MALFORMED if not.
+#
+# In HDF5 driver, although we do indeed store datatype information as metadata,
+# we actually ignore that information during read. On write, we use datatype
+# information to decode the type of void* pointers passed as args in the API.
+# On read, we use datatype of HDF5 *stored* data to populate value of datatype
+# member and not the stored metadata for that member. This means attempts to
+# corrupt file objects by setting wrong datatype have no effect. It would have
+# been better to simply not ever store datatype as metadata. But, its too late
+# to fix that now.
+#
+
 # Various corruptions of material objects
 check_malformed mat_objs material ndims=5 || exit 1
 if [ "$ext" = "pdb" ]; then
@@ -173,9 +194,13 @@ check_malformed mat_objs material matnos='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material matlist='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material_names_colors matnames='"/arrs/strsB"' || exit 1
 check_malformed mat_objs material_names_colors matcolors='"/arrs/strsB"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed mat_objs material_mix datatype=$db_short_val || exit 1
+fi
 check_malformed mat_objs material_mix mixlen=4495 || exit 1
 check_malformed mat_objs material_mix mix_next='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material_mix mix_vf='"/arrs/fltsA"' || exit 1
+check_malformed mat_objs material_mix mix_vf='"/arrs/dblsA"' || exit 1
 check_malformed mat_objs material_mix mix_mat='"/arrs/intsA"' || exit 1
 check_malformed mat_objs material_mix mix_zone='"/arrs/intsB"' || exit 1
 
@@ -188,8 +213,10 @@ check_malformed mat_objs matspecies speccolors='"/arrs/strsA"' || exit 1
 check_malformed mat_objs matspecies species_mf='"/arrs/fltsA"' || exit 1
 # diff in component name between pdb and hdf5
 if [ "$ext" = "pdb" ]; then
+    check_malformed mat_objs matspecies datatype=$db_short_val || exit 1
     check_malformed mat_objs matspecies species_names='"/arrs/strsA"' || exit 1
     check_malformed mat_objs matspecies dims='"/arrs/intsA"' || exit 1
+    check_malformed mat_objs matspecies species_mf='"/arrs/dblsA"' || exit 1
 else
     check_malformed mat_objs matspecies specnames='"/arrs/strsA"' || exit 1
     check_malformed mat_objs matspecies dims=\{3,4,5\} || exit 1
@@ -199,6 +226,7 @@ fi
 check_malformed misc_objs curve npts=-1 || exit 1
 check_malformed misc_objs curve npts=6 || exit 1
 if [ "$ext" = "pdb" ]; then
+    check_malformed misc_objs curve datatype=$db_short_val || exit 1
     check_malformed misc_objs curve xvals='"/arrs/fltsB"' || exit 1
     check_malformed misc_objs curve yvals='"/arrs/fltsA"' || exit 1
 else
@@ -315,6 +343,7 @@ check_malformed quad_objs quadmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed quad_objs quadmesh ghost_zone_labels='"/arrs/chrsB"' || exit 1
 # odd issue in PDB driver with max index names
 if [ "$ext" = "pdb" ]; then
+    check_malformed quad_objs quadmesh datatype=$db_short_val || exit 1
     check_malformed quad_objs quadmesh min_index=\{-1,-1\} subarr || exit 1
     check_malformed quad_objs quadmesh max_index_n=\{99,99\} subarr || exit 1
     check_malformed quad_objs quadmesh dims=\{2,3\} subarr || exit 1
@@ -331,6 +360,7 @@ check_malformed quad_objs quadvar ndims=5 || exit 1
 check_malformed quad_objs quadvar mixlen=5 || exit 1
 # On PDB, this fails in PJ_ReadVariable 
 if [ "$ext" = "pdb" ]; then
+    check_malformed quad_objs quadvar datatype=$db_short_val || exit 1
     check_malformed quad_objs quadvar dims='"/arrs/intsB"' "" $e_callfail_code || exit 1
     check_malformed quad_objs quadvar align='"/arrs/fltsB"' "" $e_callfail_code || exit 1
 else

@@ -3329,7 +3329,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     PJcomplist *_tcl;
     int matnos_size, matlist_size;
     int mixm_size, mixn_size, mixz_size, mixvf_size;
-    int nzones;
+    int nzones, dtypef;
 
     /* Comp. Name        Comp. Address     Data Type     */
     memset(&tmpmm, 0, sizeof(DBmaterial));
@@ -3386,16 +3386,17 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     nzones = 1;
     for (int i = 0; i < mm->ndims; i++) nzones *= mm->dims[i];
 
+    dtypef = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_mix_vf", name));
+
     /* validate sizing */
     if ((nzones < 0) ||
         (nzones > 0 && (DBGetDataReadMask2File(_dbfile) & DBMatMatlist) && nzones != matlist_size) ||
         (mm->nmat < 0) || 
         (mm->nmat > 0 && (DBGetDataReadMask2File(_dbfile) & DBMatMatnos) && mm->nmat != matnos_size) ||
         (mm->mixlen < 0) ||
-        (mm->mixlen > 0 && (DBGetDataReadMask2File(_dbfile) & DBMatMixList) && (mm->mixlen != mixm_size ||
-                                                                                mm->mixlen != mixn_size ||
-                                                                                mm->mixlen != mixvf_size ||
-                                                               (mm->mix_zone && mm->mixlen != mixz_size))))
+        (mm->mixlen > 0 && (DBGetDataReadMask2File(_dbfile) & DBMatMixList) && 
+        (mm->mixlen != mixm_size || mm->mixlen != mixn_size || mm->mixlen != mixvf_size ||
+        (mm->mix_zone && mm->mixlen != mixz_size) || (mm->datatype != dtypef))))
     {
         DBFreeMaterial(mm);
         FREE(tmpnames);
@@ -3501,7 +3502,7 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    char           tmpstr[256];
    PJcomplist     tmp_obj;
    DBmatspecies   tmpmm;
-   int            i, nstrs = 0, nzones = 1;
+   int            i, nstrs = 0, nzones = 1, dtypef;
    int            nmatspec_size = 0, speclist_size = 0;
    int            mix_speclist_size = 0, species_mf_size = 0;
    PJcomplist    *_tcl;
@@ -3575,21 +3576,11 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    /* Now read in species_mf per its datatype. */
    INIT_OBJ(&tmp_obj);
 
-   if (mm->datatype == 0) {
-      strcpy(tmpstr, objname);
-      strcat(tmpstr, "_data");
-      mm->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmpstr);
-
-      if (mm->datatype < 0)
-         mm->datatype = DB_FLOAT;
-   }
-
-   if (mm->datatype == DB_DOUBLE && PJ_InqForceSingle())
-      mm->datatype = DB_FLOAT;
+   dtypef = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_species_mf", objname));
 
    DEFALL_OBN("species_mf", &mm->species_mf, mm->datatype, &species_mf_size);
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0) < 0 ||
-       (mm->species_mf && species_mf_size != mm->nspecies_mf))
+       (mm->species_mf && (species_mf_size != mm->nspecies_mf || mm->datatype != dtypef)))
    {
       DBFreeMatspecies(mm);
       FREE(tmpnames);
@@ -3597,6 +3588,9 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
       db_perror(objname, E_MALFORMED, me);
       return NULL;
    }
+
+   if (mm->datatype == DB_DOUBLE && PJ_InqForceSingle())
+      mm->datatype = DB_FLOAT;
 
    _DBQQCalcStride(mm->stride, mm->dims, mm->ndims, mm->major_order);
 
@@ -3823,7 +3817,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
    PJcomplist   tmp_obj ;
    DBcurve tmpcu;
    PJcomplist  *_tcl;
-   int          xsize = 0, ysize = 0;
+   int          xsize = 0, ysize = 0, dtypef[2];
 
    memset(&tmpcu, 0, sizeof(DBcurve));
    INIT_OBJ (&tmp_obj) ;
@@ -3847,6 +3841,20 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
 
    if (cu->npts < 0)
    {
+      DBFreeCurve(cu);
+      db_perror(name, E_MALFORMED, me);
+      return NULL;
+   }
+
+   if (cu->xvarname) {
+       dtypef[0] = db_pdb_GetVarDatatype(dbfile->pdb, cu->xvarname);
+       dtypef[1] = db_pdb_GetVarDatatype(dbfile->pdb, cu->yvarname);
+   } else {
+       dtypef[0] = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_xvals", name));
+       dtypef[1] = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_yvals", name));
+   }
+
+   if (cu->datatype != dtypef[0] || cu->datatype != dtypef[1]) {
       DBFreeCurve(cu);
       db_perror(name, E_MALFORMED, me);
       return NULL;
@@ -5532,7 +5540,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     PJcomplist    *_tcl;
     char           *tmpannum = 0, *tmpaznum = 0;
     int            coords_size[3], gnl_size, gzl_size;
-    int            nnodes, nzones, valid;
+    int            nnodes, nzones, valid, dtypef;
 
     memset(&tmpqm, 0, sizeof(DBquadmesh));
     tmpqm.base_index[0] = -99999;
@@ -5595,7 +5603,9 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
        return NULL;
     *qm = tmpqm;
 
-    if (qm->ndims < 0 || qm->ndims > NELMTS(qm->dims))
+    dtypef = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_coord0", objname));
+
+    if (qm->ndims < 0 || qm->ndims > NELMTS(qm->dims) || qm->datatype != dtypef)
     {
         DBFreeQuadmesh(qm);
         FREE(tmpannum);
@@ -5823,8 +5833,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 
    if ((qv->ndims>0) && (qv->nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBQVData)) {
       INIT_OBJ(&tmp_obj);
-      int *sizes;
-      int *mix_sizes;
+      int *sizes, *mix_sizes, dtypef;
 
       qv->vals = ALLOC_N(void*, qv->nvals);
       sizes = ALLOC_N(int, qv->nvals);
@@ -5834,18 +5843,6 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
          qv->mixvals = ALLOC_N(void*, qv->nvals);
       }
 
-      if (qv->datatype == 0) {
-         strcpy(tmp, objname);
-         strcat(tmp, "_data");
-         if ((qv->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmp)) < 0) {
-            /* Not found. Assume float. */
-            qv->datatype = DB_FLOAT;
-         }
-      }
-
-      if (PJ_InqForceSingle())
-         qv->datatype = DB_FLOAT;
-
       for (i = 0; i < qv->nvals; i++) {
          DEFALL_OBN(_valstr[i], &qv->vals[i], DB_FLOAT, &sizes[i]);
          if (qv->mixlen > 0) {
@@ -5853,10 +5850,36 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
          }
       }
 
-      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0) < 0) {
+          free(sizes);
+          free(mix_sizes);
+          DBFreeQuadvar(qv);
+          db_perror(objname, E_CALLFAIL, me);
+          return NULL;
+      }
 
       for (i = 0; i < qv->nvals; i++) {
-         if ((qv->vals && qv->vals[i] && sizes[i] != qv->nels) ||
+          int typeok = 1;
+
+          /* This is a pain. We need to validate the datatype of the raw data in the file
+             with 'datatype' data member. However, here, we don't know the name(s) of the
+             file objects to interrogate. So, we use the "cached_group" object to do this.
+             That object contains all the object's metadata from last call to PJ_GetObject. */
+
+          for (int j = 0; j < cached_group->ncomponents && typeok; j++) {
+              int dtypef;
+              if (!strcmp(_valstr[i], cached_group->comp_names[j])) {
+                  dtypef = db_pdb_GetVarDatatype(dbfile->pdb, cached_group->pdb_names[j]);
+                  if (dtypef != qv->datatype) typeok = 0;
+              }
+              if (qv->mixlen > 0 && !strcmp(_mixvalstr[i], cached_group->comp_names[j])) {
+                  dtypef = db_pdb_GetVarDatatype(dbfile->pdb, cached_group->pdb_names[j]);
+                  if (dtypef != qv->datatype) typeok = 0;
+              }
+          }
+
+         if (!typeok || 
+             (qv->vals && qv->vals[i] && sizes[i] != qv->nels) ||
              (qv->mixvals && qv->mixvals[i] && mix_sizes[i] != qv->mixlen)) {
                 free(sizes);
                 free(mix_sizes);
@@ -5865,6 +5888,9 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
                 return NULL;
          }
       }
+
+      if (qv->datatype == DB_DOUBLE && PJ_InqForceSingle())
+         qv->datatype = DB_FLOAT;
 
       free(sizes);
       free(mix_sizes);
