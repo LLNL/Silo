@@ -396,6 +396,10 @@ check_malformed ucd_objs ucdmesh coord0='"/arrs/dblsA"' || exit 1
 check_malformed ucd_objs ucdmesh coord1='"/arrs/dblsA"' || exit 1
 check_malformed ucd_objs ucdmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed ucd_objs ucdmesh gnodeno='"/arrs/intsA"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed ucd_objs ucdmesh datatype=$db_short_val || exit 1
+    check_malformed ucd_objs ucdmesh coord0='"/arrs/svals9"' || exit 1
+fi
 # Extents arrays are clamped in size in both drivers in different ways
 #check_malformed ucd_objs ucdmesh min_extents='"/arrs/dblsA"' || exit 1
 #check_malformed ucd_objs ucdmesh max_extents='"/arrs/dblsA"' || exit 1
@@ -407,6 +411,11 @@ check_malformed ucd_objs ucdvar nels=9999 || exit 1
 check_malformed ucd_objs ucdvar_mix mixlen=2 || exit 1
 check_malformed ucd_objs ucdvar_mix value0='"/arrs/fltsA"' || exit 1
 check_malformed ucd_objs ucdvar_mix mixed_value0='"/arrs/fltsA"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed ucd_objs ucdvar_mix datatype=$db_short_val || exit 1
+    check_malformed ucd_objs ucdvar_mix value0='"/arrs/svals4"' || exit 1
+    check_malformed ucd_objs ucdvar_mix mixed_value0='"/arrs/svals3"' || exit 1
+fi
 
 # Various corruptions of facelist objects
 check_malformed list_objs facelist nfaces=-1 || exit 1
@@ -456,6 +465,10 @@ check_malformed csg_objs csgmesh typeflags='"/arrs/intsA"' || exit 1
 check_malformed csg_objs csgmesh bndnames='"/arrs/strsA"' || exit 1
 #check_malformed csg_objs csgmesh min_extents='"/arrs/dblsB"' || exit 1
 #check_malformed csg_objs csgmesh max_extents='"/arrs/dblsB"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed csg_objs csgmesh datatype=$db_short_val || exit 1
+    check_malformed csg_objs csgmesh coeffs='"/arrs/svals4"' || exit 1
+fi
 
 # Various corruptions of csg zonelist objects
 check_malformed csg_objs csgzl nregs=-1 || exit 1
@@ -474,7 +487,9 @@ check_malformed csg_objs csgvar nvals=99 || exit 1
 check_malformed csg_objs csgvar nels=2 || exit 1
 # Component naming difference between drivers
 if [ "$ext" = "pdb" ]; then
+    check_malformed csg_objs csgvar datatype=$db_short_val || exit 1
     check_malformed csg_objs csgvar value0='"/arrs/fltsA"' || exit 1
+    check_malformed csg_objs csgvar value0='"/arrs/svals1"' || exit 1
 else
     check_malformed csg_objs csgvar vals0='"/arrs/fltsA"' || exit 1
 fi
