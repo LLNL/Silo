@@ -442,6 +442,7 @@ static int use_PJgroup_cache = 1;
 static PJgroup *cached_group = NULL;
 static char    *cached_obj_name = NULL;
 static char    *cached_file_name = NULL;
+static int      cached_group_datatype = DB_NOTYPE;
 
 PRIVATE int db_pdb_ParseVDBSpec (char const *mvdbspec, char **varname,
                                  char **filename);
@@ -576,6 +577,12 @@ PJ_NoCache ( void )
  *      argument and cause it to fail if type that is read doesn't
  *      match the expected_dbtype.
  *--------------------------------------------------------------------*/
+#define DB_DATATYPE_FLAG 0x00000100
+#define DB_DATATYPE_MISMATCH -1
+#define _datatypeFlagSet(A) ((A)|DB_DATATYPE_FLAG)
+#define _datatypeFlagClr(A) ((A)&(~DB_DATATYPE_FLAG))
+#define _datatypeFlagInq(A) (((A)&DB_DATATYPE_FLAG)!=0)
+#define _datatypeTypeInq(A) (_datatypeFlagClr(A))
 INTERNAL int
 PJ_GetObject(PDBfile *file_in, char const *objname_in, PJcomplist *tobj, int expected_dbtype)
 {
@@ -643,6 +650,18 @@ PJ_GetObject(PDBfile *file_in, char const *objname_in, PJcomplist *tobj, int exp
             return db_perror(err_str, E_CALLFAIL, me);
         }
 
+        /* Scan group for possible "databype" member. This member indicates the datatype of
+           any void* array members (VarComponent members). */
+        cached_group_datatype = DB_NOTYPE;
+        for (j = 0; j < cached_group->ncomponents; j++)
+        {
+            if (STR_EQUAL(cached_group->comp_names[j], "datatype"))
+            {
+                cached_group_datatype = atoi(&cached_group->pdb_names[j][4]);
+                break;
+            }
+        }
+
         /* Check object type before we do any allocations */
         if (expected_dbtype > 0)
         {
@@ -702,8 +721,7 @@ PJ_GetObject(PDBfile *file_in, char const *objname_in, PJcomplist *tobj, int exp
         }
     }
 
-    /* Walk through the object, putting the data into the appropriate memory
-     * locations.  */
+    /* Walk through the object, putting the data into the appropriate memory locations.  */
     error = 0;
     for (i = 0; i < tobj->num && error == 0; i++)
     {
@@ -712,22 +730,40 @@ PJ_GetObject(PDBfile *file_in, char const *objname_in, PJcomplist *tobj, int exp
             if (tobj->ptr[i] != NULL &&
                 STR_EQUAL(cached_group->comp_names[j], tobj->name[i]))
             {
+                int _status;
+                int req_type = tobj->type[i];
+
+                /* Enforce datatype of the group if one is present */
+                if (!_pj_force_single && _datatypeFlagInq(req_type) && cached_group_datatype != DB_NOTYPE)
+                    req_type = cached_group_datatype;
+                else
+                    req_type = _datatypeTypeInq(req_type);
 
                 /*
                  *  For alloced arrays, pass the address of the
                  *  pointer (i.e., ptr[i]). If not alloced, address
                  *  is already in the ptr[i] element.
                  */
-                if (!PJ_ReadVariable(file, cached_group->pdb_names[j],
-                                    tobj->type[i], (int)tobj->alloced[i],
+                _status = PJ_ReadVariable(file, cached_group->pdb_names[j],
+                                    req_type, (int)tobj->alloced[i],
                                     tobj->nelmts[i],
                                     tobj->nelmts_out[i],
                                     (tobj->alloced[i]) ?
                                     (char **)&tobj->ptr[i] :
-                                    (char **)tobj->ptr[i]))
+                                    (char **)tobj->ptr[i]);
+                if (_status == FALSE)
                 {
                     error = 1;
                     db_perror(cached_group->pdb_names[j], E_CALLFAIL, me); 
+                    break;
+                }
+                else if (_status == DB_DATATYPE_MISMATCH)
+                {
+                    char msg[1024];
+                    error = 1;
+                    snprintf(msg, sizeof(msg), "expected DBdatatype of %d for object:\"%s\", component:\"%s\", value:\"%s\"",
+                        req_type, cached_obj_name, cached_group->comp_names[j], cached_group->pdb_names[j]);
+                    db_perror(msg, E_MALFORMED, me); 
                     break;
                 }
             }
@@ -1005,11 +1041,9 @@ PJ_ReadVariable(PDBfile *file,
    act_datatype = pj_GetVarDatatypeID(file, name);
 
    /* Set sentinel if will be forcing doubles to floats */
-   if (req_datatype != DB_NOTYPE && req_datatype != act_datatype &&
-       _pj_force_single)
+   forcing = 0;
+   if (req_datatype != DB_NOTYPE && req_datatype != act_datatype && _pj_force_single)
       forcing = 1;
-   else
-      forcing = 0;
 
    /*--------------------------------------------------
     *  If name is enclosed in single quotes, take it as
@@ -1121,6 +1155,9 @@ PJ_ReadVariable(PDBfile *file,
           FREE(name);
           return FALSE;
       }
+
+      if (req_datatype != DB_NOTYPE && req_datatype != act_datatype && !_pj_force_single)
+          return DB_DATATYPE_MISMATCH;
 
       /* If not already allocated, and is not a pointered var, allocate */
       if (!alloced && num > 0) {
@@ -3329,7 +3366,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     PJcomplist *_tcl;
     int matnos_size, matlist_size;
     int mixm_size, mixn_size, mixz_size, mixvf_size;
-    int nzones, dtypef;
+    int nzones, dtypem;
 
     /* Comp. Name        Comp. Address     Data Type     */
     memset(&tmpmm, 0, sizeof(DBmaterial));
@@ -3360,7 +3397,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
         DEFALL_OBN("mix_mat",     &tmpmm.mix_mat,     DB_INT, &mixm_size);
         DEFALL_OBN("mix_next",    &tmpmm.mix_next,    DB_INT, &mixn_size);
         DEFALL_OBN("mix_zone",    &tmpmm.mix_zone,    DB_INT, &mixz_size);
-        DEFALL_OBN("mix_vf",      &tmpmm.mix_vf,      DB_FLOAT, &mixvf_size);
+        DEFALL_OBN("mix_vf",      &tmpmm.mix_vf,      _datatypeFlagSet(DB_FLOAT), &mixvf_size);
     }
 
     if (PJ_GetObject(dbfile->pdb, name, &tmp_obj, DB_MATERIAL) < 0)
@@ -3386,7 +3423,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     nzones = 1;
     for (int i = 0; i < mm->ndims; i++) nzones *= mm->dims[i];
 
-    dtypef = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_mix_vf", name));
+    dtypem = PJ_InqForceSingle()?DB_FLOAT:mm->datatype;
 
     /* validate sizing */
     if ((nzones < 0) ||
@@ -3396,7 +3433,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
         (mm->mixlen < 0) ||
         (mm->mixlen > 0 && (DBGetDataReadMask2File(_dbfile) & DBMatMixList) && 
         (mm->mixlen != mixm_size || mm->mixlen != mixn_size || mm->mixlen != mixvf_size ||
-        (mm->mix_zone && mm->mixlen != mixz_size) || (mm->datatype != dtypef))))
+        (mm->mix_zone && mm->mixlen != mixz_size))))
     {
         DBFreeMaterial(mm);
         FREE(tmpnames);
@@ -3440,14 +3477,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
 
     mm->id = 0;
     mm->name = STRDUP(name);
-    if (0 >= mm->mixlen)
-    {
-        mm->datatype = DB_NOTYPE;
-    }
-    if (DB_DOUBLE == mm->datatype && PJ_InqForceSingle())
-    {
-        mm->datatype = DB_FLOAT;
-    }
+    mm->datatype = dtypem;
 
     return (mm);
 }
@@ -3502,7 +3532,7 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    char           tmpstr[256];
    PJcomplist     tmp_obj;
    DBmatspecies   tmpmm;
-   int            i, nstrs = 0, nzones = 1, dtypef;
+   int            i, nstrs = 0, nzones = 1, dtypem;
    int            nmatspec_size = 0, speclist_size = 0;
    int            mix_speclist_size = 0, species_mf_size = 0;
    PJcomplist    *_tcl;
@@ -3576,11 +3606,11 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    /* Now read in species_mf per its datatype. */
    INIT_OBJ(&tmp_obj);
 
-   dtypef = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_species_mf", objname));
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:mm->datatype;
 
-   DEFALL_OBN("species_mf", &mm->species_mf, mm->datatype, &species_mf_size);
+   DEFALL_OBN("species_mf", &mm->species_mf, _datatypeFlagSet(dtypem), &species_mf_size);
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0) < 0 ||
-       (mm->species_mf && (species_mf_size != mm->nspecies_mf || mm->datatype != dtypef)))
+       (mm->species_mf && (species_mf_size != mm->nspecies_mf)))
    {
       DBFreeMatspecies(mm);
       FREE(tmpnames);
@@ -3589,13 +3619,11 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
       return NULL;
    }
 
-   if (mm->datatype == DB_DOUBLE && PJ_InqForceSingle())
-      mm->datatype = DB_FLOAT;
-
    _DBQQCalcStride(mm->stride, mm->dims, mm->ndims, mm->major_order);
 
    mm->id = 0;
    mm->name = STRDUP(objname);
+   mm->datatype = dtypem;
 
    for (i=0; i < mm->nmat; i++)
    {
@@ -3677,6 +3705,7 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
    PJcomplist     tmp_obj;
    DBcompoundarray tmpca;
    PJcomplist    *_tcl;
+   int            dtypem;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -3760,13 +3789,12 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
     * Read the rest of the object--the vector of values, per datatype.
     */
    INIT_OBJ(&tmp_obj);
-   if (DB_DOUBLE == ca->datatype && PJ_InqForceSingle()) {
-      ca->datatype = DB_FLOAT;
-   }
 
-   DEFALL_OBN("values", &ca->values, ca->datatype, &values_size);
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:ca->datatype;
+
+   DEFALL_OBN("values", &ca->values, _datatypeFlagSet(dtypem), &values_size);
    if (PJ_GetObject(dbfile->pdb, array_name, &tmp_obj, 0) < 0 ||
-       (ca->values && values_size != ca->nvalues))
+       (ca->values && (values_size != ca->nvalues)))
    {
       DBFreeCompoundarray(ca);
       db_perror(array_name, E_MALFORMED, me);
@@ -3775,6 +3803,7 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
 
    ca->id = 0;
    ca->name = STRDUP(array_name);
+   ca->datatype = dtypem;
 
    return ca;
 }
@@ -3817,7 +3846,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
    PJcomplist   tmp_obj ;
    DBcurve tmpcu;
    PJcomplist  *_tcl;
-   int          xsize = 0, ysize = 0, dtypef[2];
+   int          xsize = 0, ysize = 0, dtypem;
 
    memset(&tmpcu, 0, sizeof(DBcurve));
    INIT_OBJ (&tmp_obj) ;
@@ -3846,22 +3875,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
       return NULL;
    }
 
-   if (cu->xvarname) {
-       dtypef[0] = db_pdb_GetVarDatatype(dbfile->pdb, cu->xvarname);
-       dtypef[1] = db_pdb_GetVarDatatype(dbfile->pdb, cu->yvarname);
-   } else {
-       dtypef[0] = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_xvals", name));
-       dtypef[1] = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_yvals", name));
-   }
-
-   if (cu->datatype != dtypef[0] || cu->datatype != dtypef[1]) {
-      DBFreeCurve(cu);
-      db_perror(name, E_MALFORMED, me);
-      return NULL;
-   }
-
-   if (DB_DOUBLE == cu->datatype && PJ_InqForceSingle())
-      cu->datatype = DB_FLOAT ;
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:cu->datatype;
 
    /*
     * Read the x and y arrays.
@@ -3876,11 +3890,11 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
          cu->y = NULL;
       } else {
          INIT_OBJ (&tmp_obj) ;
-         DEFALL_OBN ("xvals", &cu->x, cu->datatype, &xsize) ;
-         DEFALL_OBN ("yvals", &cu->y, cu->datatype, &ysize) ;
+         DEFALL_OBN ("xvals", &cu->x, _datatypeFlagSet(dtypem), &xsize) ;
+         DEFALL_OBN ("yvals", &cu->y, _datatypeFlagSet(dtypem), &ysize) ;
          if (PJ_GetObject (dbfile->pdb, name, &tmp_obj, 0) < 0 ||
-             (cu->x && xsize != cu->npts) ||
-             (cu->y && ysize != cu->npts))
+             (cu->x && (xsize != cu->npts)) || 
+             (cu->y && (ysize != cu->npts)))
          {
             DBFreeCurve(cu);
             db_perror(name, E_MALFORMED, me);
@@ -3888,6 +3902,8 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
          }
       }
    }
+
+   cu->datatype = dtypem;
 
    if      (cu->missing_value == DB_MISSING_VALUE_NOT_SET)
        cu->missing_value = 0.0;
@@ -5187,7 +5203,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    DBpointmesh tmppm;
    PJcomplist    *_tcl;
    char          *tmpannums = 0;
-   int           coords_size[3], gnl_size, gnodeno_size;
+   int           coords_size[3], gnl_size, gnodeno_size, dtypem;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -5214,9 +5230,9 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
 
    if (DBGetDataReadMask2File(_dbfile) & DBPMCoords)
    {
-       DEFALL_OBN("coord0", &tmppm.coords[0], DB_FLOAT, &coords_size[0]);
-       DEFALL_OBN("coord1", &tmppm.coords[1], DB_FLOAT, &coords_size[1]);
-       DEFALL_OBN("coord2", &tmppm.coords[2], DB_FLOAT, &coords_size[2]);
+       DEFALL_OBN("coord0", &tmppm.coords[0], _datatypeFlagSet(DB_FLOAT), &coords_size[0]);
+       DEFALL_OBN("coord1", &tmppm.coords[1], _datatypeFlagSet(DB_FLOAT), &coords_size[1]);
+       DEFALL_OBN("coord2", &tmppm.coords[2], _datatypeFlagSet(DB_FLOAT), &coords_size[2]);
    }
 
    DEFALL_OBJ("label0", &tmppm.labels[0], DB_CHAR);
@@ -5243,6 +5259,8 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
       db_perror(objname, E_MALFORMED, me);
       return NULL;
    }
+
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:pm->datatype;
 
    if ((pm->coords[0] && coords_size[0] != pm->nels) ||
        (pm->coords[1] && coords_size[1] != pm->nels) ||
@@ -5282,9 +5300,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
 
    pm->id = 0;
    pm->name = STRDUP(objname);
-   if (DB_DOUBLE==pm->datatype && PJ_InqForceSingle()) {
-      pm->datatype = DB_FLOAT;
-   }
+   pm->datatype = dtypem;
 
    return (pm);
 }
@@ -5362,6 +5378,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
    char          *rpnames = NULL;
    DBmeshvar tmpmv;
    PJcomplist    *_tcl;
+   int            dtypem;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -5413,41 +5430,29 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
       mv->vals = ALLOC_N(void*, mv->nvals);
       sizes = ALLOC_N(int, mv->nvals);
 
-      if (mv->datatype == 0) {
-          if(mv->nvals == 1)
-          {
-              sprintf(tmp, "%s_data", objname);
-          }
-          else
-          {
-              sprintf(tmp, "%s_0_data", objname);
-          }
-          if ((mv->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmp)) < 0) {
-              /* Not found. Assume float. */
-              mv->datatype = DB_FLOAT;
-          }
-      }
-
-      if (PJ_InqForceSingle())
-          mv->datatype = DB_FLOAT;
+      dtypem = PJ_InqForceSingle()?DB_FLOAT:mv->datatype;
 
       if(mv->nvals == 1)
       {
-          DEFALL_OBN("_data", &mv->vals[0], DB_FLOAT, &sizes[0]);
+          DEFALL_OBN("_data", &mv->vals[0], _datatypeFlagSet(dtypem), &sizes[0]);
       }
       else
       {
           for (i = 0; i < mv->nvals; i++)
           {
-              DEFALL_OBN(_ptvalstr[i], &mv->vals[i], DB_FLOAT, &sizes[i]);
+              DEFALL_OBN(_ptvalstr[i], &mv->vals[i], _datatypeFlagSet(dtypem), &sizes[i]);
           }
       }
 
-      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0) < 0) {
+         free(sizes);
+         DBFreeMeshvar(mv);
+         return NULL;
+      }
 
       if(mv->nvals == 1)
       {
-          if (mv->vals[0] && sizes[0] != mv->nels) {
+          if (mv->vals && mv->vals[0] && sizes[0] != mv->nels) {
              free(sizes);
              DBFreeMeshvar(mv);
              db_perror(objname, E_MALFORMED, me);
@@ -5458,7 +5463,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
       {
           for (i = 0; i < mv->nvals; i++)
           {
-              if (mv->vals[i] && sizes[i] != mv->nels) {
+              if (mv->vals && mv->vals[i] && sizes[i] != mv->nels) {
                  free(sizes);
                  DBFreeMeshvar(mv);
                  db_perror(objname, E_MALFORMED, me);
@@ -5483,6 +5488,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
 
    mv->id = 0;
    mv->name = STRDUP(objname);
+   mv->datatype = dtypem;
 
    return (mv);
 }
@@ -5540,7 +5546,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     PJcomplist    *_tcl;
     char           *tmpannum = 0, *tmpaznum = 0;
     int            coords_size[3], gnl_size, gzl_size;
-    int            nnodes, nzones, valid, dtypef;
+    int            nnodes, nzones, valid, dtypem;
 
     memset(&tmpqm, 0, sizeof(DBquadmesh));
     tmpqm.base_index[0] = -99999;
@@ -5568,9 +5574,9 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
 
     if (DBGetDataReadMask2File(_dbfile) & DBQMCoords)
     {
-        DEFALL_OBN("coord0", &tmpqm.coords[0], DB_FLOAT, &coords_size[0]);
-        DEFALL_OBN("coord1", &tmpqm.coords[1], DB_FLOAT, &coords_size[1]);
-        DEFALL_OBN("coord2", &tmpqm.coords[2], DB_FLOAT, &coords_size[2]);
+        DEFALL_OBN("coord0", &tmpqm.coords[0], _datatypeFlagSet(DB_FLOAT), &coords_size[0]);
+        DEFALL_OBN("coord1", &tmpqm.coords[1], _datatypeFlagSet(DB_FLOAT), &coords_size[1]);
+        DEFALL_OBN("coord2", &tmpqm.coords[2], _datatypeFlagSet(DB_FLOAT), &coords_size[2]);
     }
     DEFALL_OBJ("label0", &tmpqm.labels[0], DB_CHAR);
     DEFALL_OBJ("label1", &tmpqm.labels[1], DB_CHAR);
@@ -5582,8 +5588,8 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     DEFINE_OBN("dims", tmpqm.dims, DB_INT, NELMTS(tmpqm.dims));
     DEFINE_OBN("min_index", tmpqm.min_index, DB_INT, NELMTS(tmpqm.min_index));
     DEFINE_OBN("max_index", tmpqm.max_index, DB_INT, NELMTS(tmpqm.max_index));
-    DEFINE_OBN("min_extents", tmpqm.min_extents, DB_FLOAT, NELMTS(tmpqm.min_extents));
-    DEFINE_OBN("max_extents", tmpqm.max_extents, DB_FLOAT, NELMTS(tmpqm.max_extents));
+    DEFINE_OBN("min_extents", tmpqm.min_extents, _datatypeFlagSet(DB_FLOAT), NELMTS(tmpqm.min_extents));
+    DEFINE_OBN("max_extents", tmpqm.max_extents, _datatypeFlagSet(DB_FLOAT), NELMTS(tmpqm.max_extents));
     DEFINE_OBN("baseindex", tmpqm.base_index, DB_INT, NELMTS(tmpqm.base_index));
     DEFINE_OBJ("guihide", &tmpqm.guihide, DB_INT);
     DEFALL_OBJ("mrgtree_name", &tmpqm.mrgtree_name, DB_CHAR);
@@ -5603,9 +5609,9 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
        return NULL;
     *qm = tmpqm;
 
-    dtypef = db_pdb_GetVarDatatype(dbfile->pdb, DBSPrintf("%s_coord0", objname));
+    dtypem = PJ_InqForceSingle()?DB_FLOAT:qm->datatype;
 
-    if (qm->ndims < 0 || qm->ndims > NELMTS(qm->dims) || qm->datatype != dtypef)
+    if (qm->ndims < 0 || qm->ndims > NELMTS(qm->dims))
     {
         DBFreeQuadmesh(qm);
         FREE(tmpannum);
@@ -5687,9 +5693,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
 
     qm->id = 0;
     qm->name = STRDUP(objname);
-
-    if (PJ_InqForceSingle())
-        qm->datatype = DB_FLOAT;
+    qm->datatype = dtypem;
 
     _DBQMSetStride(qm);
 
@@ -5755,7 +5759,7 @@ SILO_CALLBACK DBquadvar *
 db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 {
    DBquadvar     *qv = NULL;
-   int            i;
+   int            i, dtypem;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    char           tmp[256];
@@ -5826,6 +5830,8 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
        return NULL;
    }
 
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:qv->datatype;
+
    /*
     *  Read the remainder of the object: loop over all values
     *  associated with this variable.
@@ -5833,7 +5839,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 
    if ((qv->ndims>0) && (qv->nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBQVData)) {
       INIT_OBJ(&tmp_obj);
-      int *sizes, *mix_sizes, dtypef;
+      int *sizes, *mix_sizes;
 
       qv->vals = ALLOC_N(void*, qv->nvals);
       sizes = ALLOC_N(int, qv->nvals);
@@ -5844,9 +5850,9 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
       }
 
       for (i = 0; i < qv->nvals; i++) {
-         DEFALL_OBN(_valstr[i], &qv->vals[i], DB_FLOAT, &sizes[i]);
+         DEFALL_OBN(_valstr[i], &qv->vals[i], _datatypeFlagSet(dtypem), &sizes[i]);
          if (qv->mixlen > 0) {
-            DEFALL_OBN(_mixvalstr[i], &qv->mixvals[i], DB_FLOAT, &mix_sizes[i]);
+            DEFALL_OBN(_mixvalstr[i], &qv->mixvals[i], _datatypeFlagSet(dtypem), &mix_sizes[i]);
          }
       }
 
@@ -5859,27 +5865,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
       }
 
       for (i = 0; i < qv->nvals; i++) {
-          int typeok = 1;
-
-          /* This is a pain. We need to validate the datatype of the raw data in the file
-             with 'datatype' data member. However, here, we don't know the name(s) of the
-             file objects to interrogate. So, we use the "cached_group" object to do this.
-             That object contains all the object's metadata from last call to PJ_GetObject. */
-
-          for (int j = 0; j < cached_group->ncomponents && typeok; j++) {
-              int dtypef;
-              if (!strcmp(_valstr[i], cached_group->comp_names[j])) {
-                  dtypef = db_pdb_GetVarDatatype(dbfile->pdb, cached_group->pdb_names[j]);
-                  if (dtypef != qv->datatype) typeok = 0;
-              }
-              if (qv->mixlen > 0 && !strcmp(_mixvalstr[i], cached_group->comp_names[j])) {
-                  dtypef = db_pdb_GetVarDatatype(dbfile->pdb, cached_group->pdb_names[j]);
-                  if (dtypef != qv->datatype) typeok = 0;
-              }
-          }
-
-         if (!typeok || 
-             (qv->vals && qv->vals[i] && sizes[i] != qv->nels) ||
+         if ((qv->vals && qv->vals[i] && sizes[i] != qv->nels) ||
              (qv->mixvals && qv->mixvals[i] && mix_sizes[i] != qv->mixlen)) {
                 free(sizes);
                 free(mix_sizes);
@@ -5888,9 +5874,6 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
                 return NULL;
          }
       }
-
-      if (qv->datatype == DB_DOUBLE && PJ_InqForceSingle())
-         qv->datatype = DB_FLOAT;
 
       free(sizes);
       free(mix_sizes);
@@ -5909,6 +5892,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 
    qv->id = 0;
    qv->name = STRDUP(objname);
+   qv->datatype = dtypem;
 
    _DBQQCalcStride(qv->stride, qv->dims, qv->ndims, qv->major_order);
 
@@ -5990,7 +5974,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    DBucdmesh tmpum;
    PJcomplist    *_tcl;
    char          *tmpannum = 0;
-   int           c0size, c1size, c2size, gnl_size;
+   int           c0size, c1size, c2size, gnl_size, dtypem;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -6015,9 +5999,9 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
 
    if (DBGetDataReadMask2File(_dbfile) & DBUMCoords)
    {
-       DEFALL_OBN("coord0", &tmpum.coords[0], DB_FLOAT, &c0size);
-       DEFALL_OBN("coord1", &tmpum.coords[1], DB_FLOAT, &c1size);
-       DEFALL_OBN("coord2", &tmpum.coords[2], DB_FLOAT, &c2size);
+       DEFALL_OBN("coord0", &tmpum.coords[0], _datatypeFlagSet(DB_FLOAT), &c0size);
+       DEFALL_OBN("coord1", &tmpum.coords[1], _datatypeFlagSet(DB_FLOAT), &c1size);
+       DEFALL_OBN("coord2", &tmpum.coords[2], _datatypeFlagSet(DB_FLOAT), &c2size);
    }
    DEFALL_OBJ("label0", &tmpum.labels[0], DB_CHAR);
    DEFALL_OBJ("label1", &tmpum.labels[1], DB_CHAR);
@@ -6050,6 +6034,8 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
       return NULL;
    *um = tmpum;
 
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:um->datatype;
+
    if ((um->ndims < 0 || um->ndims > NELMTS(um->coords) || um->nnodes < 0) ||
        (um->coords[0] && c0size != um->nnodes) ||
        (um->coords[1] && c1size != um->nnodes) ||
@@ -6072,11 +6058,9 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
        FREE(tmpannum);
    }
 
-   if (PJ_InqForceSingle() == TRUE)
-      um->datatype = DB_FLOAT;
-
    um->id = 0;
    um->name = STRDUP(meshname);
+   um->datatype = dtypem;
 
    /* The value we store to the file for 'topo_dim' member is
       designed such that zero indicates a value that was NOT
@@ -6254,7 +6238,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
    char          *rpnames = NULL;
    DBucdvar tmpuv;
    PJcomplist    *_tcl;
-   int            size1[NELMTS(_valstr)], size2[NELMTS(_valstr)];
+   int            size1[NELMTS(_valstr)], size2[NELMTS(_valstr)], dtypem;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -6311,28 +6295,21 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
          uv->mixvals = ALLOC_N(void*, uv->nvals);
       }
 
-      if (uv->datatype == 0) {
-          strcpy(tmp, objname);
-          strcat(tmp, "_data");
-          if ((uv->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmp)) < 0) {
-              /* Not found. Assume float. */
-              uv->datatype = DB_FLOAT;
-          }
-      }
-
-      if (PJ_InqForceSingle())
-          uv->datatype = DB_FLOAT;
+      dtypem = PJ_InqForceSingle()?DB_FLOAT:uv->datatype;
 
       for (i = 0; i < uv->nvals; i++) {
 
-         DEFALL_OBN(_valstr[i], &uv->vals[i], DB_FLOAT, &size1[i]);
+         DEFALL_OBN(_valstr[i], &uv->vals[i], _datatypeFlagSet(dtypem), &size1[i]);
 
          if (uv->mixlen > 0) {
-            DEFALL_OBN(_mixvalstr[i], &uv->mixvals[i], DB_FLOAT, &size2[i]);
+            DEFALL_OBN(_mixvalstr[i], &uv->mixvals[i], _datatypeFlagSet(dtypem), &size2[i]);
          }
       }
 
-      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0) < 0) {
+         DBFreeUcdvar(uv);
+         return NULL;
+      }
 
       for (i = 0; i < uv->nvals; i++) {
           if ((uv->vals && uv->vals[i] && size1[i] != uv->nels) ||
@@ -6358,6 +6335,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
 
    uv->id = 0;
    uv->name = STRDUP(objname);
+   uv->datatype = dtypem;
 
    return (uv);
 }
@@ -6391,7 +6369,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
    static char *me = "db_pdb_GetCsgmesh";
    DBcsgmesh tmpcsgm;
    PJcomplist    *_tcl;
-   int            tf_size, bndids_size;
+   int            tf_size, bndids_size, dtypem;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -6462,13 +6440,11 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
         int coeffs_size;
         int lcoeffs = tmpcsgm.lcoeffs;
         INIT_OBJ(&tmp_obj);
-        if (DB_DOUBLE == tmpcsgm.datatype && PJ_InqForceSingle()) {
-           tmpcsgm.datatype = DB_FLOAT;
-        }
+        dtypem = PJ_InqForceSingle()?DB_FLOAT:tmpcsgm.datatype;
 
-        DEFALL_OBN("coeffs", &tmpcsgm.coeffs, tmpcsgm.datatype, &coeffs_size);
-        PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, 0);
-        if (tmpcsgm.coeffs && coeffs_size != lcoeffs) {
+        DEFALL_OBN("coeffs", &tmpcsgm.coeffs, _datatypeFlagSet(dtypem), &coeffs_size);
+        if ((PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, 0) < 0) ||
+            (tmpcsgm.coeffs && coeffs_size != lcoeffs)) {
            FREE(zlname);
            FREE(tmpbndnames);
            FREE(tmpcsgm.typeflags);
@@ -6497,6 +6473,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
     }
 
    tmpcsgm.name = STRDUP(meshname);
+   tmpcsgm.datatype = dtypem;
 
    if ((tmpcsgm.nbounds > 0 && zlname && *zlname &&
         (DBGetDataReadMask2File(_dbfile) & DBCSGMZonelist)))
@@ -6543,6 +6520,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
    char          *rpnames = NULL;
    DBcsgvar       tmpcsgv;
    PJcomplist    *_tcl;
+   int            dtypem;
 
    memset(&tmpcsgv, 0, sizeof(DBcsgvar));
    INIT_OBJ(&tmp_obj);
@@ -6586,23 +6564,17 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
       csgv->vals = ALLOC_N(void *, csgv->nvals);
       sizes = ALLOC_N(int, csgv->nvals);
 
-      if (csgv->datatype == 0) {
-          strcpy(tmp, objname);
-          strcat(tmp, "_data");
-          if ((csgv->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmp)) < 0) {
-              /* Not found. Assume float. */
-              csgv->datatype = DB_FLOAT;
-          }
-      }
-
-      if ((csgv->datatype == DB_DOUBLE) && PJ_InqForceSingle())
-          csgv->datatype = DB_FLOAT;
+      dtypem = PJ_InqForceSingle()?DB_FLOAT:csgv->datatype;
 
       for (i = 0; i < csgv->nvals; i++) {
-         DEFALL_OBN(_valstr[i], &csgv->vals[i], csgv->datatype, &sizes[i]);
+         DEFALL_OBN(_valstr[i], &csgv->vals[i], _datatypeFlagSet(dtypem), &sizes[i]);
       }
 
-      PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0);
+      if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0) < 0) {
+         free(sizes);
+         DBFreeCsgvar(csgv);
+         return NULL;
+      }
 
       for (i = 0; i < csgv->nvals; i++) {
          if (csgv->vals[i] && sizes[i] != csgv->nels) {
@@ -6627,6 +6599,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
        csgv->missing_value = DB_MISSING_VALUE_NOT_SET;
 
    csgv->name = STRDUP(objname);
+   csgv->datatype = dtypem;
 
    return (csgv);
 }
@@ -7044,7 +7017,7 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
     static char        *me = "db_pdb_GetCSGZonelist";
     DBcsgzonelist       tmpzl;
     PJcomplist         *_tcl;
-    int                 tf_size, lids_size, rids_size, zl_size;
+    int                 tf_size, lids_size, rids_size, zl_size, dtypem;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
@@ -7102,19 +7075,18 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
        return NULL;
     }
 
+    dtypem = PJ_InqForceSingle()?DB_FLOAT:zl->datatype;
+
     /* now that we know the object's data type, we can correctly
        read the xforms */
     if ((DBGetDataReadMask2File(_dbfile) & DBZonelistInfo) && (zl->lxform > 0))
     {
         int xform_size;
         INIT_OBJ(&tmp_obj);
-        if (DB_DOUBLE == zl->datatype && PJ_InqForceSingle()) {
-           zl->datatype = DB_FLOAT;
-        }
-
-        DEFALL_OBN("xform", &zl->xform, zl->datatype, &xform_size);
-        PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0);
-        if (zl->xform && xform_size != zl->lxform)
+   
+        DEFALL_OBN("xform", &zl->xform, _datatypeFlagSet(dtypem), &xform_size);
+        if ((PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0) < 0) ||
+            (zl->xform && xform_size != zl->lxform))
         {
             FREE(tmprnames);
             FREE(tmpznames);
@@ -7163,6 +7135,8 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
         zl->alt_zonenum_vars = DBStringListToStringArray(tmpaznums, 0, !skipFirstSemicolon);
         FREE(tmpaznums);
     }
+
+    zl->datatype = dtypem;
 
     return zl;
 }
@@ -8451,7 +8425,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
    char          *cnames = NULL;
    DBmrgvar       tmpmrgv;
    PJcomplist    *_tcl;
-   int           *sizes = 0;         
+   int           *sizes = 0, dtypem;         
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -8486,24 +8460,19 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
    mrgv->data = ALLOC_N(void *, mrgv->ncomps);
    sizes = ALLOC_N(int, mrgv->ncomps);
 
-   if (mrgv->datatype == 0) {
-      strcpy(tmp, objname);
-      strcat(tmp, "_data");
-      if ((mrgv->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmp)) < 0) {
-         /* Not found. Assume float. */
-         mrgv->datatype = DB_FLOAT;
-      }
-   }
-
-   if (PJ_InqForceSingle())
-      mrgv->datatype = DB_FLOAT;
+   dtypem = PJ_InqForceSingle()?DB_FLOAT:mrgv->datatype;
 
    for (i = 0; i < mrgv->ncomps; i++) {
-      DEFALL_OBN(_valstr[i], &mrgv->data[i], DB_FLOAT, &sizes[i]);
+      DEFALL_OBN(_valstr[i], &mrgv->data[i], _datatypeFlagSet(dtypem), &sizes[i]);
    }
 
-   if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, 0) < 0)
-       return NULL;
+   if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, 0) < 0) {
+      FREE(sizes);
+      FREE(cnames);
+      FREE(rpnames);
+      free(mrgv); /* DBFreeMrgvar(mrgv) not safe */
+      return NULL;
+   }
 
    for (i = 0; i < mrgv->ncomps; i++) {
       if (mrgv->data[i] && sizes[i] != mrgv->nregns) {
@@ -8538,6 +8507,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
    }
 
    mrgv->name = STRDUP(objname);
+   mrgv->datatype = dtypem;
 
    return (mrgv);
 }
