@@ -548,22 +548,24 @@ However, a file's settings can be adjusted independently from the library's glob
 
   This setting is global to the whole library and effects subsequent read operations.
 
-  If `force` is non-zero, then any datatype'd arrays are converted on read from whatever their native datatype is to float.
-  A datatype'd array is an array that is part of some Silo object struct containing a `datatype` member which indicates the type of data in the array.
-  For example, a `DBucdvar` struct has a `datatype` member to indicate the type of data in its var and mixvar arrays.
-  Such arrays will be converted on read if `force` here is non-zero.
-  However, a `DBmaterial` object struct is *always* integer data.
-  There is no datatype member for such an object and so its data will *never* be converted to float on read regardless of the `force` single status set here.
+  If `force` is non-zero, then any `datatype`'d arrays are converted on read from whatever their native datatype is to float.
+  A `datatype`'d array is an array that is part of some Silo object struct containing a `datatype` member which indicates the type of data in the array.
+  For example, a `DBucdvar` struct has a `datatype` member to indicate the type of data in its `var` and `mixvar` arrays.
+  Such arrays will be converted to `float` on read if `force` here is non-zero.
+  However, a *clean* `DBmaterial` object with no mixed volume fraction arrays is *always* integer data.
+  The `datatype` member for a `DBmaterial` object applies only to the mixed volume fraction data, `mix_vf`.
+  So, for a *clean* `DBmaterial` object, its data will *never* be converted to float on read regardless of the `force` single status set here.
+  For a truly mixed `DBmaterial` object, the `mix_vf` array will be returned as `float` if `force` here is 1, regardless of its datatype stored in the file.
 
   This function's original intention may have been to convert *only* double precision arrays to single precision on read.
   However, the PDB driver was apparently never designed that way and the PDB driver's behavior sort of established the defacto meaning of `DBForceSingle`.
   Consequently, as of Silo version 4.8 the HDF5 driver obeys these same semantics as well.
-  Though, in fact the HDF5 driver was written to support the original intention of `DBForceSingle` and it worked in this (buggy) fashion for many years before real problems with it were encountered.
+  Though, in fact the HDF5 driver was written to support the original intention of `DBForceSingle` and it worked in this (inconsistent with PDB driver) fashion for many years before real problems with it were encountered.
 
   This method is typically used by downstream, post-processing tools to reduce memory requirements.
+  In most cases, `datatype`'d data in Silo files is floating point data often in double precision.
+  In these circumstances, forcing single precision has the effect of reducing the memory requirements by a factor of 2.
   By default, Silo does not have single precision forcing enabled.
-  When it is enabled, only the methods that result in reading of floating point data from a Silo file are effected.
-  Finally, note that write methods are **not** effected.
 
   It might be nice for data producers to also use this method during write.
   That would be a potentially useful enhancement request because it alleviates software developers from having to write the conversion code before handing to Silo.
