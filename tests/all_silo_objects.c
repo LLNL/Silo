@@ -63,6 +63,7 @@ put_misc_arrs(DBfile *db)
 {
     char chars[SZ];
     int ints[SZ];
+    short shorts[SZ];
     float flts[SZ];
     double dbls[SZ];
     char strs[] = "bat;bet;bit;bot;but;byt;pat;pet;pit;pot;put";
@@ -73,6 +74,7 @@ put_misc_arrs(DBfile *db)
         int const base = 901;
         chars[i] = (char)i;
         ints[i] = (base + i) * (i%2?1:-1);
+        shorts[i] = (short) ints[i];
         flts[i] = (float) ints[i];
         dbls[i] = (double) ints[i];
     }
@@ -102,6 +104,12 @@ put_misc_arrs(DBfile *db)
     nvals = 8;
     strs[nvals-1] = '\0';
     DBWrite(db, "strsA", strs, &nvals, 1, DB_CHAR);
+
+    for (int i = 0; i < SZ; i++)
+    {
+        nvals = i;
+        DBWrite(db, DBSPrintf("svals%d",i), shorts, &nvals, 1, DB_SHORT);
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -115,8 +123,8 @@ put_quad_objects(DBfile *db)
     double x[3] = {0.f, 1.f, 2.f};
     double y[3] = {0.f, 1.f, 2.f};
     void *coords[2] = {x, y};
-    double x2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
-    double y2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
+    float x2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
+    float y2[9] = {0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f};
     void *coords2[2] = {x2, y2};
     char *coordnames[2] = {"qx", "qy"};
     char *coordnames2[2] = {"qx", "qy"};
@@ -137,6 +145,11 @@ put_quad_objects(DBfile *db)
     double qv1m[8] = {89.f, 79.f, 69.f, 59.f, 49.f, 39.f, 29.f, 29.f};
     void *qmvals[2] = {qv0m, qv1m};
 
+    short qv0s[4] = {101, 201, 301, 401};
+    short qv1s[4] = {102, 202, 302, 402};
+    void *qsvals[2] = {qv0s, qv1s};
+    char *qsnames[2] = {"qscomp0", "qscomp1"};
+
     DBoptlist *ol = DBMakeOptlist(20);
     DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, nnum);
     DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, znum);
@@ -148,11 +161,15 @@ put_quad_objects(DBfile *db)
 
     PUT(DBPutQuadmesh(db, "quadmesh2",
                       (DBCAS_t)coordnames2, coords2, dims_nodes, 2,
-                      DB_DOUBLE, DB_NONCOLLINEAR, ol));
+                      DB_FLOAT, DB_NONCOLLINEAR, ol));
 
     PUT(DBPutQuadvar(db, "quadvar", "quadmesh", 2,
                      (DBCAS_t)qnames, qvals, dims_zones, 2,
                      qmvals, mixlen, DB_DOUBLE, DB_ZONECENT, NULL));
+
+    PUT(DBPutQuadvar(db, "quadvar_short", "quadmesh", 2,
+                     (DBCAS_t)qsnames, qsvals, dims_zones, 2,
+                     0, 0, DB_SHORT, DB_ZONECENT, NULL));
 
     PUT(DBPutQuadvar1(db, "quadvar_one", "quadmesh",
                       qone, dims_zones, 2, NULL, 0,
