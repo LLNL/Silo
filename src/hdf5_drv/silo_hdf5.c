@@ -8655,7 +8655,7 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
    static char  *me = "db_hdf5_ReadVarVals";
    hid_t        dset=-1, ftype=-1, mtype=-1, mspace=-1, fspace=-1;
    hsize_t      mem_size;
-   int i;
+   int i, retval = -1;
 
    PROTECT {
        const hsize_t zero = 0;
@@ -8667,7 +8667,7 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
            UNWIND();
        }
 
-       if (dscount <= 0) return -1;
+       if (dscount <= 0) UNWIND();
 
        /* We'll get info about the first dataset and assume all datasets are same */
        if ((dset=H5Dopen(dbfile->cwg, dsnames[0], H5P_DEFAULT))<0) {
@@ -8752,6 +8752,8 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
        
        if (ncomps) *ncomps = dscount;
        if (nitems) *nitems = nvals;
+
+       retval = 0;
    
    } CLEANUP {
        H5E_BEGIN_TRY {
@@ -8762,7 +8764,7 @@ db_hdf5_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
        } H5E_END_TRY;
    } END_PROTECT;
 
-   return 0;
+   return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -9403,7 +9405,10 @@ db_hdf5_GetCurve(DBfile *_dbfile, char const *name)
         }
 
         /* Create a curve object and initialize meta data */
-        if (NULL==(cu=DBAllocCurve())) return NULL;
+        if (NULL==(cu=DBAllocCurve())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         cu->npts = m.npts;
         cu->guihide = m.guihide;
         cu->coord_sys = m.coord_sys;
@@ -9664,7 +9669,10 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name)
         }
 
         /* Create a ucdmesh object and initialize meta data */
-        if (NULL==(csgm=DBAllocCsgmesh())) return NULL;
+        if (NULL==(csgm=DBAllocCsgmesh())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         csgm->name = BASEDUP(name);
         csgm->cycle = m.cycle;
         if ((csgm->datatype = db_hdf5_GetVarType(_dbfile, m.coeffs)) < 0)
@@ -9928,7 +9936,10 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name)
         }
 
         /* Create a ucdvar object and initialize meta data */
-        if (NULL==(csgv=DBAllocCsgvar())) return NULL;
+        if (NULL==(csgv=DBAllocCsgvar())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         csgv->name = BASEDUP(name);
         csgv->meshname = OPTDUP(m.meshname);
         csgv->cycle = m.cycle;
@@ -10153,7 +10164,10 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
         }
 
         /* Create a zonelist object and initialize meta data */
-        if (NULL==(zl=DBAllocCSGZonelist())) return NULL;
+        if (NULL==(zl=DBAllocCSGZonelist())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         zl->nregs = m.nregs;
         zl->nzones = m.nzones;
         zl->lxform = m.lxform;
@@ -10400,7 +10414,10 @@ db_hdf5_GetDefvars(DBfile *_dbfile, char const *name)
         }
 
         /* Create a defvars object and initialize meta data */
-        if (NULL==(defv=DBAllocDefvars(0))) return NULL;
+        if (NULL==(defv=DBAllocDefvars(0))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         defv->ndefs = m.ndefs;
 
         s = (char *)db_hdf5_comprd(dbfile, m.names, 1);
@@ -10817,7 +10834,10 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char const *name)
         }
 
         /* Create a quadmesh object and initialize meta data */
-        if (NULL==(qm=DBAllocQuadmesh())) return NULL;
+        if (NULL==(qm=DBAllocQuadmesh())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         qm->name = BASEDUP(name);
         qm->cycle = m.cycle;
         qm->coord_sys = m.coord_sys;
@@ -11284,7 +11304,10 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
         }
 
         /* Create a quadvar object and initialize meta data */
-        if (NULL==(qv=DBAllocQuadvar())) return NULL;
+        if (NULL==(qv=DBAllocQuadvar())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         qv->name = BASEDUP(name);
         qv->meshname = OPTDUP(m.meshid);
         qv->units = OPTDUP(m.units);
@@ -11829,7 +11852,10 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char const *name)
         }
 
         /* Create a ucdmesh object and initialize meta data */
-        if (NULL==(um=DBAllocUcdmesh())) return NULL;
+        if (NULL==(um=DBAllocUcdmesh())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         um->name = BASEDUP(name);
         um->cycle = m.cycle;
         um->coord_sys = m.coord_sys;
@@ -12311,7 +12337,10 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char const *name)
         }
 
         /* Create a ucdvar object and initialize meta data */
-        if (NULL==(uv=DBAllocUcdvar())) return NULL;
+        if (NULL==(uv=DBAllocUcdvar())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         uv->name = BASEDUP(name);
         uv->meshname = OPTDUP(m.meshid);
         uv->cycle = m.cycle;
@@ -12535,7 +12564,10 @@ db_hdf5_GetFacelist(DBfile *_dbfile, char const *name)
         }
 
         /* Create a facelist object and initialize meta data */
-        if (NULL==(fl=DBAllocFacelist())) return NULL;
+        if (NULL==(fl=DBAllocFacelist())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         fl->ndims = m.ndims;
         fl->nfaces = m.nfaces;
         fl->origin = m.origin;
@@ -13036,7 +13068,10 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char const *name)
         }
 
         /* Create a zonelist object and initialize meta data */
-        if (NULL==(zl=DBAllocZonelist())) return NULL;
+        if (NULL==(zl=DBAllocZonelist())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         zl->ndims = m.ndims;
         zl->nzones = m.nzones;
         zl->nshapes = m.nshapes;
@@ -13180,7 +13215,10 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char const *name)
         }
 
         /* Create a phzonelist object and initialize meta data */
-        if (NULL==(phzl=DBAllocPHZonelist())) return NULL;
+        if (NULL==(phzl=DBAllocPHZonelist())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         phzl->nfaces = m.nfaces;
         phzl->lnodelist = m.lnodelist;
         phzl->nzones = m.nzones;
@@ -13466,7 +13504,10 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(ma=DBAllocMaterial())) return NULL;
+        if (NULL==(ma=DBAllocMaterial())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         ma->name = BASEDUP(name);
         ma->meshname = OPTDUP(m.meshid);
         ma->ndims = m.ndims;
@@ -13783,7 +13824,10 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(ms=DBAllocMatspecies())) return NULL;
+        if (NULL==(ms=DBAllocMatspecies())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         ms->name = BASEDUP(name);
         ms->matname = OPTDUP(m.matname);
         ms->nmat = m.nmat;
@@ -14157,7 +14201,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(mm=DBAllocMultimesh(0))) return NULL;
+        if (NULL==(mm=DBAllocMultimesh(0))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         mm->nblocks = m.nblocks;
         mm->ngroups = m.ngroups;
         mm->blockorigin = m.blockorigin;
@@ -14626,7 +14673,10 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
             db_perror(name, E_MALFORMED, me);
             UNWIND();
         }
-        if (NULL==(mmadj=DBAllocMultimeshadj(0))) return NULL;
+        if (NULL==(mmadj=DBAllocMultimeshadj(0))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         mmadj->nblocks = m.nblocks;
         mmadj->blockorigin = m.blockorigin;
         mmadj->lneighbors = m.lneighbors;
@@ -15162,7 +15212,10 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(mv=DBAllocMultivar(0))) return NULL;
+        if (NULL==(mv=DBAllocMultivar(0))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         mv->nvars = m.nvars;
         mv->ngroups = m.ngroups;
         mv->blockorigin = m.blockorigin;
@@ -15500,7 +15553,10 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(mm=DBAllocMultimat(0))) return NULL;
+        if (NULL==(mm=DBAllocMultimat(0))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         mm->nmats = m.nmats;
         mm->ngroups = m.ngroups;
         mm->blockorigin = m.blockorigin;
@@ -15852,7 +15908,10 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(mm=DBAllocMultimatspecies(0))) return NULL;
+        if (NULL==(mm=DBAllocMultimatspecies(0))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         mm->matname = OPTDUP(m.matname);
         mm->nspec = m.nspec;
         mm->ngroups = m.ngroups;
@@ -16176,7 +16235,10 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(pm=DBAllocPointmesh())) return NULL;
+        if (NULL==(pm=DBAllocPointmesh())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         pm->name = BASEDUP(name);
         pm->cycle = m.cycle;
         pm->time = m.time;
@@ -16455,7 +16517,10 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(pv=DBAllocMeshvar())) return NULL;
+        if (NULL==(pv=DBAllocMeshvar())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         pv->name = BASEDUP(name);
         pv->units = OPTDUP(m.units);
         pv->meshname = OPTDUP(m.meshid);
@@ -16656,7 +16721,10 @@ db_hdf5_GetCompoundarray(DBfile *_dbfile, char const *name)
         }
 
         /* Create object and initialize meta data */
-        if (NULL==(ca=DBAllocCompoundarray())) return NULL;
+        if (NULL==(ca=DBAllocCompoundarray())) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
         ca->name = BASEDUP(name);
         ca->nelems = m.nelems;
         ca->nvalues = m.nvalues;
@@ -17587,7 +17655,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
         if (m.num_segments < 0)
         {
             db_perror(name, E_MALFORMED, me);
-            return NULL;
+            UNWIND();
         }
 
         /* Create object and initialize meta data */
@@ -17609,7 +17677,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
             (gm->segment_ids && segids_size != gm->num_segments))
         {      
             db_perror(name, E_MALFORMED, me);
-            return NULL;
+            UNWIND();
         }
 
         /* read the map segment data */
@@ -17630,7 +17698,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
                         FREE(intArray);
                         free(gm); /* DBFreeGroupelmap(gm) not safely callable */
                         db_perror(name, E_MALFORMED, me);
-                        return NULL;
+                        UNWIND();
                     }
                     gm->segment_data[i][j] = intArray[n++];
                 }
@@ -17662,7 +17730,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
                         FREE(fracsArray);
                         free(gm); /* DBFreeGroupelmap(gm) not safely callable */
                         db_perror(name, E_MALFORMED, me);
-                        return NULL;
+                        UNWIND();
                     }
                     if (gm->fracs_data_type == DB_FLOAT)
                     {
