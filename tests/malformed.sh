@@ -194,15 +194,16 @@ check_malformed mat_objs material matnos='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material matlist='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material_names_colors matnames='"/arrs/strsB"' || exit 1
 check_malformed mat_objs material_names_colors matcolors='"/arrs/strsB"' || exit 1
-if [ "$ext" = "pdb" ]; then
-    check_malformed mat_objs material_mix datatype=$db_short_val || exit 1
-fi
 check_malformed mat_objs material_mix mixlen=4495 || exit 1
 check_malformed mat_objs material_mix mix_next='"/arrs/intsB"' || exit 1
 check_malformed mat_objs material_mix mix_vf='"/arrs/fltsA"' || exit 1
 check_malformed mat_objs material_mix mix_vf='"/arrs/dblsA"' || exit 1
 check_malformed mat_objs material_mix mix_mat='"/arrs/intsA"' || exit 1
 check_malformed mat_objs material_mix mix_zone='"/arrs/intsB"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed mat_objs material_mix datatype=$db_short_val || exit 1
+    check_malformed mat_objs material_mix mix_vf='"/arrs/svals4"' || exit 1
+fi
 
 # Various corruptions of Matspecies objects
 check_malformed mat_objs matspecies ndims=5 || exit 1
@@ -216,7 +217,7 @@ if [ "$ext" = "pdb" ]; then
     check_malformed mat_objs matspecies datatype=$db_short_val || exit 1
     check_malformed mat_objs matspecies species_names='"/arrs/strsA"' || exit 1
     check_malformed mat_objs matspecies dims='"/arrs/intsA"' || exit 1
-    check_malformed mat_objs matspecies species_mf='"/arrs/dblsA"' || exit 1
+    check_malformed mat_objs matspecies species_mf='"/arrs/svals3"' || exit 1
 else
     check_malformed mat_objs matspecies specnames='"/arrs/strsA"' || exit 1
     check_malformed mat_objs matspecies dims=\{3,4,5\} || exit 1
@@ -227,8 +228,8 @@ check_malformed misc_objs curve npts=-1 || exit 1
 check_malformed misc_objs curve npts=6 || exit 1
 if [ "$ext" = "pdb" ]; then
     check_malformed misc_objs curve datatype=$db_short_val || exit 1
-    check_malformed misc_objs curve xvals='"/arrs/fltsB"' || exit 1
-    check_malformed misc_objs curve yvals='"/arrs/fltsA"' || exit 1
+    check_malformed misc_objs curve xvals='"/arrs/svals5"' || exit 1
+    check_malformed misc_objs curve yvals='"/arrs/svals5"' || exit 1
 else
     check_malformed misc_objs curve xvarname='"/arrs/fltsB"' || exit 1
     check_malformed misc_objs curve yvarname='"/arrs/fltsA"' || exit 1
@@ -242,6 +243,10 @@ check_malformed misc_objs compound nvalues=99 || exit 1
 check_malformed misc_objs compound elemnames='"/arrs/strsA"' || exit 1
 check_malformed misc_objs compound elemlengths='"/arrs/intsB"' || exit 1
 check_malformed misc_objs compound values='"/arrs/intsB"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed misc_objs compound datatype=$db_short_val || exit 1
+    check_malformed misc_objs compound values='"/arrs/svals6"' || exit 1
+fi
 
 # Various corruptions of defvars objects
 check_malformed misc_objs defvars ndefs=-1 || exit 1
@@ -321,17 +326,26 @@ check_malformed point_objs pointmesh nels=2 || exit 1
 check_malformed point_objs pointmesh gnodeno='"/arrs/intsA"' || exit 1
 check_malformed point_objs pointmesh ghost_node_labels='"/arrs/chrsA"' || exit 1
 check_malformed point_objs pointmesh coord0='"/arrs/fltsA"' || exit 1
+check_malformed point_objs pointmesh coord1='"/arrs/fltsB"' || exit 1
 check_malformed point_objs pointmesh gnodeno='"/arrs/intsA"' || exit 1
 check_malformed point_objs pointmesh ghost_node_labels='"/arrs/intsA"' || exit 1
+if [ "$ext" = "pdb" ]; then
+    check_malformed point_objs pointmesh datatype=$db_short_val || exit 1
+    check_malformed point_objs pointmesh coord0='"/arrs/svals5"' || exit 1
+    check_malformed point_objs pointmesh coord1='"/arrs/svals5"' || exit 1
+fi
 
 # Various corruptions of pointvar objects
 check_malformed point_objs pointvar nvals=99 || exit 1
 check_malformed point_objs pointvar nels=3 || exit 1
-# Funky browser syntax issue parsing component names beginning with number
-# requires us to quote args slightly differently for PDB driver.
 if [ "$ext" = "pdb" ]; then
+    check_malformed point_objs pointvar datatype=$db_short_val || exit 1
+    # Funky browser syntax issue parsing component names beginning with number
+    # requires us to quote args slightly differently for PDB driver.
+    check_malformed point_objs pointvar "'0_data'='/arrs/svals5'" || exit 1
     check_malformed point_objs pointvar "'0_data'='/arrs/fltsB'" || exit 1
-    check_malformed point_objs pointvar "'1_data'='/arrs/fltsA'" || exit 1
+    check_malformed point_objs pointvar "'1_data'='/arrs/svals5'" || exit 1
+    check_malformed point_objs pointvar "'1_data'='/arrs/intsA'" || exit 1
 else
     check_malformed point_objs pointvar data0='"/arrs/fltsB"' || exit 1
     check_malformed point_objs pointvar data1='"/arrs/fltsA"' || exit 1
@@ -344,6 +358,8 @@ check_malformed quad_objs quadmesh ghost_zone_labels='"/arrs/chrsB"' || exit 1
 # odd issue in PDB driver with max index names
 if [ "$ext" = "pdb" ]; then
     check_malformed quad_objs quadmesh datatype=$db_short_val || exit 1
+    check_malformed quad_objs quadmesh coord0='"/arrs/svals3"' || exit 1
+    check_malformed quad_objs quadmesh coord1='"/arrs/svals3"' || exit 1
     check_malformed quad_objs quadmesh min_index=\{-1,-1\} subarr || exit 1
     check_malformed quad_objs quadmesh max_index_n=\{99,99\} subarr || exit 1
     check_malformed quad_objs quadmesh dims=\{2,3\} subarr || exit 1
@@ -361,6 +377,8 @@ check_malformed quad_objs quadvar mixlen=5 || exit 1
 # On PDB, this fails in PJ_ReadVariable 
 if [ "$ext" = "pdb" ]; then
     check_malformed quad_objs quadvar datatype=$db_short_val || exit 1
+    check_malformed quad_objs quadvar value1='"/arrs/svals4"' || exit 1
+    check_malformed quad_objs quadvar mixed_value0='"/arrs/svals8"' || exit 1
     check_malformed quad_objs quadvar dims='"/arrs/intsB"' "" $e_callfail_code || exit 1
     check_malformed quad_objs quadvar align='"/arrs/fltsB"' "" $e_callfail_code || exit 1
 else
