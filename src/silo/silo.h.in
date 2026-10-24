@@ -383,6 +383,8 @@ typedef enum {
 } DBObjectType;
 
 /* Data types */
+/* PDB driver ORs flags into ints holding DBdatatype values so no value
+   here should be larger than 0xFF */
 typedef enum {
     DB_INT=16,
     DB_SHORT=17,
@@ -392,13 +394,13 @@ typedef enum {
     DB_CHAR=21,
     DB_LONG_LONG=22,
 
-    /* mini-array types for things like dims[3] or min_extents[3] */
+    /* mini-array types for things like dims[3] or min_extents[3] (INT USE ONLY) */
     DB_INTA=23,
     DB_FLOATA=24,
     DB_DOUBLEA=25,
 
     DB_NOTYPE=26,          /*unknown type */
-    DB_FLOAT_OR_DOUBLE=27  /* for "datatype" component queries on HDF5 driver */
+    DB_FLOAT_OR_DOUBLE=27, /* returned in some "datatype" component queries on HDF5 driver. */
 } DBdatatype;
 
 /* negative values used here so an int can store an index into an array */
