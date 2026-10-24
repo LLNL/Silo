@@ -5222,8 +5222,8 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    DEFINE_OBJ("origin", &tmppm.origin, DB_INT);
    DEFINE_OBJ("gnznodtype", &tmppm.gnznodtype, DB_INT);
 
-   DEFINE_OBN("min_extents", tmppm.min_extents, DB_FLOAT, NELMTS(tmppm.min_extents));
-   DEFINE_OBN("max_extents", tmppm.max_extents, DB_FLOAT, NELMTS(tmppm.max_extents));
+   DEFINE_OBN("min_extents", tmppm.min_extents, _datatypeFlagSet(DB_FLOAT), NELMTS(tmppm.min_extents));
+   DEFINE_OBN("max_extents", tmppm.max_extents, _datatypeFlagSet(DB_FLOAT), NELMTS(tmppm.max_extents));
 
    DEFINE_OBJ("guihide", &tmppm.guihide, DB_INT);
    DEFALL_OBJ("mrgtree_name", &tmppm.mrgtree_name, DB_CHAR);
@@ -5994,8 +5994,8 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    DEFINE_OBJ("nnodes", &tmpum.nnodes, DB_INT);
    DEFINE_OBJ("origin", &tmpum.origin, DB_INT);
 
-   DEFINE_OBN("min_extents", tmpum.min_extents, DB_FLOAT, NELMTS(tmpum.min_extents));
-   DEFINE_OBN("max_extents", tmpum.max_extents, DB_FLOAT, NELMTS(tmpum.max_extents));
+   DEFINE_OBN("min_extents", tmpum.min_extents, _datatypeFlagSet(DB_FLOAT), NELMTS(tmpum.min_extents));
+   DEFINE_OBN("max_extents", tmpum.max_extents, _datatypeFlagSet(DB_FLOAT), NELMTS(tmpum.max_extents));
 
    if (DBGetDataReadMask2File(_dbfile) & DBUMCoords)
    {
